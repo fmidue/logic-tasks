@@ -1,10 +1,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Main (main) where
+module LogicTasks.Syntax.TreeToFormula where
 
 import Tasks.SynTree.Config (SynTreeInst(..), SynTreeConfig, defaultSynTreeConfig, checkSynTreeConfig)
 import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
-import AppHelp (determineBaseConfig, feedbackLoop)
+import LogicTasks.Syntax.AppHelp (determineBaseConfig, feedbackLoop)
 import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))

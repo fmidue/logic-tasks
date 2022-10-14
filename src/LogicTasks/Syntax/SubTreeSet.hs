@@ -1,10 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Main (main) where
+module LogicTasks.Syntax.SubTreeSet where
 
 import Tasks.SubTree.Config (SubTreeInst(..), SubTreeConfig(..), defaultSubTreeConfig, checkSubTreeConfig)
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
-import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
+import LogicTasks.Syntax.AppHelp (offerChange, determineBaseConfig, feedbackLoop)
 import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))

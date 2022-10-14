@@ -1,10 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
-module Main (main) where
+module LogicTasks.Syntax.IllegalCnfs where
 
 import Test.QuickCheck (generate)
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
-import AppHelp (offerChange, feedbackLoop)
+import LogicTasks.Syntax.AppHelp (offerChange, feedbackLoop)
 import Tasks.LegalCNF.Quiz(generateLegalCNFInst, feedback)
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), defaultLegalCNFConfig, checkLegalCNFConfig)
 import Config(BaseConfig(..), CnfConfig(..))

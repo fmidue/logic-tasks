@@ -1,10 +1,10 @@
 {-# LANGUAGE NamedFieldPuns, RecordWildCards #-}
 
-module Main (main) where
+module LogicTasks.Syntax.SimplestFormula where
 
 import Tasks.SuperfluousBrackets.Config (defaultSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig)
 import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
-import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
+import LogicTasks.Syntax.AppHelp (offerChange, determineBaseConfig, feedbackLoop)
 import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))

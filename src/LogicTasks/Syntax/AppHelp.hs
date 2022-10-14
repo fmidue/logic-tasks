@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module AppHelp (
+module LogicTasks.Syntax.AppHelp (
     offerChange,
     determineBaseConfig,
     feedbackLoop,
@@ -28,9 +28,9 @@ determineBaseConfig initSynTreeConfig = do
   return newConfig
 
 feedbackLoop :: (String -> Bool) -> String -> IO ()
-feedbackLoop feedbackFunction correctMessage = repeat
+feedbackLoop feedbackFunction correctMessage = loop
   where
-    repeat = do
+    loop = do
       putStrLn "\nTry what feedback you will get for some input (blank for the sample solution and exit):"
       input <- getLine
       if null input
@@ -38,4 +38,4 @@ feedbackLoop feedbackFunction correctMessage = repeat
           putStrLn correctMessage
         else do
           putStrLn $ "Your submission is " ++ show (feedbackFunction input)
-          repeat
+          loop

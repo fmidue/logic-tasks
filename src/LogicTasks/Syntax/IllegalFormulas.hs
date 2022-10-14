@@ -1,10 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Main (main) where
+module LogicTasks.Syntax.IllegalFormulas where
 
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), defaultLegalPropositionConfig, checkLegalPropositionConfig)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst, feedback)
-import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
+import LogicTasks.Syntax.AppHelp (offerChange, determineBaseConfig, feedbackLoop)
 import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))

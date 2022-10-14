@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,11 +25,10 @@ library
       LogicTasks.Printing
       LogicTasks.Parsing
       LogicTasks.Util
-      Trees.Types
-      Trees.Helpers
-      Trees.Parsing
-      Trees.Generate
-      Trees.Print
+      LogicTasks.Syntax.IllegalCnfs
+      LogicTasks.Syntax.IllegalFormulas
+      LogicTasks.Syntax.SubTreeSet
+      LogicTasks.Syntax.TreeToFormula
       Tasks.SynTree.Config
       Tasks.SynTree.Quiz
       Tasks.SubTree.Config
@@ -55,9 +54,16 @@ library
   other-modules:
       Auxiliary
       Formula
+      LogicTasks.Syntax.AppHelp
+      LogicTasks.Syntax.SimplestFormula
       Printing
       Resolution
       Table
+      Trees.Generate
+      Trees.Helpers
+      Trees.Parsing
+      Trees.Print
+      Trees.Types
       Util
       Paths_logic_tasks
   hs-source-dirs:
@@ -69,130 +75,6 @@ library
     , containers
     , extra
     , hspec
-    , minisat-solver
-    , mtl
-    , output-monad
-    , parsec
-    , random
-    , text
-    , wl-pprint-text
-  default-language: Haskell2010
-
-executable formulaFromSyntaxTree
-  main-is: formulaFromSyntaxTree.hs
-  other-modules:
-      AppHelp
-      Paths_logic_tasks
-  hs-source-dirs:
-      app
-  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
-  build-depends:
-      QuickCheck >=2.14
-    , base >=4.7 && <5
-    , containers
-    , extra
-    , hspec
-    , logic-tasks
-    , minisat-solver
-    , mtl
-    , output-monad
-    , parsec
-    , pretty-simple
-    , random
-    , text
-    , wl-pprint-text
-  default-language: Haskell2010
-
-executable illegalCNFSelect
-  main-is: illegalCNFSelect.hs
-  other-modules:
-      AppHelp
-      Paths_logic_tasks
-  hs-source-dirs:
-      app
-  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
-  build-depends:
-      QuickCheck >=2.14
-    , base >=4.7 && <5
-    , containers
-    , extra
-    , hspec
-    , logic-tasks
-    , minisat-solver
-    , mtl
-    , output-monad
-    , parsec
-    , pretty-simple
-    , random
-    , text
-    , wl-pprint-text
-  default-language: Haskell2010
-
-executable illegalPseudoFormulasSelect
-  main-is: illegalPseudoFormulasSelect.hs
-  other-modules:
-      AppHelp
-      Paths_logic_tasks
-  hs-source-dirs:
-      app
-  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
-  build-depends:
-      QuickCheck >=2.14
-    , base >=4.7 && <5
-    , containers
-    , extra
-    , hspec
-    , logic-tasks
-    , minisat-solver
-    , mtl
-    , output-monad
-    , parsec
-    , pretty-simple
-    , random
-    , text
-    , wl-pprint-text
-  default-language: Haskell2010
-
-executable partNonAtomicSubTreeSet
-  main-is: partNonAtomicSubTreeSet.hs
-  other-modules:
-      AppHelp
-      Paths_logic_tasks
-  hs-source-dirs:
-      app
-  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
-  build-depends:
-      QuickCheck >=2.14
-    , base >=4.7 && <5
-    , containers
-    , extra
-    , hspec
-    , logic-tasks
-    , minisat-solver
-    , mtl
-    , output-monad
-    , parsec
-    , pretty-simple
-    , random
-    , text
-    , wl-pprint-text
-  default-language: Haskell2010
-
-executable simplestFormula
-  main-is: simplestFormula.hs
-  other-modules:
-      AppHelp
-      Paths_logic_tasks
-  hs-source-dirs:
-      app
-  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
-  build-depends:
-      QuickCheck >=2.14
-    , base >=4.7 && <5
-    , containers
-    , extra
-    , hspec
-    , logic-tasks
     , minisat-solver
     , mtl
     , output-monad
@@ -231,6 +113,7 @@ test-suite src-test
     , mtl
     , output-monad
     , parsec
+    , pretty-simple
     , random
     , text
     , wl-pprint-text
