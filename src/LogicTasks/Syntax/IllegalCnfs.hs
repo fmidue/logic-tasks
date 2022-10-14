@@ -1,62 +1,56 @@
 {-# LANGUAGE RecordWildCards #-}
 module LogicTasks.Syntax.IllegalCnfs where
 
-import Test.QuickCheck (generate)
-import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
-import Text.Pretty.Simple (pPrint)
-import LogicTasks.Syntax.AppHelp (offerChange, feedbackLoop)
-import Tasks.LegalCNF.Quiz(generateLegalCNFInst, feedback)
-import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), defaultLegalCNFConfig, checkLegalCNFConfig)
-import Config(BaseConfig(..), CnfConfig(..))
 
-main :: IO ()
-main = do
-  hSetBuffering stdout NoBuffering
-  theConfigToUse <- determineLegalCNFConfig
-  putStrLn "\nThe following is the config now used:\n"
-  pPrint theConfigToUse
-  putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@LegalCNFInst{..} <- generate . generateLegalCNFInst $ theConfigToUse
-  pPrint inst
-  putStrLn "In this task there are some propositional logic formulas, your task is to give the set of ordinal numbers of the illegal conjunctive normal form (CNF) in propositional logic formulas"
-  putStrLn "The input form is {serial number1, serial number2,..}"
-  feedbackLoop (feedback inst) ("The sample solution is " ++ show serialsOfWrong)
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 
-determineLegalCNFConfig :: IO LegalCNFConfig
-determineLegalCNFConfig = do
-    putStrLn "\nThe following is the default config:\n"
-    pPrint defaultLegalCNFConfig
-    let LegalCNFConfig {cnfConfig = cnfConfig@CnfConfig {baseConf = baseConf@BaseConfig{..}, ..}, ..} = defaultLegalCNFConfig
-    minClauseLength' <- offerChange "minClauseLength" minClauseLength
-    maxClauseLength' <- offerChange "maxClauseLength" maxClauseLength
-    usedLiterals' <- offerChange "usedLiterals" usedLiterals
-    minClauseAmount' <- offerChange "minClauseAmount" minClauseAmount
-    maxClauseAmount' <- offerChange "maxClauseAmount" maxClauseAmount
-    formulas' <- offerChange "formulas" formulas
-    illegals' <- offerChange "illegals" illegals
-    externalGenFormulas' <- offerChange "externalGenFormulas" externalGenFormulas
-    includeFormWithJustOneClause' <- offerChange "includeFormWithJustOneClause" includeFormWithJustOneClause
-    includeFormWithJustOneLiteralPerClause' <- offerChange "includeFormWithJustOneLiteralPerClause" includeFormWithJustOneLiteralPerClause
-    maxStringSize' <- offerChange "maxStringSize" maxStringSize
-    minStringSize' <- offerChange "minStringSize" minStringSize
-    allowArrowOperators' <- offerChange "allowArrowOperators" allowArrowOperators
-    let newBaseConfig = baseConf {minClauseLength = minClauseLength', maxClauseLength = maxClauseLength', usedLiterals = usedLiterals'}
-        newCNFConfig = cnfConfig {baseConf = newBaseConfig, minClauseAmount = minClauseAmount', maxClauseAmount = maxClauseAmount'}
-        newConfig = defaultLegalCNFConfig{
-            formulas = formulas'
-          , illegals = illegals'
-          , cnfConfig = newCNFConfig
-          , includeFormWithJustOneLiteralPerClause = includeFormWithJustOneLiteralPerClause'
-          , includeFormWithJustOneClause = includeFormWithJustOneClause'
-          , externalGenFormulas = externalGenFormulas'
-          , maxStringSize = maxStringSize'
-          , minStringSize = minStringSize'
-          , allowArrowOperators = allowArrowOperators'}
-    case checkLegalCNFConfig newConfig of
-      Nothing ->
-        return newConfig
-      Just problem -> do
-        putStrLn $ "This didn't go well. Here is the problem: " ++ problem
-        putStrLn "You should try again."
-        determineLegalCNFConfig
+
+
+
+description :: OutputMonad m => LegalCNFInst -> LangM m
+description LegalCNFInst{..} = do
+    paragraph $ translate $ do
+      german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
+      english "Consider the following propositional logic formulae:"
+
+    indent $ code $ unlines formulaStrings
+
+    paragraph $ translate $ do
+      german "Welche dieser Formeln sind nicht in konjunktiver Normalform (cnf) angegeben?"
+      english "Which of these formulae are not given in conjunctive normal form (cnf)?"
+
+    paragraph $ translate $ do
+      german "Geben Sie eine Liste der Indices aller nicht cnf-Formeln als Ihre Lösung an."
+      english "Enter a list containing the indices of the non-cnf formulae to submit your answer."
+
+    paragraph $ translate $ do
+      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 keine cnf-Formeln, dann ist diese Lösung korrekt:"
+      english "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
+
+    indent $ code "[2,3]"
+
+
+
+
+verifyInst :: OutputMonad m => LegalCNFInst -> LangM m
+verifyInst _ = pure()
+
+
+
+verifyConfig :: OutputMonad m => LegalCNFConfig -> LangM m
+verifyConfig = checkLegalCNFConfig
+
+start :: [Int]
+start = []
+
+
+
+partialGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
+partialGrade _ _ = pure()
+
+
+
+completeGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
+completeGrade _ _ = pure()
 
