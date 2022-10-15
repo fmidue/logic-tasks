@@ -49,18 +49,15 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     | not (all isLetter usedLiterals)
       = reject "Only letters are allowed as literals."
                "Nur Buchstaben können Literale sein."
-    | minClauseAmount < 1
-      = reject "The number of Clauses must be positive"
-               "Die Anzahl der Klauseln muss positiv sein."
-    | minClauseLength < 1
-      = reject "The number of Literals per clause must be positive."
-               "Die Anzahl der Literale pro Klausel muss positiv sein."
-    | maxClauseAmount < minClauseAmount
-      = reject "maxClauses can not less than minClauseAmount."
-               "MaxClauses ist größer als MinClauseAmount."
-    | maxClauseLength < minClauseLength
-      = reject "maxClauseLength can not be less than minClauseLength."
-               "maxClauseLength ist größer als minClauseLength."
+    | negArgs
+      = reject "The following parameters need to be greater than zero: minClauseAmount, minClauseLength, minStringSize, formulas."
+               "Diese Parameter müssen größer als null sein: minClauseAmount, minClauseLength, minStringSize, formulas."
+    | zeroArgs
+      = reject "The following parameters need to be zero or greater: illegals, externalGenFormulas."
+               "Diese Parameter müssen null oder größer sein: illegals, externalGenFormulas."
+    | boundsError
+      = reject "At least one upper bound is smaller than its corresponding lower bound."
+               "Mindestens eine Obergrenze ist niedriger als die zugehörige Untergrenze."
     | (maxClauseLength > 2 * length usedLiterals) || (externalGenFormulas > 0 && maxClauseLength > length usedLiterals)
       = reject "The Used Literals can not generate a Clause with maxClauseLength"
                "Die angegebenen Literale können die maximale Klauselgröße nicht generieren."
@@ -76,27 +73,12 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     | maxClauseLength == 1 && maxClauseAmount == 1
       = reject "Atomic propositions have no illegal forms"
                "Atomare Aussagen können nicht syntaktisch falsch sein."
-    | formulas < 1
-      = reject "The number of formulas must be positive"
-               "Die anzahl der Formeln muss positiv sein."
-    | illegals < 0
-      = reject "The number of illegal formulae can not be negative."
-               "Die Anzahl illegaler Formeln kann nicht negativ sein."
-    | externalGenFormulas < 0
-      = reject "The number external generated formulas can not be negative"
-               "Anzahl korrekter Formeln kann nicht negativ sein."
     | formulas - illegals - externalGenFormulas <  (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
       = reject "The formulas used to generate special formula are not sufficient."
                "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
     | externalGenFormulas > 0 && minClauseAmount > lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
       = reject "minClauseAmount is too large. The external generator can not generate a CNF."
                "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
-    | minStringSize <= 0
-      = reject "Can not generate String with invalid minStringSize."
-               "minStringSize ist negativ oder 0."
-    | maxStringSize < minStringSize
-      = reject "maxStringSize can not be less than minStringSize."
-               "maxStringSize kann nicht kleiner sein als minStringSize."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 5 + 1)
       = reject "Can not generate String with given minStringSize."
                "String kann mit gegebenen minStringSize nicht generiert werden."
@@ -109,6 +91,10 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     reject e g  = refuse $ indent $ translate $ do
       english e
       german g
+
+    negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
+    zeroArgs = any (<0) [illegals, externalGenFormulas]
+    boundsError = any (\(a,b) -> b < a) [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
 
 
 data LegalCNFInst =
