@@ -2,7 +2,7 @@
 
 module LogicTasks.Syntax.SimplestFormula where
 
-import Tasks.SuperfluousBrackets.Config (defaultSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig)
+import Tasks.SuperfluousBrackets.Config (defaultSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
 import LogicTasks.Syntax.AppHelp (offerChange, determineBaseConfig, feedbackLoop)
 import Test.QuickCheck (generate)
@@ -33,10 +33,4 @@ determineSuperfluousBracketsConfig = do
   syntaxTreeConfig' <- determineBaseConfig syntaxTreeConfig
   superfluousBracketPairs' <- offerChange "superfluousBracketPairs" superfluousBracketPairs
   let newConfig = defaultSuperfluousBracketsConfig {syntaxTreeConfig = syntaxTreeConfig', superfluousBracketPairs = superfluousBracketPairs'}
-  case checkSuperfluousBracketsConfig newConfig of
-    Nothing ->
-      return newConfig
-    Just problem -> do
-      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
-      putStrLn "You should try again."
-      determineSuperfluousBracketsConfig
+  return newConfig

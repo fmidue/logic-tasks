@@ -8,7 +8,8 @@ module Tasks.LegalProposition.Config (
     checkLegalPropositionConfig
 ) where
 
-import Control.Applicative              (Alternative ((<|>)))
+
+import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Data.Set (Set)
 import Trees.Helpers (maxLeavesForNodes)
@@ -32,27 +33,37 @@ defaultLegalPropositionConfig =
     , bracketFormulas = 1
     }
 
-checkLegalPropositionConfig :: LegalPropositionConfig -> Maybe String
+checkLegalPropositionConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
 checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig
-    <|> checkAdditionalConfig lPConfig
+    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig lPConfig
 
-checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
+
+checkAdditionalConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
 checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
     | minNodes < 3
-      = Just "form A and ~A is meaningless in this kind of issue"
+      = reject "form A and ~A is meaningless in this kind of issue"
+               "Minimale Anzahl an Blättern unter 3 kann nur triviale Aufgaben erzeugen."
     | formulas < 1
-      = Just "The number of formulas must be positive."
+      = reject "The number of formulas must be positive."
+               "Anzahl der Formeln muss positiv sein."
     | illegals < 0
-      = Just "The number of illegals can not be negative."
+      = reject "The number of illegals can not be negative."
+               "Anzahl falscher Formeln muss 0 oder höher sein."
     | bracketFormulas < 0
-      = Just "The number of bracketFormulas cannot be less than 0."
+      = reject "The number of bracketFormulas cannot be less than 0."
+               "bracketFormulas kann nicht negativ sein."
     | formulas < illegals + bracketFormulas
-      = Just "The number of formulas cannot be less than the sum of bracket Formulas and illegal ones."
+      = reject "The number of formulas cannot be less than the sum of bracket Formulas and illegal ones."
+               "Die Anzahl der Formeln kann nicht niedriger als die Summe von falschen und richtigen Formeln."
     | let leaves = maxLeavesForNodes maxNodes , (if allowArrowOperators then (4 :: Integer) else (2 :: Integer)) ^ (maxNodes - leaves) < formulas
-      = Just "It has risks that formulas are larger than is actually reasonable given the possible size of the original formula."
+      = reject "It has risks that formulas are larger than is actually reasonable given the possible size of the original formula."
+               "Einstellungen führen zu extrem großen Formeln."
     | otherwise
-      = Nothing
+      = pure()
+  where
+    reject e g  = refuse $ indent $ translate $ do
+      english e
+      german g
 
 data LegalPropositionInst =
     LegalPropositionInst

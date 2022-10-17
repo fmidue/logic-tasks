@@ -2,7 +2,7 @@
 
 module LogicTasks.Syntax.SubTreeSet where
 
-import Tasks.SubTree.Config (SubTreeInst(..), SubTreeConfig(..), defaultSubTreeConfig, checkSubTreeConfig)
+import Tasks.SubTree.Config (SubTreeInst(..), SubTreeConfig(..), defaultSubTreeConfig)
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
 import LogicTasks.Syntax.AppHelp (offerChange, determineBaseConfig, feedbackLoop)
 import Test.QuickCheck (generate)
@@ -33,10 +33,4 @@ determineSubTreeConfig = do
   allowSameSubTree' <- offerChange "allowSameSubTree" allowSameSubTree
   minSubTrees' <- offerChange "minSubTrees" minSubTrees
   let newConfig = defaultSubTreeConfig {syntaxTreeConfig = syntaxTreeConfig', minSubTrees = minSubTrees', allowSameSubTree = allowSameSubTree'}
-  case checkSubTreeConfig newConfig of
-    Nothing ->
-      return newConfig
-    Just problem -> do
-      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
-      putStrLn "You should try again."
-      determineSubTreeConfig
+  return newConfig
