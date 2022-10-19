@@ -2,35 +2,59 @@
 
 module LogicTasks.Syntax.SimplestFormula where
 
-import Tasks.SuperfluousBrackets.Config (defaultSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
-import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
-import LogicTasks.Syntax.AppHelp (offerChange, determineBaseConfig, feedbackLoop)
-import Test.QuickCheck (generate)
 
-import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
-import Text.Pretty.Simple (pPrint)
+import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
+import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 
-main :: IO ()
-main = do
-  hSetBuffering stdout NoBuffering
-  theConfigToUse <- determineSuperfluousBracketsConfig
-  putStrLn "\nThe following is the config now used:\n"
-  pPrint theConfigToUse
-  putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SuperfluousBracketsInst{ simplestString } <- generate . generateSuperfluousBracketsInst $ theConfigToUse
-  pPrint inst
-  putStrLn "\n This is an important syntax task before you deal with CNF and DNF"
-  putStrLn "\n Because of /\\ and \\/ are associative, it is not necessary to use brackets when combining three atoms with same operators /\\ or \\/ for example A/\\B/\\C"
-  putStrLn "\n The task will give a formula with redundant brackets, and your mission is to give the simplest form of the formula"
-  putStrLn "\n That means delete all unnecessary brackets"
-  feedbackLoop (feedback inst) ("The sample solution is: " ++ simplestString)
 
-determineSuperfluousBracketsConfig :: IO SuperfluousBracketsConfig
-determineSuperfluousBracketsConfig = do
-  putStrLn "\nThe following is the default config:\n"
-  pPrint defaultSuperfluousBracketsConfig
-  let SuperfluousBracketsConfig{..} = defaultSuperfluousBracketsConfig
-  syntaxTreeConfig' <- determineBaseConfig syntaxTreeConfig
-  superfluousBracketPairs' <- offerChange "superfluousBracketPairs" superfluousBracketPairs
-  let newConfig = defaultSuperfluousBracketsConfig {syntaxTreeConfig = syntaxTreeConfig', superfluousBracketPairs = superfluousBracketPairs'}
-  return newConfig
+
+
+description :: OutputMonad m => SuperfluousBracketsInst -> LangM m
+description SuperfluousBracketsInst{..} = do
+    paragraph $ translate $ do
+      german "Betrachten Sie die folgende aussagenlogische Formel:"
+      english "Consider the following propositional logic formula:"
+
+    indent $ code $ stringWithSuperfluousBrackets
+
+    paragraph $ translate $ do
+      german "Aufgrund der Assoziativität von /\\ und \\/ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
+      english "Since /\\ and \\/ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
+
+    indent $ code $ "A/\\B/\\C"
+
+    paragraph $ translate $ do
+      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
+      english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional formula."
+
+    paragraph $ translate $ do
+      german "Ist z.B. (A \\/ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
+      english "For example, if (A \\/ B) is the given formula, then the solution is:"
+
+    indent $ code "A \\/ B"
+
+
+
+
+verifyInst :: OutputMonad m => SuperfluousBracketsInst -> LangM m
+verifyInst _ = pure()
+
+
+
+verifyConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
+verifyConfig = checkSuperfluousBracketsConfig
+
+
+
+start :: [Int]
+start = []
+
+
+
+partialGrade :: OutputMonad m => SuperfluousBracketsInst -> [Int] -> LangM m
+partialGrade _ _ = pure()
+
+
+
+completeGrade :: OutputMonad m => SuperfluousBracketsInst -> [Int] -> LangM m
+completeGrade _ _ = pure()
