@@ -1,34 +1,51 @@
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module LogicTasks.Syntax.TreeToFormula where
 
-import Tasks.SynTree.Config (SynTreeInst(..), SynTreeConfig, defaultSynTreeConfig)
-import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
-import LogicTasks.Syntax.AppHelp (determineBaseConfig, feedbackLoop)
-import Test.QuickCheck (generate)
 
-import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
-import Text.Pretty.Simple (pPrint)
+import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
+import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 
 
 
-main :: IO ()
-main = do
-  hSetBuffering stdout NoBuffering
-  theConfigToUse <- determineSynTreeConfig
-  putStrLn "\nThe following is the config now used:\n"
-  pPrint theConfigToUse
-  putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SynTreeInst{ correct } <- generate . generateSynTreeInst $ theConfigToUse
-  pPrint inst
-  putStrLn "\nYour task is to input the propositional logic formula represented by the above (LaTeX rendered) syntax tree."
-  putStrLn "You may use as many brackets as you want for your own clarity."
-  feedbackLoop (feedback inst) ("The sample solution is: " ++ correct)
 
-determineSynTreeConfig :: IO SynTreeConfig
-determineSynTreeConfig = do
-  putStrLn "\nThe following is the default config:\n"
-  pPrint defaultSynTreeConfig
-  syntaxTreeConfig <- determineBaseConfig defaultSynTreeConfig
-  return syntaxTreeConfig
+description :: OutputMonad m => SynTreeInst -> LangM m
+description SynTreeInst{..} = do
+    paragraph $ translate $ do
+      german "Betrachten Sie den folgenden Syntaxbaum:"
+      english "Consider the following syntax tree:"
 
+    indent $ latex $ latexImage
+
+    paragraph $ translate $ do
+      german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
+      english "Find the propositional logic formula represented by this syntax tree."
+
+    paragraph $ translate $ do
+      german "Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen, solange diese die Bedeutung der Formel nicht verändern."
+      english "You are allowed to add arbitrarily many additional pairs of brackets, provided that they do not change the interpretation of the formula."
+
+
+
+verifyInst :: OutputMonad m => SynTreeInst -> LangM m
+verifyInst _ = pure()
+
+
+
+verifyConfig :: OutputMonad m => SynTreeConfig -> LangM m
+verifyConfig = checkSynTreeConfig
+
+
+
+start :: [String]
+start = []
+
+
+
+partialGrade :: OutputMonad m => SynTreeInst -> [Int] -> LangM m
+partialGrade _ _ = pure()
+
+
+
+completeGrade :: OutputMonad m => SynTreeInst -> [Int] -> LangM m
+completeGrade _ _ = pure()
