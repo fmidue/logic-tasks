@@ -46,8 +46,8 @@ verifyConfig = checkSuperfluousBracketsConfig
 
 
 
-start :: [Int]
-start = []
+start :: String
+start = ""
 
 
 
