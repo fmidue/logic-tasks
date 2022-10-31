@@ -1,5 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 
 module Tasks.LegalCNF.Config(
     checkLegalCNFConfig,
@@ -10,10 +12,15 @@ module Tasks.LegalCNF.Config(
 
 
 import Control.Monad.Output(OutputMonad(..), LangM, english, german, translate)
-import Types (lengthBound)
-import Data.Set (Set)
-import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
 import Data.Char (isLetter)
+import Data.Set (Set)
+import GHC.Generics
+import Types (lengthBound)
+
+import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
+
+
+
 
 data LegalCNFConfig =
   LegalCNFConfig
@@ -27,7 +34,7 @@ data LegalCNFConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
-  } deriving Show
+  } deriving (Show,Generic)
 
 defaultLegalCNFConfig :: LegalCNFConfig
 defaultLegalCNFConfig =
@@ -102,4 +109,4 @@ data LegalCNFInst =
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]
-    } deriving Show
+    } deriving (Show,Generic)

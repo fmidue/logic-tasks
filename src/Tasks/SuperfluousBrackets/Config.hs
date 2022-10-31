@@ -1,24 +1,28 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Tasks.SuperfluousBrackets.Config(
     SuperfluousBracketsConfig (..),
     SuperfluousBracketsInst (..),
-
     defaultSuperfluousBracketsConfig,
     checkSuperfluousBracketsConfig
 )where
 
 
-
 import Control.Monad.Output(LangM, OutputMonad(..), english, german, translate)
+import GHC.Generics
+
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
+
+
+
 
 data SuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
       syntaxTreeConfig :: SynTreeConfig
     , superfluousBracketPairs :: Integer
-    } deriving Show
+    } deriving (Show,Generic)
 
 defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
 defaultSuperfluousBracketsConfig =
@@ -57,4 +61,4 @@ data SuperfluousBracketsInst =
     {
       stringWithSuperfluousBrackets :: String
     , simplestString :: String
-    } deriving Show
+    } deriving (Show,Generic)

@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Tasks.LegalProposition.Config (
     LegalPropositionConfig (..),
@@ -10,9 +11,14 @@ module Tasks.LegalProposition.Config (
 
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
-import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Data.Set (Set)
+import GHC.Generics
+
 import Trees.Helpers (maxLeavesForNodes)
+import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
+
+
+
 
 data LegalPropositionConfig =
     LegalPropositionConfig
@@ -21,7 +27,7 @@ data LegalPropositionConfig =
     , formulas :: Integer
     , illegals :: Integer
     , bracketFormulas :: Integer
-    } deriving Show
+    } deriving (Show,Generic)
 
 defaultLegalPropositionConfig :: LegalPropositionConfig
 defaultLegalPropositionConfig =
@@ -70,4 +76,4 @@ data LegalPropositionInst =
     {
       serialsOfWrong :: Set Int
     , pseudoFormulas :: [String]
-    } deriving Show
+    } deriving (Show,Generic)

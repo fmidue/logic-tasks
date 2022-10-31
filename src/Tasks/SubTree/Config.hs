@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Tasks.SubTree.Config (
     SubTreeInst(..),
@@ -8,12 +9,13 @@ module Tasks.SubTree.Config (
   ) where
 
 
-
-import Data.Set (Set)
 import Control.Monad.Output(LangM, OutputMonad(..), english, german, translate)
+import Data.Set (Set)
+import GHC.Generics
+
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
-import Trees.Types (SynTree, BinOp)
 import Trees.Helpers (maxLeavesForNodes)
+import Trees.Types (SynTree, BinOp)
 
 
 
@@ -23,7 +25,7 @@ data SubTreeConfig =
       syntaxTreeConfig :: SynTreeConfig
     , allowSameSubTree :: Bool
     , minSubTrees :: Integer
-    } deriving Show
+    } deriving (Show,Generic)
 
 defaultSubTreeConfig :: SubTreeConfig
 defaultSubTreeConfig =
@@ -58,4 +60,4 @@ data SubTreeInst =
     , correctTrees :: Set (SynTree BinOp Char)
     , correctFormulas :: Set String
     , minInputTrees :: Integer
-    } deriving Show
+    } deriving (Show,Generic)

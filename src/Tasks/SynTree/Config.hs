@@ -1,18 +1,23 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Tasks.SynTree.Config (
   SynTreeConfig(..),
   SynTreeInst(..),
-
   checkSynTreeConfig,
   defaultSynTreeConfig,
   ) where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
-import Trees.Types (SynTree, BinOp)
-import Trees.Helpers (maxNodesForDepth)
 import Data.Char (isLetter)
+import GHC.Generics
+
+import Trees.Helpers (maxNodesForDepth)
+import Trees.Types (SynTree, BinOp)
+
+
+
 
 data SynTreeConfig =
   SynTreeConfig
@@ -23,7 +28,7 @@ data SynTreeConfig =
   , atLeastOccurring :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
-  } deriving Show
+  } deriving (Show,Generic)
 
 defaultSynTreeConfig :: SynTreeConfig
 defaultSynTreeConfig =
@@ -87,4 +92,4 @@ data SynTreeInst =
     { instSynTree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
-    } deriving Show
+    } deriving (Show,Generic)
