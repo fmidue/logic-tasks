@@ -36,6 +36,7 @@ library:
     - LogicTasks.Util
     - LogicTasks.Syntax.IllegalCnfs
     - LogicTasks.Syntax.IllegalFormulas
+    - LogicTasks.Syntax.SimplestFormula
     - LogicTasks.Syntax.SubTreeSet
     - LogicTasks.Syntax.TreeToFormula
     - Tasks.SynTree.Config

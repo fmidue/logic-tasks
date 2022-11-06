@@ -27,6 +27,7 @@ library
       LogicTasks.Util
       LogicTasks.Syntax.IllegalCnfs
       LogicTasks.Syntax.IllegalFormulas
+      LogicTasks.Syntax.SimplestFormula
       LogicTasks.Syntax.SubTreeSet
       LogicTasks.Syntax.TreeToFormula
       Tasks.SynTree.Config
@@ -55,7 +56,6 @@ library
       Auxiliary
       Formula
       LogicTasks.Syntax.AppHelp
-      LogicTasks.Syntax.SimplestFormula
       Printing
       Resolution
       Table
