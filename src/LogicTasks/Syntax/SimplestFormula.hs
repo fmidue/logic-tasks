@@ -51,10 +51,10 @@ start = ""
 
 
 
-partialGrade :: OutputMonad m => SuperfluousBracketsInst -> [Int] -> LangM m
+partialGrade :: OutputMonad m => SuperfluousBracketsInst -> String -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SuperfluousBracketsInst -> [Int] -> LangM m
+completeGrade :: OutputMonad m => SuperfluousBracketsInst -> String -> LangM m
 completeGrade _ _ = pure()

@@ -42,10 +42,10 @@ start = []
 
 
 
-partialGrade :: OutputMonad m => SynTreeInst -> [Int] -> LangM m
+partialGrade :: OutputMonad m => SynTreeInst -> [String] -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SynTreeInst -> [Int] -> LangM m
+completeGrade :: OutputMonad m => SynTreeInst -> [String] -> LangM m
 completeGrade _ _ = pure()

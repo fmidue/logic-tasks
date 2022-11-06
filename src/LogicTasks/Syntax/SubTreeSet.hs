@@ -53,10 +53,10 @@ start = []
 
 
 
-partialGrade :: OutputMonad m => SubTreeInst -> [Int] -> LangM m
+partialGrade :: OutputMonad m => SubTreeInst -> [String] -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SubTreeInst -> [Int] -> LangM m
+completeGrade :: OutputMonad m => SubTreeInst -> [String] -> LangM m
 completeGrade _ _ = pure()
