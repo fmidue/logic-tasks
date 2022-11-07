@@ -37,15 +37,15 @@ verifyConfig = checkSynTreeConfig
 
 
 
-start :: [String]
+start :: String
 start = []
 
 
 
-partialGrade :: OutputMonad m => SynTreeInst -> [String] -> LangM m
+partialGrade :: OutputMonad m => SynTreeInst -> String -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SynTreeInst -> [String] -> LangM m
+completeGrade :: OutputMonad m => SynTreeInst -> String -> LangM m
 completeGrade _ _ = pure()
