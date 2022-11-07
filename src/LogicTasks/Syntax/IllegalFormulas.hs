@@ -3,7 +3,9 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
+import Control.Monad.Output (LangM, OutputMonad(..))
+
+import LogicTasks.Syntax.Helpers
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 
 
@@ -11,25 +13,25 @@ import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalProposition
 
 description :: OutputMonad m => LegalPropositionInst -> LangM m
 description LegalPropositionInst{..} = do
-    paragraph $ translate $ do
-      german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
-      english "Consider the following propositional formulae:"
+    instruct
+      "Consider the following propositional formulae:"
+      "Betrachten Sie die folgenden aussagenlogischen Formeln:"
 
-    indent $ code $ unlines pseudoFormulas
+    focus $ unlines $ indexed pseudoFormulas
 
-    paragraph $ translate $ do
-      german "Einige dieser Formeln enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt sind."
-      english "Some of these formulae are syntactically incorrect. Which of these formulae are invalid?"
+    instruct
+      "Some of these formulae are syntactically incorrect. Which of these formulae are invalid?"
+      "Einige dieser Formeln enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt sind."
 
-    paragraph $ translate $ do
-      german "Geben Sie eine Liste der Indices aller syntaktisch falschen Formeln als Ihre Lösung an."
-      english "Enter a list containing the indices of the invalid formulae to submit your answer."
+    instruct
+      "Enter a list containing the indices of the invalid formulae to submit your answer."
+      "Geben Sie eine Liste der Indices aller syntaktisch falschen Formeln als Ihre Lösung an."
 
-    paragraph $ translate $ do
-      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
-      english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
+    instruct
+      "For example, if only choices 2 and 3 are incorrect, then the solution is:"
+      "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
 
-    indent $ code "[2,3]"
+    focus "[2,3]"
 
 
 

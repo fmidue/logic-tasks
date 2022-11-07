@@ -3,7 +3,9 @@
 module LogicTasks.Syntax.TreeToFormula where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
+import Control.Monad.Output (LangM, OutputMonad(..))
+
+import LogicTasks.Syntax.Helpers (instruct)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 
 
@@ -11,19 +13,20 @@ import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 
 description :: OutputMonad m => SynTreeInst -> LangM m
 description SynTreeInst{..} = do
-    paragraph $ translate $ do
-      german "Betrachten Sie den folgenden Syntaxbaum:"
-      english "Consider the following syntax tree:"
+    instruct
+      "Consider the following syntax tree:"
+      "Betrachten Sie den folgenden Syntaxbaum:"
 
     indent $ latex $ latexImage
 
-    paragraph $ translate $ do
-      german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
-      english "Find the propositional logic formula represented by this syntax tree."
+    instruct
+      "Find the propositional logic formula represented by this syntax tree."
+      "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
 
-    paragraph $ translate $ do
-      german "Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen, solange diese die Bedeutung der Formel nicht verändern."
-      english "You are allowed to add arbitrarily many additional pairs of brackets, provided that they do not change the interpretation of the formula."
+    instruct
+      "You are allowed to add arbitrarily many additional pairs of brackets, provided that they do not change the interpretation of the formula."
+      "Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen, solange diese die Bedeutung der Formel nicht verändern."
+
 
 
 

@@ -2,7 +2,9 @@
 module LogicTasks.Syntax.IllegalCnfs where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (LangM, OutputMonad (..))
+
+import LogicTasks.Syntax.Helpers
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 
 
@@ -10,25 +12,25 @@ import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNF
 
 description :: OutputMonad m => LegalCNFInst -> LangM m
 description LegalCNFInst{..} = do
-    paragraph $ translate $ do
-      german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
-      english "Consider the following propositional logic formulae:"
+    instruct
+      "Consider the following propositional logic formulae:"
+      "Betrachten Sie die folgenden aussagenlogischen Formeln:"
 
-    indent $ code $ unlines formulaStrings
+    focus $ unlines $ indexed formulaStrings
 
-    paragraph $ translate $ do
-      german "Welche dieser Formeln sind nicht in konjunktiver Normalform (cnf) angegeben?"
-      english "Which of these formulae are not given in conjunctive normal form (cnf)?"
+    instruct
+      "Which of these formulae are not given in conjunctive normal form (cnf)?"
+      "Welche dieser Formeln sind nicht in konjunktiver Normalform (cnf) angegeben?"
 
-    paragraph $ translate $ do
-      german "Geben Sie eine Liste der Indices aller nicht cnf-Formeln als Ihre Lösung an."
-      english "Enter a list containing the indices of the non-cnf formulae to submit your answer."
+    instruct
+      "Enter a list containing the indices of the non-cnf formulae to submit your answer."
+      "Geben Sie eine Liste der Indices aller nicht cnf-Formeln als Ihre Lösung an."
 
-    paragraph $ translate $ do
-      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 keine cnf-Formeln, dann ist diese Lösung korrekt:"
-      english "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
+    instruct
+      "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
+      "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 keine cnf-Formeln, dann ist diese Lösung korrekt:"
 
-    indent $ code "[2,3]"
+    focus "[2,3]"
 
 
 

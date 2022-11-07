@@ -3,7 +3,9 @@
 module LogicTasks.Syntax.SimplestFormula where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
+import Control.Monad.Output (LangM, OutputMonad(..))
+
+import LogicTasks.Syntax.Helpers
 import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 
 
@@ -11,27 +13,27 @@ import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, Superfl
 
 description :: OutputMonad m => SuperfluousBracketsInst -> LangM m
 description SuperfluousBracketsInst{..} = do
-    paragraph $ translate $ do
-      german "Betrachten Sie die folgende aussagenlogische Formel:"
-      english "Consider the following propositional logic formula:"
+    instruct
+      "Consider the following propositional logic formula:"
+      "Betrachten Sie die folgende aussagenlogische Formel:"
 
-    indent $ code $ stringWithSuperfluousBrackets
+    focus stringWithSuperfluousBrackets
 
-    paragraph $ translate $ do
-      german "Aufgrund der Assoziativität von /\\ und \\/ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
-      english "Since /\\ and \\/ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
+    instruct
+      "Since /\\ and \\/ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
+      "Aufgrund der Assoziativität von /\\ und \\/ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
 
-    indent $ code $ "A /\\ B /\\ C"
+    focus "A /\\ B /\\ C"
 
-    paragraph $ translate $ do
-      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
-      english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional formula."
+    instruct
+      "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional formula."
+      "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
 
-    paragraph $ translate $ do
-      german "Ist z.B. (A \\/ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
-      english "For example, if (A \\/ B) is the given formula, then the solution is:"
+    instruct
+      "For example, if (A \\/ B) is the given formula, then the solution is:"
+      "Ist z.B. (A \\/ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
 
-    indent $ code "A \\/ B"
+    focus "A \\/ B"
 
 
 
