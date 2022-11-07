@@ -56,7 +56,6 @@ library
   other-modules:
       Auxiliary
       Formula
-      LogicTasks.Syntax.AppHelp
       Printing
       Resolution
       Table
