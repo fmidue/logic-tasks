@@ -21,7 +21,7 @@ description SuperfluousBracketsInst{..} = do
       german "Aufgrund der Assoziativität von /\\ und \\/ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
       english "Since /\\ and \\/ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
 
-    indent $ code $ "A/\\B/\\C"
+    indent $ code $ "A /\\ B /\\ C"
 
     paragraph $ translate $ do
       german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
