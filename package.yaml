@@ -57,6 +57,7 @@ library:
     - Tasks.LegalCNF.Quiz
     - Tasks.LegalCNF.GenerateIllegal
     - Tasks.LegalCNF.GenerateLegal
+    - Trees.Types
     - Parsing
     - ParsingHelpers
     - Config
