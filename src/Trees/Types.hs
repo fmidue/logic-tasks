@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Trees.Types
     (
@@ -9,8 +10,14 @@ module Trees.Types
     allBinaryOperators,
     ) where
 
+
+import GHC.Generics
+
+
+
+
 data BinOp = And | Or | Impl | Equi
-  deriving (Eq, Ord, Show, Enum, Bounded)
+  deriving (Eq, Generic, Ord, Show, Enum, Bounded)
 
 showOperator :: BinOp -> String
 showOperator And = "/\\"
@@ -28,7 +35,7 @@ data SynTree o c
     = Binary o (SynTree o c) (SynTree o c)
     | Not (SynTree o c)
     | Leaf c
-  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
+  deriving (Eq, Generic, Ord, Show, Functor, Foldable, Traversable)
 
 instance Applicative (SynTree o) where
   pure = Leaf
