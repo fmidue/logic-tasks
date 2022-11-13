@@ -3,6 +3,8 @@ module LogicTasks.Syntax.IllegalCnfs where
 
 
 import Control.Monad.Output (LangM, OutputMonad (..))
+import Data.List (nub, sort)
+import Data.Set (toList)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
@@ -49,10 +51,31 @@ start = []
 
 
 partialGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
-partialGrade _ _ = pure()
+partialGrade LegalCNFInst{..} sol
+    | invalidIndex = reject
+      "At least one index in the list does not exist."
+      "Mindestens einer der Indices existiert nicht."
+
+    | wrongAmount = reject
+      "The amount of indices is wrong."
+      "Die Anzahl der Indices ist falsch."
+
+    | otherwise = pure()
+  where
+    nubSol = nub sol
+    correct = toList serialsOfWrong
+    invalidIndex = any (`notElem` [1..length correct]) nubSol
+    wrongAmount = length nubSol /= length correct
 
 
 
 completeGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
-completeGrade _ _ = pure()
+completeGrade LegalCNFInst{..} sol
+    | wrongSolution = reject
+      "Your solution is incorrect."
+      "Ihre Lösung ist falsch."
 
+   | otherwise = pure()
+  where
+    nubSol = nub sol
+    wrongSolution = sort nubSol /= sort (toList serialsOfWrong)
