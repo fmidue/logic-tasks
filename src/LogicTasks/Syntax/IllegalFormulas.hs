@@ -4,6 +4,8 @@ module LogicTasks.Syntax.IllegalFormulas where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..))
+import Data.List (nub, sort)
+import Data.Set (toList)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
@@ -50,9 +52,31 @@ start = []
 
 
 partialGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
-partialGrade _ _ = pure()
+partialGrade LegalPropositionInst{..} sol
+    | invalidIndex = reject
+      "At least one index in the list does not exist."
+      "Mindestens einer der Indices existiert nicht."
+
+    | wrongAmount = reject
+      "The amount of indices is wrong."
+      "Die Anzahl der Indices ist falsch."
+
+    | otherwise = pure()
+  where
+    nubSol = nub sol
+    correct = toList serialsOfWrong
+    invalidIndex = any (`notElem` [1..length correct]) nubSol
+    wrongAmount = length nubSol /= length correct
 
 
 
 completeGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
-completeGrade _ _ = pure()
+completeGrade LegalPropositionInst{..} sol
+    | wrongSolution = reject
+      "Your solution is incorrect."
+      "Ihre Lösung ist falsch."
+
+    | otherwise = pure()
+  where
+    nubSol = nub sol
+    wrongSolution = sort nubSol /= sort (toList serialsOfWrong)

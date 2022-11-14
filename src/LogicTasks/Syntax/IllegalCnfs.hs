@@ -75,7 +75,7 @@ completeGrade LegalCNFInst{..} sol
       "Your solution is incorrect."
       "Ihre Lösung ist falsch."
 
-   | otherwise = pure()
+    | otherwise = pure()
   where
     nubSol = nub sol
     wrongSolution = sort nubSol /= sort (toList serialsOfWrong)
