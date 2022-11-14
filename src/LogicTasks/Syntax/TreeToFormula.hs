@@ -5,9 +5,9 @@ module LogicTasks.Syntax.TreeToFormula where
 
 import Control.Monad.Output (LangM, OutputMonad(..))
 
-import LogicTasks.Syntax.Helpers (instruct)
+import LogicTasks.Syntax.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
-
+import Tasks.SynTree.Quiz (feedback)
 
 
 
@@ -51,4 +51,8 @@ partialGrade _ _ = pure()
 
 
 completeGrade :: OutputMonad m => SynTreeInst -> String -> LangM m
-completeGrade _ _ = pure()
+completeGrade inst sol
+    | not $ feedback inst sol = reject
+      "Your solution is not correct."
+      "Ihre Abgabe ist nicht die korrekte Lösung"
+    | otherwise = pure()

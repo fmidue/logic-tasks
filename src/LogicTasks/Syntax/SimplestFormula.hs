@@ -7,6 +7,7 @@ import Control.Monad.Output (LangM, OutputMonad(..))
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
+import Tasks.SuperfluousBrackets.Quiz (feedback)
 
 
 
@@ -59,4 +60,8 @@ partialGrade _ _ = pure()
 
 
 completeGrade :: OutputMonad m => SuperfluousBracketsInst -> String -> LangM m
-completeGrade _ _ = pure()
+completeGrade inst sol
+    | not $ feedback inst sol = reject
+      "Your solution is not correct."
+      "Ihre Abgabe ist nicht die korrekte Lösung"
+    | otherwise = pure()

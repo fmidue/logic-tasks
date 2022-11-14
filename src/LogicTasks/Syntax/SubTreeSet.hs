@@ -7,7 +7,7 @@ import Control.Monad.Output (LangM, OutputMonad(..))
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
-
+import Tasks.SubTree.Quiz (feedback)
 
 
 
@@ -61,4 +61,8 @@ partialGrade _ _ = pure()
 
 
 completeGrade :: OutputMonad m => SubTreeInst -> [String] -> LangM m
-completeGrade _ _ = pure()
+completeGrade inst sol
+    | not $ feedback inst $ show sol = reject
+      "Your solution is not correct."
+      "Ihre Abgabe ist nicht die korrekte Lösung"
+    | otherwise = pure()
