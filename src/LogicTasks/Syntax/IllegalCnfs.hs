@@ -64,7 +64,7 @@ partialGrade LegalCNFInst{..} sol
   where
     nubSol = nub sol
     correct = toList serialsOfWrong
-    invalidIndex = any (`notElem` [1..max correct]) nubSol
+    invalidIndex = any (`notElem` [1..maximum correct]) nubSol
     wrongAmount = length nubSol /= length correct
 
 
