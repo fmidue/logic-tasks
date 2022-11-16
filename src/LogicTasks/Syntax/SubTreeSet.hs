@@ -55,19 +55,19 @@ verifyConfig = checkSubTreeConfig
 
 
 
-start :: [String]
+start :: String
 start = []
 
 
 
-partialGrade :: OutputMonad m => SubTreeInst -> [String] -> LangM m
+partialGrade :: OutputMonad m => SubTreeInst -> String -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SubTreeInst -> [String] -> LangM m
+completeGrade :: OutputMonad m => SubTreeInst -> String -> LangM m
 completeGrade inst sol
-    | not $ feedback inst $ concat sol = reject
+    | not $ feedback inst $ sol = reject
       "Your solution is not correct."
       "Ihre Abgabe ist nicht die korrekte Lösung"
     | otherwise = pure()
