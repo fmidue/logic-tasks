@@ -4,6 +4,7 @@ module LogicTasks.Syntax.SubTreeSet where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..))
+import Data.Set (toList)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
@@ -37,7 +38,9 @@ description SubTreeInst{..} = do
 
     focus "A \\/ B"
 
-    focus $ show correctTrees
+    focus $ show $ toList correctTrees
+
+    focus $ show $ correctFormulas
 
 
 
