@@ -24,18 +24,22 @@ description SubTreeInst{..} = do
       ("Finden Sie " ++ show minInputTrees ++ " nicht atomare Subformeln, die in dieser Formel enthalten sind.")
 
     instruct
-      "Submit your solution as a  list of subformulae."
-      "Geben Sie die Lösung als eine Liste der Subformeln an."
+      "Submit your solution as a set of subformulae."
+      "Geben Sie die Lösung als eine Menge der Subformeln an."
 
     instruct
       "Remove bracket pairs which only serve to enclose entire Subformulae and do not add any additional brackets."
       "Entfernen Sie dabei Klammerpaare, die eine Subformel komplett umschließen und fügen Sie keine zusätzlichen Klammern hinzu."
 
     instruct
+      "Denote the start and end of the set by using curly braces ({ })."
+      "Notieren Sie Anfang und Ende der Menge mit gechweiften Klammern ({ })."
+
+    instruct
       "For example, if ~(A \\/ B) is the given formula and one subformula is required, then the solution is:"
       "Ist z.B. ~(A \\/ B) die gegebene Formel und es wird eine Subformel gesucht, dann ist die folgende Lösung korrekt:"
 
-    focus "A \\/ B"
+    focus "{ A \\/ B }"
 
 
 
