@@ -5,6 +5,7 @@ module Trees.Types
     (
     SynTree(..),
     BinOp(..),
+    PropFormula(..),
     showOperator,
     showOperatorNot,
     allBinaryOperators,
@@ -14,7 +15,7 @@ module Trees.Types
 import GHC.Generics
 
 
-
+newtype PropFormula = PropFormula (SynTree BinOp Char)
 
 data BinOp = And | Or | Impl | Equi
   deriving (Eq, Generic, Ord, Show, Enum, Bounded)

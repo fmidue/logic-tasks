@@ -9,10 +9,11 @@ import Tasks.SuperfluousBrackets.Config (SuperfluousBracketsConfig(..), Superflu
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets(superfluousBracketsDisplay)
 import Test.QuickCheck (Gen, suchThat)
 import Tasks.SynTree.Config (SynTreeConfig(..))
+import Trees.Parsing (formulaParse)
 import Trees.Print (simplestDisplay)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
-import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
+import Trees.Types (PropFormula(..))
 import Data.Char (isSpace)
 
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
@@ -25,5 +26,5 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       , simplestString = simplestDisplay syntaxTree
       }
 
-feedback :: SuperfluousBracketsInst -> String -> Bool
-feedback SuperfluousBracketsInst {simplestString} input = superfluousBracketsExcParser input == Right (filter (not . isSpace) simplestString)
+feedback :: SuperfluousBracketsInst -> PropFormula -> Bool
+feedback SuperfluousBracketsInst {simplestString} (PropFormula input) = Right input == formulaParse (filter (not . isSpace) simplestString)

@@ -8,7 +8,8 @@ import Control.Monad.Output (LangM, OutputMonad(..))
 import LogicTasks.Syntax.Helpers
 import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.Quiz (feedback)
-
+import Trees.Types
+import Trees.Parsing (formulaParse)
 
 
 
@@ -36,6 +37,9 @@ description SuperfluousBracketsInst{..} = do
 
     focus "A \\/ B"
 
+    focus $ simplestString
+
+    focus $ show $ formulaParse simplestString
 
 
 
@@ -49,17 +53,17 @@ verifyConfig = checkSuperfluousBracketsConfig
 
 
 
-start :: String
-start = []
+start :: PropFormula
+start = PropFormula $ Leaf ' '
 
 
 
-partialGrade :: OutputMonad m => SuperfluousBracketsInst -> String -> LangM m
+partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SuperfluousBracketsInst -> String -> LangM m
+completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."
