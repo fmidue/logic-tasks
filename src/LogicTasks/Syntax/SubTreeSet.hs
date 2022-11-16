@@ -37,6 +37,8 @@ description SubTreeInst{..} = do
 
     focus "A \\/ B"
 
+    focus $ show correctTrees
+
 
 
 
