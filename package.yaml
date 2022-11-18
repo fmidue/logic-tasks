@@ -58,6 +58,7 @@ library:
     - Tasks.LegalCNF.GenerateIllegal
     - Tasks.LegalCNF.GenerateLegal
     - Trees.Types
+    - Trees.Parsing
     - Parsing
     - ParsingHelpers
     - Config
