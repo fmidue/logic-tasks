@@ -50,6 +50,7 @@ library
       Tasks.LegalCNF.GenerateLegal
       Trees.Types
       Trees.Parsing
+      Trees.Print
       Parsing
       ParsingHelpers
       Config
@@ -63,7 +64,6 @@ library
       Table
       Trees.Generate
       Trees.Helpers
-      Trees.Print
       Util
       Paths_logic_tasks
   hs-source-dirs:
