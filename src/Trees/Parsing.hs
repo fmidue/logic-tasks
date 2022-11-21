@@ -100,4 +100,4 @@ parseBasic = parseAtomic <|> parseBrackets <|> parseNeg
 
 
 parseSimpleForm :: Parser SimpleFormula
-parseSimpleForm = parseBrackets <|> parseVarLengthForm
+parseSimpleForm = parseVarLengthForm <|> parseBrackets
