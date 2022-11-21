@@ -5,7 +5,7 @@ module Trees.Types
     (
     SynTree(..),
     BinOp(..),
-    PropFormula(..),
+    SimpleFormula(..),
     showOperator,
     showOperatorNot,
     allBinaryOperators,
@@ -15,7 +15,7 @@ module Trees.Types
 import GHC.Generics
 
 
-newtype PropFormula = PropFormula (SynTree BinOp Char)
+
 
 data BinOp = And | Or | Impl | Equi
   deriving (Eq, Generic, Ord, Show, Enum, Bounded)
@@ -46,3 +46,15 @@ instance Monad (SynTree o) where
   Binary oper a b >>= k = Binary oper (a >>= k) (b >>= k)
   Not a           >>= k = Not (a >>= k)
   Leaf a          >>= k = k a
+
+
+data SimpleFormula = Atomic Char | Neg SimpleFormula | Brackets SimpleFormula | Assoc BinOp SimpleFormula SimpleFormula
+
+
+instance Show SimpleFormula where
+  show (Atomic c) = [c]
+  show (Neg f) = showOperatorNot ++ show f
+  show (Brackets f) = '(' : show f ++ ")"
+  show (Assoc o f1 f2) = show f1 ++ " " ++ showOperator o ++ " " ++ show f2
+
+

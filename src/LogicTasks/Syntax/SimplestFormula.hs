@@ -53,17 +53,17 @@ verifyConfig = checkSuperfluousBracketsConfig
 
 
 
-start :: PropFormula
-start = PropFormula $ Leaf ' '
+start :: SimpleFormula
+start = Atomic ' '
 
 
 
-partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
+partialGrade :: OutputMonad m => SuperfluousBracketsInst -> SimpleFormula -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
+completeGrade :: OutputMonad m => SuperfluousBracketsInst -> SimpleFormula -> LangM m
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."
