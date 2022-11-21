@@ -37,10 +37,6 @@ description SuperfluousBracketsInst{..} = do
 
     focus "A \\/ B"
 
-    focus $ simplestString
-
-    focus $ show $ formulaParse simplestString
-
 
 
 verifyInst :: OutputMonad m => SuperfluousBracketsInst -> LangM m
