@@ -9,7 +9,6 @@ import LogicTasks.Syntax.Helpers
 import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.Quiz (feedback)
 import Trees.Types
-import Trees.Parsing (formulaParse)
 
 
 
