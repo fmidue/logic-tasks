@@ -73,22 +73,10 @@ parseAnyOp = parseOp And <|> parseOp Or <|> parseOp Impl <|> parseOp Equi
 
 
 
-parseVarLengthForm :: Parser SimpleFormula
-parseVarLengthForm = do
-   form1 <- parseBasic
-   mOp <- optionMaybe parseAnyOp
-   case mOp of
-     Nothing   -> pure form1
-     (Just op) ->
-       do form2 <- parseVarLengthForm
-          pure $ Assoc op form1 form2
-
-
-
 parseBrackets :: Parser SimpleFormula
 parseBrackets = do
   lexeme $ char '('
-  form <- parseVarLengthForm
+  form <- parseSimpleForm
   lexeme $ char ')'
   return $ Brackets form
 
@@ -100,4 +88,11 @@ parseBasic = parseAtomic <|> parseBrackets <|> parseNeg
 
 
 parseSimpleForm :: Parser SimpleFormula
-parseSimpleForm = parseVarLengthForm
+parseSimpleForm = do
+   form1 <- parseBasic
+   mOp <- optionMaybe parseAnyOp
+   case mOp of
+     Nothing   -> pure form1
+     (Just op) ->
+       do form2 <- parseSimpleForm
+          pure $ Assoc op form1 form2
