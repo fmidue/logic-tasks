@@ -5,7 +5,7 @@ module Trees.Types
     (
     SynTree(..),
     BinOp(..),
-    SimpleFormula(..),
+    PropFormula(..),
     showOperator,
     showOperatorNot,
     allBinaryOperators,
@@ -48,10 +48,10 @@ instance Monad (SynTree o) where
   Leaf a          >>= k = k a
 
 
-data SimpleFormula = Atomic Char | Neg SimpleFormula | Brackets SimpleFormula | Assoc BinOp SimpleFormula SimpleFormula
+data PropFormula = Atomic Char | Neg PropFormula | Brackets PropFormula | Assoc BinOp PropFormula PropFormula
 
 
-instance Show SimpleFormula where
+instance Show PropFormula where
   show (Atomic c) = [c]
   show (Neg f) = showOperatorNot ++ show f
   show (Brackets f) = '(' : show f ++ ")"

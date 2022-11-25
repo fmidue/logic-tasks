@@ -3,7 +3,7 @@
 module Trees.Parsing (
   parserS,
   formulaParse,
-  parseSimpleForm
+  parsePropForm
   ) where
 
 import Text.Parsec.Char (char, satisfy, string)
@@ -11,7 +11,7 @@ import Text.Parsec (eof, ParseError, parse, (<|>), optionMaybe)
 import Text.Parsec.String (Parser)
 
 import Data.Char (isLetter)
-import Trees.Types (SynTree(..), BinOp(..), SimpleFormula(..), showOperator, showOperatorNot, allBinaryOperators)
+import Trees.Types (SynTree(..), BinOp(..), PropFormula(..), showOperator, showOperatorNot, allBinaryOperators)
 import ParsingHelpers (lexeme, whitespace)
 
 leafE :: Parser (SynTree o Char)
@@ -47,14 +47,14 @@ formulaParse = parse (whitespace >> parserS <* eof) ""
 
 -- Parsers for formulas with reduced brackets
 
-parseAtomic :: Parser SimpleFormula
+parseAtomic :: Parser PropFormula
 parseAtomic = do
   c <- lexeme (satisfy isLetter)
   pure $ Atomic c
 
 
 
-parseNeg :: Parser SimpleFormula
+parseNeg :: Parser PropFormula
 parseNeg = do
   lexeme $ char '~'
   Neg <$> parseBasic
@@ -73,26 +73,26 @@ parseAnyOp = parseOp And <|> parseOp Or <|> parseOp Impl <|> parseOp Equi
 
 
 
-parseBrackets :: Parser SimpleFormula
+parseBrackets :: Parser PropFormula
 parseBrackets = do
   lexeme $ char '('
-  form <- parseSimpleForm
+  form <- parsePropForm
   lexeme $ char ')'
   return $ Brackets form
 
 
 
-parseBasic :: Parser SimpleFormula
+parseBasic :: Parser PropFormula
 parseBasic = parseAtomic <|> parseBrackets <|> parseNeg
 
 
 
-parseSimpleForm :: Parser SimpleFormula
-parseSimpleForm = do
+parsePropForm :: Parser PropFormula
+parsePropForm = do
    form1 <- parseBasic
    mOp <- optionMaybe parseAnyOp
    case mOp of
      Nothing   -> pure form1
      (Just op) ->
-       do form2 <- parseSimpleForm
+       do form2 <- parsePropForm
           pure $ Assoc op form1 form2
