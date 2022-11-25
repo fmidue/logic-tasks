@@ -9,8 +9,10 @@ import Test.QuickCheck (Gen)
 import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
 
 import Trees.Print (display, transferToPicture)
-import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
+import Trees.Types (PropFormula(..))
+
+
 
 generateSynTreeInst :: SynTreeConfig -> Gen SynTreeInst
 generateSynTreeInst SynTreeConfig {..} = do
@@ -21,6 +23,6 @@ generateSynTreeInst SynTreeConfig {..} = do
       , correct = display tree
       }
 
-feedback :: SynTreeInst -> String -> Bool
-feedback SynTreeInst {instSynTree} input =
-  formulaParse input == Right instSynTree
+feedback :: SynTreeInst -> PropFormula -> Bool
+feedback SynTreeInst {correct} input =
+  show input == correct

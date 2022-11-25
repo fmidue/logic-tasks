@@ -8,7 +8,7 @@ import Control.Monad.Output (LangM, OutputMonad(..))
 import LogicTasks.Syntax.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Tasks.SubTree.Quiz (feedback)
-
+import Trees.Types (PropFormula(..))
 
 
 description :: OutputMonad m => SubTreeInst -> LangM m
@@ -53,17 +53,17 @@ verifyConfig = checkSubTreeConfig
 
 
 
-start :: String
+start :: [PropFormula]
 start = []
 
 
 
-partialGrade :: OutputMonad m => SubTreeInst -> String -> LangM m
+partialGrade :: OutputMonad m => SubTreeInst -> [PropFormula] -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SubTreeInst -> String -> LangM m
+completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula] -> LangM m
 completeGrade inst sol
     | not $ feedback inst $ sol = reject
       "Your solution is not correct."

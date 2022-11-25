@@ -8,6 +8,7 @@ import Control.Monad.Output (LangM, OutputMonad(..))
 import LogicTasks.Syntax.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Tasks.SynTree.Quiz (feedback)
+import Trees.Types (PropFormula(..))
 
 
 
@@ -40,17 +41,17 @@ verifyConfig = checkSynTreeConfig
 
 
 
-start :: String
-start = []
+start :: PropFormula
+start = Atomic ' '
 
 
 
-partialGrade :: OutputMonad m => SynTreeInst -> String -> LangM m
+partialGrade :: OutputMonad m => SynTreeInst -> PropFormula -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SynTreeInst -> String -> LangM m
+completeGrade :: OutputMonad m => SynTreeInst -> PropFormula -> LangM m
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."
