@@ -4,11 +4,15 @@ module LogicTasks.Syntax.SubTreeSet where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..))
+import Data.Either (fromRight)
+import Data.List (nub, sort)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Tasks.SubTree.Quiz (feedback)
-import Trees.Types (PropFormula(..))
+import Trees.Types (PropFormula(..), SynTree(..))
+import Trees.Parsing
+import Trees.Helpers
 
 
 description :: OutputMonad m => SubTreeInst -> LangM m
@@ -59,7 +63,31 @@ start = []
 
 
 partialGrade :: OutputMonad m => SubTreeInst -> [PropFormula] -> LangM m
-partialGrade _ _ = pure()
+partialGrade SubTreeInst{..} fs
+    | any (`notElem` origLits) literals =
+      reject
+        "At least one subformula contains unknown literals."
+        "Ihre Abgabe beinhaltet mindestens eine Subformel mit unbekannten Literalen."
+
+    | any (> origOpsNum) opsNum =
+      reject
+        "Your solution contains at least one subformula with more logical operators than the original formula."
+        "Ihre Abgabe beinhaltet mindestens eine Subformel mit mehr logische Operatoren als die ursprüngliche Formel."
+
+    | amount < minInputTrees =
+      reject
+        ("Your solution does not contain enough subformulae. Add " ++ show (minInputTrees - amount) ++ ".")
+        ("Ihre Abgabe beinhaltet nicht genügend Subformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu.")
+
+    | otherwise = pure()
+  where
+    amount = fromIntegral $ length $ nub fs
+    trees = map formulaToTree fs
+    literals = sort $ nub $ concatMap collectLeaves trees
+    opsNum = map numOfOps trees
+    origTree = fromRight (Leaf ' ') $ formulaParse formula
+    origLits = sort $ nub $ collectLeaves origTree
+    origOpsNum = numOfOps origTree
 
 
 

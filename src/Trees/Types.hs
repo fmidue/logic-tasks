@@ -49,6 +49,7 @@ instance Monad (SynTree o) where
 
 
 data PropFormula = Atomic Char | Neg PropFormula | Brackets PropFormula | Assoc BinOp PropFormula PropFormula
+  deriving (Eq)
 
 
 instance Show PropFormula where

@@ -60,12 +60,12 @@ start = Atomic ' '
 
 partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
 partialGrade SuperfluousBracketsInst{..} f
-    | literals > origLits =
+    | any (`notElem` origLits) literals =
       reject
         "Your solution contains unknown literals."
         "Ihre Abgabe beinhaltet unbekannte Literale."
 
-    | literals < origLits =
+    | any (`notElem` literals) origLits =
       reject
         "Your solution does not contain all literals present in the original formula."
         "Ihre Abgabe beinhaltet nicht alle Literale aus der ursprünglichen Formel."

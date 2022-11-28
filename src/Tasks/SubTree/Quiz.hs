@@ -29,7 +29,6 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       }
 
 feedback :: SubTreeInst -> [PropFormula] -> Bool
-feedback SubTreeInst {correctFormulas,minInputTrees} ps =
-    inputSet `isSubsetOf` correctFormulas && fromIntegral (size inputSet) >= minInputTrees
+feedback SubTreeInst {correctFormulas} ps = inputSet `isSubsetOf` correctFormulas
   where
-     inputSet = fromList (Prelude.map show ps)
+    inputSet = fromList (Prelude.map show ps)
