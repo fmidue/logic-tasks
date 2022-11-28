@@ -4,11 +4,15 @@ module LogicTasks.Syntax.SimplestFormula where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..))
+import Data.Either (fromRight)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.Quiz (feedback)
+import Trees.Helpers
+import Trees.Parsing (formulaParse)
 import Trees.Types
+
 
 
 
@@ -54,7 +58,35 @@ start = Atomic ' '
 
 
 partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
-partialGrade _ _ = pure()
+partialGrade SuperfluousBracketsInst{..} f
+    | literals > origLits =
+      reject
+        "Your solution contains unknown literals."
+        "Ihre Abgabe beinhaltet unbekannte Literale."
+
+    | literals < origLits =
+      reject
+        "Your solution does not contain all literals present in the original formula."
+        "Ihre Abgabe beinhaltet nicht alle Literale aus der ursprünglichen Formel."
+
+    | opsNum > origOpsNum =
+      reject
+        "Your solution contains more logical operators than the original formula."
+        "Ihre Abgabe beinhaltet mehr logische Operatoren als die ursprüngliche Formel."
+
+    | opsNum < origOpsNum =
+      reject
+        "Your solution contains less logical operators than the original formula."
+        "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
+
+    | otherwise = pure()
+  where
+    tree = formulaToTree f
+    literals = collectLeaves tree
+    opsNum = numberAllBinaryNodes tree
+    origTree = fromRight (Leaf ' ') $ formulaParse stringWithSuperfluousBrackets
+    origLits = collectLeaves origTree
+    origOpsNum = numberAllBinaryNodes origTree
 
 
 
