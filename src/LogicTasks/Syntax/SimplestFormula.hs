@@ -5,6 +5,7 @@ module LogicTasks.Syntax.SimplestFormula where
 
 import Control.Monad.Output (LangM, OutputMonad(..))
 import Data.Either (fromRight)
+import Data.List (nub, sort)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
@@ -82,11 +83,11 @@ partialGrade SuperfluousBracketsInst{..} f
     | otherwise = pure()
   where
     tree = formulaToTree f
-    literals = collectLeaves tree
-    opsNum = numberAllBinaryNodes tree
+    literals = sort $ nub $ collectLeaves tree
+    opsNum = numOfOps tree
     origTree = fromRight (Leaf ' ') $ formulaParse stringWithSuperfluousBrackets
-    origLits = collectLeaves origTree
-    origOpsNum = numberAllBinaryNodes origTree
+    origLits = sort $ nub $ collectLeaves origTree
+    origOpsNum = numOfOps origTree
 
 
 

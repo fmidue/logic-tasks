@@ -18,6 +18,7 @@ module Trees.Helpers
     cnfToSynTree,
     clauseToSynTree,
     literalToSynTree,
+    numOfOps,
     formulaToTree
     ) where
 
@@ -116,6 +117,11 @@ clauseToSynTree = foldr1 (Binary Or) . map literalToSynTree . toList . Setform.l
 literalToSynTree :: Setform.Literal -> SynTree o Char
 literalToSynTree (Setform.Literal a) = Leaf a
 literalToSynTree (Setform.Not a) = Not (Leaf a)
+
+
+numOfOps :: SynTree o c -> Integer
+numOfOps (Binary _ t1 t2)= 1 + numOfOps t1 + numOfOps t2
+numOfOps _ = 0
 
 
 formulaToTree :: PropFormula -> SynTree BinOp Char
