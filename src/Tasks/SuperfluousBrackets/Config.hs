@@ -13,7 +13,7 @@ import Control.Monad.Output(LangM, OutputMonad(..), english, german, translate)
 import GHC.Generics
 
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
-
+import Trees.Types (BinOp, SynTree)
 
 
 
@@ -59,6 +59,7 @@ checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig 
 data SuperfluousBracketsInst =
     SuperfluousBracketsInst
     {
-      stringWithSuperfluousBrackets :: String
+      syntaxTree :: SynTree BinOp Char
+    , stringWithSuperfluousBrackets :: String
     , simplestString :: String
     } deriving (Show,Generic)

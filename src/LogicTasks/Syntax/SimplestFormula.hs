@@ -4,14 +4,12 @@ module LogicTasks.Syntax.SimplestFormula where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..))
-import Data.Either (fromRight)
 import Data.List (nub, sort)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.Quiz (feedback)
 import Trees.Helpers
-import Trees.Parsing (formulaParse)
 import Trees.Types
 
 
@@ -60,34 +58,33 @@ start = Atomic ' '
 
 partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
 partialGrade SuperfluousBracketsInst{..} f
-    | any (`notElem` origLits) literals =
+    | any (`notElem` correctLits) literals =
       reject
         "Your solution contains unknown literals."
         "Ihre Abgabe beinhaltet unbekannte Literale."
 
-    | any (`notElem` literals) origLits =
+    | any (`notElem` literals) correctLits =
       reject
         "Your solution does not contain all literals present in the original formula."
         "Ihre Abgabe beinhaltet nicht alle Literale aus der ursprünglichen Formel."
 
-    | opsNum > origOpsNum =
+    | opsNum > correctOpsNum =
       reject
         "Your solution contains more logical operators than the original formula."
         "Ihre Abgabe beinhaltet mehr logische Operatoren als die ursprüngliche Formel."
 
-    | opsNum < origOpsNum =
+    | opsNum < correctOpsNum =
       reject
         "Your solution contains less logical operators than the original formula."
         "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
     | otherwise = pure()
   where
-    tree = formulaToTree f
-    literals = sort $ nub $ collectLeaves tree
-    opsNum = numOfOps tree
-    origTree = fromRight (Leaf ' ') $ formulaParse stringWithSuperfluousBrackets
-    origLits = sort $ nub $ collectLeaves origTree
-    origOpsNum = numOfOps origTree
+    formulaTree = formulaToTree f
+    literals = sort $ nub $ collectLeaves  formulaTree
+    opsNum = numOfOps formulaTree
+    correctLits = sort $ nub $ collectLeaves syntaxTree
+    correctOpsNum = numOfOps syntaxTree
 
 
 

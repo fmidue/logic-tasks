@@ -23,7 +23,8 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       `suchThat` sameAssociativeOperatorAdjacent
     stringWithSuperfluousBrackets <- superfluousBracketsDisplay syntaxTree superfluousBracketPairs
     return $ SuperfluousBracketsInst
-      { stringWithSuperfluousBrackets
+      { syntaxTree
+      , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay syntaxTree
       }
 
