@@ -4,14 +4,12 @@ module LogicTasks.Syntax.SubTreeSet where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..))
-import Data.Either (fromRight)
 import Data.List (nub, sort)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Tasks.SubTree.Quiz (feedback)
-import Trees.Types (PropFormula(..), SynTree(..))
-import Trees.Parsing
+import Trees.Types (PropFormula(..))
 import Trees.Helpers
 
 
@@ -78,12 +76,11 @@ partialGrade SubTreeInst{..} fs
     | otherwise = pure()
   where
     amount = fromIntegral $ length $ nub fs
-    trees = map formulaToTree fs
-    literals = sort $ nub $ concatMap collectLeaves trees
-    opsNum = map numOfOps trees
-    origTree = fromRight (Leaf ' ') $ formulaParse formula
-    origLits = sort $ nub $ collectLeaves origTree
-    origOpsNum = numOfOps origTree
+    formTrees = map formulaToTree fs
+    literals = sort $ nub $ concatMap collectLeaves formTrees
+    opsNum = map numOfOps formTrees
+    origLits = sort $ nub $ collectLeaves tree
+    origOpsNum = numOfOps tree
 
 
 

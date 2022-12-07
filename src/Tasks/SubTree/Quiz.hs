@@ -22,7 +22,8 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       `suchThat` \synTree -> (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
     let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
-      { minInputTrees = minSubTrees
+      { tree
+      , minInputTrees = minSubTrees
       , formula = display tree
       , correctTrees
       , correctFormulas = Data.Set.map display correctTrees
