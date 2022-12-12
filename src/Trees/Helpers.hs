@@ -121,6 +121,7 @@ literalToSynTree (Setform.Not a) = Not (Leaf a)
 
 numOfOps :: SynTree o c -> Integer
 numOfOps (Binary _ t1 t2)= 1 + numOfOps t1 + numOfOps t2
+numOfOps (Not t) = numOfOps t
 numOfOps _ = 0
 
 
