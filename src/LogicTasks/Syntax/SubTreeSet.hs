@@ -65,7 +65,7 @@ partialGrade SubTreeInst{..} fs
 
     | any (> origOpsNum) opsNum =
       reject
-        "Your solution contains at least one subformula with more logical operators than the original formula."
+        ("Your solution contains at least one subformula with more logical operators than the original formula." ++ show origOpsNum ++ " " ++ show opsNum)
         "Ihre Abgabe beinhaltet mindestens eine Subformel mit mehr logische Operatoren als die ursprüngliche Formel."
 
     | amount < minInputTrees =
