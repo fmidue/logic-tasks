@@ -3,11 +3,11 @@
 module LogicTasks.Syntax.TreeToFormula where
 
 
-import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 import Control.Monad.IO.Class(MonadIO (liftIO))
 import Control.Monad.Output (LangM, OutputMonad(..))
-import qualified Data.ByteString.Lazy.UTF8 as LBS (fromString)
+import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
+import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
@@ -92,4 +92,4 @@ outputImage path tree = do
 
 cacheTree :: String -> FilePath -> IO FilePath
 cacheTree tree path = cacheIO path ext "tree" tree outputImage
-  where ext = showDigest (sha1 . LBS.fromString $ tree) ++ ".svg"
+  where ext = showDigest (sha1 . fromString $ tree) ++ ".svg"

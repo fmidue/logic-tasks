@@ -2,14 +2,15 @@
 module LogicTasks.Syntax.Helpers where
 
 
-import Data.Digest.Pure.SHA (sha256, showDigest)
-import qualified Data.ByteString.Lazy             as LBS (fromStrict)
-import Control.Monad.IO.Class           (MonadIO (liftIO))
-import qualified Data.ByteString.UTF8             as BS (fromString)
-import qualified Data.ByteString                  as BS (readFile, writeFile)
-import Control.Monad                    (when)
-import System.Directory                 (doesFileExist)
+import qualified Data.ByteString as BS (readFile, writeFile)
+
+import Control.Monad (when)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Data.ByteString.Lazy (fromStrict)
+import Data.ByteString.UTF8 (fromString)
+import Data.Digest.Pure.SHA (sha256, showDigest)
+import System.Directory                 (doesFileExist)
 
 
 
@@ -42,7 +43,6 @@ reject e g  = refuse $ indent $ bilingual e g
 
 
 
-
 cacheIO
   :: (MonadIO m, Show a)
   => FilePath
@@ -68,7 +68,7 @@ cacheIO path ext name what how = (file <$) . cache $ how file what
             liftIO $ appendFile (path ++ "busted.txt") whatId
             create'
         else create'
-    what' = BS.fromString $ show what
-    whatId = path ++ name ++ showDigest (sha256 $ LBS.fromStrict what')
+    what' = fromString $ show what
+    whatId = path ++ name ++ showDigest (sha256 $ fromStrict what')
     whatFile = whatId ++ ".hs"
     file = whatId ++ ext
