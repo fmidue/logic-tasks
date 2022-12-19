@@ -15,6 +15,11 @@ dependencies:
 - text
 - output-monad
 - pretty-simple
+- latex-svg-image >= 0.2
+- bytestring
+- utf8-string
+- SHA
+- directory
 
 library:
   source-dirs: src

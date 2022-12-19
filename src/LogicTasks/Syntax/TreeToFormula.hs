@@ -3,7 +3,11 @@
 module LogicTasks.Syntax.TreeToFormula where
 
 
+import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
+import Control.Monad.IO.Class(MonadIO (liftIO))
 import Control.Monad.Output (LangM, OutputMonad(..))
+import qualified Data.ByteString.Lazy.UTF8 as LBS (fromString)
+import Data.Digest.Pure.SHA (sha1, showDigest)
 
 import LogicTasks.Syntax.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
@@ -12,13 +16,16 @@ import Trees.Types (PropFormula(..))
 
 
 
-description :: OutputMonad m => SynTreeInst -> LangM m
-description SynTreeInst{..} = do
+
+description :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> LangM m
+description path SynTreeInst{..} = do
     instruct
       "Consider the following syntax tree:"
       "Betrachten Sie den folgenden Syntaxbaum:"
 
-    indent $ latex $ latexImage
+    picture <- liftIO $ cacheTree latexImage path
+
+    image picture
 
     instruct
       "Find the propositional logic formula represented by this syntax tree."
@@ -57,3 +64,32 @@ completeGrade inst sol
       "Your solution is not correct."
       "Ihre Abgabe ist nicht die korrekte Lösung"
     | otherwise = pure()
+
+
+
+treeOptions :: FormulaOptions
+treeOptions = FormulaOptions "\\usepackage[linguistics]{forest}" Nothing
+
+
+
+getImage :: String -> IO SVG
+getImage s = do
+  let iTree = "\\begin{forest}" ++ s ++ "\\end{forest}"
+  render <- imageForFormula defaultEnv treeOptions iTree
+  case render of (Left _) -> error "failed to render an image with the given formula."
+                 (Right svg) -> pure svg
+
+
+
+
+outputImage :: FilePath -> String -> IO FilePath
+outputImage path tree = do
+  img <- getImage $ tree
+  writeFile path img
+  pure path
+
+
+
+cacheTree :: String -> FilePath -> IO FilePath
+cacheTree tree path = cacheIO path ext "tree" tree outputImage
+  where ext = showDigest (sha1 . LBS.fromString $ tree) ++ ".svg"

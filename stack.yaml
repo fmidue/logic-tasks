@@ -6,7 +6,9 @@ packages:
 extra-deps:
   - QuickCheck-2.14
   - minisat-solver-0.1
+  - latex-svg-image-0.2
   - git: https://github.com/fmidue/output-monad.git
     commit: d51169e89ecfc736e12f36732b08d53460c2bb4f
     subdirs:
       - output-monad
+
