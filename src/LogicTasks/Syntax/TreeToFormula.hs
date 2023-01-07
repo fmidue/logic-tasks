@@ -84,7 +84,7 @@ getImage s = do
 
 outputImage :: FilePath -> String -> IO FilePath
 outputImage path tree = do
-  img <- getImage $ tree
+  img <- getImage tree
   writeFile path img
   pure path
 
