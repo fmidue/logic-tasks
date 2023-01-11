@@ -22,9 +22,10 @@ indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])
 
 bilingual :: OutputMonad m => String -> String -> LangM m
 bilingual e g =
-    translate $ do
-      german g
-      english e
+    paragraph $
+      translate $ do
+        german g
+        english e
 
 
 
