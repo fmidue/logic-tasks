@@ -10,7 +10,7 @@ import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate
 import Data.ByteString.Lazy (fromStrict)
 import Data.ByteString.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha256, showDigest)
-import System.Directory                 (doesFileExist)
+import System.Directory (doesFileExist)
 
 
 
@@ -39,8 +39,7 @@ focus = indent . code
 
 
 example :: OutputMonad m => String -> String -> String -> LangM m
-example e g correct =
-    paragraph $ indent $ do
+example e g correct = indent $ do
       instruct e g
       code correct
 

@@ -24,6 +24,8 @@ description LegalCNFInst{..} = do
       "Which of these formulae are not given in conjunctive normal form (cnf)?"
       "Welche dieser Formeln sind nicht in konjunktiver Normalform (cnf) angegeben?"
 
+    instruct " " " "
+
     instruct
       "Enter a list containing the indices of the non-cnf formulae to submit your answer."
       "Geben Sie eine Liste der Indices aller nicht cnf-Formeln als Ihre Lösung an."
