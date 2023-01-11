@@ -33,11 +33,10 @@ description SuperfluousBracketsInst{..} = do
       "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional formula."
       "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
 
-    instruct
+    example
       "For example, if (A \\/ B) is the given formula, then the solution is:"
       "Ist z.B. (A \\/ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
-
-    focus "A \\/ B"
+      "A \\/ B"
 
 
 

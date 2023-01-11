@@ -33,11 +33,10 @@ description SubTreeInst{..} = do
       "Remove bracket pairs which only serve to enclose entire Subformulae and do not add any additional brackets."
       "Entfernen Sie dabei Klammerpaare, die eine Subformel komplett umschließen und fügen Sie keine zusätzlichen Klammern hinzu."
 
-    instruct
+    example
       "For example, if ~(A \\/ B) is the given formula and one subformula is required, then the solution is:"
       "Ist z.B. ~(A \\/ B) die gegebene Formel und es wird eine Subformel gesucht, dann ist die folgende Lösung korrekt:"
-
-    focus "[ A \\/ B ]"
+      "[ A \\/ B ]"
 
 
 
