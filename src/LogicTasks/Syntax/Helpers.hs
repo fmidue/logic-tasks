@@ -40,7 +40,7 @@ focus = indent . code
 
 example :: OutputMonad m => String -> String -> String -> LangM m
 example e g correct =
-    indent $ do
+    paragraph $ indent $ do
       instruct e g
       code correct
 
