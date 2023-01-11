@@ -33,11 +33,6 @@ instruct e g = paragraph $ bilingual e g
 
 
 
-gap :: OutputMonad m => LangM m
-gap = paragraph $ bilingual " " " "
-
-
-
 focus :: OutputMonad m => String -> LangM m
 focus = indent . code
 

@@ -28,8 +28,6 @@ description LegalCNFInst{..} = do
       "Enter a list containing the indices of the non-cnf formulae to submit your answer."
       "Geben Sie eine Liste der Indices aller nicht cnf-Formeln als Ihre Lösung an."
 
-    gap
-
     example
       "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
       "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 keine cnf-Formeln, dann ist diese Lösung korrekt:"
