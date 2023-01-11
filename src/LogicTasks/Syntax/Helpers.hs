@@ -34,7 +34,7 @@ instruct e g = paragraph $ bilingual e g
 
 
 gap :: OutputMonad m => LangM m
-gap = paragraph $ text " "
+gap = paragraph $ bilingual " " " "
 
 
 
