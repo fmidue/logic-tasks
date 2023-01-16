@@ -85,7 +85,7 @@ partialGrade SubTreeInst{..} fs
 
 completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula] -> LangM m
 completeGrade inst sol
-    | not $ feedback inst $ sol = reject
+    | not $ feedback inst sol = reject
       "Your solution is not correct."
       "Ihre Abgabe ist nicht die korrekte Lösung"
     | otherwise = pure()

@@ -173,7 +173,7 @@ completeGrade PrologInst{..} sol =
 transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(PrologLiteral,Literal)])
 transform (pc1,pc2) = (clause1, clause2, applyPol)
   where
-    allPreds = toList (union (pliterals pc1) (pliterals pc2))
+    allPreds = toList (pliterals pc1 `union` pliterals pc2)
     noDups = map (\(PrologLiteral _ n f) -> PrologLiteral True n f) allPreds
     mapping = zip noDups ['A'..'Z']
 

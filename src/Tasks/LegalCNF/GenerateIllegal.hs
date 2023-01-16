@@ -66,7 +66,7 @@ genIllegalClauseShape ifFirstLayer allowArrowOperators ors = do
     then  if allowArrowOperators
           then oneof [ return (Not (legalShape Or ors))
                      , genIllegalOper (legalShape Or)
-                         (Equi : Impl : if ifFirstLayer then [] else [And]) ors
+                         (Equi : Impl : [And | not ifFirstLayer]) ors
                      ]
           else  if ifFirstLayer
                 then return (Not (legalShape Or ors))

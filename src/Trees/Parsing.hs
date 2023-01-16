@@ -94,5 +94,4 @@ parsePropForm = do
    case mOp of
      Nothing   -> pure form1
      (Just op) ->
-       do form2 <- parsePropForm
-          pure $ Assoc op form1 form2
+       do Assoc op form1 <$> parsePropForm
