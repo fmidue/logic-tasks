@@ -65,6 +65,8 @@ library:
     - Trees.Types
     - Trees.Parsing
     - Trees.Print
+    - Trees.Helpers
+    - Trees.Generate
     - Parsing
     - ParsingHelpers
     - Config

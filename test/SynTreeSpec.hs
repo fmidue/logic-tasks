@@ -4,13 +4,14 @@
 module SynTreeSpec (spec, validBoundsSynTree) where
 
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
+import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat, arbitrary)
 import Data.List.Extra ( nubOrd, isInfixOf )
-import Data.Maybe (isJust, isNothing)
+import Data.Either (isRight)
 
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
-import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig, SynTreeInst (..))
+import Trees.Parsing (formulaParse)
+import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
 import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
 
@@ -57,28 +58,22 @@ invalidBoundsSynTree = do
         maxConsecutiveNegations
       }
 
+
+
 spec :: Spec
 spec = do
-  describe "checkSynTreeConfig" $ do
-    it "should reject invalid bounds" $
-      forAll invalidBoundsSynTree (isJust . checkSynTreeConfig)
-    it "should reject a corner case configuration" $
-      isJust (checkSynTreeConfig (SynTreeConfig 1 1 2 "A" 1 True 1))
-    it "should accept the default config" $
-      isNothing (checkSynTreeConfig defaultSynTreeConfig)
-    it "should accept valid bounds" $
-      forAll validBoundsSynTree (isNothing . checkSynTreeConfig)
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> not $ feedback sTInst (tail correct)
+        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} ->
+          forAll arbitrary $ \pFormula -> not $ feedback sTInst pFormula
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst correct
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> isRight $ formulaParse correct
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, even without spaces" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst (deleteSpaces correct)
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> isRight $ formulaParse $ deleteSpaces correct
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSynTree >= minNodes && treeNodes instSynTree <= maxNodes

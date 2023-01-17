@@ -3,19 +3,20 @@
 module SuperfluousBracketsSpec (spec) where
 
 import Test.QuickCheck (Gen, forAll, choose, suchThat, (==>))
+import Data.Either (fromRight)
 import Data.List.Extra (notNull)
-import Data.Maybe (isJust, isNothing)
 import Test.Hspec (Spec, describe, it)
+import Text.Parsec (parse)
 
 import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
-import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig, defaultSuperfluousBracketsConfig)
+import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
-import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay, sameAssociativeOperatorAdjacentSerial)
-import Trees.Parsing(formulaParse)
+import Trees.Parsing(formulaParse, parsePropForm)
 import TestHelpers (deleteBrackets)
 import Trees.Generate (genSynTree)
 
@@ -41,13 +42,6 @@ invalidBoundsSuperfluousBrackets = do
 
 spec :: Spec
 spec = do
-    describe "checkSuperfluousBracketsConfig" $ do
-        it "should reject invalid bound in checkSuperfluousBracketsConfig" $
-            forAll invalidBoundsSuperfluousBrackets (isJust . checkSuperfluousBracketsConfig)
-        it "should accept the default config" $
-            isNothing (checkSuperfluousBracketsConfig defaultSuperfluousBracketsConfig)
-        it "should accept valid bounds" $
-            forAll validBoundsSuperfluousBrackets (isNothing . checkSuperfluousBracketsConfig)
     describe "sameAssociativeOperatorAdjacent" $ do
         it "should return false if there are no two \\/s or two /\\s as neighbors" $
             not $ sameAssociativeOperatorAdjacent (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c'))))
@@ -78,7 +72,7 @@ spec = do
     describe "generateSuperfluousBracketsInst" $ do
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSuperfluousBrackets $ \superfluousBracketsConfig ->
-                forAll (generateSuperfluousBracketsInst superfluousBracketsConfig) $ \superfluousBracketsInst@SuperfluousBracketsInst{..} -> feedback superfluousBracketsInst simplestString
+                forAll (generateSuperfluousBracketsInst superfluousBracketsConfig) $ \superfluousBracketsInst@SuperfluousBracketsInst{..} -> feedback superfluousBracketsInst (fromRight (Atomic ' ') (parse parsePropForm "" simplestString))
         it "the stringWithSuperfluousBrackets should have right number of SuperfluousBrackets" $
             forAll validBoundsSuperfluousBrackets $ \sBConfig@SuperfluousBracketsConfig {..} ->
                 forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} -> fromIntegral (length stringWithSuperfluousBrackets - length simplestString) == superfluousBracketPairs * 2

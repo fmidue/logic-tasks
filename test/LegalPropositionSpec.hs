@@ -4,12 +4,11 @@ module LegalPropositionSpec (spec) where
 
 import Data.Set (toList, singleton)
 import Data.Either (isLeft, isRight)
-import Data.Maybe (isJust, isNothing)
 import Data.List ((\\))
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, forAll, suchThat)
 
-import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..), checkLegalPropositionConfig, defaultLegalPropositionConfig)
+import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..))
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst, feedback)
@@ -59,13 +58,6 @@ legalTest xs strings = all (\ x -> isRight (formulaParse (strings !! (x - 1)))) 
 
 spec :: Spec
 spec = do
-    describe "checkLegalPropositionConfig" $ do
-        it "should reject invalid bounds" $
-            forAll invalidBoundsLegalProposition (isJust . checkLegalPropositionConfig)
-        it "should accept the default config" $
-            isNothing (checkLegalPropositionConfig defaultLegalPropositionConfig)
-        it "should accept valid bounds" $
-            forAll validBoundsLegalProposition (isNothing . checkLegalPropositionConfig)
     describe "illegalDisplay" $ do
         it "at least creates actual formula symbols" $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->

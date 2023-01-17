@@ -95,3 +95,4 @@ parsePropForm = do
      Nothing   -> pure form1
      (Just op) ->
        do Assoc op form1 <$> parsePropForm
+

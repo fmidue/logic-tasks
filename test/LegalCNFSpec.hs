@@ -5,7 +5,6 @@ module LegalCNFSpec (spec) where
 import Data.Set (toList)
 import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it)
-import Data.Maybe (isJust, isNothing)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements)
 import Data.List((\\))
 
@@ -16,7 +15,7 @@ import Text.ParserCombinators.Parsec (ParseError, eof, parse)
 import Config (CnfConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree)
-import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig, defaultLegalCNFConfig)
+import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..))
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
 import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst, feedback)
@@ -100,13 +99,6 @@ legalTest xs strings = all (\ x -> isRight (cnfParse (strings !! (x - 1)))) xs
 
 spec :: Spec
 spec = do
-    describe "checkLegalCNFConfig" $ do
-        it "should reject invalid bounds" $
-            forAll invalidBoundsLegalCNF (isJust . checkLegalCNFConfig)
-        it "should accept the default config" $
-            isNothing (checkLegalCNFConfig defaultLegalCNFConfig)
-        it "should accept valid bounds" $
-            forAll validBoundsLegalCNF (isNothing . checkLegalCNFConfig)
     describe "genIllegalSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->

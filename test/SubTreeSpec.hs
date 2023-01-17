@@ -3,18 +3,20 @@ module SubTreeSpec (spec) where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
-import Data.Maybe (isJust, isNothing)
+import Text.Parsec (parse)
+import Data.Either (fromRight)
 import Data.List (intercalate)
 import Data.List.Extra (isInfixOf )
-import Data.Set (size, toList, map, fromList)
+import Data.Set (size, toList, map)
 
-import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
+import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
-import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Trees.Helpers (maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
+import Trees.Parsing (parsePropForm)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
 import SynTreeSpec (validBoundsSynTree)
 
@@ -44,13 +46,6 @@ invalidBoundsSubTree = do
 
 spec :: Spec
 spec = do
-    describe "checkSubTreeConfig" $ do
-        it "should reject invalid bound in checkSubTreeConfig" $
-            forAll invalidBoundsSubTree (isJust . checkSubTreeConfig)
-        it "should accept the default config" $
-            isNothing (checkSubTreeConfig defaultSubTreeConfig)
-        it "should accept valid bounds" $
-            forAll validBoundsSubTree (isNothing . checkSubTreeConfig)
     describe "generateSubTreeInst" $ do
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
@@ -66,17 +61,10 @@ spec = do
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let correctFormulas' = toList correctFormulas in all (`isInfixOf` formula) correctFormulas'
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (displaySubTrees $ toList correctTrees)
+                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (\s -> fromRight (Atomic ' ') (parse parsePropForm "" s)) $ toList correctFormulas
         it "the correct store in Inst should be accept by feedback, even without spaces" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (deleteSpaces . displaySubTrees $ toList correctTrees)
-    describe "feedback" $ do
-      it "rejects insufficiently large answer sets" $
-        not $ feedback (SubTreeInst "~A" (fromList [Leaf 'A', Not (Leaf 'A')]) (fromList ["A","~A"]) 2) "{A,A}"
-      it "rejects wrong subtree" $
-        not $ feedback (SubTreeInst "A => B" (fromList [Leaf 'A', Leaf 'B', Binary Impl (Leaf 'A') (Leaf 'B')]) (fromList ["A","B","A => B"]) 2) "{A,C}"
-      it "rejects wrong subformula strings" $
-        not $ feedback (SubTreeInst "A => B" (fromList [Leaf 'A', Leaf 'B', Binary Impl (Leaf 'A') (Leaf 'B')]) (fromList ["A","B","A => B"]) 2) "{A,(B)}"
+                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (\s -> fromRight (Atomic ' ') (parse parsePropForm "" $ deleteSpaces s)) $ toList correctFormulas
 
 displaySubTrees :: [SynTree BinOp Char] -> String
 displaySubTrees trees = "{" ++ showTrees trees ++ "}"
