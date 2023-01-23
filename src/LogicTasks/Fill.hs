@@ -119,39 +119,44 @@ start = []
 
 partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
-  preventWithHint (solLen > acLen)
+  preventWithHint (solLen > tableLen)
     (translate $ do
       german "Lösung überschreitet nicht maximale Anzahl Werte?"
       english "Solution does not exceed maximum possible number of values?"
     )
     (translate $ do
-      german $ "Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
-      english $ "Solution contains too many values. Please remove " ++ eng ++ " to proceed."
+      german $ "Lösung enthält zu viele Werte. Es " ++ gerLong ++" entfernt werden."
+      english $ "Solution contains too many values. Please remove " ++ engLong ++ " to proceed."
     )
 
-  preventWithHint (acLen > solLen)
+  preventWithHint (missingLen > solLen)
     (translate $ do
       german "Lösung hat genügend Werte?."
       english "Solution contains enough values?."
     )
     (translate $ do
-      german $ "Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
-      english $ "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
+      german $ "Lösung enthält zu wenige Werte. Es " ++ gerShort ++ " hinzugefügt werden."
+      english $ "Solution does not contain enough values. Please add " ++ engShort ++ " to proceed."
     )
   where
-    acLen = length missing
+    tableLen = length $ readEntries $ getTable cnf
+    missingLen = length missing
     solLen = length sol
-    distance = abs (solLen - acLen)
-    display = show distance
-    (ger, eng) = if distance == 1
-      then ("muss " ++ display ++ " Wert", display ++ " value")
-      else ("müssen " ++ display ++ " Werte", display ++ " values")
+    diffToTable = abs (solLen - tableLen)
+    diffToMissing = abs (solLen - missingLen)
+    (gerLong,engLong) = gereng diffToTable
+    (gerShort,engShort) = gereng diffToMissing
+    gereng diff = if diff == 1
+        then ("muss " ++ display ++ " Wert", display ++ " value")
+        else ("müssen " ++ display ++ " Werte", display ++ " values")
+      where
+        display = show diff
 
 
 
 completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 completeGrade FillInst{..} sol = do
-  preventWithHint (not $ null diff)
+  preventWithHint (not (null diffShort || null diffLong))
     (translate $ do
       german "Lösung ist korrekt?"
       english "Solution is korrekt?"
@@ -162,8 +167,11 @@ completeGrade FillInst{..} sol = do
     )
   where
     table = getTable cnf
-    correct = [ fromJust (readEntries table !! i) | i <- map (\x -> x-1) missing]
+    allEntries = map fromJust $ readEntries table
+    correctShort = [allEntries !! i | i <- map (\x -> x-1) missing]
     boolSol = map truth sol
-    zipped = zip3 boolSol correct [1..]
-    (_,diff) = pairwiseCheck zipped
-    display = show (length diff)
+    zippedShort = zip3 boolSol correctShort [1..]
+    zippedLong = zip3 boolSol allEntries [1..]
+    (_,diffShort) = pairwiseCheck zippedShort
+    (_,diffLong) = pairwiseCheck zippedLong
+    display = show (min (length diffShort) (length diffLong))
