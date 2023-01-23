@@ -10,8 +10,8 @@ import Test.QuickCheck(Gen)
 import Config ( BaseConfig(..), CnfConfig(..), FillConfig(..), FillInst(..))
 import Formula (hasEmptyClause, isEmptyCnf)
 import Table (gapsAt, readEntries)
-import Types (TruthValue, atomics, genCnf, getTable, truth)
-import Util (availableLetter, checkCnfConf, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
+import Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
+import Util (checkCnfConf, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 
 
 
@@ -36,7 +36,7 @@ description FillInst{..} = do
     translate $ do
       german "Betrachten Sie die folgende Formel:"
       english "Consider the following formula:"
-    indent $ code $ availableLetter cnf : " = " ++ show cnf
+    indent $ code $ availableLetter (literals cnf) : " = " ++ show cnf
 
   paragraph $ do
     translate $ do

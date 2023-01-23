@@ -11,6 +11,7 @@ module Types
        , Con(..)
        , Cnf(..)
        , Dnf(..)
+       , availableLetter
        , getClauses
        , getConjunctions
        , Table(..)
@@ -35,7 +36,7 @@ module Types
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
-import Data.List(intercalate, delete, nub, transpose)
+import Data.List(intercalate, delete, nub, transpose, (\\))
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
@@ -57,6 +58,10 @@ class Formula a where
     atomics :: a -> [Literal]
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
+
+
+
+
 
 
 ---------------------------------------------------
@@ -451,7 +456,7 @@ instance Show Table where
         formatLine x y =
             foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "-" (show . fromEnum) y) x ++ "\n"
 
-        header = concat [show x ++ " | " | x <- lits] ++ "F"
+        header = concat [show x ++ " | " | x <- lits] ++ show (availableLetter (getLiterals t))
         rows = concat [formatLine x y | (x,y) <- unformattedRows]
           where
 
@@ -502,6 +507,8 @@ getTable f = Table lits values
     values = map (`evaluate` f) $ possibleAllocations lits
 
 
+availableLetter :: [Literal] -> Char
+availableLetter xs = head $ (['F'..'Z'] ++ "*") \\ map letter xs
 
 
 -------------------------------------------------------------------

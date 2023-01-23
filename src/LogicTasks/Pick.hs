@@ -9,9 +9,9 @@ import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
 import Formula (mkCnf, xorSat)
-import Types (atomics, genCnf, getTable, letter)
+import Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Printing (showIndexedList)
-import Util (availableLetter, checkCnfConf, tryGen)
+import Util (checkCnfConf, tryGen)
 
 
 
@@ -38,7 +38,7 @@ description PickInst{..} = do
       translate $ do
         german "Betrachten Sie die folgende Formel:"
         english "Consider the following formula:"
-      indent $ code $ availableLetter sTable : " = " ++ show sTable
+      indent $ code $ availableLetter (literals sTable) : " = " ++ show sTable
 
     paragraph $ do
       translate $ do
