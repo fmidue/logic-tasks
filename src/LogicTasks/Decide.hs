@@ -12,7 +12,7 @@ import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
 import Formula (isEmptyCnf, hasEmptyClause)
 import Table (flipAt, readEntries)
 import Types (atomics, genCnf, getTable)
-import Util (checkCnfConf, isOutside, preventWithHint, remove)
+import Util (availableLetter, checkCnfConf, isOutside, preventWithHint, remove)
 
 
 
@@ -36,7 +36,7 @@ description DecideInst{..} = do
     translate $ do
       english "Consider the following formula:"
       german "Betrachten Sie die folgende Formel:"
-    indent $ code $ "F = " ++ show cnf
+    indent $ code $ availableLetter cnf : " = " ++ show cnf
 
   paragraph $ do
     translate $ do

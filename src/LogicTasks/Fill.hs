@@ -11,7 +11,7 @@ import Config ( BaseConfig(..), CnfConfig(..), FillConfig(..), FillInst(..))
 import Formula (hasEmptyClause, isEmptyCnf)
 import Table (gapsAt, readEntries)
 import Types (TruthValue, atomics, genCnf, getTable, truth)
-import Util (checkCnfConf, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
+import Util (availableLetter, checkCnfConf, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 
 
 
@@ -36,7 +36,7 @@ description FillInst{..} = do
     translate $ do
       german "Betrachten Sie die folgende Formel:"
       english "Consider the following formula:"
-    indent $ code $ "F = " ++ show cnf
+    indent $ code $ availableLetter cnf : " = " ++ show cnf
 
   paragraph $ do
     translate $ do

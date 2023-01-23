@@ -5,13 +5,17 @@ module Util where
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate, yesNo)
 import Control.Monad.State (put, get, lift, evalStateT)
-import Data.List (delete)
+import Data.List (delete, (\\))
 import Test.QuickCheck(Gen, elements)
 
 import Config (BaseConfig(..), CnfConfig(..))
-import Types (Formula, getTable)
+import Types (Cnf, Formula, getTable, letter, literals)
 import Table (readEntries)
 
+
+
+availableLetter :: Cnf -> Char
+availableLetter cnf = head $ (['F'..'Z'] ++ "*") \\ map letter (literals cnf)
 
 
 
