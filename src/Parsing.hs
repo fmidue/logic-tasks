@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -fno-warn-missing-methods #-}
 
 module Parsing where
 
@@ -216,10 +215,6 @@ instance Parse PrologClause where
        spaces
        char '}'
        pure $ mkPrologClause []
-
-
-instance Parse Table
-
 
 
 instance Parse PickInst where
