@@ -138,6 +138,16 @@ partialGrade FillInst{..} sol = do
       german $ "Lösung enthält zu wenige Werte. Es " ++ gerShort ++ " hinzugefügt werden."
       english $ "Solution does not contain enough values. Please add " ++ engShort ++ " to proceed."
     )
+
+  preventWithHint (not (solLen == tableLen || solLen == missingLen))
+    (translate $ do
+      german "Lösung hat korrekte Länge?"
+      english "Solution has correct length?"
+    )
+    (translate $ do
+      german $ "Die Lösung muss genau "  ++ show missingLen ++ " Lücken enthalten."
+      english $ "The solution must contain exactly " ++ show missingLen ++ " gaps."
+    )
   where
     tableLen = length $ readEntries $ getTable cnf
     missingLen = length missing
@@ -165,6 +175,7 @@ completeGrade FillInst{..} sol = do
       german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
       english $ "Your solution contains " ++ display ++ " mistakes."
     )
+
   where
     table = getTable cnf
     allEntries = map fromJust $ readEntries table
