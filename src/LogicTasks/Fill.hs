@@ -186,4 +186,4 @@ completeGrade FillInst{..} sol = do
     zippedLong = zip3 boolSol allEntries [1..]
     (_,diffShort) = pairwiseCheck zippedShort
     (_,diffLong) = pairwiseCheck zippedLong
-    display = show (min (length diffShort) (length diffLong))
+    display = show (max (length diffShort) (length diffLong))
