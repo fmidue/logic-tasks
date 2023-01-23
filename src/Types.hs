@@ -456,7 +456,7 @@ instance Show Table where
         formatLine x y =
             foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "-" (show . fromEnum) y) x ++ "\n"
 
-        header = concat [show x ++ " | " | x <- lits] ++ show (availableLetter (getLiterals t))
+        header = concat [show x ++ " | " | x <- lits] ++ [availableLetter $ getLiterals t]
         rows = concat [formatLine x y | (x,y) <- unformattedRows]
           where
 
