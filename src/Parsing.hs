@@ -4,6 +4,7 @@ module Parsing where
 
 import Config
 import Formula
+import ParsingHelpers (lexeme)
 import Types
 
 import Control.Monad (void)
@@ -13,7 +14,6 @@ import Text.ParserCombinators.Parsec
 
 
 instance Parse ResStep where
-
   parser = do
     withSpaces '('
     cl1 <- parseEither resClause parseNum
@@ -28,11 +28,11 @@ instance Parse ResStep where
    where
     braces = between (withSpaces '{') (withSpaces '}')
 
-    indexParse = withSpaces '=' >> trailSpaces parseNum
+    indexParse = withSpaces '=' >> lexeme parseNum
 
     resClause = mkClause <$> braces (parser `sepBy` char ',')
 
-    parseEither x y = trailSpaces ((Left <$> try x) <|> (Right <$> y))
+    parseEither x y = lexeme ((Left <$> try x) <|> (Right <$> y))
 
     parseNum = do
       i <- many1 digit
@@ -40,22 +40,17 @@ instance Parse ResStep where
 
 
 
-
-trailSpaces :: Parser a -> Parser a
-trailSpaces p = p <* spaces
-
-
 withSpaces :: Char -> Parser Char
-withSpaces = trailSpaces . char
+withSpaces = lexeme . char
 
 
 parseOr :: Parser ()
-parseOr = (trailSpaces (void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
+parseOr = (lexeme (void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
 
 
 
 parseAnd :: Parser ()
-parseAnd = (trailSpaces (void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
+parseAnd = (lexeme (void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
 
 
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
@@ -69,7 +64,7 @@ class Parse a where
 
 
 instance Parse a => Parse [a] where
-  parser = (trailSpaces listParse <?> "List")
+  parser = (lexeme listParse <?> "List")
            <|> fail "Could not parse a list of values: The elements of a list are enclosed by square brackets '[ ]' and separated by commas."
     where
       listParse = do
@@ -81,7 +76,7 @@ instance Parse a => Parse [a] where
 
 
 instance Parse Number where
-  parser = (trailSpaces numParse <?> "Number") <|> fail "Could not parse a number"
+  parser = (lexeme numParse <?> "Number") <|> fail "Could not parse a number"
     where numParse = do
             result <- optionMaybe $ many1 digit
             pure $ Number $ fmap read result
@@ -90,7 +85,7 @@ instance Parse Number where
 
 
 instance Parse TruthValue where
-  parser = trailSpaces truthParse <?> "Truth Value"
+  parser = lexeme truthParse <?> "Truth Value"
 
     where truthParse = do
             s <- getInput
@@ -123,7 +118,7 @@ instance Parse TruthValue where
 
 
 instance Parse Literal where
-  parser = (trailSpaces litParse <?> "Literal")
+  parser = (lexeme litParse <?> "Literal")
            <|> fail "Could not parse a literal: Literals are denoted by capital letters, negation is denoted by a '~'."
     where
       litParse = do
@@ -136,11 +131,11 @@ instance Parse Literal where
 
 
 instance Parse Clause where
- parser = (trailSpaces clauseParse <?> "Clause")
+ parser = (lexeme clauseParse <?> "Clause")
           <|> fail "Could not parse a clause: Clauses are composed out of literals and the 'or operator' (\\/)."
    where
      clauseParse = do
-       braces <- trailSpaces $ optionMaybe $ char '('
+       braces <- lexeme $ optionMaybe $ char '('
        lits <- sepBy parser parseOr
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
@@ -149,11 +144,11 @@ instance Parse Clause where
 
 
 instance Parse Con where
- parser = (trailSpaces conParse <?> "Conjunction")
+ parser = (lexeme conParse <?> "Conjunction")
           <|> fail "Could not parse a conjunction: Conjunctions are composed out of literals and the 'and operator' (/\\)."
    where
      conParse = do
-       braces <- trailSpaces $ optionMaybe $ char '('
+       braces <- lexeme $ optionMaybe $ char '('
        lits <- sepBy parser parseAnd
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
@@ -162,7 +157,7 @@ instance Parse Con where
 
 
 instance Parse Cnf where
-  parser = (trailSpaces parseCnf <?> "CNF")
+  parser = (lexeme parseCnf <?> "CNF")
            <|> fail "Could not parse a CNF: CNFs are composed out of clauses and the 'and operator' (/\\)."
     where
       parseCnf = do
@@ -172,7 +167,7 @@ instance Parse Cnf where
 
 
 instance Parse Dnf where
-  parser = (trailSpaces parseDnf <?> "DNF")
+  parser = (lexeme parseDnf <?> "DNF")
            <|> fail "Could not parse a DNF: DNFs are composed out of clauses and the 'or operator' (\\/)."
     where
       parseDnf = do
@@ -182,15 +177,15 @@ instance Parse Dnf where
 
 
 instance Parse PrologLiteral where
-  parser = (trailSpaces litParse <?> "Literal")
+  parser = (lexeme litParse <?> "Literal")
            <|> fail "Could not parse a literal."
     where
       litParse = do
-        pol <- trailSpaces $ optionMaybe $ string "not("
+        pol <- lexeme $ optionMaybe $ string "not("
         ident <- strParse
-        trailSpaces $ char '('
-        facts <- trailSpaces $ sepBy (trailSpaces strParse) (trailSpaces $ char ',')
-        trailSpaces $ char ')'
+        lexeme $ char '('
+        facts <- lexeme $ sepBy (lexeme strParse) (lexeme $ char ',')
+        lexeme $ char ')'
         case pol of Nothing -> pure (PrologLiteral True ident facts)
                     Just _  -> do char ')'
                                   pure (PrologLiteral False ident facts)
@@ -201,11 +196,11 @@ instance Parse PrologLiteral where
 
 
 instance Parse PrologClause where
- parser = (trailSpaces (emptyParse <|> clauseParse) <?> "Clause")
+ parser = (lexeme (emptyParse <|> clauseParse) <?> "Clause")
           <|> fail "Could not parse a clause: Clauses are composed out of terms and the 'or operator' (\\/)."
    where
      clauseParse = do
-       braces <- trailSpaces $ optionMaybe $ char '('
+       braces <- lexeme $ optionMaybe $ char '('
        ts <- sepBy parser parseOr
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
@@ -218,14 +213,14 @@ instance Parse PrologClause where
 
 
 instance Parse PickInst where
-  parser = trailSpaces instParse
+  parser = lexeme instParse
     where
       instParse = do
         string "PickInst("
         cs <- parser
         withSpaces ','
-        index <- trailSpaces $ many1 digit
-        text <- optionMaybe $ trailSpaces bonusText
+        index <- lexeme $ many1 digit
+        text <- optionMaybe $ lexeme bonusText
         char ')'
         pure $ PickInst cs (read index) text
           where
