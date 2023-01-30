@@ -13,10 +13,7 @@ module Formula
        , isEmptyDnf
        , hasEmptyCon
        , xorSat
-       , orSat
        , andSat
-       , implSat
-       , equivSat
        , sat
        , transformProlog
        , flipPol
@@ -113,19 +110,6 @@ xorSat = logOpSat (Sat.:++:)
 andSat :: (Formula a, Formula b) => a -> b -> Bool
 andSat = logOpSat (Sat.:&&:)
 
-
--- | (f1 ``orSat`` f2) indicates whether (f1 \\/ f2) is satisfiable
-orSat :: (Formula a, Formula b) => a -> b -> Bool
-orSat = logOpSat (Sat.:||:)
-
-
--- | (f1 ``implSat`` f2) indicates whether (f1 -> f2) is satisfiable
-implSat :: (Formula a, Formula b) => a -> b -> Bool
-implSat = logOpSat (Sat.:->:)
-
--- | (f1 ``andSat`` f2) indicates whether (f1 \<-> f2) is satisfiable
-equivSat :: (Formula a, Formula b) => a -> b -> Bool
-equivSat = logOpSat (Sat.:<->:)
 
 
 -- | Indicates whether the given formula is satisfiable
