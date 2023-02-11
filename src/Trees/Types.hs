@@ -14,7 +14,6 @@ module Trees.Types
 
 
 import GHC.Generics
-import Test.QuickCheck
 
 
 
@@ -58,12 +57,3 @@ instance Show (PropFormula Char) where
   show (Neg f) = showOperatorNot ++ show f
   show (Brackets f) = '(' : show f ++ ")"
   show (Assoc o f1 f2) = show f1 ++ " " ++ showOperator o ++ " " ++ show f2
-
-
-instance Arbitrary (PropFormula Char) where
-   arbitrary = sized pf
-     where
-       pf :: Int -> Gen (PropFormula Char)
-       pf 0 = Atomic <$> elements ['A'..'Z']
-       pf n = oneof [Neg <$> next, Brackets <$> next, Assoc <$> elements allBinaryOperators <*> next <*> next]
-         where next = pf (n-1)
