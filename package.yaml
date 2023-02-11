@@ -29,14 +29,14 @@ library:
     - LogicTasks.Table
     - LogicTasks.Resolution
     - LogicTasks.Config
-    - LogicTasks.Fill
-    - LogicTasks.Pick
-    - LogicTasks.Decide
-    - LogicTasks.Max
-    - LogicTasks.Min
-    - LogicTasks.Step
-    - LogicTasks.Prolog
-    - LogicTasks.Resolve
+    - LogicTasks.Semantics.Fill
+    - LogicTasks.Semantics.Pick
+    - LogicTasks.Semantics.Decide
+    - LogicTasks.Semantics.Max
+    - LogicTasks.Semantics.Min
+    - LogicTasks.Semantics.Step
+    - LogicTasks.Semantics.Prolog
+    - LogicTasks.Semantics.Resolve
     - LogicTasks.Printing
     - LogicTasks.Parsing
     - LogicTasks.Util

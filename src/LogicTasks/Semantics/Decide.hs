@@ -1,6 +1,6 @@
 {-# language RecordWildCards #-}
 
-module LogicTasks.Decide where
+module LogicTasks.Semantics.Decide where
 
 
 import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)

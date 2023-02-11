@@ -1,6 +1,6 @@
 {-# language RecordWildCards #-}
 
-module LogicTasks.Resolve where
+module LogicTasks.Semantics.Resolve where
 
 
 import Data.Set (fromList, member, toList, unions)

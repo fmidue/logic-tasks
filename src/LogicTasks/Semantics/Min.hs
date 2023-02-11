@@ -1,6 +1,6 @@
 {-# language RecordWildCards #-}
 
-module LogicTasks.Max where
+module LogicTasks.Semantics.Min where
 
 
 import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
@@ -8,34 +8,34 @@ import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
-import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
-import Formula (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
+import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
 import Table (readEntries)
-import Types (Cnf, Literal(..), amount, atomics, genCnf, getClauses, getTable)
+import Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
+import Formula (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
 import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 
 
 
-genMaxInst :: MinMaxConfig -> Gen MaxInst
-genMaxInst MinMaxConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = MaxInst <$> cnfInRange <*> pure extraText
-  where
-    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
-    cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
+genMinInst :: MinMaxConfig -> Gen MinInst
+genMinInst MinMaxConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = MinInst <$> dnfInRange <*> pure extraText
+   where
+     getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+     dnfInRange = tryGen getDnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
 
 
 
-description :: OutputMonad m => MaxInst -> LangM m
-description MaxInst{..} = do
+description :: OutputMonad m => MinInst -> LangM m
+description MinInst{..} = do
   paragraph $ do
     translate $ do
       german "Betrachten Sie die folgende Wahrheitstafel:"
       english "Consider the following truth table:"
-    indent $ code $ show $ getTable cnf
+    indent $ code $ show $ getTable dnf
 
   paragraph $ translate $ do
-    german "Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
-    english "Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
+    german "Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
+    english "Provide a formula in disjunctive normal form, that corresponds to the table. Use minterms to do this."
 
   paragraph $ translate $ do
     german "Reichen Sie ihre Lösung als ascii-basierte Formel ein."
@@ -65,20 +65,20 @@ description MaxInst{..} = do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    code $ show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
+    code $ show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
 
   paragraph $ text (fromMaybe "" addText)
 
 
 
-verifyStatic :: OutputMonad m => MaxInst -> LangM m
-verifyStatic MaxInst{..}
-    | isEmptyCnf cnf || hasEmptyClause cnf =
+verifyStatic :: OutputMonad m => MinInst -> LangM m
+verifyStatic MinInst{..}
+    | isEmptyDnf dnf || hasEmptyCon dnf =
         refuse $ indent $ translate $ do
           german "Geben Sie bitte eine nicht-leere Formel an."
           english "Please give a non empty formula."
 
-    | otherwise = pure()
+    | otherwise = pure ()
 
 
 
@@ -102,13 +102,13 @@ verifyQuiz MinMaxConfig{..}
 
 
 
-start :: Cnf
-start = mkCnf []
+start :: Dnf
+start = mkDnf []
 
 
 
-partialGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-partialGrade MaxInst{..} sol = do
+partialGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
+partialGrade MinInst{..} sol = do
   preventWithHint (not $ null extra)
     (translate $ do
       german "Angegebene Literale kommen in Aufgabe vor?"
@@ -135,10 +135,10 @@ partialGrade MaxInst{..} sol = do
       itemizeM $ map (text . show) missing
     )
 
-  prevent (not $ all (\c -> amount c == length corLits) $ getClauses sol) $
+  prevent (not $ all (\c -> amount c == length corLits) $ getConjunctions sol) $
     translate $ do
-      german "Alle Klauseln sind Maxterme?"
-      english "All clauses are maxterms?"
+      german "Alle Konjunktionen sind Minterme?"
+      english "All conjunctions are minterms?"
 
   preventWithHint (solLen < corrLen)
     (translate $ do
@@ -148,8 +148,8 @@ partialGrade MaxInst{..} sol = do
 
     (paragraph $ do
       translate $ do
-        german "Die angegebene Formel enthält zu wenige Maxterme. Fügen sie "
-        english "The formula does not contain enough maxterms. Add "
+        german "Die angegebene Formel enthält zu wenige Minterme. Fügen sie "
+        english "The formula does not contain enough minterms. Add "
       text diff
       translate $ do
         german " hinzu!"
@@ -158,36 +158,35 @@ partialGrade MaxInst{..} sol = do
 
   preventWithHint (solLen > corrLen)
     (translate $ do
-      german "Nicht zu viele Maxterme in Lösung?"
-      english "Not too many maxterms in solution?"
+      german "Nicht zu viele Minterme in Lösung?"
+      english "Not too many minterms in solution?"
     )
 
     (paragraph $ do
       translate $ do
-        german " Die angegebene Formel enthält zu viele Maxterme. Entfernen sie "
-        english "The formula contains too many maxterms. Remove "
+        german " Die angegebene Formel enthält zu viele Minterme. Entfernen sie "
+        english "The formula contains too many minterms. Remove "
       text $ diff ++ "!"
     )
   where
     solLits = atomics sol
-    corLits = atomics cnf
+    corLits = atomics dnf
     extra = solLits \\ corLits
     missing = corLits \\ solLits
-    table = getTable cnf
-    corrLen = length $ filter (== Just False) (readEntries table)
+    table = getTable dnf
+    corrLen = length $ filter (== Just True) (readEntries table)
     solLen = amount sol
     diff = show $ abs (solLen - corrLen)
 
 
 
-completeGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-completeGrade MaxInst{..} sol =
+completeGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
+completeGrade MinInst{..} sol = do
   preventWithHint (not $ null diff)
     (translate $ do
-       german "Lösung liefert korrekte Wahrheitstabelle?"
-       english "Solution gives correct truth table?"
+      german "Lösung liefert korrekte Wahrheitstabelle?"
+      english "Solution gives correct truth table?"
     )
-
     (paragraph $ do
       translate $ do
         german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
@@ -196,4 +195,4 @@ completeGrade MaxInst{..} sol =
     )
   where
     solTable = getTable sol
-    (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable cnf) [1..])
+    (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable dnf) [1..])

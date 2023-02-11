@@ -1,6 +1,6 @@
 {-# language RecordWildCards #-}
 
-module LogicTasks.Prolog where
+module LogicTasks.Semantics.Prolog where
 
 
 import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
