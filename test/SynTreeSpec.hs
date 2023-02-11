@@ -4,15 +4,15 @@
 module SynTreeSpec (spec, validBoundsSynTree) where
 
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat, arbitrary)
-import Data.List.Extra ( nubOrd, isInfixOf )
+import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
+import Data.List.Extra (nubOrd, isInfixOf)
 
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
-import Trees.Types (PropFormula)
+import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
 import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
-import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
+import Tasks.SynTree.Quiz (generateSynTreeInst)
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
@@ -64,15 +64,14 @@ spec = do
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} ->
-          forAll (arbitrary :: Gen (PropFormula Char)) $ \pFormula -> not $ feedback sTInst (show pFormula)
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> not $ formulaParse (tail correct) == Right tree
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst correct
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right tree
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, even without spaces" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst (deleteSpaces correct)
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse (deleteSpaces correct) == Right tree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes tree >= minNodes && treeNodes tree <= maxNodes
