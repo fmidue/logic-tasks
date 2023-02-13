@@ -7,7 +7,11 @@ import Control.Monad.Output (LangM, OutputMonad(..))
 import Data.List (nub, sort)
 
 import LogicTasks.Syntax.Helpers
-import Tasks.SuperfluousBrackets.Config (checkSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
+import Tasks.SuperfluousBrackets.Config (
+    checkSuperfluousBracketsConfig
+  , SuperfluousBracketsConfig(..)
+  , SuperfluousBracketsInst(..)
+  )
 import Tasks.SuperfluousBrackets.Quiz (feedback)
 import Trees.Helpers
 import Trees.Types
@@ -24,14 +28,18 @@ description SuperfluousBracketsInst{..} = do
     focus stringWithSuperfluousBrackets
 
     instruct
-      "Since /\\ and \\/ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
-      "Aufgrund der Assoziativität von /\\ und \\/ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
+      ("Since /\\ and \\/ are associative, it is not necessary to use brackets when combining three " ++
+       "or more atoms with the same operator, for example in:")
+      ("Aufgrund der Assoziativität von /\\ und \\/ müssen Formeln mit drei oder mehr atomaren Aussagen " ++
+       "und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:")
 
     focus "A /\\ B /\\ C"
 
     instruct
-      "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
-      "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
+      ("Remove all unnecessary pairs of brackets in the given formula. " ++
+       "Give your answer as a propositional logic formula.")
+      ("Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. " ++
+       "Geben Sie die Lösung in Form einer Aussagenlogischen Formel an.")
 
     example
       "For example, if (A \\/ B) is the given formula, then the solution is:"

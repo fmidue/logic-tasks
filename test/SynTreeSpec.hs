@@ -4,15 +4,15 @@
 module SynTreeSpec (spec, validBoundsSynTree) where
 
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat, arbitrary)
-import Data.List.Extra ( nubOrd, isInfixOf )
+import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
+import Data.List.Extra (nubOrd, isInfixOf)
 
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
-import Trees.Types (PropFormula)
+import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
 import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
-import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
+import Tasks.SynTree.Quiz (generateSynTreeInst)
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
@@ -24,7 +24,8 @@ validBoundsSynTree = do
   let maxNodes'' = maxNodes' - 1
       maxConsecutiveNegations' = maxConsecutiveNegations + 2
       (result, rest) = maxNodes'' `divMod` maxConsecutiveNegations'
-  maxDepth <- choose (minDepthForNodes minNodes', 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest)
+  maxDepth <- choose
+    (minDepthForNodes minNodes', 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest)
   let maxNodes = min maxNodes' (maxNodesForDepth maxDepth)
   useChars <- choose (1, maxLeavesForNodes maxNodes)
   let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
@@ -64,24 +65,27 @@ spec = do
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} ->
-          forAll (arbitrary :: Gen (PropFormula Char)) $ \pFormula -> not $ feedback sTInst (show pFormula)
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse (tail correct) /= Right tree
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst correct
-    it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, even without spaces" $
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right tree
+    it ("should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, " ++
+        "even without spaces") $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst (deleteSpaces correct)
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse (deleteSpaces correct) == Right tree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes tree >= minNodes && treeNodes tree <= maxNodes
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->
+          treeNodes tree >= minNodes && treeNodes tree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> fromIntegral (length (nubOrd (collectLeaves tree))) >= atLeastOccurring
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->
+          fromIntegral (length (nubOrd (collectLeaves tree))) >= atLeastOccurring
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->  not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->
+          not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))

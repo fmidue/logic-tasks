@@ -25,13 +25,19 @@ genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring allow
     if maxConsecutiveNegations /= 0
         then do
         nodes <- choose (minNodes, maxNodes)
-        sample <- syntaxShape nodes maxDepth allowArrowOperators True `suchThat` \synTree -> (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) && consecutiveNegations synTree <= maxConsecutiveNegations
-        usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
+        sample <- syntaxShape nodes maxDepth allowArrowOperators True
+          `suchThat` \synTree ->
+            (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) &&
+            consecutiveNegations synTree <= maxConsecutiveNegations
+        usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
+          fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
         else do
         nodes <- choose (minNodes, maxNodes) `suchThat` odd
-        sample <- syntaxShape nodes maxDepth allowArrowOperators False `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
-        usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
+        sample <- syntaxShape nodes maxDepth allowArrowOperators False
+          `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
+        usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
+          fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
 
 syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())
@@ -42,16 +48,25 @@ syntaxShape nodes maxDepth allowArrowOperators allowNegation
     | maxNodesForDepth (maxDepth - 1) < nodes - 1 = oneof binaryOper
     | otherwise = oneof $ negativeForm : binaryOper
     where
-        binaryOper = map (binaryOperator nodes maxDepth allowArrowOperators allowNegation . Binary) $ chooseList allowArrowOperators
+        binaryOper = map (binaryOperator nodes maxDepth allowArrowOperators allowNegation . Binary) $
+          chooseList allowArrowOperators
         negativeForm = negativeFormula nodes maxDepth allowArrowOperators
 
-binaryOperator :: Integer -> Integer -> Bool -> Bool -> (SynTree BinOp () -> SynTree BinOp () -> SynTree BinOp ()) -> Gen (SynTree BinOp ())
+binaryOperator
+    :: Integer
+    -> Integer
+    -> Bool -> Bool
+    -> (SynTree BinOp ()
+    -> SynTree BinOp ()
+    -> SynTree BinOp ())
+    -> Gen (SynTree BinOp ())
 binaryOperator nodes maxDepth allowArrowOperators allowNegation operator =
     let minNodesPerSide = max 1 (restNodes - maxNodesForDepth newMaxDepth)
         restNodes = nodes - 1
         newMaxDepth = maxDepth - 1
     in  do
-        leftNodes <- choose (minNodesPerSide , restNodes - minNodesPerSide) `suchThat` \leftNodes -> allowNegation || odd leftNodes
+        leftNodes <- choose (minNodesPerSide , restNodes - minNodesPerSide)
+          `suchThat` \leftNodes -> allowNegation || odd leftNodes
         leftTree <- syntaxShape leftNodes newMaxDepth allowArrowOperators allowNegation
         rightTree <- syntaxShape (restNodes - leftNodes ) newMaxDepth allowArrowOperators allowNegation
         return (operator leftTree rightTree)

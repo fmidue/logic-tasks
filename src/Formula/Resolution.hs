@@ -103,7 +103,8 @@ genRes (minLen,maxLen) steps lits = do
                   underMax = Set.filter (\clause -> Set.size clause <= maxLen) ys
                 chosenClause <- setElements (if Set.null underMin then underMax else underMin)
                 let
-                  chooseableLits = filter (\lit -> Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
+                  chooseableLits = filter (\lit ->
+                    Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
                 if null chooseableLits
                     then buildClauses xs ys (runs+1)
                     else do

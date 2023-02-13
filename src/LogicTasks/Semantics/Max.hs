@@ -18,7 +18,8 @@ import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, t
 
 
 genMaxInst :: MinMaxConfig -> Gen MaxInst
-genMaxInst MinMaxConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = MaxInst <$> cnfInRange <*> pure extraText
+genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} =
+    MaxInst <$> cnfInRange <*> pure extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries

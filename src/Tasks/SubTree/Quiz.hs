@@ -18,8 +18,15 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
 generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations
-      `suchThat` \synTree -> (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
+    tree <- genSynTree
+        (minNodes, maxNodes)
+        maxDepth
+        usedLiterals
+        atLeastOccurring
+        allowArrowOperators
+        maxConsecutiveNegations
+      `suchThat` \synTree ->
+        (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
     let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
       { tree

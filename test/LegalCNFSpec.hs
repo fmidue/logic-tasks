@@ -30,7 +30,8 @@ validBoundsLegalCNF = do
         minClauses = lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
     maxClauseAmount <- choose (1, clauses)  `suchThat` \amount -> amount > 1 || maxClauseLength > 1
     minClauseAmount <- choose (1, min minClauses maxClauseAmount)
-    formulas <- choose (1, min 15 ((maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1) `div` 2 + 1))
+    formulas <- choose
+      (1, min 15 ((maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1) `div` 2 + 1))
     illegals <- choose (0, formulas)
     externalGenFormulas <- choose (0, formulas - illegals)
     let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals - externalGenFormulas > 0
@@ -102,22 +103,33 @@ spec = do
     describe "genIllegalSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
-                forAll (genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators) (not . judgeCNFSynTree)
+                forAll
+                  (genIllegalSynTree
+                    (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
+                     usedLiterals
+                     allowArrowOperators
+                  )
+                  (not . judgeCNFSynTree)
     describe "judgeCNFSynTree" $
         it "is reasonably implemented" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
-                forAll (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) (judgeCNFSynTree . cnfToSynTree)
+                forAll
+                  (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
+                  (judgeCNFSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $
         it "all of the formulas in the wrong serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \lCConfig ->
-                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} -> illegalTest (toList serialsOfWrong) formulaStrings
+                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} ->
+                  illegalTest (toList serialsOfWrong) formulaStrings
     describe "generateLegalCNFInst" $ do
         it "all of the formulas not in the wrong serial should be Cnf" $
             forAll validBoundsLegalCNF $ \lCConfig@LegalCNFConfig{..} ->
-                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} -> legalTest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
+                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} ->
+                  legalTest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalCNF $ \lCConfig ->
-                forAll (generateLegalCNFInst lCConfig) $ \lCInst@LegalCNFInst {..} -> feedback lCInst (transferSetIntToString serialsOfWrong)
+                forAll (generateLegalCNFInst lCConfig) $ \lCInst@LegalCNFInst {..} ->
+                  feedback lCInst (transferSetIntToString serialsOfWrong)
 
 judgeCNFSynTree :: SynTree BinOp a -> Bool
 judgeCNFSynTree (Binary And a b) = judgeCNFSynTree a && judgeCNFSynTree b

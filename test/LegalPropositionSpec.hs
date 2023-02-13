@@ -25,7 +25,7 @@ validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
     syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree `suchThat` ((3 <=) . minNodes)
     let leaves = maxLeavesForNodes maxNodes
-    formulas <- choose (1, min 15 ( if allowArrowOperators then (4 :: Integer) else (2 :: Integer) ^ (maxNodes - leaves)))
+    formulas <- choose (1, min 15 $ if allowArrowOperators then 4 else 2 ^ (maxNodes - leaves))
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
     return $ LegalPropositionConfig
@@ -61,32 +61,76 @@ spec = do
     describe "illegalDisplay" $ do
         it "at least creates actual formula symbols" $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $ \synTree ->
-                    forAll (deleteSpaces <$> illegalDisplay synTree) $ \str -> subFormulasStringParse ("{" ++ str ++ "}") == Right (singleton str)
+                forAll
+                  (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                  ) $ \synTree ->
+                      forAll (deleteSpaces <$> illegalDisplay synTree) $ \str ->
+                        subFormulasStringParse ("{" ++ str ++ "}") == Right (singleton str)
         it "the String after illegalDisplay can not parse " $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $ \synTree ->
-                    forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
+                forAll
+                  (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                  ) $ \synTree ->
+                      forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
     describe "bracket display" $ do
         it "the String after bracketDisplay just add a bracket " $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $ \synTree ->
-                    forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
+                forAll
+                  (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                  ) $ \synTree ->
+                      forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
         it "the String can be parsed by formulaParse" $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $ \synTree ->
-                    forAll (bracketDisplay synTree) $ \str -> formulaParse str == Right synTree
+                forAll
+                  (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                  ) $ \synTree ->
+                      forAll (bracketDisplay synTree) $ \str -> formulaParse str == Right synTree
         it "the String remove all brackets should same with display remove all brackets" $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $ \synTree ->
-                    forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
+                forAll
+                  (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                  ) $ \synTree ->
+                      forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
             forAll validBoundsLegalProposition $ \lPConfig ->
-                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> illegalTest (toList serialsOfWrong) pseudoFormulas
+                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} ->
+                  illegalTest (toList serialsOfWrong) pseudoFormulas
         it "the generateLegalPropositionInst should generate expected legal number" $
             forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig{..} ->
-                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> legalTest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
+                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} ->
+                  legalTest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalProposition $ \lPConfig ->
-                forAll (generateLegalPropositionInst lPConfig) $ \lPInst@LegalPropositionInst{..} -> feedback lPInst (transferSetIntToString serialsOfWrong)
+                forAll (generateLegalPropositionInst lPConfig) $ \lPInst@LegalPropositionInst{..} ->
+                  feedback lPInst (transferSetIntToString serialsOfWrong)

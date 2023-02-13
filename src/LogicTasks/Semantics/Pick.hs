@@ -42,8 +42,10 @@ description PickInst{..} = do
 
     paragraph $ do
       translate $ do
-        german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
-        english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
+        german $ "Welche der folgenden Wahrheitstafeln passt zu der Formel? " ++
+                 "Geben Sie die richtige Tafel durch ihre Nummer an."
+        english $ "Which of these truth tables represents the formula? " ++
+                  "Specify the correct table by giving its number."
       indent $ code $ showIndexedList 120 5 $ map getTable cnfs
 
     paragraph $ indent $ do

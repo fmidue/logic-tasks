@@ -28,11 +28,16 @@ normalShow (Not a) = showOperatorNot ++ normalShow a
 simplestDisplay :: SynTree BinOp Char -> String
 simplestDisplay (Leaf a)=  a : ""
 simplestDisplay (Not a) = showOperatorNot ++ simplestShow a Nothing
-simplestDisplay (Binary oper a b) = simplestShow a (Just oper) ++ " " ++ showOperator oper ++ " " ++ simplestShow b (Just oper)
+simplestDisplay (Binary oper a b) =
+    simplestShow a (Just oper) ++ " " ++ showOperator oper ++ " " ++ simplestShow b (Just oper)
 
 simplestShow :: SynTree BinOp Char -> Maybe BinOp -> String
 simplestShow (Leaf a) _ =  a : ""
 simplestShow (Not a) _ = showOperatorNot ++ simplestShow a Nothing
 simplestShow (Binary And a b) j@(Just And) = simplestShow a j ++ " " ++ showOperator And ++ " " ++ simplestShow b j
 simplestShow (Binary Or a b) j@(Just Or) = simplestShow a j ++ " " ++ showOperator Or ++ " " ++ simplestShow b j
-simplestShow (Binary oper a b) _ = let j = Just oper in "(" ++ simplestShow a j ++ " " ++ showOperator oper ++ " " ++ simplestShow b j ++ ")"
+simplestShow (Binary oper a b) _ =
+  let
+    j = Just oper
+  in
+    "(" ++ simplestShow a j ++ " " ++ showOperator oper ++ " " ++ simplestShow b j ++ ")"

@@ -61,8 +61,8 @@ checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {
     | formulas < illegals + bracketFormulas
       = reject "The number of formulas cannot be less than the sum of bracket Formulas and illegal ones."
                "Die Anzahl der Formeln kann nicht niedriger als die Summe von falschen und richtigen Formeln."
-    | let leaves = maxLeavesForNodes maxNodes , (if allowArrowOperators then (4 :: Integer) else (2 :: Integer)) ^ (maxNodes - leaves) < formulas
-      = reject "It has risks that formulas are larger than is actually reasonable given the possible size of the original formula."
+    | let leaves = maxLeavesForNodes maxNodes, (if allowArrowOperators then 4 else 2) ^ (maxNodes - leaves) < formulas
+      = reject "Settings may result in extremely large formulae."
                "Einstellungen führen zu extrem großen Formeln."
     | otherwise
       = pure()

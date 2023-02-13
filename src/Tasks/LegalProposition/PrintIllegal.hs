@@ -16,13 +16,19 @@ illegalDisplay synTree =
 
 ifUseIllegal :: Bool -> Bool -> SynTree BinOp Char -> String -> Gen String
 ifUseIllegal useBug notFirstLayer synTree usedLiterals =
-    let nodeNum = treeNodes synTree
-    in if not useBug
-       then return (normalShow synTree)
-       else frequency [(1, implementIllegal notFirstLayer synTree usedLiterals), (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedLiterals)]
+    let
+      nodeNum = treeNodes synTree
+    in
+      if not useBug
+        then return (normalShow synTree)
+        else frequency
+          [ (1, implementIllegal notFirstLayer synTree usedLiterals)
+          , (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedLiterals)
+          ]
 
 subTreeIllegal ::Bool -> SynTree BinOp Char -> String -> Gen String
-subTreeIllegal notFirstLayer (Binary oper a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator oper)
+subTreeIllegal notFirstLayer (Binary oper a b) usedLiterals =
+    allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator oper)
 subTreeIllegal _ (Not a) usedLiterals = do
     left <- ifUseIllegal True True a usedLiterals
     return (showOperatorNot ++ left)
@@ -42,18 +48,23 @@ illegalShow notFirstLayer a b usedLiterals usedOperator =
     if notFirstLayer
     then  do
         letter <- elements usedLiterals
-        frequency (map (\(probability, replacedOperator) -> (probability, combineNormalShow a b replacedOperator True)) [(2, ""), (2, showOperatorNot), (2, [letter])] ++ illegalParentheses a b usedOperator)
+        frequency (map (\(probability, replacedOperator) ->
+          (probability, combineNormalShow a b replacedOperator True))
+            [(2, ""), (2, showOperatorNot), (2, [letter])] ++ illegalParentheses a b usedOperator)
     else  do
         letter <- elements usedLiterals
-        frequency (map (\(probability, replacedOperator) -> (probability, combineNormalShow a b replacedOperator False)) [(2, ""), (1, showOperatorNot), (1, [letter])])
+        frequency (map (\(probability, replacedOperator) ->
+          (probability, combineNormalShow a b replacedOperator False)) [(2, ""), (1, showOperatorNot), (1, [letter])])
 
 combineNormalShow :: SynTree BinOp Char -> SynTree BinOp Char -> String -> Bool -> Gen String
 combineNormalShow a b replacedOperator False = return (normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b)
-combineNormalShow a b replacedOperator True = return ("(" ++ normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b ++ ")")
+combineNormalShow a b replacedOperator True =
+    return $ "(" ++ normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b ++ ")"
 
 
 implementIllegal :: Bool -> SynTree BinOp Char -> String -> Gen String
-implementIllegal notFirstLayer (Binary oper a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals (showOperator oper)
+implementIllegal notFirstLayer (Binary oper a b) usedLiterals =
+    illegalShow notFirstLayer a b usedLiterals (showOperator oper)
 implementIllegal _ (Not a) usedLiterals = do
     letter <- elements usedLiterals
     elements  $ map (++ (' ' : normalShow a)) ([letter] : map showOperator allBinaryOperators)

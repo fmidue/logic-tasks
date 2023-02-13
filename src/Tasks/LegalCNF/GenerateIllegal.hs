@@ -14,7 +14,11 @@ import Formula.Types (Clause(Clause))
 import Control.Monad (join)
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
-genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators = do
+genIllegalSynTree
+  (minClauseAmount, maxClauseAmount)
+  (minClauseLength, maxClauseLength)
+  usedLiterals
+  allowArrowOperators = do
     ifUseError <- elements [True,False]
     let ifUseError'
           | maxClauseAmount == 1 = False
@@ -24,7 +28,8 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
         then do
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
             firstSyntaxShape <- genIllegalCNFShape allowArrowOperators (clauses - 1)
-            clauseList <- toList . Setform.clauseSet <$> genCnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
+            clauseList <- toList . Setform.clauseSet
+              <$> genCnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
             return (genIllegalCNF firstSyntaxShape clauseList)
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)

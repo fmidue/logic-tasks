@@ -65,7 +65,10 @@ class Parse a where
 
 instance Parse a => Parse [a] where
   parser = (lexeme listParse <?> "List")
-           <|> fail "Could not parse a list of values: The elements of a list are enclosed by square brackets '[ ]' and separated by commas."
+      <|> fail (
+        "Could not parse a list of values: " ++
+        "The elements of a list are enclosed by square brackets '[ ]' and separated by commas."
+        )
     where
       listParse = do
         withSpaces '[' <|> fail "could not parse an opening '['"
@@ -90,12 +93,18 @@ instance Parse TruthValue where
     where truthParse = do
             s <- getInput
             setInput (map toLower s)
-            t <- try (parseTrue <|> parseFalse <|> fail "Could not parse a truth value: Please enter values as described in the exercise description.")
-                      <|> fail "The truth value was mistyped."
-            notFollowedByElse alphaNum (\c -> fail $ unlines
-                                               ["unexpected " ++ [c]
-                                               ,"Additional characters were appended to this truth value or it was mistyped."
-                                               ])
+            t <- try
+             (    parseTrue
+              <|> parseFalse
+              <|> fail "Could not parse a truth value: Please enter values as described in the exercise description."
+             )
+              <|> fail "The truth value was mistyped."
+            notFollowedByElse alphaNum (\c ->
+              fail $ unlines
+                [ "unexpected " ++ [c]
+                , "Additional characters were appended to this truth value or it was mistyped."
+                ]
+              )
             pure t
               where
                 parseTrue = do
@@ -119,7 +128,7 @@ instance Parse TruthValue where
 
 instance Parse Literal where
   parser = (lexeme litParse <?> "Literal")
-           <|> fail "Could not parse a literal: Literals are denoted by capital letters, negation is denoted by a '~'."
+      <|> fail "Could not parse a literal: Literals are denoted by capital letters, negation is denoted by a '~'."
     where
       litParse = do
         result <- optionMaybe $ char '~'
@@ -132,7 +141,7 @@ instance Parse Literal where
 
 instance Parse Clause where
  parser = (lexeme clauseParse <?> "Clause")
-          <|> fail "Could not parse a clause: Clauses are composed out of literals and the 'or operator' (\\/)."
+     <|> fail "Could not parse a clause: Clauses are composed out of literals and the 'or operator' (\\/)."
    where
      clauseParse = do
        braces <- lexeme $ optionMaybe $ char '('
@@ -145,7 +154,7 @@ instance Parse Clause where
 
 instance Parse Con where
  parser = (lexeme conParse <?> "Conjunction")
-          <|> fail "Could not parse a conjunction: Conjunctions are composed out of literals and the 'and operator' (/\\)."
+     <|> fail "Could not parse a conjunction: Conjunctions are composed out of literals and the 'and operator' (/\\)."
    where
      conParse = do
        braces <- lexeme $ optionMaybe $ char '('

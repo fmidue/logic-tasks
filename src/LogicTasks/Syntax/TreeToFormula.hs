@@ -12,7 +12,7 @@ import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 import LogicTasks.Syntax.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Tasks.SynTree.Quiz (feedback)
-import Trees.Types (PropFormula(..))
+import Trees.Types (BinOp, SynTree(..))
 
 
 
@@ -48,19 +48,19 @@ verifyConfig = checkSynTreeConfig
 
 
 
-start :: PropFormula Char
-start = Atomic ' '
+start :: SynTree BinOp Char
+start = Leaf ' '
 
 
 
-partialGrade :: OutputMonad m => SynTreeInst -> PropFormula c -> LangM m
+partialGrade :: OutputMonad m => SynTreeInst -> SynTree BinOp Char -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SynTreeInst -> PropFormula Char -> LangM m
+completeGrade :: OutputMonad m => SynTreeInst -> SynTree BinOp Char -> LangM m
 completeGrade inst sol
-    | not $ feedback inst (show sol) = reject
+    | not $ feedback inst sol = reject
       "Your solution is not correct."
       "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()

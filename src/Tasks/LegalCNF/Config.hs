@@ -57,8 +57,9 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = reject "Only letters are allowed as literals."
                "Nur Buchstaben können Literale sein."
     | negArgs
-      = reject "The following parameters need to be greater than zero: minClauseAmount, minClauseLength, minStringSize, formulas."
-               "Diese Parameter müssen größer als null sein: minClauseAmount, minClauseLength, minStringSize, formulas."
+      = reject
+        "These parameters need to be greater than zero: minClauseAmount, minClauseLength, minStringSize, formulas."
+        "Diese Parameter müssen größer als null sein: minClauseAmount, minClauseLength, minStringSize, formulas."
     | zeroArgs
       = reject "The following parameters need to be zero or greater: illegals, externalGenFormulas."
                "Diese Parameter müssen null oder größer sein: illegals, externalGenFormulas."
@@ -74,16 +75,20 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     || externalGenFormulas > 0 && fromIntegral maxClauseAmount > min 15 (limit literalLength)
       = reject "The maxClauseAmount is too big. There is the risk of duplicate clauses in the CNF."
                "maxClauseAmount ist zu groß. Es ist möglich, dass eine Klausel mehrfach in der CNF vorkommt."
-    | fromIntegral formulas > (fromIntegral (maxClauseLength - minClauseLength + 1) ^ (fromIntegral (maxClauseAmount - minClauseAmount + 1) :: Integer)) `div` (2 :: Integer) + 1
+    | fromIntegral formulas >
+       (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
+       `div` (2 :: Integer) + 1
       = reject  "Amount of Formulas is too big and bears the risk of generating similar CNFs."
                 "Menge an Formeln ist zu groß. Eine Formeln könnte mehrfach generiert werden."
     | maxClauseLength == 1 && maxClauseAmount == 1
       = reject "Atomic propositions have no illegal forms"
                "Atomare Aussagen können nicht syntaktisch falsch sein."
-    | formulas - illegals - externalGenFormulas <  (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
+    | formulas - illegals - externalGenFormulas <
+        (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
       = reject "The formulas used to generate special formula are not sufficient."
                "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
-    | externalGenFormulas > 0 && minClauseAmount > lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
+    | externalGenFormulas > 0
+        && minClauseAmount > lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
       = reject "minClauseAmount is too large. The external generator can not generate a CNF."
                "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 5 + 1)
@@ -101,7 +106,8 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
 
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
     zeroArgs = any (<0) [illegals, externalGenFormulas]
-    boundsError = any (\(a,b) -> b < a) [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
+    boundsError = any (\(a,b) -> b < a)
+      [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
 
 
 data LegalCNFInst =

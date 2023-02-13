@@ -116,7 +116,12 @@ data ResolutionInst = ResolutionInst {
 
 dResInst :: ResolutionInst
 dResInst =  ResolutionInst
-          { clauses = [mkClause [Not 'A', Not 'C', Literal 'B'], mkClause [Literal 'A', Not 'C'], mkClause [Literal 'C'], mkClause [Not 'B']]
+          { clauses =
+              [ mkClause [Not 'A', Not 'C', Literal 'B']
+              , mkClause [Literal 'A', Not 'C']
+              , mkClause [Literal 'C']
+              , mkClause [Not 'B']
+              ]
           , addText = Nothing
           }
 

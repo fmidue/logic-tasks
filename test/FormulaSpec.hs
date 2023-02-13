@@ -39,7 +39,7 @@ validBoundsClause = do
 validBoundsCnf :: Gen ((Int,Int),(Int,Int),[Char])
 validBoundsCnf = do
     ((minLen,maxLen),chars) <- validBoundsClause
-    let upperBound = minimum [2^ maxLen, 2^length chars]
+    let upperBound = min (2^maxLen) (2^length chars)
     minNum <- chooseInt (1,upperBound)
     maxNum <- chooseInt (minNum,upperBound)
     pure ((minNum,maxNum),(minLen,maxLen),chars)
@@ -70,9 +70,17 @@ spec = do
     it "should return the empty conjuncion when called with the empty list" $
       property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 []) isEmptyCnf
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
-      forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
-        let num = length (getClauses cnf) in num >= lowerNum && num <= upperNum
+      forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
+          let
+            num = length (getClauses cnf)
+          in
+            num >= lowerNum && num <= upperNum
     it "should generate a random cnf formula with the correct clause length if given valid parameters" $
-      forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
-       let sizes = map (length . literals) (getClauses cnf) in maximum sizes <= upperLen && minimum sizes >= lowerLen
+      forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
+         let
+           sizes = map (length . literals) (getClauses cnf)
+         in
+           maximum sizes <= upperLen && minimum sizes >= lowerLen
 

@@ -28,18 +28,52 @@ generateLegalCNFInst lCConfig@LegalCNFConfig {..} = do
     let serial2 = serial1 \\ serialsOfExternal
     serialsOfJustOneClause <- vectorOf (if includeFormWithJustOneClause then 1 else 0) (elements serial2)
     let serial3 = serial2 \\ serialsOfJustOneClause
-    serialsOfJustOneLiteralPerClause <- vectorOf (if includeFormWithJustOneLiteralPerClause then 1 else 0) (elements serial3)
-    treeList <- genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause [1 .. formulas] lCConfig `suchThat` (listNoDuplicate . map (simplestDisplay . fmap (const '_')))
+    serialsOfJustOneLiteralPerClause <- vectorOf
+        (if includeFormWithJustOneLiteralPerClause then 1 else 0)
+        (elements serial3)
+    treeList <- genSynTreeList
+        serialsOfWrong
+        serialsOfExternal
+        serialsOfJustOneClause
+        serialsOfJustOneLiteralPerClause
+        [1 .. formulas]
+        lCConfig
+      `suchThat` (listNoDuplicate . map (simplestDisplay . fmap (const '_')))
     return $ LegalCNFInst {serialsOfWrong = fromList serialsOfWrong, formulaStrings = map simplestDisplay treeList}
 
 
 genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]
-genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause formulasList lCConfig@LegalCNFConfig{..} =
-    mapM (\serial -> genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause lCConfig serial `suchThat` checkSize minStringSize maxStringSize) formulasList
+genSynTreeList
+  serialsOfWrong
+  serialsOfExternal
+  serialsOfJustOneClause
+  serialsOfJustOneLiteralPerClause
+  formulasList
+  lCConfig@LegalCNFConfig{..} =
+    mapM (\serial ->
+      genSynTreeWithSerial
+        serialsOfWrong
+        serialsOfExternal
+        serialsOfJustOneClause
+        serialsOfJustOneLiteralPerClause
+        lCConfig
+        serial
+      `suchThat` checkSize minStringSize maxStringSize) formulasList
 
 genSynTreeWithSerial :: [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Int -> Gen (SynTree BinOp Char)
-genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} serial
-    | serial `elem` serialsOfWrong = genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
+genSynTreeWithSerial
+  serialsOfWrong
+  serialsOfExternal
+  serialsOfJustOneClause
+  serialsOfJustOneLiteralPerClause
+  LegalCNFConfig {cnfConfig = CnfConfig {baseConf = BaseConfig{..},..},..}
+  serial
+    | serial `elem` serialsOfWrong =
+        genIllegalSynTree
+          (minClauseAmount, maxClauseAmount)
+          (minClauseLength, maxClauseLength)
+          usedLiterals
+          allowArrowOperators
     | serial `elem` serialsOfExternal =
         cnfToSynTree <$>
         Formula.Types.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
@@ -51,10 +85,17 @@ genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause ser
         Tasks.LegalCNF.GenerateLegal.genCnf (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals
     | otherwise =
         cnfToSynTree <$>
-        Tasks.LegalCNF.GenerateLegal.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+        Tasks.LegalCNF.GenerateLegal.genCnf
+          (minClauseAmount, maxClauseAmount)
+          (minClauseLength, maxClauseLength)
+          usedLiterals
 
 checkSize :: Int -> Int -> SynTree BinOp Char -> Bool
-checkSize minStringSize maxStringSize synTree = let stringLength = length (simplestDisplay synTree) in stringLength <= maxStringSize && stringLength >= minStringSize
+checkSize minStringSize maxStringSize synTree =
+  let
+    stringLength = length (simplestDisplay synTree)
+  in
+    stringLength <= maxStringSize && stringLength >= minStringSize
 
 feedback :: LegalCNFInst -> String -> Bool
 feedback LegalCNFInst {serialsOfWrong} input = illegalPropositionStringParse input == Right serialsOfWrong

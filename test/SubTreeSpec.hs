@@ -49,22 +49,43 @@ spec = do
     describe "generateSubTreeInst" $ do
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> let correctTrees = allNotLeafSubTrees tree in subTreeStringParse (displaySubTrees (toList correctTrees)) == Right correctTrees
+                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
+                  let
+                    correctTrees = allNotLeafSubTrees tree
+                  in
+                    subTreeStringParse (displaySubTrees $ toList correctTrees) == Right correctTrees
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> let correctTrees = allNotLeafSubTrees tree in subFormulasStringParse (deleteSpaces (displaySubTrees (toList correctTrees))) == Right (Data.Set.map deleteSpaces correctFormulas)
+                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
+                  let
+                    correctTrees = allNotLeafSubTrees tree
+                  in
+                    subFormulasStringParse (deleteSpaces $ displaySubTrees $ toList correctTrees)
+                      == Right (Data.Set.map deleteSpaces correctFormulas)
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> fromIntegral (size correctFormulas) >= minSubTrees
+                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} ->
+                  fromIntegral (size correctFormulas) >= minSubTrees
         it "all subformulas is the sublist of formula" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let correctFormulas' = toList correctFormulas in all (`isInfixOf` display tree) correctFormulas'
+                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} ->
+                  let
+                    correctFormulas' = toList correctFormulas
+                  in
+                    all (`isInfixOf` display tree) correctFormulas'
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (\s -> fromRight (Atomic ' ') (parse parsePropForm "" s)) $ toList correctFormulas
+                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->
+                  feedback subConfig $ Prelude.map
+                    (fromRight (Atomic ' ') . parse parsePropForm " ")
+                    (toList correctFormulas)
         it "the correct store in Inst should be accept by feedback, even without spaces" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (\s -> fromRight (Atomic ' ') (parse parsePropForm "" $ deleteSpaces s)) $ toList correctFormulas
+                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->
+                  feedback subConfig $ Prelude.map
+                    (\s -> fromRight (Atomic ' ')
+                    (parse parsePropForm "" $ deleteSpaces s))
+                    (toList correctFormulas)
 
 displaySubTrees :: [SynTree BinOp Char] -> String
 displaySubTrees trees = "{" ++ showTrees trees ++ "}"

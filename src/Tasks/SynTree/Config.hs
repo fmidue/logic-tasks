@@ -76,7 +76,9 @@ checkSynTreeConfig SynTreeConfig {..}
                "Minimale Anzahl der Blätter würde eingestellte Tiefe verletzen."
     | let maxNodes' = maxNodes - 1
           maxConsecutiveNegations' = maxConsecutiveNegations + 2
-          (result, rest) = maxNodes' `divMod` maxConsecutiveNegations', maxDepth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
+          (result, rest) =
+            maxNodes' `divMod` maxConsecutiveNegations',
+            maxDepth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
       = reject "Your maximum depth value is unreasonably large, given your other settings."
                "Maximale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
     | otherwise = pure()

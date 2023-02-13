@@ -88,7 +88,11 @@ maxLeavesForNodes nodes = (nodes + 1) `div` 2
 sameAssociativeOperatorAdjacent :: SynTree BinOp c -> Bool
 sameAssociativeOperatorAdjacent (Leaf _) = False
 sameAssociativeOperatorAdjacent (Not a) = sameAssociativeOperatorAdjacent a
-sameAssociativeOperatorAdjacent (Binary oper a b) = checkNextOperator a oper || checkNextOperator b oper || sameAssociativeOperatorAdjacent a || sameAssociativeOperatorAdjacent b
+sameAssociativeOperatorAdjacent (Binary oper a b) =
+    checkNextOperator a oper ||
+    checkNextOperator b oper ||
+    sameAssociativeOperatorAdjacent a ||
+    sameAssociativeOperatorAdjacent b
 
 checkNextOperator :: SynTree BinOp c -> BinOp -> Bool
 checkNextOperator (Binary And _ _) And = True

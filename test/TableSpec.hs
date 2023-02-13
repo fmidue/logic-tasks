@@ -49,7 +49,8 @@ tableGenSpec =
 
     context "When looking at each row of the generated table" $
       it "should have truth values equal to the formula being evaluated with the row's allocation" $
-        forAll (applySize (arbitrary :: Gen Cnf)) $ \x -> map (`evaluate` x) (possibleAllocations (atomics x)) == readEntries (getTable x)
+        forAll (applySize (arbitrary :: Gen Cnf)) $ \x ->
+          map (`evaluate` x) (possibleAllocations (atomics x)) == readEntries (getTable x)
 
 
 
