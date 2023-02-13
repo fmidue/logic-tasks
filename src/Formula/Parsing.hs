@@ -1,11 +1,11 @@
 
-module Parsing where
+module Formula.Parsing where
 
 
 import Config
-import Formula
+import Formula.Util
 import ParsingHelpers (lexeme)
-import Types
+import Formula.Types
 
 import Control.Monad (void)
 import Data.Char (toLower)

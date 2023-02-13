@@ -2,13 +2,13 @@
 {-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
 
-module Printing
+module Formula.Printing
        ( showIndexedList
        ) where
 
 
 import Config
-import Types
+import Formula.Types
 
 import Data.List (intercalate, intersperse, nub)
 import Data.Text.Lazy (pack)

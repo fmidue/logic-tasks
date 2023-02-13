@@ -1,4 +1,4 @@
-module LogicTasks.Printing (module Printing) where
+module LogicTasks.Printing (module Formula.Printing) where
 
 
-import Printing
+import Formula.Printing

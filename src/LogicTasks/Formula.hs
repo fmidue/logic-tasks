@@ -1,6 +1,6 @@
 module LogicTasks.Formula
        (
-         module Formula
+         module Formula.Util
        , Literal(..)
        , Clause
        , Con
@@ -25,5 +25,5 @@ module LogicTasks.Formula
 
 
 
-import Types
-import Formula
+import Formula.Types
+import Formula.Util

@@ -26,7 +26,7 @@ import Control.Monad (void)
 import Control.Monad.State (get, put, runState, evalState)
 import Data.Set(fromList, Set, toList)
 import Data.List.Extra (nubBy)
-import qualified Types as Setform hiding (Dnf(..), Con(..))
+import qualified Formula.Types as Setform hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
 

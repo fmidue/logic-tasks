@@ -11,9 +11,9 @@ import Data.Tuple (swap)
 import Test.QuickCheck (Gen, elements)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Types (Clause, Literal(..), PrologLiteral(..), PrologClause, genClause, literals, pliterals, opposite)
-import Formula (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
-import Resolution (resolvable, resolve)
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause, genClause, literals, pliterals, opposite)
+import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
+import Formula.Resolution (resolvable, resolve)
 import Util(prevent, preventWithHint, tryGen)
 
 

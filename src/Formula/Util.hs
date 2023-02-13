@@ -1,5 +1,5 @@
 
-module Formula
+module Formula.Util
        (
          isPositive
        , mkClause
@@ -28,7 +28,7 @@ import qualified SAT.MiniSat as Sat
 
 import Data.Maybe(fromJust)
 
-import Types
+import Formula.Types
 
 
 ---------------------------------------------------------------------------------------------------

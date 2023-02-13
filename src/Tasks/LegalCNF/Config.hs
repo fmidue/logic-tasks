@@ -15,7 +15,7 @@ import Control.Monad.Output(OutputMonad(..), LangM, english, german, translate)
 import Data.Char (isLetter)
 import Data.Set (Set)
 import GHC.Generics
-import Types (lengthBound)
+import Formula.Types (lengthBound)
 
 import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
 

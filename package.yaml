@@ -68,10 +68,10 @@ library:
     - Trees.Print
     - Trees.Helpers
     - Trees.Generate
-    - Parsing
+    - Formula.Parsing
     - ParsingHelpers
     - Config
-    - Types
+    - Formula.Types
 
   ghc-options:
   - -Wall

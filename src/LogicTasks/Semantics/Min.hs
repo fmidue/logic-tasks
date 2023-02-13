@@ -9,9 +9,9 @@ import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
 import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
-import Table (readEntries)
-import Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
-import Formula (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
+import Formula.Table (readEntries)
+import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
+import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
 import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 

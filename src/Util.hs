@@ -10,8 +10,8 @@ import Data.List (delete)
 import Test.QuickCheck(Gen, elements)
 
 import Config (BaseConfig(..), CnfConfig(..))
-import Types (Formula, getTable)
-import Table (readEntries)
+import Formula.Types (Formula, getTable)
+import Formula.Table (readEntries)
 
 
 

@@ -4,13 +4,13 @@ module Tasks.LegalCNF.GenerateIllegal (
 
 import Test.QuickCheck (choose, Gen, elements, frequency)
 import Test.QuickCheck.Gen (oneof)
-import qualified Types as Setform hiding (Dnf(..), Con(..))
+import qualified Formula.Types as Setform hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Data.Set (toList, size)
 import Trees.Helpers (relabelShape, literalToSynTree, clauseToSynTree, collectLeaves)
 import Data.List ((\\))
 import Tasks.LegalCNF.GenerateLegal (genClause, genCnf)
-import Types (Clause(Clause))
+import Formula.Types (Clause(Clause))
 import Control.Monad (join)
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)

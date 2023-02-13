@@ -1,10 +1,10 @@
 module LogicTasks.Table
        (
-         module Table
+         module Formula.Table
        , Table
        , getTable
        ) where
 
 
-import Types
-import Table
+import Formula.Types
+import Formula.Table

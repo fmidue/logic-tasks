@@ -2,7 +2,7 @@
 {-# language DuplicateRecordFields #-}
 
 -- | Some basic types for propositional logic
-module Types
+module Formula.Types
        (
          TruthValue(..)
        , Literal(..)

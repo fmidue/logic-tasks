@@ -8,9 +8,9 @@ import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
-import Formula (mkCnf, xorSat)
-import Types (atomics, availableLetter, genCnf, getTable, letter, literals)
-import Printing (showIndexedList)
+import Formula.Util (mkCnf, xorSat)
+import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
+import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
 
 

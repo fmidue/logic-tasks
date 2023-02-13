@@ -5,7 +5,7 @@ module Tasks.LegalCNF.GenerateLegal (
 
 import Test.QuickCheck (choose, Gen, suchThat, elements)
 import Test.QuickCheck.Gen (vectorOf)
-import qualified Types as Setform
+import qualified Formula.Types as Setform
 import Data.Set (fromList)
 import Auxiliary (listNoDuplicate)
 

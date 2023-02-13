@@ -6,8 +6,8 @@ module Config where
 
 import Data.Typeable
 import GHC.Generics
-import Types
-import Formula
+import Formula.Types
+import Formula.Util
 
 
 

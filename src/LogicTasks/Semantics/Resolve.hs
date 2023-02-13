@@ -10,9 +10,9 @@ import Data.Maybe (fromJust, fromMaybe)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
-import Formula (isEmptyClause, mkCnf, sat)
-import Resolution (applySteps, genRes, resolvableWith, resolve)
-import Types (Clause, ResStep(..), literals)
+import Formula.Util (isEmptyClause, mkCnf, sat)
+import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
+import Formula.Types (Clause, ResStep(..), literals)
 import Util (checkBaseConf, prevent, preventWithHint)
 
 

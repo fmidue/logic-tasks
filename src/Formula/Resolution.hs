@@ -1,4 +1,4 @@
-module Resolution
+module Formula.Resolution
        (
          genRes
        , resolve
@@ -15,8 +15,8 @@ import Data.Set (empty,Set)
 import Data.Maybe (isJust)
 import Test.QuickCheck (Gen,choose,elements,shuffle)
 
-import Types
-import Formula
+import Formula.Types
+import Formula.Util
 
 
 

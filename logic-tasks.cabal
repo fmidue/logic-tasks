@@ -53,17 +53,17 @@ library
       Trees.Print
       Trees.Helpers
       Trees.Generate
-      Parsing
+      Formula.Parsing
       ParsingHelpers
       Config
-      Types
+      Formula.Types
   other-modules:
       Auxiliary
-      Formula
+      Formula.Printing
+      Formula.Resolution
+      Formula.Table
+      Formula.Util
       LogicTasks.Syntax.Helpers
-      Printing
-      Resolution
-      Table
       Util
       Paths_logic_tasks
   hs-source-dirs:

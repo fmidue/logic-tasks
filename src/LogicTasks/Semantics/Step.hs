@@ -10,9 +10,9 @@ import Data.Set (difference, fromList, member, toList, union)
 import Test.QuickCheck (Gen, elements)
 
 import Config (StepConfig(..), StepInst(..), BaseConfig(..))
-import Formula (isEmptyClause, mkClause)
-import Types (Clause, Literal(..), genClause, literals, opposite)
-import Resolution (resolvable, resolve)
+import Formula.Util (isEmptyClause, mkClause)
+import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
+import Formula.Resolution (resolvable, resolve)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 
 

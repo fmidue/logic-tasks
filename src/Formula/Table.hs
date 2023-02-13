@@ -1,5 +1,5 @@
 
-module Table
+module Formula.Table
        (
          readEntries
        , readLiterals
@@ -11,7 +11,7 @@ module Table
 
 import Data.Set (Set)
 
-import Types
+import Formula.Types
 import qualified Data.Set as Set (fromList)
 
 
