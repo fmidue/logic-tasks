@@ -4,5 +4,6 @@ module LogicTasks.Resolution
       , ResStep
       ) where
 
+
 import Formula.Resolution
 import Formula.Types (ResStep)

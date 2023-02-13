@@ -24,6 +24,5 @@ module LogicTasks.Formula
        ) where
 
 
-
 import Formula.Types
 import Formula.Util
