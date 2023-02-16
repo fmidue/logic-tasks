@@ -1,4 +1,6 @@
 Autotool
+Cnf
+Dnf
 DSL
 GHC
 Graphviz
@@ -7,6 +9,7 @@ Hspec
 UML
 concat
 fmap
+fmidue
 foldl
 foldr
 fst
@@ -18,3 +21,6 @@ println
 scanl
 snd
 uncurry
+unlines
+workflows
+
