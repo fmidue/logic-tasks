@@ -12,4 +12,4 @@
 \b([A-Za-z])\g{-1}{3,}\b
 
 # ignore lines starting with 'german' and following strings (german task descriptions)
-^\s*german.*(\n\s*".*"(\s\+\+)?)*$
+\bgerman.*(\n\s*".*"(\s\+\+)?)*
