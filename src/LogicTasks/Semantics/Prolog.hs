@@ -50,8 +50,7 @@ description PrologInst{..} = do
     english "Resolve the clauses and give the resulting resolvent."
 
   paragraph $ translate $ do
-    german $ "Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis " ++
-             "in der folgenden Tupelform an: (Literal, Resolvente)."
+    german "Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
     english "Provide the literal used for the step and the resolvent in the following tuple form: (literal, resolvent)."
 
   paragraph $ translate $ do

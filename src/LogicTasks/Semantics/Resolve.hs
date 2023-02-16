@@ -52,8 +52,7 @@ description ResolutionInst{..} = do
     english "Use the resolution technique on this formula to derive the empty clause."
 
   paragraph $ translate $ do
-    german $ "Geben Sie die Lösung als eine Liste von Tripeln an, " ++
-             "wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
+    german "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
     english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
 
   clauseKey
@@ -69,10 +68,8 @@ description ResolutionInst{..} = do
     english "You can optionally substitute clauses with numbers."
 
   paragraph $ translate $ do
-    german $ "Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. " ++
-             "(erste Klausel = 1, zweite Klausel = 2, ...)"
-    english $ "Clauses in the starting formula are already numbered by their order. " ++
-              "first clause = 1, second clause = 2, ...)"
+    german "Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)"
+    english "Clauses in the starting formula are already numbered by their order. first clause = 1, second clause = 2, ...)"
 
   paragraph $ translate $ do
     german "neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
@@ -178,10 +175,8 @@ completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol =
     case applySteps clauses steps of
         Nothing -> refuse $ indent $ translate $ do
-                     german $ "In mindestens einem Schritt werden Klauseln resolviert, " ++
-                              "die nicht in der Formel sind oder noch nicht abgeleitet wurden."
-                     english $ "In at least one step clauses are used, that are not part of the original formula " ++
-                               "and are not derived from previous steps."
+                     german "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
+                     english "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
 
         Just solClauses -> if any isEmptyClause solClauses
                             then pure()

@@ -40,24 +40,17 @@ description FillInst{..} = do
 
   paragraph $ do
     translate $ do
-      german $ "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert " ++
-               "(Wahr oder Falsch)."
+      german "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
       english "Fill all blanks in the corresponding truth table with truth values (True or False)."
     indent $ code $ show $ gapsAt (getTable cnf) missing
 
   paragraph $ translate $ do
-    german $ "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, " ++
-             "wobei das erste Element der Liste der ersten Lücke von oben entspricht, " ++
-             "das zweite Element der zweiten Lücke, etc."
-    english $ "Provide the solution as a list of truth values. " ++
-              "The first element of the list fills the first blank from the top, " ++
-              "the second element fills the second blank, etc."
+    german "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
+    english "Provide the solution as a list of truth values. The first element of the list fills the first blank from the top, the second element fills the second blank, etc."
 
   paragraph $ translate $ do
-    german $ "Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), " ++
-             "ausgeschrieben (wahr, falsch) oder als Kurzform (f, w) erfolgen."
-    english $ "Values can be submitted in binary form (0 = false, 1 = true), " ++
-              "by entering the entire word (true, false) or by giving a shorthand (f or t)."
+    german "Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (wahr, falsch) oder als Kurzform (f, w) erfolgen."
+    english "Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word (true, false) or by giving a shorthand (f or t)."
 
   paragraph $ indent $ do
     translate $ do
