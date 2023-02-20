@@ -1,7 +1,6 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module Tasks.LegalCNF.Quiz (
-    feedback,
     generateLegalCNFInst
     ) where
 
@@ -18,7 +17,6 @@ import Config (BaseConfig(..), CnfConfig(..))
 import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..))
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree)
 import Trees.Helpers (cnfToSynTree)
-import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Trees.Print (simplestDisplay)
 import Trees.Types (BinOp(..), SynTree(..))
 
@@ -106,8 +104,3 @@ checkSize minStringSize maxStringSize synTree =
     stringLength = length (simplestDisplay synTree)
   in
     stringLength <= maxStringSize && stringLength >= minStringSize
-
-
-
-feedback :: LegalCNFInst -> String -> Bool
-feedback LegalCNFInst {serialsOfWrong} input = illegalPropositionStringParse input == Right serialsOfWrong

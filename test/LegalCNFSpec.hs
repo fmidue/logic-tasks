@@ -18,7 +18,8 @@ import Trees.Helpers (cnfToSynTree)
 import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..))
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
 import Tasks.LegalCNF.GenerateLegal (genCnf)
-import Tasks.LegalCNF.Quiz (generateLegalCNFInst, feedback)
+import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
+import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import TestHelpers (transferSetIntToString)
 
 validBoundsLegalCNF :: Gen LegalCNFConfig
@@ -119,17 +120,17 @@ spec = do
     describe "generateLegalCNFInst" $
         it "all of the formulas in the wrong serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \config ->
-                forAll (generateLegalCNFInst config) $ \LegalCNFInst {..} ->
+                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
                   illegalTest (toList serialsOfWrong) formulaStrings
     describe "generateLegalCNFInst" $ do
         it "all of the formulas not in the wrong serial should be Cnf" $
             forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
-                forAll (generateLegalCNFInst config) $ \LegalCNFInst {..} ->
+                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
                   legalTest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
-        it "the feedback designed for Instance can works good" $
+        it "the feedback designed for Instance works as expected" $
             forAll validBoundsLegalCNF $ \config ->
-                forAll (generateLegalCNFInst config) $ \inst@LegalCNFInst {..} ->
-                  feedback inst (transferSetIntToString serialsOfWrong)
+                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
+                  illegalPropositionStringParse(transferSetIntToString serialsOfWrong) == Right serialsOfWrong
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool
 judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b

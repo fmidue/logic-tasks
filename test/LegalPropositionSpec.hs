@@ -9,9 +9,10 @@ import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, forAll, suchThat)
 
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..))
+import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
-import Tasks.LegalProposition.Quiz (generateLegalPropositionInst, feedback)
+import Tasks.LegalProposition.Quiz (generateLegalPropositionInst)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Parsing (formulaParse)
 import Tasks.SubTree.Parsing (subFormulasStringParse)
@@ -130,7 +131,7 @@ spec = do
             forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
                   legalTest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
-        it "the feedback designed for Instance can works good" $
+        it "the feedback designed for Instance works as expected" $
             forAll validBoundsLegalProposition $ \config ->
-                forAll (generateLegalPropositionInst config) $ \inst@LegalPropositionInst{..} ->
-                  feedback inst (transferSetIntToString serialsOfWrong)
+                forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
+                  illegalPropositionStringParse (transferSetIntToString serialsOfWrong) == Right serialsOfWrong

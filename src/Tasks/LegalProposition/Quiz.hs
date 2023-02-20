@@ -2,7 +2,6 @@
 
 module Tasks.LegalProposition.Quiz (
     generateLegalPropositionInst,
-    feedback,
     ) where
 
 
@@ -12,7 +11,6 @@ import Test.QuickCheck (Gen, choose, suchThat, vectorOf)
 
 import Auxiliary (listNoDuplicate)
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst (..))
-import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -63,11 +61,6 @@ genPseudoList serialsOfWrong serialsOfBracket trees =
 
 legalDisplay :: SynTree BinOp Char -> Gen String
 legalDisplay syntaxTree = return (display syntaxTree)
-
-
-
-feedback :: LegalPropositionInst -> String -> Bool
-feedback  LegalPropositionInst {serialsOfWrong}  input = illegalPropositionStringParse input == Right serialsOfWrong
 
 
 
