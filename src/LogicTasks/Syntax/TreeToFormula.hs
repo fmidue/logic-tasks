@@ -11,7 +11,6 @@ import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
 import LogicTasks.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
-import Tasks.SynTree.Quiz (feedback)
 import Trees.Types (BinOp, SynTree(..))
 
 
@@ -60,7 +59,7 @@ partialGrade _ _ = pure()
 
 completeGrade :: OutputMonad m => SynTreeInst -> SynTree BinOp Char -> LangM m
 completeGrade inst sol
-    | not $ feedback inst sol = reject $ do
+    | not $ sol == tree inst = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()

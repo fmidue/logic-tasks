@@ -63,12 +63,11 @@ partialGrade LegalCNFInst{..} sol
 
 
 completeGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
-completeGrade LegalCNFInst{..} sol
+completeGrade inst sol
     | wrongSolution = reject $ do
       english "Your solution is incorrect."
       german "Ihre Lösung ist falsch."
 
     | otherwise = pure()
   where
-    nubSol = nub sol
-    wrongSolution = sort nubSol /= sort (toList serialsOfWrong)
+    wrongSolution = sort (nub sol) /= sort (toList $ serialsOfWrong inst)
