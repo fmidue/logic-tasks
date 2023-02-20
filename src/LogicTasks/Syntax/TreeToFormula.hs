@@ -59,7 +59,7 @@ partialGrade _ _ = pure()
 
 completeGrade :: OutputMonad m => SynTreeInst -> SynTree BinOp Char -> LangM m
 completeGrade inst sol
-    | not $ sol == tree inst = reject $ do
+    | sol /= tree inst = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()
