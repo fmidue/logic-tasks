@@ -90,7 +90,7 @@ partialGrade SuperfluousBracketsInst{..} f
 
 completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula Char -> LangM m
 completeGrade inst sol
-    | not $ show sol == simplestString inst = reject $ do
+    | show sol /= simplestString inst = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()
