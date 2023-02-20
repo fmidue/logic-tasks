@@ -1,7 +1,6 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module Tasks.SuperfluousBrackets.Quiz (
-    feedback,
     generateSuperfluousBracketsInst
     )where
 
@@ -14,7 +13,6 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
 import Trees.Print (simplestDisplay)
-import Trees.Types (PropFormula)
 
 
 
@@ -35,8 +33,3 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
       }
-
-
-
-feedback :: SuperfluousBracketsInst -> PropFormula Char -> Bool
-feedback SuperfluousBracketsInst {simplestString} simForm = show simForm == simplestString

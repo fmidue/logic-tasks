@@ -8,11 +8,10 @@ import Data.List (nub, sort)
 
 import LogicTasks.Helpers
 import Tasks.SuperfluousBrackets.Config (
-    checkSuperfluousBracketsConfig
-  , SuperfluousBracketsConfig(..)
-  , SuperfluousBracketsInst(..)
-  )
-import Tasks.SuperfluousBrackets.Quiz (feedback)
+    checkSuperfluousBracketsConfig,
+    SuperfluousBracketsConfig(..),
+    SuperfluousBracketsInst(..)
+    )
 import Trees.Helpers
 import Trees.Types
 
@@ -91,7 +90,7 @@ partialGrade SuperfluousBracketsInst{..} f
 
 completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula Char -> LangM m
 completeGrade inst sol
-    | not $ feedback inst sol = reject $ do
+    | not $ show sol == simplestString inst = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()
