@@ -5,10 +5,10 @@ module LogicTasks.Syntax.SubTreeSet where
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.List (nub, sort)
+import Data.Set (fromList, isSubsetOf)
 
 import LogicTasks.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
-import Tasks.SubTree.Quiz (feedback)
 import Trees.Types (PropFormula)
 import Trees.Print (display)
 import Trees.Helpers
@@ -83,8 +83,10 @@ partialGrade SubTreeInst{..} fs
 
 
 completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula Char] -> LangM m
-completeGrade inst sol
-    | not $ feedback inst sol = reject $ do
+completeGrade SubTreeInst{..} sol
+    | not $ partOfSolution = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist keine korrekte Lösung."
     | otherwise = pure()
+  where
+    partOfSolution = fromList (map show sol) `isSubsetOf` correctFormulas

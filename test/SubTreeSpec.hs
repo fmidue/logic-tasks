@@ -1,16 +1,16 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 module SubTreeSpec (spec) where
 
-import Test.Hspec ( describe, it, Spec )
+import Test.Hspec (describe, it, Spec)
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Text.Parsec (parse)
 import Data.Either (fromRight)
 import Data.List (intercalate)
 import Data.List.Extra (isInfixOf )
-import Data.Set (size, toList, map)
+import Data.Set (fromList, size, toList, map)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
-import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
+import Tasks.SubTree.Quiz (generateSubTreeInst)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Trees.Helpers (allNotLeafSubTrees, maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
@@ -73,19 +73,28 @@ spec = do
                     correctFormulas' = toList correctFormulas
                   in
                     all (`isInfixOf` display tree) correctFormulas'
-        it "the correct store in Inst should be accept by feedback" $
-            forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->
-                  feedback subConfig $ Prelude.map
-                    (fromRight (Atomic ' ') . parse parsePropForm " ")
-                    (toList correctFormulas)
-        it "the correct store in Inst should be accept by feedback, even without spaces" $
-            forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->
-                  feedback subConfig $ Prelude.map
-                    (\s -> fromRight (Atomic ' ')
-                    (parse parsePropForm "" $ deleteSpaces s))
-                    (toList correctFormulas)
+        it "Converting correct subformulae Strings into formulae and parsing them again should yield the original" $
+            forAll validBoundsSubTree $ \config ->
+                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
+                  let
+                    propFormulae = Prelude.map
+                      (\s -> fromRight (Atomic ' ') (parse parsePropForm "" s))
+                      (toList correctFormulas)
+                    inputSet = fromList (Prelude.map show propFormulae)
+                  in
+                    inputSet == correctFormulas
+        it "The above should be true even when deleting spaces in the input" $
+            forAll validBoundsSubTree $ \config ->
+                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
+                  let
+                    propFormulae = Prelude.map
+                      (\s -> fromRight (Atomic ' ') (parse parsePropForm "" $ deleteSpaces s))
+                      (toList correctFormulas)
+                    inputSet = fromList (Prelude.map show propFormulae)
+                  in
+                    inputSet == correctFormulas
+
+
 
 displaySubTrees :: [SynTree BinOp Char] -> String
 displaySubTrees trees = "{" ++ showTrees trees ++ "}"
