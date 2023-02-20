@@ -84,7 +84,7 @@ partialGrade SubTreeInst{..} fs
 
 completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula Char] -> LangM m
 completeGrade SubTreeInst{..} sol
-    | not $ partOfSolution = reject $ do
+    | not partOfSolution = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist keine korrekte Lösung."
     | otherwise = pure()

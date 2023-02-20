@@ -78,7 +78,7 @@ spec = do
                 forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
                   let
                     propFormulae = Prelude.map
-                      (\s -> fromRight (Atomic ' ') (parse parsePropForm "" s))
+                      (fromRight (Atomic ' ') . (parse parsePropForm ""))
                       (toList correctFormulas)
                     inputSet = fromList (Prelude.map show propFormulae)
                   in
@@ -88,7 +88,7 @@ spec = do
                 forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
                   let
                     propFormulae = Prelude.map
-                      (\s -> fromRight (Atomic ' ') (parse parsePropForm "" $ deleteSpaces s))
+                      (fromRight (Atomic ' ') . (parse parsePropForm "" . deleteSpaces))
                       (toList correctFormulas)
                     inputSet = fromList (Prelude.map show propFormulae)
                   in
