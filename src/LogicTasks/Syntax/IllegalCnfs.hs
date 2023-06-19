@@ -22,15 +22,15 @@ description LegalCNFInst{..} = do
 
     instruct $ do
       english "Which of these formulae are not given in conjunctive normal form (cnf)?"
-      german "Welche dieser Formeln sind nicht in konjunktiver Normalform (cnf) angegeben?"
+      german "Welche dieser Formeln sind nicht in konjunktiver Normalform (KNF) angegeben?"
 
     instruct $ do
       english "Enter a list containing the indices of the non-cnf formulae to submit your answer."
-      german "Geben Sie eine Liste der Indices aller nicht cnf-Formeln als Ihre Lösung an."
+      german "Geben Sie eine Liste der Indices aller nicht in KNF vorliegenden Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
       english "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
-      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 keine cnf-Formeln, dann ist diese Lösung korrekt:"
+      german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 nicht in KNF vor, dann ist diese Lösung korrekt:"
 
 
 
