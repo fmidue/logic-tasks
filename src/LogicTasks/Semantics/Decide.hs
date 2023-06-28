@@ -67,16 +67,11 @@ verifyStatic DecideInst{..}
 
 
 
-    | any (> 2^length (atomics cnf)) changed =
+    | any (> 2^length (atomics cnf)) changed || any (<=0) changed =
         refuse $ indent $ translate $ do
-          english "At least one given index is too high."
-          german "Mindestens ein gegebener Index ist zu hoch."
+          english "At least one of the given indices does not exist."
+          german "Mindestens einer der angegebenen Indizes existiert nicht."
 
-
-    | any (<= 0) changed =
-        refuse $ indent $ translate $ do
-          english "At least one given index is zero or negative."
-          german "Mindestens ein gegebener Index ist null oder negativ."
 
 
     | null changed =
