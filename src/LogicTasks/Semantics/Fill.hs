@@ -69,15 +69,12 @@ verifyStatic FillInst{..}
           german "Geben Sie bitte eine nicht-leere Formel an."
           english "Please give a non empty formula."
 
-    | any (> 2^length (atomics cnf)) missing =
-        refuse $ indent $ translate $ do
-          german "Mindestens ein gegebener Index ist zu hoch."
-          english "At least one given index is too high."
 
-    | any (<= 0) missing =
-        refuse $ indent $ translate $ do
-          german "Mindestens ein gegebener Index ist null oder negativ."
-          english "At least one given index is zero or negative."
+    | any (> 2^length (atomics cnf)) missing || any (<=0) missing =
+    refuse $ indent $ translate $ do
+      english "At least one of the given indices does not exist."
+      german "Mindestens einer der angegebenen Indizes existiert nicht."
+
 
     | null missing =
         refuse $ indent $ translate $ do
