@@ -1,9 +1,18 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Pick where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, elements, vectorOf)
 
@@ -39,20 +48,21 @@ description PickInst{..} = do
         german "Betrachten Sie die folgende Formel:"
         english "Consider the following formula:"
       indent $ code $ availableLetter (literals sTable) : " = " ++ show sTable
-
+      pure ()
     paragraph $ do
       translate $ do
         german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
         english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
       indent $ code $ showIndexedList 120 5 $ map getTable cnfs
-
+      pure ()
     paragraph $ indent $ do
       translate $ do
         german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
         english "A valid solution could look like this: "
       code "1"
-
+      pure ()
     paragraph $ text (fromMaybe "" addText)
+    pure ()
   where
     sTable = cnfs !! (correct - 1)
 

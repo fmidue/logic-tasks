@@ -1,3 +1,5 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Min where
@@ -5,7 +7,14 @@ module LogicTasks.Semantics.Min where
 
 import qualified LogicTasks.Semantics.Max as Max
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
@@ -34,7 +43,7 @@ description MinInst{..} = do
       german "Betrachten Sie die folgende Wahrheitstafel:"
       english "Consider the following truth table:"
     indent $ code $ show $ getTable dnf
-
+    pure ()
   paragraph $ translate $ do
     german "Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
     english "Provide a formula in disjunctive normal form, that corresponds to the table. Use minterms to do this."
@@ -50,9 +59,9 @@ description MinInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
     code $ show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
-
+    pure ()
   paragraph $ text (fromMaybe "" addText)
-
+  pure ()
 
 
 verifyStatic :: OutputMonad m => MinInst -> LangM m

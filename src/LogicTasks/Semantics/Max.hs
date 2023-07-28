@@ -1,9 +1,18 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Max where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
@@ -34,7 +43,7 @@ description MaxInst{..} = do
       german "Betrachten Sie die folgende Wahrheitstafel:"
       english "Consider the following truth table:"
     indent $ code $ show $ getTable cnf
-
+    pure ()
   paragraph $ translate $ do
     german "Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
     english "Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
@@ -50,9 +59,9 @@ description MaxInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
     code $ show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
-
+    pure ()
   paragraph $ text (fromMaybe "" addText)
-
+  pure ()
 
 
 verifyStatic :: OutputMonad m => MaxInst -> LangM m
@@ -91,6 +100,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
         german "Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
         english "Your submission contains unknown literals. These do not appear in a correct solution: "
       itemizeM $ map (text . show) extra
+      pure ()
     )
 
   preventWithHint (not $ null missing)
@@ -104,6 +114,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
         german "Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
         english "Some literals are missing. Add these literals to your submission: "
       itemizeM $ map (text . show) missing
+      pure ()
     )
 
   prevent allValidTerms $
@@ -125,6 +136,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
       translate $ do
         german " hinzu!"
         english "!"
+      pure ()
     )
 
   preventWithHint (solLen > corrLen)
@@ -138,7 +150,9 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
         german $ " Die angegebene Formel enthält zu viele " ++ gTerms ++ ". Entfernen sie "
         english $ "The formula contains too many " ++ eTerms ++ ". Remove "
       text $ diff ++ "!"
+      pure ()
     )
+  pure ()
  where
     solLits = atomics solution
     extra = solLits \\ correctLits
@@ -174,6 +188,7 @@ completeMinMax correct solution =
           german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
           english "The following rows are not correct: "
         itemizeM $ map (text . show) diff
+        pure ()
       )
   where
     solTable = getTable solution

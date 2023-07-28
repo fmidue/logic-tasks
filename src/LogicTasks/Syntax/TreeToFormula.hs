@@ -1,10 +1,19 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module LogicTasks.Syntax.TreeToFormula where
 
 
 import Control.Monad.IO.Class(MonadIO (liftIO))
-import Control.Monad.Output (LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  ($=<<),
+  english,
+  german,
+  )
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
@@ -23,9 +32,7 @@ description path SynTreeInst{..} = do
       english "Consider the following syntax tree:"
       german "Betrachten Sie den folgenden Syntaxbaum:"
 
-    picture <- liftIO $ cacheTree latexImage path
-
-    image picture
+    image $=<< liftIO $ cacheTree latexImage path
 
     instruct $ do
       english "Give the propositional logic formula represented by this syntax tree."
@@ -34,7 +41,7 @@ description path SynTreeInst{..} = do
     instruct $ do
       english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
-
+    pure ()
 
 
 

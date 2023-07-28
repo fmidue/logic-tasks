@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Tasks.LegalCNF.Config (
     LegalCNFConfig(..),
@@ -10,7 +11,7 @@ module Tasks.LegalCNF.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.Char (isLetter)
 import Data.Set (Set)
 import GHC.Generics (Generic)

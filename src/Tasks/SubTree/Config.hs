@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Tasks.SubTree.Config (
     SubTreeInst(..),
@@ -9,7 +10,7 @@ module Tasks.SubTree.Config (
     ) where
 
 
-import Control.Monad.Output(LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.Set (Set)
 import GHC.Generics (Generic)
 
@@ -43,7 +44,7 @@ defaultSubTreeConfig =
 
 checkSubTreeConfig :: OutputMonad m => SubTreeConfig -> LangM m
 checkSubTreeConfig subConfig@SubTreeConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig subConfig
+    checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig subConfig
 
 
 

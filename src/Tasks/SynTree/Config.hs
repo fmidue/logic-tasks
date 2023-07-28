@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
@@ -9,7 +10,7 @@ module Tasks.SynTree.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
 

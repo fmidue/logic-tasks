@@ -1,9 +1,11 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module LogicTasks.Syntax.SubTreeSet where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf)
 
@@ -37,7 +39,7 @@ description SubTreeInst{..} = do
     example "[ A \\/ B ]" $ do
       english "For example, if ~(A \\/ B) is the given formula and one subformula is required, then the solution is:"
       german "Ist z.B. ~(A \\/ B) die gegebene Formel und es wird eine Teilformel gesucht, dann ist die folgende Lösung korrekt:"
-
+    pure ()
 
 
 verifyInst :: OutputMonad m => SubTreeInst -> LangM m

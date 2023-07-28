@@ -1,10 +1,19 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Resolve where
 
 
 import Data.Set (fromList, member, toList, unions)
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.List (sort)
 import Data.Maybe (fromJust, fromMaybe)
 import Test.QuickCheck (Gen)
@@ -46,7 +55,7 @@ description ResolutionInst{..} = do
       german "Betrachten Sie die folgende Formel in KNF:"
       english "Consider the following formula in cnf:"
     indent $ code $ show $ mkCnf clauses
-
+    pure ()
   paragraph $ translate $ do
     german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
     english "Use the resolution technique on this formula to derive the empty clause."
@@ -62,7 +71,7 @@ description ResolutionInst{..} = do
       german "Leere Klausel:"
       english "Empty clause:"
     code "{ }"
-
+    pure ()
   paragraph $ translate $ do
     german "Optional können Sie Klauseln auch durch Nummern substituieren."
     english "You can optionally substitute clauses with numbers."
@@ -80,9 +89,9 @@ description ResolutionInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
     code "[(1, 2, {A, ~B} = 5), (4, 5, { })]"
-
+    pure ()
   paragraph $ text (fromMaybe "" addText)
-
+  pure ()
 
 
 verifyStatic :: OutputMonad m => ResolutionInst -> LangM m
@@ -141,6 +150,7 @@ partialGrade ResolutionInst{..} sol = do
         german "Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
         english "At least one step contains literals not found in the original formula. "
       itemizeM $ map (text . show) wrongLitsSteps
+      pure ()
     )
 
   preventWithHint (not $ null noResolveSteps)
@@ -153,12 +163,14 @@ partialGrade ResolutionInst{..} sol = do
         german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
         english "At least one step is not a valid resolution step. "
       itemizeM $ map (text . show) noResolveSteps
+      pure ()
     )
 
   prevent checkEmptyClause $
     translate $ do
       german "Letzter Schritt leitet die leere Klausel ab?"
       english "The last step derives the empty clause?"
+  pure ()
   where
     checkMapping = correctMapping sol $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
@@ -207,6 +219,7 @@ correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
       english "No index is in duplicate use?"
 
   correctMapping rest newMapping
+  pure ()
   where
     newMapping = case i of Nothing      -> mapping
                            (Just index) -> (index,c3) : mapping

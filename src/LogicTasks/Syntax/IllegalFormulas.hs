@@ -1,9 +1,11 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module LogicTasks.Syntax.IllegalFormulas where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.List (nub, sort)
 import Data.Set (toList)
 
@@ -32,7 +34,7 @@ description LegalPropositionInst{..} = do
     example "[2,3]" $ do
       english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
       german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
-
+    pure ()
 
 
 verifyInst :: OutputMonad m => LegalPropositionInst -> LangM m

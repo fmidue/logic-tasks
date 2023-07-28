@@ -1,9 +1,18 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Step where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Data.List (delete)
 import Data.Set (difference, fromList, member, toList, union)
@@ -37,7 +46,7 @@ description StepInst{..} = do
       english "Consider the two following clauses:"
     indent $ code $ show clause1
     indent $ code $ show clause2
-
+    pure ()
   paragraph $ translate $ do
     german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
     english "Resolve the clauses and give the resulting resolvent."
@@ -53,9 +62,9 @@ description StepInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
     code "(A, ~B \\/ C)"
-
+    pure ()
   paragraph $ text (fromMaybe "" addText)
-
+  pure ()
 
 
 verifyStatic :: OutputMonad m => StepInst -> LangM m
@@ -107,7 +116,9 @@ partialGrade StepInst{..} sol = do
         german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
         english "The resolvent contains unknown literals. These literals are incorrect:"
       itemizeM $ map (text . show) extra
+      pure ()
     )
+  pure ()
   where
      mSol = fromJust $ step sol
      availLits = fromList (literals clause1) `union` fromList (literals clause2)

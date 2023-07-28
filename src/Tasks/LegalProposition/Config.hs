@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Tasks.LegalProposition.Config (
     LegalPropositionConfig (..),
@@ -9,7 +10,7 @@ module Tasks.LegalProposition.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.Set (Set)
 import GHC.Generics (Generic)
 
@@ -41,7 +42,7 @@ defaultLegalPropositionConfig =
 
 checkLegalPropositionConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
 checkLegalPropositionConfig config@LegalPropositionConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig config
+    checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
 
 checkAdditionalConfig :: OutputMonad m => LegalPropositionConfig ->LangM m

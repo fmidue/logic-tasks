@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Tasks.SuperfluousBrackets.Config (
     SuperfluousBracketsConfig (..),
@@ -9,7 +10,7 @@ module Tasks.SuperfluousBrackets.Config (
     )where
 
 
-import Control.Monad.Output(LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
@@ -40,7 +41,7 @@ defaultSuperfluousBracketsConfig =
 
 checkSuperfluousBracketsConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkSuperfluousBracketsConfig config@SuperfluousBracketsConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig config
+    checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
 
 

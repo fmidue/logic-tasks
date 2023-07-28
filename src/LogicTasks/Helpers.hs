@@ -1,3 +1,5 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module LogicTasks.Helpers where
 
@@ -6,7 +8,15 @@ import qualified Data.ByteString as BS (readFile, writeFile)
 
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Control.Monad.Output (LangM, Language, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  Language,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Control.Monad.State (State)
 import Data.Map (Map)
 import Data.ByteString.Lazy (fromStrict)
@@ -36,7 +46,7 @@ example :: OutputMonad m => String -> State (Map Language String) () -> LangM m
 example correct s = indent $ do
     instruct s
     code correct
-
+    pure ()
 
 
 reject :: OutputMonad m => State (Map Language String) () -> LangM m
@@ -53,13 +63,14 @@ clauseKey = do
   paragraph $ indent $ do
     text "Negation:"
     code "~"
-
+    pure ()
   paragraph $ indent $ do
     translate $ do
       german "Oder:"
       english "Or:"
     code "\\/"
-
+    pure ()
+  pure()
 
 
 cnfKey :: OutputMonad m => LangM m
@@ -70,7 +81,8 @@ cnfKey = do
       german "Und:"
       english "And:"
     code "/\\"
-
+    pure ()
+  pure ()
 
 
 cacheIO

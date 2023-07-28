@@ -1,9 +1,18 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Prolog where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Set (difference, member, toList, union)
 import Data.Tuple (swap)
@@ -44,7 +53,7 @@ description PrologInst{..} = do
       english "Consider the two following clauses:"
     indent $ code $ show literals1
     indent $ code $ show literals2
-
+    pure ()
   paragraph $ translate $ do
     german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
     english "Resolve the clauses and give the resulting resolvent."
@@ -62,9 +71,9 @@ description PrologInst{..} = do
       german "Ein Lösungsversuch mit den Klauseln a(x) und not(a(x)) könnte beispielsweise so aussehen:"
       english "A valid solution with the clauses a(x) and not(a(x)) could look like this:"
     code "(a(x), { })"
-
+    pure ()
   paragraph $ text (fromMaybe "" addText)
-
+  pure ()
 
 
 verifyStatic :: OutputMonad m => PrologInst -> LangM m
@@ -133,7 +142,9 @@ partialGrade PrologInst{..} sol = do
         german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
         english "The resolvent contains unknown literals. These are incorrect:"
       itemizeM $ map (text . show) extra
+      pure ()
     )
+  pure ()
   where
      availLits = pLiterals literals1 `union` pLiterals literals2
      solLits = pLiterals $ snd sol

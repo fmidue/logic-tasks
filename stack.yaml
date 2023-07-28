@@ -8,6 +8,6 @@ extra-deps:
   - minisat-solver-0.1
   - latex-svg-image-0.2
   - git: https://github.com/fmidue/output-monad.git
-    commit: c953b14c2b73dfb9cb5749c999cdc63702b8cb8c
+    commit: a9f13159256327d6478e50a097910b052e8f3f02
     subdirs:
       - output-monad

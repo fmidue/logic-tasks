@@ -1,9 +1,11 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module LogicTasks.Syntax.SimplestFormula where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 
@@ -40,7 +42,7 @@ description SuperfluousBracketsInst{..} = do
     example "A \\/ B" $ do
       english "For example, if (A \\/ B) is the given formula, then the solution is:"
       german "Ist z.B. (A \\/ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
-
+    pure ()
 
 
 verifyInst :: OutputMonad m => SuperfluousBracketsInst -> LangM m

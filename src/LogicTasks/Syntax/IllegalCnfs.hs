@@ -1,8 +1,10 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
 module LogicTasks.Syntax.IllegalCnfs where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.List (nub, sort)
 import Data.Set (toList)
 
@@ -31,6 +33,7 @@ description LegalCNFInst{..} = do
     example "[2,3]" $ do
       english "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
       german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 nicht in KNF vor, dann ist diese Lösung korrekt:"
+    pure ()
 
 
 

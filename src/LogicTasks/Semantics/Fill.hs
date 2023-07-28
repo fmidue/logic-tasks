@@ -1,9 +1,18 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Fill where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.Maybe (fromMaybe, fromJust)
 import Test.QuickCheck(Gen)
 
@@ -37,13 +46,13 @@ description FillInst{..} = do
       german  "Betrachten Sie die folgende Formel:"
       english "Consider the following formula:"
     indent $ code $ availableLetter (literals cnf) : " = " ++ show cnf
-
+    pure ()
   paragraph $ do
     translate $ do
       german "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
       english "Fill all blanks in the corresponding truth table with truth values (True or False)."
     indent $ code $ show $ gapsAt (getTable cnf) missing
-
+    pure ()
   paragraph $ translate $ do
     german "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
     english "Provide the solution as a list of truth values. The first element of the list fills the first blank from the top, the second element fills the second blank, etc."
@@ -57,9 +66,9 @@ description FillInst{..} = do
       german "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen:"
       english "A valid solution for four blanks could look like this:"
     code "[0,1,1,1]"
-
+    pure ()
   paragraph $ text (fromMaybe "" addText)
-
+  pure ()
 
 
 verifyStatic :: OutputMonad m => FillInst -> LangM m
@@ -134,6 +143,7 @@ partialGrade FillInst{..} sol = do
       german $ "Die Lösung muss genau "  ++ show missingLen ++ " Lücken enthalten."
       english $ "The solution must contain exactly " ++ show missingLen ++ " gaps."
     )
+  pure ()
   where
     tableLen = length $ readEntries $ getTable cnf
     missingLen = length missing

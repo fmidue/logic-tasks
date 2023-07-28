@@ -1,9 +1,18 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module LogicTasks.Semantics.Decide where
 
 
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (
+  GenericOutputMonad (..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  )
 import Data.List (nub)
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
@@ -37,13 +46,13 @@ description DecideInst{..} = do
       english "Consider the following formula:"
       german "Betrachten Sie die folgende Formel:"
     indent $ code $ availableLetter (literals cnf) : " = " ++ show cnf
-
+    pure ()
   paragraph $ do
     translate $ do
       english "Find all faulty entries in the last column of the following truth table."
       german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzen Spalte der folgenden Wahrheitstafel."
     indent $ code $ show (flipAt (getTable cnf) changed)
-
+    pure ()
   paragraph $ translate $ do
     english  "Provide the solution as a list of indices of the faulty rows. The indices start with 1."
     german  "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Die Indizes beginnen dabei mit der 1."
@@ -53,9 +62,9 @@ description DecideInst{..} = do
       english "A valid solution could look like this: "
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
     code "[1,4,5]"
-
+    pure ()
   paragraph $ text (fromMaybe "" addText)
-
+  pure ()
 
 
 verifyStatic :: OutputMonad m => DecideInst -> LangM m
@@ -120,7 +129,7 @@ partialGrade DecideInst{..} sol = do
       german $ "Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."
       english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
     )
-
+  pure ()
   where
     acLen = length $ nub changed
     solLen = length $ nub sol

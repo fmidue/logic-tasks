@@ -1,9 +1,19 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 
 module Util where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate, yesNo)
+import Control.Monad.Output (
+  GenericOutputMonad(..),
+  LangM,
+  OutputMonad,
+  english,
+  german,
+  translate,
+  yesNo,
+  )
 import Control.Monad.State (put, get, lift, evalStateT)
 import Control.Monad (when)
 import Data.List (delete)
@@ -24,7 +34,7 @@ preventWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
 preventWithHint b desc hint = do
   yesNo (not b) desc
   when b (refuse $ indent hint)
-
+  pure ()
 
 
 pairwiseCheck :: Eq a => [(a,a,Int)] -> ([Int],[Int])
