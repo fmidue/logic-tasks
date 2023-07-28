@@ -1,2 +1,3 @@
 ---
 - ignore: {name: Use String}
+- ignore: {name: Redundant pure}
