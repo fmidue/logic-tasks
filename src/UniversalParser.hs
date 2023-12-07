@@ -9,7 +9,7 @@ import Data.Functor (($>))
 import Data.Maybe (fromMaybe)
 import qualified Data.List.NonEmpty as NonEmpty
 
-import Text.Megaparsec (ErrorItem(..), satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, hidden)
+import Text.Megaparsec (ErrorItem(..), satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, hidden, notFollowedBy)
 import Text.Megaparsec.Char (char)
 
 import ParsingHelpers
@@ -173,7 +173,12 @@ formula LevelSpec{..}
   noFixity :: Parser NoFixity
   noFixity = do
     x <- basic
-    NoFixity x <$> anyBinaryOp <*> basic <|> pure (OfBasic x)
+    NoFixity x <$> anyBinaryOp <*> basic <* _noOperator <|> pure (OfBasic x)
+
+  _noOperator :: Parser ()
+  _noOperator =
+    notFollowedBy (andParser <|> orParser <|> implicationParser <|> biImplicationParser)
+    <|> unexpected (Label $ NonEmpty.fromList "operator (perhaps you are missing some parentheses)")
 
   anyBinaryOp :: Parser Op
   anyBinaryOp = _noNested *> chooseBinary <* _noSecondOp
