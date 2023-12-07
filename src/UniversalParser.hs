@@ -7,9 +7,10 @@ module UniversalParser where
 
 import Data.Functor (($>))
 import Data.Maybe (fromMaybe)
+import qualified Data.List.NonEmpty as NonEmpty
 
-import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char)
-import Text.Parsec.String (Parser)
+import Text.Megaparsec (ErrorItem(..), satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, hidden)
+import Text.Megaparsec.Char (char)
 
 import ParsingHelpers
 
@@ -186,22 +187,21 @@ formula LevelSpec{..}
       )
 
     _noNested :: Parser () -- catch the A (B and C) error pattern
-    _noNested = (do
+    _noNested = hidden ((do
       lookAhead $ char '('
       _ <- try nested
-      unexpected "formula"
-      fail "maybe there is an operator missing")
-      <|> pure ()
+      unexpected . Label $ NonEmpty.fromList "formula (maybe there is an operator missing)")
+      <|> pure ())
 
     _noSecondOp :: Parser ()
-    _noSecondOp = (do
+    _noSecondOp = hidden ((do
       op <- try chooseBinary
-      unexpected $ "second operator: " ++ case op of
+      unexpected . Label . NonEmpty.fromList $ "second operator: " ++ case op of
         Or -> "Disjunction"
         And -> "Conjunction"
         Impl -> "Implication"
         BiImpl -> "Bi-Implication")
-      <|> pure ()
+      <|> pure ())
 
   basic :: Parser Basic
   basic = BasicNested <$> nested <|> BasicNeg <$> neg

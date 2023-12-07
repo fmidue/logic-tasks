@@ -82,10 +82,10 @@ library
     , hspec
     , latex-svg-image >=0.2
     , math-functions
+    , megaparsec
     , minisat-solver
     , mtl
     , output-monad
-    , parsec
     , pretty-simple
     , random
     , text
@@ -124,10 +124,10 @@ test-suite src-test
     , latex-svg-image >=0.2
     , logic-tasks
     , math-functions
+    , megaparsec
     , minisat-solver
     , mtl
     , output-monad
-    , parsec
     , pretty-simple
     , random
     , text

@@ -7,8 +7,8 @@ module LogicTasks.Debug where
 import Test.QuickCheck
 import Control.Monad.Output.Generic
 import Control.Monad.Output
-import Text.Parsec
-import Text.Parsec.String (Parser)
+import Text.Megaparsec
+import ParsingHelpers (Parser)
 import Data.Maybe (isJust)
 import Formula.Types (Cnf(..), Clause(..), Literal(..), Formula(..))
 import Formula.Util (isPositive)

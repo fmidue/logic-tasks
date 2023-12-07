@@ -6,7 +6,7 @@ import Test.QuickCheck (Gen, forAll, choose, suchThat, (==>))
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (notNull)
 import Test.Hspec (Spec, describe, it)
-import Text.Parsec (parse)
+import Text.Megaparsec (parse)
 
 import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst)
 import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))

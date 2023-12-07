@@ -3,7 +3,7 @@ module SubTreeSpec (spec) where
 
 import Test.Hspec (describe, it, xit, Spec)
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
-import Text.Parsec (parse)
+import Text.Megaparsec (parse)
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (isInfixOf )
 import Data.Set (fromList, size, toList)

@@ -5,33 +5,35 @@ module Formula.Parsing where
 
 import Config
 import Formula.Util
-import ParsingHelpers (lexeme, tokenSymbol)
 import Formula.Types
 
 import Control.Monad (void)
 import Data.Char (toLower)
 import Data.Map (fromList)
-import Text.ParserCombinators.Parsec (
-  Parser,
+import Text.Megaparsec (
   (<?>),
   (<|>),
-  alphaNum,
   between,
-  char,
-  digit,
   getInput,
-  many1,
+  some,
   notFollowedBy,
-  optionMaybe,
+  optional,
   satisfy,
   sepBy,
   setInput,
-  spaces,
-  string,
   try,
   )
 
+import Text.Megaparsec.Char (
+  alphaNumChar,
+  char,
+  digitChar,
+  space,
+  string,
+  )
+
 import UniversalParser
+import ParsingHelpers (Parser, lexeme, tokenSymbol)
 
 instance Parse ResStep where
   parser = do
@@ -41,7 +43,7 @@ instance Parse ResStep where
     cl2 <- parseEither resClause parseNum
     tokenSymbol ","
     cl3 <- resClause
-    index <- optionMaybe indexParse
+    index <- optional indexParse
     tokenSymbol ")"
     pure $ Res (cl1,cl2,(cl3,index))
 
@@ -55,7 +57,7 @@ instance Parse ResStep where
     parseEither x y = lexeme ((Left <$> try x) <|> (Right <$> y))
 
     parseNum = do
-      i <- many1 digit
+      i <- some digitChar
       pure (read i)
 
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
@@ -87,14 +89,14 @@ instance Parse a => Parse [a] where
 instance Parse Number where
   parser = (lexeme numParse <?> "Number") <|> fail "Could not parse a number"
     where numParse = do
-            result <- optionMaybe $ many1 digit
+            result <- optional $ some digitChar
             pure $ Number $ fmap read result
 
 
 instance Parse StepAnswer where
   parser = (lexeme stepParse <?> "Resolution Step") <|> fail "Could not parse a tuple"
     where stepParse = do
-            result <- optionMaybe parseTuple
+            result <- optional parseTuple
             pure $ StepAnswer result
           parseTuple = do
             void $ lexeme $ char '('
@@ -119,7 +121,7 @@ instance Parse TruthValue where
               <|> fail "Could not parse a truth value: Please enter values as described in the exercise description."
              )
               <|> fail "The truth value was mistyped."
-            notFollowedByElse alphaNum (\c ->
+            notFollowedByElse alphaNumChar (\c ->
               fail $ unlines
                 [ "unexpected " ++ [c]
                 , "Additional characters were appended to this truth value or it was mistyped."
@@ -138,7 +140,7 @@ instance Parse TruthValue where
                 single :: String -> Parser String
                 single s = do
                     res <- string s
-                    notFollowedBy alphaNum
+                    notFollowedBy alphaNumChar
                     return res
 
                 eitherDeEn = string "fals" >> (try (string "e") <|> string "ch") -- no-spell-check
@@ -259,7 +261,7 @@ instance Parse PrologLiteral where
            <|> fail "Could not parse a literal."
     where
       litParse = do
-        pol <- lexeme $ optionMaybe $ string "not("
+        pol <- lexeme $ optional $ string "not("
         ident <- strParse
         lexeme $ char '('
         facts <- lexeme $ sepBy (lexeme strParse) (lexeme $ char ',')
@@ -268,7 +270,7 @@ instance Parse PrologLiteral where
                     Just _  -> do char ')'
                                   pure (PrologLiteral False ident facts)
         where
-          strParse = many1 $ satisfy $ flip elem ['A'..'z']
+          strParse = some $ satisfy $ flip elem ['A'..'z']
 
 
 
@@ -278,14 +280,14 @@ instance Parse PrologClause where
           <|> fail "Could not parse a clause: Clauses are composed out of terms and the 'or operator' (\\/)."
    where
      clauseParse = do
-       braces <- lexeme $ optionMaybe $ char '('
+       braces <- lexeme $ optional $ char '('
        ts <- sepBy parser orParser
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkPrologClause ts
      emptyParse = do
        char '{'
-       spaces
+       space
        char '}'
        pure $ mkPrologClause []
 
@@ -297,14 +299,14 @@ instance Parse PickInst where
         string "PickInst("
         cs <- parser
         tokenSymbol ","
-        index <- lexeme $ many1 digit
+        index <- lexeme $ some digitChar
         printSol <- lexeme text'
-        bonusText <- optionMaybe $ lexeme text'
+        bonusText <- optional $ lexeme text'
         char ')'
         pure $ PickInst cs (read index) (read printSol) (fromList . read <$> bonusText)
           where
-            text' = between start (char '}') $ many1 $ satisfy ( /= '}')
+            text' = between start (char '}') $ some $ satisfy ( /= '}')
             start = do
               char ','
-              spaces
+              space
               char '{'

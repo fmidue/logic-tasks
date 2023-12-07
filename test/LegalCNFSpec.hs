@@ -7,11 +7,12 @@ import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it, xit)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess, within)
 import Data.List((\\))
+import Data.Void
 
 import ParsingHelpers (fully)
 import Formula.Types (Cnf)
 import Formula.Parsing (parser)
-import Text.ParserCombinators.Parsec (ParseError, parse)
+import Text.Megaparsec (ParseErrorBundle, parse)
 import Config (CnfConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree)
@@ -157,5 +158,5 @@ judgeLeaf :: SynTree o a -> Bool
 judgeLeaf (Leaf _) = True
 judgeLeaf _ = False
 
-cnfParse :: String -> Either ParseError Cnf
+cnfParse :: String -> Either (ParseErrorBundle String Void) Cnf
 cnfParse = parse (fully parser) ""

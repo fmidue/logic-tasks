@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module ParsingHelpers (
+  Parser,
   formulaSymbol,
   whitespace,
   lexeme,
@@ -21,19 +22,21 @@ import Control.Applicative ((<**>))
 import Data.Char (isLetter)
 import Data.Functor (void)
 import Data.List.Extra (nubOrd)
+import Data.Void
 
-import Text.Parsec ((<|>), try, notFollowedBy, alphaNum, string, eof)
-import Text.Parsec.Char (oneOf, satisfy, spaces)
-import Text.Parsec.String (Parser)
+import Text.Megaparsec (Parsec, (<|>), try, notFollowedBy, eof, oneOf, satisfy)
+import Text.Megaparsec.Char (space, alphaNumChar, string)
 
 import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)
+
+type Parser = Parsec Void String
 
 formulaSymbol :: Parser Char
 formulaSymbol = satisfy isLetter
     <|> oneOf (nubOrd ("()" ++ showOperatorNot ++ concatMap showOperator allBinaryOperators))
 
 whitespace :: Parser ()
-whitespace = spaces
+whitespace = space
 
 parens :: Parser a -> Parser a
 parens p = try $ tokenSymbol "(" *> p <* tokenSymbol ")"
@@ -43,19 +46,19 @@ brackets :: Parser a -> Parser a
 brackets = parens
 
 lexeme :: Parser a ->  Parser a
-lexeme x = x <* spaces
+lexeme x = x <* space
 
 token :: Parser a -> Parser a
 token = lexeme . try
 
 keyword :: String -> Parser ()
-keyword k = token (string k *> notFollowedBy alphaNum)
+keyword k = token (string k *> notFollowedBy alphaNumChar)
 
 tokenSymbol :: String -> Parser ()
 tokenSymbol = token . void . string
 
 fully :: Parser a -> Parser a
-fully p = spaces *> p <* eof
+fully p = space *> p <* eof
 
 infixl1 ::(a -> b) -> Parser a -> Parser (b -> a -> b) -> Parser b
 infixl1 wrap p op = wrap <$> p <**> rest where
