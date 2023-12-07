@@ -25,8 +25,8 @@ description LegalPropositionInst{..} = do
     focus $ unlines $ indexed pseudoFormulas
 
     instruct $ do
-      english "Some of these are syntactically incorrect. Which of these formulae are invalid?"
-      german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt sind."
+      english "Some of these are syntactically incorrect. Which of these formulae have an invalid format?"
+      german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt geformt sind."
 
     instruct $ do
       english "Enter a list containing the indices of the invalid formulae to submit your answer."
