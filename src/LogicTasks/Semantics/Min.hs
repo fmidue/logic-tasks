@@ -25,7 +25,8 @@ import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions
 import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
 import LogicTasks.Helpers (extra, formulaKey)
 import Util (tryGen, withRatio)
-
+import Formula.Parsing.Delayed (Delayed, withDelayed)
+import Formula.Parsing (Parse(..))
 
 
 
@@ -85,15 +86,18 @@ verifyQuiz = Max.verifyQuiz
 start :: Dnf
 start = mkDnf [mkCon [Literal 'A']]
 
+partialGrade :: OutputMonad m => MinInst -> Delayed Dnf -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-
-partialGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
-partialGrade MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms False
+partialGrade' :: OutputMonad m => MinInst -> Dnf -> LangM m
+partialGrade' MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms False
   where
     corLits = atomics dnf
     allMinTerms = not $ all (\c -> amount c == length corLits) $ getConjunctions sol
 
 
+completeGrade :: OutputMonad m => MinInst -> Delayed Dnf -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
-completeGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
-completeGrade MinInst{..} = Max.completeMinMax showSolution dnf
+completeGrade' :: OutputMonad m => MinInst -> Dnf -> LangM m
+completeGrade' MinInst{..} = Max.completeMinMax showSolution dnf

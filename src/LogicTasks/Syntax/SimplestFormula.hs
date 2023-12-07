@@ -18,6 +18,9 @@ import Tasks.SuperfluousBrackets.Config (
 import Trees.Helpers
 import Trees.Types
 import Control.Monad (when)
+import Formula.Parsing.Delayed (Delayed, withDelayed)
+import Formula.Parsing (Parse(..))
+import Trees.Parsing()
 
 
 
@@ -74,9 +77,11 @@ start :: FormulaAnswer
 start = FormulaAnswer Nothing
 
 
+partialGrade :: OutputMonad m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
-partialGrade SuperfluousBracketsInst{..} f
+partialGrade' :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
+partialGrade' SuperfluousBracketsInst{..} f
     | isNothing $ maybeForm f =
       reject $ do
         english "Your submission is empty."
@@ -110,10 +115,11 @@ partialGrade SuperfluousBracketsInst{..} f
     correctLits = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
+completeGrade :: OutputMonad m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
-
-completeGrade :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
-completeGrade inst sol
+completeGrade' :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
+completeGrade' inst sol
     | show (fromJust (maybeForm sol)) /= simplestString inst = refuse $ do
       instruct $ do
         english "Your solution is incorrect."

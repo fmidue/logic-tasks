@@ -33,7 +33,8 @@ import Control.Monad (unless, when)
 import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
-
+import Formula.Parsing.Delayed (Delayed, withDelayed)
+import Formula.Parsing (Parse(..))
 
 
 
@@ -197,9 +198,11 @@ gradeSteps steps appliedIsNothing = do
             fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
 
+partialGrade :: OutputMonad m => ResolutionInst -> Delayed [ResStep] -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
-partialGrade ResolutionInst{..} sol = do
+partialGrade' :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
+partialGrade' ResolutionInst{..} sol = do
   checkMapping
 
   preventWithHint (not $ null wrongLitsSteps)
@@ -228,8 +231,11 @@ partialGrade ResolutionInst{..} sol = do
     applied = applySteps clauses steps
     stepsGraded = gradeSteps steps (isNothing applied)
 
-completeGrade :: (OutputMonad m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
-completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
+completeGrade :: (OutputMonad m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` parser
+
+completeGrade' :: (OutputMonad m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
+completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
     unless printFeedbackImmediately $ do
       recoverFrom stepsGraded
 

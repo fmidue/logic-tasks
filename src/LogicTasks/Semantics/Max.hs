@@ -26,7 +26,8 @@ import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getCla
 import LogicTasks.Helpers (formulaKey, example, extra)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 import Control.Monad (when)
-
+import Formula.Parsing.Delayed (Delayed, withDelayed)
+import Formula.Parsing (Parse(..))
 
 
 
@@ -168,10 +169,11 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
       then ("Maxterme", "Klauseln", "maxterms", "clauses") -- no-spell-check
       else ("Minterme", "Konjunktionen", "minterms", "conjunctions") -- no-spell-check
 
+partialGrade :: OutputMonad m => MaxInst -> Delayed Cnf -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-
-partialGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-partialGrade MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
+partialGrade' :: OutputMonad m => MaxInst -> Cnf -> LangM m
+partialGrade' MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
   where
     corLits = atomics cnf
     allMaxTerms = not $ all (\c -> amount c == length corLits) $ getClauses sol
@@ -202,7 +204,8 @@ completeMinMax showSolution correct solution =
     solTable = getTable solution
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable correct) [1..])
 
+completeGrade :: OutputMonad m => MaxInst -> Delayed Cnf -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
-
-completeGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-completeGrade MaxInst{..} = completeMinMax showSolution cnf
+completeGrade' :: OutputMonad m => MaxInst -> Cnf -> LangM m
+completeGrade' MaxInst{..} = completeMinMax showSolution cnf

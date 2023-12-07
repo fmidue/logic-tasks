@@ -26,8 +26,6 @@ import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 
 
-
-
 genFillInst :: FillConfig -> Gen FillInst
 genFillInst FillConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = do
     cnf <- cnfInRange
@@ -114,8 +112,6 @@ verifyQuiz FillConfig{..}
 start :: [TruthValue]
 start = []
 
-
-
 partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
   preventWithHint (solLen /= missingLen)
@@ -133,7 +129,6 @@ partialGrade FillInst{..} sol = do
       boolSol = map truth sol
       solLen = length boolSol
       missingLen = length missing
-
 
 completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 completeGrade FillInst{..} sol = do
