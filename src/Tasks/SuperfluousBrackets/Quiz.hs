@@ -26,7 +26,7 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
         atLeastOccurring
         allowArrowOperators
         maxConsecutiveNegations
-      `suchThat` (\x -> sameAssociativeOperatorAdjacent x && numOfUniqueOpsInSynTree x > 1)
+      `suchThat` \x -> sameAssociativeOperatorAdjacent x && numOfUniqueOpsInSynTree x > 1
     stringWithSuperfluousBrackets <- superfluousBracketsDisplay tree superfluousBracketPairs
     return $ SuperfluousBracketsInst
       { tree
