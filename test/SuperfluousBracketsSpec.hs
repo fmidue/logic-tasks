@@ -32,6 +32,7 @@ validBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
+        , minUniqueOperators = 2
         }
 
 invalidBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
@@ -42,6 +43,7 @@ invalidBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
+        , minUniqueOperators = 2
         }
 
 spec :: Spec
@@ -67,6 +69,15 @@ spec = do
                   ) $ \synTree ->
                     sameAssociativeOperatorAdjacent synTree ==>
                       notNull (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing)
+    describe "numOfUniqueOpsInSynTree" $ do
+        it "should return 0 if there is only a leaf" $
+            numOfUniqueOpsInSynTree (Leaf 'a') == 0
+        it "should return 1 if there is only one operator" $
+            numOfUniqueOpsInSynTree (Binary Or (Leaf 'a') (Leaf 'b')) == 1
+        it "should return 1 if there are two operators of same kind" $
+            numOfUniqueOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c')))) == 1
+        it "should return 2 if there are two unique operators" $
+            numOfUniqueOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary And (Leaf 'a') (Leaf 'c')))) == 2
     describe "simplestDisplay and superfluousBracketsDisplay" $ do
         it "simplestDisplay should have less brackets than or equal to normal formula" $
             forAll validBoundsSuperfluousBrackets $
@@ -129,7 +140,7 @@ spec = do
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   fromIntegral (length stringWithSuperfluousBrackets - length simplestString)
                     == superfluousBracketPairs * 2
-        it "should not have less than two unique operators" $
+        it "should have the right number of unique operators" $
             forAll validBoundsSuperfluousBrackets $ \config@SuperfluousBracketsConfig {..} ->
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
-                  numOfUniqueOpsInSynTree tree > 1
+                  numOfUniqueOpsInSynTree tree >= minUniqueOperators

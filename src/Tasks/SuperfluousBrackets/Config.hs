@@ -25,6 +25,7 @@ data SuperfluousBracketsConfig =
     {
       syntaxTreeConfig :: SynTreeConfig
     , superfluousBracketPairs :: Integer
+    , minUniqueOperators :: Integer
     } deriving (Show,Generic)
 
 
@@ -35,6 +36,7 @@ defaultSuperfluousBracketsConfig =
     {
       syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
     , superfluousBracketPairs = 2
+    , minUniqueOperators = 2
     }
 
 
@@ -56,6 +58,9 @@ checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig 
     | superfluousBracketPairs < 1 = reject $ do
         english "Add at least one extra pair of brackets."
         german "Es muss mindestens ein Klammerpaar hinzugefügt werden."
+    | minUniqueOperators < 1 = reject $ do
+        english "There should be at least one operator"
+        german "Es sollte mindestens einen Operator geben"
     | otherwise = pure()
 
 
