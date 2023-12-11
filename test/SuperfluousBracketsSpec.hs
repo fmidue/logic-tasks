@@ -13,7 +13,7 @@ import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), Superfluo
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula)
-import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
+import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes, numOfUniqueOpsInSynTree)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
   superfluousBracketsDisplay,
@@ -129,3 +129,7 @@ spec = do
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   fromIntegral (length stringWithSuperfluousBrackets - length simplestString)
                     == superfluousBracketPairs * 2
+        it "should not have less than two unique operators" $
+            forAll validBoundsSuperfluousBrackets $ \config@SuperfluousBracketsConfig {..} ->
+                forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
+                  numOfUniqueOpsInSynTree tree > 1

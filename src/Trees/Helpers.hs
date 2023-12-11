@@ -19,7 +19,8 @@ module Trees.Helpers
     clauseToSynTree,
     literalToSynTree,
     numOfOps,
-    numOfOpsInFormula
+    numOfOpsInFormula,
+    numOfUniqueOpsInSynTree,
     ) where
 
 import Control.Monad (void)
@@ -139,3 +140,12 @@ numOfOpsInFormula (Atomic _) = 0
 numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
+
+numOfUniqueOpsInSynTree :: SynTree BinOp c -> Integer
+numOfUniqueOpsInSynTree (Leaf _) = 0
+numOfUniqueOpsInSynTree (Not f) = numOfUniqueOpsInSynTree f
+numOfUniqueOpsInSynTree bin = num' bin []
+  where num' :: SynTree BinOp c -> [BinOp] -> Integer
+        num' (Binary op sub1 sub2) xs = if op `elem` xs then num' sub1 xs + num' sub2 xs
+                                                        else 1 + num' sub1 (op:xs) + num' sub2 (op:xs)
+        num' x _ = numOfUniqueOpsInSynTree x

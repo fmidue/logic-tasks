@@ -10,7 +10,7 @@ import Test.QuickCheck (Gen, suchThat)
 import Tasks.SuperfluousBrackets.Config (SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Trees.Helpers (sameAssociativeOperatorAdjacent)
+import Trees.Helpers (sameAssociativeOperatorAdjacent, numOfUniqueOpsInSynTree)
 import Trees.Generate (genSynTree)
 import Trees.Print (simplestDisplay)
 
@@ -26,7 +26,7 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
         atLeastOccurring
         allowArrowOperators
         maxConsecutiveNegations
-      `suchThat` sameAssociativeOperatorAdjacent
+      `suchThat` (\x -> sameAssociativeOperatorAdjacent x && numOfUniqueOpsInSynTree x > 1)
     stringWithSuperfluousBrackets <- superfluousBracketsDisplay tree superfluousBracketPairs
     return $ SuperfluousBracketsInst
       { tree
