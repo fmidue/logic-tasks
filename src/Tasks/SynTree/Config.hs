@@ -32,6 +32,7 @@ data SynTreeConfig =
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   , extraText :: Maybe String
+  , minUniqueBinOperators :: Integer
   } deriving (Show,Generic)
 
 
@@ -47,6 +48,7 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , extraText = Nothing
+    , minUniqueBinOperators = 0
     }
 
 
@@ -91,6 +93,9 @@ checkSynTreeConfig SynTreeConfig {..}
       = reject $ do
         english "Your maximum depth value is unreasonably large, given your other settings."
         german "Maximale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
+    | minUniqueBinOperators < 0 = reject $ do
+        english "There should be a positive number of unique operators"
+        german "Es sollte eine positive Anzahl an unterschiedlichen Operatoren geben"
     | otherwise = pure()
 
 

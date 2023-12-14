@@ -13,7 +13,7 @@ import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), Superfluo
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula)
-import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes, numOfUniqueBinOpsInSynTree)
+import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
   superfluousBracketsDisplay,
@@ -32,7 +32,6 @@ validBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
-        , minUniqueBinOperators = 2
         }
 
 invalidBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
@@ -43,7 +42,6 @@ invalidBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
-        , minUniqueBinOperators = 2
         }
 
 spec :: Spec
@@ -66,18 +64,10 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                     sameAssociativeOperatorAdjacent synTree ==>
                       notNull (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing)
-    describe "numOfUniqueBinOpsInSynTree" $ do
-        it "should return 0 if there is only a leaf" $
-            numOfUniqueBinOpsInSynTree (Leaf 'a') == 0
-        it "should return 1 if there is only one operator" $
-            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Leaf 'b')) == 1
-        it "should return 1 if there are two operators of same kind" $
-            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c')))) == 1
-        it "should return 2 if there are two unique operators" $
-            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary And (Leaf 'a') (Binary And (Leaf 'a') (Leaf 'c'))))) == 2
     describe "simplestDisplay and superfluousBracketsDisplay" $ do
         it "simplestDisplay should have less brackets than or equal to normal formula" $
             forAll validBoundsSuperfluousBrackets $
@@ -90,6 +80,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                     length (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing) *2
                       == length (display synTree) - length (simplestDisplay synTree)
@@ -107,6 +98,7 @@ spec = do
                   atLeastOccurring
                   allowArrowOperators
                   maxConsecutiveNegations
+                  minUniqueBinOperators
                 ) $
                   \synTree -> not (sameAssociativeOperatorAdjacent synTree) ==>
                     display synTree == simplestDisplay synTree
@@ -125,6 +117,7 @@ spec = do
                         atLeastOccurring
                         allowArrowOperators
                         maxConsecutiveNegations
+                        minUniqueBinOperators
                       `suchThat` sameAssociativeOperatorAdjacent
                     ) $
                       \synTree -> forAll (superfluousBracketsDisplay synTree (treeNodes synTree + 1)) $
@@ -140,7 +133,3 @@ spec = do
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   fromIntegral (length stringWithSuperfluousBrackets - length simplestString)
                     == superfluousBracketPairs * 2
-        it "should have the right number of unique operators" $
-            forAll validBoundsSuperfluousBrackets $ \config@SuperfluousBracketsConfig {..} ->
-                forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
-                  numOfUniqueBinOpsInSynTree tree >= minUniqueBinOperators
