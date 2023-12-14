@@ -70,6 +70,8 @@ illegalShow notFirstLayer a b usedLiterals usedOperator =
 
 
 combineNormalShow :: SynTree BinOp Char -> SynTree BinOp Char -> String -> Bool -> Gen String
+combineNormalShow a b "" False = return (normalShow a ++ " " ++ normalShow b)
+combineNormalShow a b "" True = return ("(" ++ normalShow a ++ " " ++ normalShow b ++ ")")
 combineNormalShow a b replacedOperator False = return (normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b)
 combineNormalShow a b replacedOperator True =
     return $ "(" ++ normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b ++ ")"
