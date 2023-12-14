@@ -13,7 +13,7 @@ import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), Superfluo
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula)
-import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes, numOfUniqueOpsInSynTree)
+import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes, numOfUniqueBinOpsInSynTree)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
   superfluousBracketsDisplay,
@@ -32,7 +32,7 @@ validBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
-        , minUniqueOperators = 2
+        , minUniqueBinOperators = 2
         }
 
 invalidBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
@@ -43,7 +43,7 @@ invalidBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
-        , minUniqueOperators = 2
+        , minUniqueBinOperators = 2
         }
 
 spec :: Spec
@@ -69,15 +69,15 @@ spec = do
                   ) $ \synTree ->
                     sameAssociativeOperatorAdjacent synTree ==>
                       notNull (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing)
-    describe "numOfUniqueOpsInSynTree" $ do
+    describe "numOfUniqueBinOpsInSynTree" $ do
         it "should return 0 if there is only a leaf" $
-            numOfUniqueOpsInSynTree (Leaf 'a') == 0
+            numOfUniqueBinOpsInSynTree (Leaf 'a') == 0
         it "should return 1 if there is only one operator" $
-            numOfUniqueOpsInSynTree (Binary Or (Leaf 'a') (Leaf 'b')) == 1
+            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Leaf 'b')) == 1
         it "should return 1 if there are two operators of same kind" $
-            numOfUniqueOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c')))) == 1
+            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c')))) == 1
         it "should return 2 if there are two unique operators" $
-            numOfUniqueOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary And (Leaf 'a') (Leaf 'c')))) == 2
+            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary And (Leaf 'a') (Binary And (Leaf 'a') (Leaf 'c'))))) == 2
     describe "simplestDisplay and superfluousBracketsDisplay" $ do
         it "simplestDisplay should have less brackets than or equal to normal formula" $
             forAll validBoundsSuperfluousBrackets $
@@ -143,4 +143,4 @@ spec = do
         it "should have the right number of unique operators" $
             forAll validBoundsSuperfluousBrackets $ \config@SuperfluousBracketsConfig {..} ->
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
-                  numOfUniqueOpsInSynTree tree >= minUniqueOperators
+                  numOfUniqueBinOpsInSynTree tree >= minUniqueBinOperators
