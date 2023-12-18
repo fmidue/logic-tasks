@@ -140,7 +140,7 @@ data PrologInst = PrologInst {
                , literals2 :: !PrologClause
                , addText :: !(Maybe String)
                }
-               deriving (Typeable, Generic)
+               deriving (Show, Typeable, Generic)
 
 
 dPrologInst :: PrologInst
@@ -273,7 +273,7 @@ data PrologConfig = PrologConfig {
     , usedPredicates :: [PrologLiteral]
     , extraText :: Maybe String
     }
-    deriving (Typeable, Generic)
+    deriving (Show, Typeable, Generic)
 
 dPrologConf :: PrologConfig
 dPrologConf = PrologConfig

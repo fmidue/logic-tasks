@@ -16,7 +16,7 @@ import Control.Monad.Output (
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Set (difference, member, toList, union)
 import Data.Tuple (swap)
-import Test.QuickCheck (Gen)
+import Test.QuickCheck (Gen, suchThat)
 
 import Config (PrologConfig(..), PrologInst(..))
 import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite)
@@ -24,13 +24,14 @@ import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transfo
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
-
-
+import Formula.Helpers (isHornClause)
 
 
 genPrologInst :: PrologConfig -> Gen PrologInst
 genPrologInst PrologConfig{..} = do
     (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
+      `suchThat` \(clause', resolveLit', literals1') -> isHornClause (mkPrologClause $ map remap (resolveLit' : literals1')) &&
+                                                          isHornClause (mkPrologClause $ map remap (opposite resolveLit' : literals clause'))
     let
       termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
       termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
