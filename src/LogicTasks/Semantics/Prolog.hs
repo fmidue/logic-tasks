@@ -13,7 +13,7 @@ import Control.Monad.Output (
   german,
   translate,
   )
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust)
 import Data.Set (difference, member, toList, union)
 import Data.Tuple (swap)
 import Test.QuickCheck (Gen)
@@ -24,6 +24,7 @@ import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transfo
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
+import LogicTasks.Helpers
 
 
 
@@ -72,7 +73,7 @@ description PrologInst{..} = do
       english "A valid solution with the clauses a(x) and not(a(x)) could look like this:"
     code "(a(x), { })"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra extraText
   pure ()
 
 
@@ -132,7 +133,7 @@ partialGrade PrologInst{..} sol = do
       german "Gewähltes Literal kommt in den Klauseln vor?"
       english "Chosen literal is contained in any of the clauses?"
 
-  preventWithHint (not $ null extra)
+  preventWithHint (not $ null extraLiterals)
     (translate $ do
        german "Resolvente besteht aus bekannten Literalen?"
        english "Resolvent contains only known literals?"
@@ -141,14 +142,14 @@ partialGrade PrologInst{..} sol = do
       translate $ do
         german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
         english "The resolvent contains unknown literals. These are incorrect:"
-      itemizeM $ map (text . show) extra
+      itemizeM $ map (text . show) extraLiterals
       pure ()
     )
   pure ()
   where
      availLits = pLiterals literals1 `union` pLiterals literals2
      solLits = pLiterals $ snd sol
-     extra = toList $ solLits `difference` availLits
+     extraLiterals = toList $ solLits `difference` availLits
 
 
 

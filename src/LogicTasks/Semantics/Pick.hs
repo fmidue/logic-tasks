@@ -13,7 +13,7 @@ import Control.Monad.Output (
   german,
   translate,
   )
-import Data.Maybe (fromMaybe)
+
 import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
@@ -21,6 +21,7 @@ import Formula.Util (mkCnf, xorSat)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
+import LogicTasks.Helpers
 
 
 
@@ -61,7 +62,7 @@ description PickInst{..} = do
         english "A valid solution could look like this: "
       code "1"
       pure ()
-    paragraph $ text (fromMaybe "" addText)
+    extra extraText
     pure ()
   where
     sTable = cnfs !! (correct - 1)

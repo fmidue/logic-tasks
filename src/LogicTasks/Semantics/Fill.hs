@@ -21,6 +21,7 @@ import Formula.Util (hasEmptyClause, isEmptyCnf)
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
 import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
+import LogicTasks.Helpers
 
 
 
@@ -67,7 +68,8 @@ description FillInst{..} = do
       english "A valid solution for four blanks could look like this:"
     code "[0,1,1,1]"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+
+  extra extraText
   pure ()
 
 

@@ -8,6 +8,8 @@ import Data.Typeable
 import GHC.Generics
 import Formula.Types
 import Formula.Util
+import Data.Map (Map)
+import Control.Monad.Output (Language)
 
 
 
@@ -25,7 +27,7 @@ instance Show StepAnswer where
 data PickInst = PickInst {
                  cnfs    :: ![Cnf]
                , correct :: !Int
-               , addText :: !(Maybe String)
+               , extraText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -33,21 +35,21 @@ dPickInst :: PickInst
 dPickInst =  PickInst
           { cnfs = [mkCnf [mkClause [Literal 'A', Not 'B']], mkCnf [mkClause [Not 'A', Literal 'B']]]
           , correct = 1
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
 
 data MaxInst = MaxInst {
                  cnf     :: !Cnf
-               , addText :: !(Maybe String)
+               , extraText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
@@ -55,14 +57,14 @@ dMaxInst =  MaxInst
 
 data MinInst = MinInst {
                  dnf     :: !Dnf
-               , addText :: !(Maybe String)
+               , extraText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
 dMinInst :: MinInst
 dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
@@ -70,7 +72,7 @@ dMinInst =  MinInst
 data FillInst = FillInst {
                  cnf     :: !Cnf
                , missing :: ![Int]
-               , addText :: !(Maybe String)
+               , extraText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -78,7 +80,7 @@ dFillInst :: FillInst
 dFillInst =  FillInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
@@ -86,7 +88,7 @@ dFillInst =  FillInst
 data DecideInst = DecideInst {
                  cnf     :: !Cnf
                , changed :: ![Int]
-               , addText :: !(Maybe String)
+               , extraText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -94,7 +96,7 @@ dDecideInst :: DecideInst
 dDecideInst =  DecideInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , changed = [1,4]
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
@@ -102,7 +104,7 @@ dDecideInst =  DecideInst
 data StepInst = StepInst {
                  clause1 :: !Clause
                , clause2 :: !Clause
-               , addText :: !(Maybe String)
+               , extraText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -110,14 +112,14 @@ dStepInst :: StepInst
 dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
 
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
-               , addText    :: !(Maybe String)
+               , extraText    :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -129,7 +131,7 @@ dResInst =  ResolutionInst
               , mkClause [Literal 'C']
               , mkClause [Not 'B']
               ]
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
@@ -138,7 +140,7 @@ dResInst =  ResolutionInst
 data PrologInst = PrologInst {
                  literals1 :: !PrologClause
                , literals2 :: !PrologClause
-               , addText :: !(Maybe String)
+               , extraText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -147,7 +149,7 @@ dPrologInst :: PrologInst
 dPrologInst =  PrologInst
           { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
-          , addText = Nothing
+          , extraText = Nothing
           }
 
 
@@ -189,7 +191,7 @@ data PickConfig = PickConfig {
        cnfConf :: CnfConfig
      , amountOfOptions :: Int
      , pickCnf :: Bool
-     , extraText :: Maybe String
+     , extraText :: Maybe (Map Language String)
      }
      deriving (Typeable, Generic)
 
@@ -207,7 +209,7 @@ data FillConfig = FillConfig {
       cnfConf :: CnfConfig
     , percentageOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
-    , extraText :: Maybe String
+    , extraText :: Maybe (Map Language String)
     }
     deriving (Typeable, Generic)
 
@@ -224,7 +226,7 @@ dFillConf = FillConfig
 data MinMaxConfig = MinMaxConfig {
       cnfConf :: CnfConfig
     , percentTrueEntries :: Maybe (Int,Int)
-    , extraText :: Maybe String
+    , extraText :: Maybe (Map Language String)
     }
     deriving (Typeable, Generic)
 
@@ -240,7 +242,7 @@ dMinMaxConf = MinMaxConfig
 data DecideConfig = DecideConfig {
       cnfConf :: CnfConfig
     , percentageOfChanged :: Int
-    , extraText :: Maybe String
+    , extraText :: Maybe (Map Language String)
     }
     deriving (Typeable, Generic)
 
@@ -255,7 +257,7 @@ dDecideConf = DecideConfig
 
 data StepConfig = StepConfig {
       baseConf :: BaseConfig
-    , extraText :: Maybe String
+    , extraText :: Maybe (Map Language String)
     }
     deriving (Typeable, Generic)
 
@@ -271,7 +273,7 @@ data PrologConfig = PrologConfig {
       minClauseLength :: Int
     , maxClauseLength :: Int
     , usedPredicates :: [PrologLiteral]
-    , extraText :: Maybe String
+    , extraText :: Maybe (Map Language String)
     }
     deriving (Typeable, Generic)
 
@@ -287,7 +289,7 @@ dPrologConf = PrologConfig
 data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
-    , extraText :: Maybe String
+    , extraText :: Maybe (Map Language String)
     }
     deriving (Typeable, Generic)
 

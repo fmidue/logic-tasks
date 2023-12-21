@@ -14,7 +14,6 @@ import Control.Monad.Output (
   translate,
   )
 import Data.List (nub)
-import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
 import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
@@ -22,6 +21,7 @@ import Formula.Util (isEmptyCnf, hasEmptyClause)
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, literals)
 import Util (checkCnfConf, isOutside, preventWithHint, remove)
+import LogicTasks.Helpers
 
 
 
@@ -63,7 +63,7 @@ description DecideInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
     code "[1,4,5]"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra extraText
   pure ()
 
 

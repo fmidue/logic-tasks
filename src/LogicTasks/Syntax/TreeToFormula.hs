@@ -16,7 +16,7 @@ import Control.Monad.Output (
   )
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
-import Data.Maybe (fromJust, isNothing, fromMaybe)
+import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
 import LogicTasks.Helpers
@@ -45,7 +45,7 @@ description path SynTreeInst{..} = do
     keyHeading
     fullKey
 
-    paragraph $ text (fromMaybe "" extraText)
+    extra extraText
     pure ()
 
 
