@@ -28,4 +28,5 @@ generateSynTreeInst SynTreeConfig {..} = do
       , latexImage = transferToPicture tree
       , correct = display tree
       , extraText = extraText
+      , allowArrowOperators = allowArrowOperators
       }

@@ -17,6 +17,8 @@ module Formula.Util
        , sat
        , transformProlog
        , flipPol
+       , isSemanticEqual
+       , isSemanticEqualSat
        ) where
 
 
@@ -24,6 +26,7 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Maybe(fromJust)
+import Data.List (sort)
 
 import Formula.Types
 
@@ -116,6 +119,12 @@ andSat = logOpSat (Sat.:&&:)
 sat :: Formula a => a -> Bool
 sat f = Sat.satisfiable $ convert f
 
+-- | Are two formulas semantically equal?
+isSemanticEqual :: Formula a => a -> a -> Bool
+isSemanticEqual a b = isSemanticEqualSat (convert a) (convert b)
+
+isSemanticEqualSat :: Ord a => Sat.Formula a -> Sat.Formula a -> Bool
+isSemanticEqualSat a b = sort (Sat.solve_all a) == sort (Sat.solve_all b)
 
 ----------------------------------------------------------------------------------------------------------
 
