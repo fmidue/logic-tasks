@@ -28,14 +28,13 @@ import Formula.Helpers (isHornClause)
 
 
 genPrologInst :: PrologConfig -> Gen PrologInst
-genPrologInst PrologConfig{..} = do
+genPrologInst PrologConfig{..} = (do
     (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
-      `suchThat` \(clause', resolveLit', literals1') -> isHornClause (mkPrologClause $ map remap (resolveLit' : literals1')) &&
-                                                          isHornClause (mkPrologClause $ map remap (opposite resolveLit' : literals clause'))
     let
       termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
       termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
-    pure $ PrologInst termAddedClause1 termAddedClause2 extraText
+    pure $ PrologInst termAddedClause1 termAddedClause2 extraText)
+  `suchThat` \(PrologInst clause1 clause2 _) -> isHornClause clause1 && isHornClause clause2
   where
     mapping = zip usedPredicates ['A'..'Z']
     usedLiterals = map snd mapping
