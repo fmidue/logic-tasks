@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Tasks.LegalProposition.Quiz (
     generateLegalPropositionInst,
@@ -23,7 +24,7 @@ import Trees.Types (BinOp, SynTree)
 
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
-generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
+generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, extraText}, ..} = do
     treeList <- vectorOf
         (fromIntegral formulas)
         (genSynTree (minNodes, maxNodes)
@@ -43,7 +44,9 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
+        , correctTrees = treeList
         , extraText = extraText
+        , showSolution = printSolution
         }
 
 

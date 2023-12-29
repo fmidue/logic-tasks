@@ -55,6 +55,12 @@ example correct s = indent $ do
 reject :: OutputMonad m => State (Map Language String) () -> LangM m
 reject  = refuse . indent . translate
 
+applyForAll :: OutputMonad m => [a] -> (a -> LangM m) -> LangM m
+applyForAll [] _ = pure ()
+applyForAll (x:xs) m = do
+  m x
+  applyForAll xs m
+  pure ()
 
 
 clauseKey :: OutputMonad m => LangM m

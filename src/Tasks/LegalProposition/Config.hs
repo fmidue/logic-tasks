@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Tasks.LegalProposition.Config (
     LegalPropositionConfig (..),
@@ -17,6 +18,7 @@ import GHC.Generics (Generic)
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxLeavesForNodes)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
+import Trees.Types (SynTree, BinOp)
 
 
 
@@ -28,6 +30,7 @@ data LegalPropositionConfig =
     , formulas :: Integer
     , illegals :: Integer
     , bracketFormulas :: Integer
+    , printSolution :: Bool
     } deriving (Show,Generic)
 
 defaultLegalPropositionConfig :: LegalPropositionConfig
@@ -38,6 +41,7 @@ defaultLegalPropositionConfig =
     , formulas = 5
     , illegals = 2
     , bracketFormulas = 1
+    , printSolution = False
     }
 
 checkLegalPropositionConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
@@ -46,7 +50,7 @@ checkLegalPropositionConfig config@LegalPropositionConfig {..} =
 
 
 checkAdditionalConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
-checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, formulas, illegals, bracketFormulas}
     | minNodes < 3 = reject $ do
         english "form A and ~A is meaningless in this kind of issue"
         german "Minimale Anzahl an Blättern unter 3 kann nur triviale Aufgaben erzeugen."
@@ -76,4 +80,6 @@ data LegalPropositionInst =
       serialsOfWrong :: Set Int
     , pseudoFormulas :: [String]
     , extraText :: Maybe String
+    , showSolution :: Bool
+    , correctTrees :: [SynTree BinOp Char]
     } deriving (Show,Generic)

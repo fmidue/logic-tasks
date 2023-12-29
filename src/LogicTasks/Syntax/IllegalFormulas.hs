@@ -5,13 +5,17 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text)
+import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text, GenericOutputMonad (refuse, code, image), ($=<<))
 import Data.List (nub, sort)
 import Data.Set (toList)
 import Data.Maybe (fromMaybe)
 
 import LogicTasks.Helpers
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
+import Control.Monad (when)
+import Trees.Print (display, transferToPicture)
+import Control.Monad.IO.Class (MonadIO (liftIO))
+import LogicTasks.Syntax.TreeToFormula (cacheTree)
 
 
 
@@ -68,11 +72,28 @@ partialGrade LegalPropositionInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
-completeGrade inst sol
-    | wrongSolution = reject $ do
-      english "Your solution is incorrect."
-      german "Ihre Lösung ist falsch."
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> LegalPropositionInst -> [Int] -> LangM m
+completeGrade path inst sol
+    | wrongSolution = refuse $ do
+      instruct $ do
+        english "Your solution is incorrect."
+        german "Ihre Lösung ist falsch."
+
+      when (showSolution inst) $ do
+        example (show (toList (serialsOfWrong inst))) $ do
+          english "One possible solutions for this task is:"
+          german "Eine mögliche Lösung für die Aufgabe ist:"
+
+      instruct $ do
+        english "The following syntax trees represent the well-formed formulae:"
+        german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
+
+      applyForAll (correctTrees inst) $ \x -> do
+        code (display x)
+        image $=<< liftIO $ cacheTree (transferToPicture x) path
+        pure ()
+
+      pure ()
 
     | otherwise = pure()
   where

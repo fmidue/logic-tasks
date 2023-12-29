@@ -4,13 +4,14 @@
 module LogicTasks.Syntax.IllegalCnfs where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text)
+import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text, GenericOutputMonad (refuse))
 import Data.List (nub, sort)
 import Data.Set (toList)
 import Data.Maybe (fromMaybe)
 
 import LogicTasks.Helpers
-import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
+import Tasks.LegalCNF.Config(LegalCNFConfig, LegalCNFInst(..), checkLegalCNFConfig)
+import Control.Monad (when)
 
 
 
@@ -70,9 +71,17 @@ partialGrade LegalCNFInst{..} sol
 
 completeGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
 completeGrade inst sol
-    | wrongSolution = reject $ do
-      english "Your solution is incorrect."
-      german "Ihre Lösung ist falsch."
+    | wrongSolution = refuse $ do
+      instruct $ do
+        english "Your solution is incorrect."
+        german "Ihre Lösung ist falsch."
+
+      when (showSolution inst) $ do
+        example (show (toList (serialsOfWrong inst))) $ do
+          english "One possible solutions for this task is:"
+          german "Eine mögliche Lösung für die Aufgabe ist:"
+
+      pure ()
 
     | otherwise = pure()
   where

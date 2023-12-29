@@ -32,6 +32,7 @@ data SynTreeConfig =
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   , extraText :: Maybe String
+  , printSolution :: Bool
   } deriving (Show,Generic)
 
 
@@ -47,6 +48,7 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -101,4 +103,5 @@ data SynTreeInst =
     , latexImage :: String
     , correct :: String
     , extraText :: Maybe String
+    , showSolution :: Bool
     } deriving (Show,Generic)

@@ -32,6 +32,7 @@ validBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
+        , printSolution = False
         }
 
 invalidBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
@@ -42,6 +43,7 @@ invalidBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
+        , printSolution = False
         }
 
 spec :: Spec

@@ -18,7 +18,7 @@ import Trees.Print (display)
 
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
-generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
+generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, extraText}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
         maxDepth
@@ -33,5 +33,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       { tree
       , minInputTrees = minSubTrees
       , correctFormulas = Data.Set.map display correctTrees
+      , correctTrees = correctTrees
       , extraText = extraText
+      , showSolution = printSolution
       }
