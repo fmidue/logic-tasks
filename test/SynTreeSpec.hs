@@ -11,8 +11,11 @@ import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
-import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
+import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes, binSynTreeToMiniSatFormula)
 import Tasks.SynTree.Quiz (generateSynTreeInst)
+import SAT.MiniSat hiding (Formula(Not))
+import qualified SAT.MiniSat as Sat (Formula(Not))
+import Trees.Types (SynTree(..), BinOp(..))
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
@@ -93,3 +96,17 @@ spec = do
       forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
         forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
           not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))
+  describe "binSynTreeToMiniSatFormula" $ do
+    it "should correctly convert Leaf" $
+      binSynTreeToMiniSatFormula (Leaf 'A') == Var 'A'
+    it "should correctly convert Not" $ do
+      binSynTreeToMiniSatFormula (Not (Leaf 'A')) == Sat.Not (Var 'A') &&
+        binSynTreeToMiniSatFormula (Not ((Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Leaf 'C'))))
+          == Sat.Not((Var 'A' :->: Sat.Not (Var 'B')) :&&: Var 'C')
+    it "should correctly convert Binary" $
+      binSynTreeToMiniSatFormula (Binary And (Leaf 'A') (Leaf 'B')) == (Var 'A' :&&: Var 'B') &&
+      binSynTreeToMiniSatFormula (Binary Or (Leaf 'A') (Leaf 'B')) == (Var 'A' :||: Var 'B') &&
+      binSynTreeToMiniSatFormula (Binary Impl (Leaf 'A') (Leaf 'B')) == (Var 'A' :->: Var 'B') &&
+      binSynTreeToMiniSatFormula (Binary Equi (Leaf 'A') (Leaf 'B')) == (Var 'A' :<->: Var 'B') &&
+      binSynTreeToMiniSatFormula (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Binary Equi (Binary Or (Leaf 'C') (Leaf 'D')) (Leaf 'E')))
+        == (Var 'A' :->: Sat.Not (Var 'B')) :&&: ((Var 'C' :||: Var 'D') :<->: Var 'E')
