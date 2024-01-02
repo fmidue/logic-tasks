@@ -272,6 +272,7 @@ data PrologConfig = PrologConfig {
     , maxClauseLength :: Int
     , usedPredicates :: [PrologLiteral]
     , extraText :: Maybe String
+    , createOnlyHornClauses :: Bool
     }
     deriving (Show, Typeable, Generic)
 
@@ -281,6 +282,7 @@ dPrologConf = PrologConfig
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
+    , createOnlyHornClauses = True
     }
 
 
