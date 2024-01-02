@@ -77,15 +77,16 @@ partialGrade _ sol
 
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> TreeFormulaAnswer -> LangM m
 completeGrade path inst sol
-    | fromJust ( maybeTree sol) /= tree inst = refuse $ do
+    | treeAnswer /= tree inst = refuse $ do
         instruct $ do
           english "Your solution is not correct. The syntax tree for the entered formula looks like this:"
           german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu der eingegebenen Formel sieht so aus:"
 
-        image $=<< liftIO $ cacheTree (transferToPicture (fromJust (maybeTree sol))) path
+        image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
         pure ()
     | otherwise = pure()
+  where treeAnswer = fromJust (maybeTree sol)
 
 
 
