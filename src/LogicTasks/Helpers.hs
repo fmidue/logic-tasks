@@ -20,7 +20,7 @@ import Control.Monad.Output (
   translatedCode,
   localise,
   )
-import Control.Monad.State (State, MonadState (put))
+import Control.Monad.State (State, modify)
 import Data.Map (Map)
 import Data.ByteString.Lazy (fromStrict)
 import Data.ByteString.UTF8 (fromString)
@@ -30,7 +30,7 @@ import System.Directory (doesFileExist)
 
 
 extra :: OutputMonad m => Maybe (Map Language String) -> LangM m
-extra (Just extraMap) = paragraph $ translate $ put extraMap
+extra (Just extraMap) = paragraph $ translate $ modify (const extraMap)
 extra _ = pure ()
 
 indexed :: [String] -> [String]
