@@ -24,7 +24,7 @@ import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Trees.Helpers (binSynTreeToMiniSatFormula)
 import Formula.Util (isSemanticEqualSat)
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 
 
 
@@ -37,16 +37,16 @@ description path SynTreeInst{..} = do
     image $=<< liftIO $ cacheTree latexImage path
 
     instruct $ do
-      english ("Give the propositional logic formula that is " ++ (if not allowArrowOperators then "exactly " else "") ++ "represented by this syntax tree.")
-      german ("Geben Sie die aussagenlogische Formel an, die " ++ (if not allowArrowOperators then "exakt " else "") ++"von diesem Syntaxbaum dargestellt wird.")
-
-    unless allowArrowOperators $ instruct $ do
-      english "Refrain from semantic changes."
-      german "Sehen Sie von semantischen Umformungen ab."
+      english "Give the propositional logic formula that is represented by this syntax tree."
+      german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
 
     instruct $ do
       english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+
+    unless allowSemanticallyEquivalentSolutions $ instruct $ do
+      english "Remarks: The exact formula of the syntax tree must be specified. Other formulae that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
+      german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
     fullKey
@@ -72,26 +72,29 @@ start = TreeFormulaAnswer Nothing
 
 
 partialGrade :: OutputMonad m => SynTreeInst -> TreeFormulaAnswer -> LangM m
-partialGrade inst sol
+partialGrade _ sol
     | isNothing $ maybeTree sol = reject $ do
       english "You did not submit a solution."
       german "Die Abgabe ist leer."
-
-    | fromJust (maybeTree sol) /= tree inst && not (allowArrowOperators inst) &&
-      isSemanticEqualSat (binSynTreeToMiniSatFormula (fromJust (maybeTree sol))) (binSynTreeToMiniSatFormula (tree inst)) = reject $ do
-      english "Are you sure that your formula represents exactly this syntax tree and not a semantically equivalent one?"
-      german "Bist du dir sicher, dass deine Formel genau diesen Syntaxbaum darstellt und nicht einen semantisch äquivalenten?"
-
     | otherwise = pure ()
 
 
 
 completeGrade :: OutputMonad m => SynTreeInst -> TreeFormulaAnswer -> LangM m
 completeGrade inst sol
-    | fromJust ( maybeTree sol) /= tree inst = reject $ do
-      english "Your solution is not correct."
-      german "Ihre Abgabe ist nicht die korrekte Lösung."
+    | treeAnswer /= tree inst = refuse $ indent $ do
+      instruct $ do
+        english "Your solution is not correct."
+        german "Ihre Abgabe ist nicht die korrekte Lösung."
+
+      when (not (allowSemanticallyEquivalentSolutions inst) && isSemanticEqualSat (binSynTreeToMiniSatFormula treeAnswer) (binSynTreeToMiniSatFormula (tree inst))) $
+        instruct $ do
+          english "Are you sure that your formula represents exactly this syntax tree and not a semantically equivalent one?"
+          german "Bist du dir sicher, dass deine Formel genau diesen Syntaxbaum darstellt und nicht einen semantisch äquivalenten?"
+
+      pure ()
     | otherwise = pure ()
+  where treeAnswer = fromJust (maybeTree sol)
 
 
 

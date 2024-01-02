@@ -29,4 +29,5 @@ generateSynTreeInst SynTreeConfig {..} = do
       , correct = display tree
       , extraText = extraText
       , allowArrowOperators = allowArrowOperators
+      , allowSemanticallyEquivalentSolutions = allowSemanticallyEquivalentSolutions
       }

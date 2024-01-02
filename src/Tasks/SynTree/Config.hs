@@ -32,6 +32,7 @@ data SynTreeConfig =
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   , extraText :: Maybe String
+  , allowSemanticallyEquivalentSolutions :: Bool
   } deriving (Show,Generic)
 
 
@@ -47,6 +48,7 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , extraText = Nothing
+    , allowSemanticallyEquivalentSolutions = False
     }
 
 
@@ -102,4 +104,5 @@ data SynTreeInst =
     , correct :: String
     , extraText :: Maybe String
     , allowArrowOperators :: Bool
+    , allowSemanticallyEquivalentSolutions :: Bool
     } deriving (Show,Generic)
