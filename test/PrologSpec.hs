@@ -9,6 +9,6 @@ import Test.QuickCheck
 spec :: Spec
 spec = do
   describe "genPrologInst" $
-    it "should only generate PrologInst with horn clauses" $
+    it "should only generate PrologInst with horn clauses by default" $
       forAll (genPrologInst dPrologConf) $ \PrologInst {..} ->
         isHornClause literals1 && isHornClause literals2
