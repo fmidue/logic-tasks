@@ -44,7 +44,7 @@ description path SynTreeInst{..} = do
       english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    unless allowSemanticallyEquivalentSolutions $ instruct $ do
+    when onlyAcceptExactFormula $ instruct $ do
       english "Remarks: The exact formula of the syntax tree must be specified. Other formulae that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
       german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
@@ -87,7 +87,7 @@ completeGrade inst sol
         english "Your solution is not correct."
         german "Ihre Abgabe ist nicht die korrekte Lösung."
 
-      when (not (allowSemanticallyEquivalentSolutions inst) && isSemanticEqualSat (binSynTreeToMiniSatFormula treeAnswer) (binSynTreeToMiniSatFormula (tree inst))) $
+      when (onlyAcceptExactFormula inst && isSemanticEqualSat (binSynTreeToMiniSatFormula treeAnswer) (binSynTreeToMiniSatFormula (tree inst))) $
         instruct $ do
           english "Are you sure that your formula represents exactly this syntax tree and not a semantically equivalent one?"
           german "Bist du dir sicher, dass deine Formel genau diesen Syntaxbaum darstellt und nicht einen semantisch äquivalenten?"
