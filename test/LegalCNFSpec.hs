@@ -5,7 +5,7 @@ module LegalCNFSpec (spec) where
 import Data.Set (toList)
 import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess)
+import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess, within)
 import Data.List((\\))
 
 import ParsingHelpers (fully)
@@ -97,6 +97,9 @@ invalidBoundsLegalCNF = do
           extraText = Nothing
         }
 
+timeout :: Int
+timeout = 30000000 -- 30 seconds
+
 spec :: Spec
 spec = do
     describe "validBoundsLegalCNF" $
@@ -127,11 +130,11 @@ spec = do
                   (judgeCnfSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $ do
         it "all of the formulas in the wrong serial should not be Cnf" $
-            forAll validBoundsLegalCNF $ \config ->
+            within timeout $ forAll validBoundsLegalCNF $ \config ->
                 forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
                   all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) (toList serialsOfWrong)
         it "all of the formulas not in the wrong serial should be Cnf" $
-            forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
+            within timeout $ forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
                 forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
                   all (\x -> isRight (cnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
 
