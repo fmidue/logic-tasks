@@ -35,7 +35,7 @@ description LegalPropositionInst{..} = do
       english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
       german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
 
-    extra extraText
+    extra addText
     pure ()
 
 

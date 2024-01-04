@@ -61,7 +61,7 @@ description MaxInst{..} = do
       german "(A oder nicht B) und (nicht C oder nicht D)"
       english "(A or not B) and (not C or not D)"
     pure ()
-  extra extraText
+  extra addText
   pure ()
 
 

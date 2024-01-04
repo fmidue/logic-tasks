@@ -73,7 +73,7 @@ description PrologInst{..} = do
       english "A valid solution with the clauses a(x) and not(a(x)) could look like this:"
     code "(a(x), { })"
     pure ()
-  extra extraText
+  extra addText
   pure ()
 
 

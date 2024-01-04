@@ -34,7 +34,7 @@ description LegalCNFInst{..} = do
       english "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
       german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 nicht in KNF vor, dann ist diese Lösung korrekt:"
 
-    extra extraText
+    extra addText
 
     pure ()
 

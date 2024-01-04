@@ -62,7 +62,7 @@ description PickInst{..} = do
         english "A valid solution could look like this: "
       code "1"
       pure ()
-    extra extraText
+    extra addText
     pure ()
   where
     sTable = cnfs !! (correct - 1)

@@ -44,7 +44,7 @@ description SubTreeInst{..} = do
     keyHeading
     fullKey
 
-    extra extraText
+    extra addText
     pure ()
 
 

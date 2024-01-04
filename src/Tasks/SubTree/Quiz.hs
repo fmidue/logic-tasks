@@ -33,5 +33,5 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       { tree
       , minInputTrees = minSubTrees
       , correctFormulas = Data.Set.map display correctTrees
-      , extraText = extraText
+      , addText = extraText
       }

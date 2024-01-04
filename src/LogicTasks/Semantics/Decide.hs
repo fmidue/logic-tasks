@@ -63,7 +63,7 @@ description DecideInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
     code "[1,4,5]"
     pure ()
-  extra extraText
+  extra addText
   pure ()
 
 

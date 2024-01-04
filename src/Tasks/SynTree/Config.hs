@@ -101,5 +101,5 @@ data SynTreeInst =
     { tree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
-    , extraText :: Maybe (Map Language String)
+    , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

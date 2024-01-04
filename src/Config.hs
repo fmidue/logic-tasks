@@ -27,7 +27,7 @@ instance Show StepAnswer where
 data PickInst = PickInst {
                  cnfs    :: ![Cnf]
                , correct :: !Int
-               , extraText :: Maybe (Map Language String)
+               , addText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -35,21 +35,21 @@ dPickInst :: PickInst
 dPickInst =  PickInst
           { cnfs = [mkCnf [mkClause [Literal 'A', Not 'B']], mkCnf [mkClause [Not 'A', Literal 'B']]]
           , correct = 1
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 
 
 data MaxInst = MaxInst {
                  cnf     :: !Cnf
-               , extraText :: Maybe (Map Language String)
+               , addText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 
@@ -57,14 +57,14 @@ dMaxInst =  MaxInst
 
 data MinInst = MinInst {
                  dnf     :: !Dnf
-               , extraText :: Maybe (Map Language String)
+               , addText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
 dMinInst :: MinInst
 dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 
@@ -72,7 +72,7 @@ dMinInst =  MinInst
 data FillInst = FillInst {
                  cnf     :: !Cnf
                , missing :: ![Int]
-               , extraText :: Maybe (Map Language String)
+               , addText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -80,7 +80,7 @@ dFillInst :: FillInst
 dFillInst =  FillInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 
@@ -88,7 +88,7 @@ dFillInst =  FillInst
 data DecideInst = DecideInst {
                  cnf     :: !Cnf
                , changed :: ![Int]
-               , extraText :: Maybe (Map Language String)
+               , addText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -96,7 +96,7 @@ dDecideInst :: DecideInst
 dDecideInst =  DecideInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , changed = [1,4]
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 
@@ -104,7 +104,7 @@ dDecideInst =  DecideInst
 data StepInst = StepInst {
                  clause1 :: !Clause
                , clause2 :: !Clause
-               , extraText :: Maybe (Map Language String)
+               , addText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -112,14 +112,14 @@ dStepInst :: StepInst
 dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 
 
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
-               , extraText    :: Maybe (Map Language String)
+               , addText    :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -131,7 +131,7 @@ dResInst =  ResolutionInst
               , mkClause [Literal 'C']
               , mkClause [Not 'B']
               ]
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 
@@ -140,7 +140,7 @@ dResInst =  ResolutionInst
 data PrologInst = PrologInst {
                  literals1 :: !PrologClause
                , literals2 :: !PrologClause
-               , extraText :: Maybe (Map Language String)
+               , addText :: Maybe (Map Language String)
                }
                deriving (Typeable, Generic)
 
@@ -149,7 +149,7 @@ dPrologInst :: PrologInst
 dPrologInst =  PrologInst
           { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
-          , extraText = Nothing
+          , addText = Nothing
           }
 
 

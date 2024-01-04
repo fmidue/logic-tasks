@@ -76,5 +76,5 @@ data LegalPropositionInst =
     {
       serialsOfWrong :: Set Int
     , pseudoFormulas :: [String]
-    , extraText :: Maybe (Map Language String)
+    , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

@@ -93,7 +93,7 @@ description ResolutionInst{..} = do
       english "[(1, 2, {A, not B} = 5), (4, 5, { })]"
       german "[(1, 2, {A, nicht B} = 5), (4, 5, { })]"
     pure ()
-  extra extraText
+  extra addText
   pure ()
 
 

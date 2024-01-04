@@ -61,7 +61,7 @@ description MinInst{..} = do
       german "(A und nicht B) oder (nicht C und nicht D)"
       english "(A and not B) or (not C and not D)"
     pure ()
-  extra extraText
+  extra addText
   pure ()
 
 

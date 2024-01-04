@@ -63,7 +63,7 @@ description StepInst{..} = do
       english "A valid solution could look like this: "
     code "(A, not B or C)"
     pure ()
-  LogicHelpers.extra extraText
+  LogicHelpers.extra addText
   pure ()
 
 
