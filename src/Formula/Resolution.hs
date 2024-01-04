@@ -5,6 +5,8 @@ module Formula.Resolution
        , resolvable
        , resolvableWith
        , applySteps
+       , computeResSteps
+       , showResSteps
        ) where
 
 
@@ -12,11 +14,12 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Set (empty,Set)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromJust)
 import Test.QuickCheck (Gen,choose,elements,shuffle)
 
-import Formula.Types
+import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
+import Data.List (nub, find, elemIndex)
 
 
 
@@ -142,3 +145,52 @@ setElements :: Set a -> Gen a
 setElements set
     | null set = error "setElements used with empty set."
     | otherwise = (`Set.elemAt` set) `fmap` choose (0, Set.size set - 1)
+
+----------------------------------------------------------------------------------------------------------
+
+initResolution :: [Clause] -> [([Clause], Clause)]
+initResolution = foldr (\ x -> (:) ([], x)) []
+
+resolutions :: [([Clause], Clause)] -> [([Clause], Clause)]
+resolutions [] = []
+resolutions xss@((cs, r):xs) = nub $ (cs,r) : [ ([x,y], fromJust res) | x <- allClauses, l <- Set.toList (literalSet x), y <- allClauses, let res = resolve x y l, isJust res]  ++ resolutions xs
+  where allClauses = map snd xss
+
+solution' :: [([Clause], Clause)] -> [([Clause], Clause)]
+solution' xs = if any (\(_, Clause x) -> null x) xs then xs else solution' (resolutions xs)
+
+reconstructSolution :: Clause -> [([Clause], Clause)] -> [([Clause], Clause)]
+reconstructSolution c xs = if isJust rOrigin then [ fromJust rOrigin ] else reconstructSolution (head (fst (fromJust r))) xs ++ reconstructSolution (last (fst (fromJust r))) xs  ++ [(fst (fromJust r) ,c)]
+  where rOrigin = find (\(ps,x) -> x == c && null ps) xs
+        r = find (\(ps,x) -> x == c && not (null ps)) xs
+
+applyNum :: [Clause] -> [([Clause], Clause)] -> [([Clause], Clause, Int)]
+applyNum _ [] = []
+applyNum origs xs = map (\(ys, c) -> (ys, c, fromJust (elemIndex c correctedOrigs) +1)) old ++ zipWith (curry (\((ys, c),i) -> (ys, c,i))) new [length origs + 1..]
+  where
+    old = filter (\(ps, _) -> null ps) xs
+    new = filter (\(ps, _) -> not (null ps)) xs
+    correctedOrigs = Set.toList $ clauseSet $ mkCnf origs
+
+convertSteps :: [([Clause], Clause, Int)] -> [ResStep]
+convertSteps [] = []
+convertSteps xs = map mapFn new
+  where new = filter (\(a,_,_) -> not (null a)) xs
+        mapFn (ys,c,i) = let (_,_,l) = fromJust (find (\(_,b,_) -> b == head ys) xs)
+                             (_,_,r) = fromJust (find (\(_,b,_) -> b == last ys) xs)
+                          in Res (Right l, Right r, (c, Just i))
+
+pretty' :: ResStep -> Bool -> String
+pretty' (Res (a,b,(c,d))) isLast = "(" ++ showEither a ++ ", " ++ showEither b ++ ", " ++ show c ++ showNum ++ ")"
+  where showEither (Left x) = show x
+        showEither (Right y) = show y
+        showNum = if isJust d && not isLast then " = " ++ show (fromJust d) else ""
+
+showResSteps :: [ResStep] -> [String]
+showResSteps [] = []
+showResSteps [x] = [pretty' x True]
+showResSteps (x:xs) = pretty' x False : showResSteps xs
+
+computeResSteps :: [Clause] -> [ResStep]
+computeResSteps clauses = convertSteps (applyNum clauses (reconstructSolution (Clause empty) (solution' (initResolution clauses))))
+

@@ -298,8 +298,9 @@ instance Parse PickInst where
         tokenSymbol ","
         index <- lexeme $ many1 digit
         text <- optionMaybe $ lexeme bonusText
+        printSol <- lexeme $ many1 digit
         char ')'
-        pure $ PickInst cs (read index) text
+        pure $ PickInst cs (read index) text (read printSol /= 0)
           where
             bonusText = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do

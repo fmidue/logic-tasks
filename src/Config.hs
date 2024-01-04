@@ -11,7 +11,7 @@ import Formula.Util
 
 
 
-newtype Number = Number {value :: Maybe Int} deriving (Typeable, Generic)
+newtype Number = Number {value :: Maybe Int} deriving (Show,Typeable, Generic)
 
 
 newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)} deriving (Typeable, Generic)
@@ -26,6 +26,7 @@ data PickInst = PickInst {
                  cnfs    :: ![Cnf]
                , correct :: !Int
                , addText :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -34,6 +35,7 @@ dPickInst =  PickInst
           { cnfs = [mkCnf [mkClause [Literal 'A', Not 'B']], mkCnf [mkClause [Not 'A', Literal 'B']]]
           , correct = 1
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -41,6 +43,7 @@ dPickInst =  PickInst
 data MaxInst = MaxInst {
                  cnf     :: !Cnf
                , addText :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -48,6 +51,7 @@ dMaxInst :: MaxInst
 dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -56,6 +60,7 @@ dMaxInst =  MaxInst
 data MinInst = MinInst {
                  dnf     :: !Dnf
                , addText :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -63,6 +68,7 @@ dMinInst :: MinInst
 dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -71,6 +77,7 @@ data FillInst = FillInst {
                  cnf     :: !Cnf
                , missing :: ![Int]
                , addText :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -79,6 +86,7 @@ dFillInst =  FillInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -87,6 +95,7 @@ data DecideInst = DecideInst {
                  cnf     :: !Cnf
                , changed :: ![Int]
                , addText :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -95,6 +104,7 @@ dDecideInst =  DecideInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , changed = [1,4]
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -103,6 +113,7 @@ data StepInst = StepInst {
                  clause1 :: !Clause
                , clause2 :: !Clause
                , addText :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -111,6 +122,7 @@ dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -118,6 +130,7 @@ dStepInst =  StepInst
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
                , addText    :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -130,6 +143,7 @@ dResInst =  ResolutionInst
               , mkClause [Not 'B']
               ]
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -139,6 +153,7 @@ data PrologInst = PrologInst {
                  literals1 :: !PrologClause
                , literals2 :: !PrologClause
                , addText :: !(Maybe String)
+               , showSolution :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -148,6 +163,7 @@ dPrologInst =  PrologInst
           { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
           , addText = Nothing
+          , showSolution = False
           }
 
 
@@ -190,6 +206,7 @@ data PickConfig = PickConfig {
      , amountOfOptions :: Int
      , pickCnf :: Bool
      , extraText :: Maybe String
+     , printSolution :: Bool
      }
      deriving (Typeable, Generic)
 
@@ -199,6 +216,7 @@ dPickConf = PickConfig
     , amountOfOptions = 3
     , pickCnf = False
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -208,6 +226,7 @@ data FillConfig = FillConfig {
     , percentageOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     , extraText :: Maybe String
+    , printSolution :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -217,6 +236,7 @@ dFillConf = FillConfig
     , percentageOfGaps = 40
     , percentTrueEntries = Just (30,70)
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -225,6 +245,7 @@ data MinMaxConfig = MinMaxConfig {
       cnfConf :: CnfConfig
     , percentTrueEntries :: Maybe (Int,Int)
     , extraText :: Maybe String
+    , printSolution :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -233,6 +254,7 @@ dMinMaxConf = MinMaxConfig
     { cnfConf = dCnfConf
     , percentTrueEntries = Just (50,70)
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -241,6 +263,7 @@ data DecideConfig = DecideConfig {
       cnfConf :: CnfConfig
     , percentageOfChanged :: Int
     , extraText :: Maybe String
+    , printSolution :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -249,6 +272,7 @@ dDecideConf = DecideConfig
     { cnfConf = dCnfConf
     , percentageOfChanged = 40
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -256,6 +280,7 @@ dDecideConf = DecideConfig
 data StepConfig = StepConfig {
       baseConf :: BaseConfig
     , extraText :: Maybe String
+    , printSolution :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -263,6 +288,7 @@ dStepConf :: StepConfig
 dStepConf = StepConfig
     { baseConf = dBaseConf
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -272,6 +298,7 @@ data PrologConfig = PrologConfig {
     , maxClauseLength :: Int
     , usedPredicates :: [PrologLiteral]
     , extraText :: Maybe String
+    , printSolution :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -281,6 +308,7 @@ dPrologConf = PrologConfig
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -288,6 +316,7 @@ data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
     , extraText :: Maybe String
+    , printSolution :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -296,4 +325,5 @@ dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
     , extraText = Nothing
+    , printSolution = False
     }
