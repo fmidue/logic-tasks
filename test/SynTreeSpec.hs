@@ -101,7 +101,7 @@ spec = do
       binSynTreeToMiniSatFormula (Leaf 'A') == Var 'A'
     it "should correctly convert Not" $ do
       binSynTreeToMiniSatFormula (Not (Leaf 'A')) == Sat.Not (Var 'A') &&
-        binSynTreeToMiniSatFormula (Not ((Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Leaf 'C'))))
+        binSynTreeToMiniSatFormula (Not (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Leaf 'C')))
           == Sat.Not((Var 'A' :->: Sat.Not (Var 'B')) :&&: Var 'C')
     it "should correctly convert Binary" $
       binSynTreeToMiniSatFormula (Binary And (Leaf 'A') (Leaf 'B')) == (Var 'A' :&&: Var 'B') &&
