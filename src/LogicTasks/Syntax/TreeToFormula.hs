@@ -28,6 +28,8 @@ import Control.Monad (when)
 import Trees.Print (transferToPicture)
 
 
+
+
 description :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> LangM m
 description path SynTreeInst{..} = do
     instruct $ do
@@ -83,18 +85,18 @@ partialGrade _ sol
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> TreeFormulaAnswer -> LangM m
 completeGrade path inst sol
     | treeAnswer /= tree inst = refuse $ do
-      instruct $ do
-        english "Your solution is not correct. The syntax tree for the entered formula looks like this:"
-        german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu der eingegebenen Formel sieht so aus:"
-
-      image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
-
-      when (onlyAcceptExactFormula inst && isSemanticEqualSat (binSynTreeToMiniSatFormula treeAnswer) (binSynTreeToMiniSatFormula (tree inst))) $
         instruct $ do
-          english "Are you sure that your formula represents exactly this syntax tree and not a semantically equivalent one?"
-          german "Bist du dir sicher, dass deine Formel genau diesen Syntaxbaum darstellt und nicht einen semantisch äquivalenten?"
+          english "Your solution is not correct. The syntax tree for the entered formula looks like this:"
+          german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu der eingegebenen Formel sieht so aus:"
 
-      pure ()
+        image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
+
+        when (onlyAcceptExactFormula inst && isSemanticEqualSat (binSynTreeToMiniSatFormula treeAnswer) (binSynTreeToMiniSatFormula (tree inst))) $
+          instruct $ do
+            english "Are you sure that your formula represents exactly this syntax tree and not a semantically equivalent one?"
+            german "Bist du dir sicher, dass deine Formel genau diesen Syntaxbaum darstellt und nicht einen semantisch äquivalenten?"
+
+        pure ()
     | otherwise = pure ()
   where treeAnswer = fromJust (maybeTree sol)
 
