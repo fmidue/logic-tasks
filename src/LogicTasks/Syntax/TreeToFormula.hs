@@ -24,7 +24,7 @@ import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Trees.Helpers (binSynTreeToMiniSatFormula)
 import Formula.Util (isSemanticEqualSat)
-import Control.Monad (unless, when)
+import Control.Monad (when)
 
 
 
