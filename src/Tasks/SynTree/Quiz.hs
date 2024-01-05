@@ -28,5 +28,5 @@ generateSynTreeInst SynTreeConfig {..} = do
       , latexImage = transferToPicture tree
       , correct = display tree
       , extraText = extraText
-      , onlyAcceptExactFormula = onlyAcceptExactFormula
+      , extraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
       }

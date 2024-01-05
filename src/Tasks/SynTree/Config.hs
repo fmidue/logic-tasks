@@ -32,7 +32,7 @@ data SynTreeConfig =
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   , extraText :: Maybe String
-  , onlyAcceptExactFormula :: Bool
+  , extraHintsOnSemanticEquivalence :: Bool
   } deriving (Show,Generic)
 
 
@@ -48,7 +48,7 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , extraText = Nothing
-    , onlyAcceptExactFormula = True
+    , extraHintsOnSemanticEquivalence = True
     }
 
 
@@ -103,5 +103,5 @@ data SynTreeInst =
     , latexImage :: String
     , correct :: String
     , extraText :: Maybe String
-    , onlyAcceptExactFormula :: Bool
+    , extraHintsOnSemanticEquivalence :: Bool
     } deriving (Show,Generic)
