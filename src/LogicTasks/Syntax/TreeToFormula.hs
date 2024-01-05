@@ -86,15 +86,15 @@ completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> TreeFo
 completeGrade path inst sol
     | treeAnswer /= tree inst = refuse $ do
         instruct $ do
-          english "Your solution is not correct. The syntax tree for the entered formula looks like this:"
-          german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu der eingegebenen Formel sieht so aus:"
+          english "Your solution is not correct. The syntax tree for your entered formula looks like this:"
+          german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
         when (extraHintsOnSemanticEquivalence inst && isSemanticEqualSat (binSynTreeToMiniSatFormula treeAnswer) (binSynTreeToMiniSatFormula (tree inst))) $
           instruct $ do
-            english "Are you sure that your formula represents exactly this syntax tree and not a semantically equivalent one?"
-            german "Bist du dir sicher, dass deine Formel genau diesen Syntaxbaum darstellt und nicht einen semantisch äquivalenten?"
+            english "This syntax tree is semantically equivalent to the original one, but not identical."
+            german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
 
         pure ()
     | otherwise = pure ()
