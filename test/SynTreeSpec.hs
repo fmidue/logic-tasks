@@ -42,7 +42,7 @@ validBoundsSynTree = do
         allowArrowOperators,
         maxConsecutiveNegations,
         extraText = Nothing,
-        allowSemanticallyEquivalentSolutions = False
+        onlyAcceptExactFormula = False
       }
 
 invalidBoundsSynTree :: Gen SynTreeConfig
@@ -62,7 +62,7 @@ invalidBoundsSynTree = do
         allowArrowOperators = True,
         maxConsecutiveNegations,
         extraText = Nothing,
-        allowSemanticallyEquivalentSolutions = False
+        onlyAcceptExactFormula = False
       }
 
 
