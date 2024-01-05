@@ -87,7 +87,7 @@ spec = do
 
   describe "isSemanticEqualSat" $  do
     it "a formula is semantically equal to itself" $
-      forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _ _ _ _) ->
+      forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _ _ _) ->
         isSemanticEqualSat (binSynTreeToMiniSatFormula tree) (binSynTreeToMiniSatFormula tree)
     it "a formula is semantically equal to itself with associativity applied" $ do
       isSemanticEqualSat ((Var 'A' :&&: Var 'B') :&&: Var 'C') (Var 'A' :&&: (Var 'B' :&&: Var 'C')) &&

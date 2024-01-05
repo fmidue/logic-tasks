@@ -103,6 +103,5 @@ data SynTreeInst =
     , latexImage :: String
     , correct :: String
     , extraText :: Maybe String
-    , allowArrowOperators :: Bool
     , onlyAcceptExactFormula :: Bool
     } deriving (Show,Generic)
