@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Tasks.LegalCNF.Quiz (
     generateLegalCNFInst
