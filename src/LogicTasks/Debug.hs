@@ -12,7 +12,8 @@ import Data.Maybe (isJust)
 import Formula.Types (Cnf(..), Clause(..), Literal(..), Formula(..))
 import Formula.Util (isPositive)
 import Data.Set (size, toList)
-import Data.List (partition, sort, nub)
+import Data.List (partition)
+import Data.List.Extra (nubSort)
 
 showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
 showDescription gen f = do
@@ -61,7 +62,7 @@ analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $
   tabulate "clause lengths" (map (show . size . literalSet) . toList $ clauseSet cnf) $
   tabulate "number of clauses" (pure . show . size $ clauseSet cnf) $
   tabulate "trivial clauses (containing both X and not X)" (map (show . isTrivial) . toList $ clauseSet cnf) $
-  tabulate "usage of atomic propositions" (pure . sort . nub . map (\case (Literal x) -> x ; (Not x) -> x) $ literals cnf)
+  tabulate "usage of atomic propositions" (pure . nubSort . map (\case (Literal x) -> x ; (Not x) -> x) $ literals cnf)
     True
 
 isTrivial :: Clause -> Bool

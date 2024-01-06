@@ -60,8 +60,8 @@ description PrologInst{..} = do
     english "Resolve the clauses and give the resulting resolvent."
 
   paragraph $ translate $ do
-    german "Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
-    english "Provide the literal used for the step and the resolvent in the following tuple form: (literal, resolvent)."
+    german "Geben Sie das in dem Resolutionsschritt genutzte Literal (in positiver oder negativer Form) und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
+    english "Provide the literal (in positive or negative form) used for the step and the resolvent in the following tuple form: (literal, resolvent)."
 
   paragraph $ translate $ do
     german "Die leere Klausel kann durch geschweifte Klammern '{ }' dargestellt werden."

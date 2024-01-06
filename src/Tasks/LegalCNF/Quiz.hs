@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module Tasks.LegalCNF.Quiz (
     generateLegalCNFInst
@@ -42,7 +42,9 @@ generateLegalCNFInst config@LegalCNFConfig {..} = do
         [1 .. formulas]
         config
       `suchThat` (listNoDuplicate . map (simplestDisplay . fmap (const '_')))
-    return $ LegalCNFInst {serialsOfWrong = fromList serialsOfWrong, formulaStrings = map simplestDisplay treeList, addText = extraText}
+    return $ LegalCNFInst { serialsOfWrong = fromList serialsOfWrong
+                          , formulaStrings = map simplestDisplay treeList
+                          , addText = extraText}
 
 
 

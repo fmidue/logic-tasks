@@ -35,7 +35,7 @@ ifUseIllegal useBug notFirstLayer synTree usedLiterals =
 
 subTreeIllegal ::Bool -> SynTree BinOp Char -> String -> Gen String
 subTreeIllegal notFirstLayer (Binary operator a b) usedLiterals =
-    allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator operator)
+    allocateBugToSubtree notFirstLayer a b usedLiterals operator
 subTreeIllegal _ (Not a) usedLiterals = do
     left <- ifUseIllegal True True a usedLiterals
     return (showOperatorNot ++ left)
@@ -43,18 +43,18 @@ subTreeIllegal _ (Leaf _) _ = error "This will not happen but must be write"
 
 
 
-allocateBugToSubtree :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> String -> Gen String
+allocateBugToSubtree :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> BinOp -> Gen String
 allocateBugToSubtree notFirstLayer a b usedLiterals usedOperator = do
     ifUseBug <- elements [True, False]
     left <- ifUseIllegal ifUseBug True a usedLiterals
     right <- ifUseIllegal (not ifUseBug) True b usedLiterals
     if notFirstLayer
-    then return ("(" ++ left ++ " " ++ usedOperator ++ " " ++ right ++ ")")
-    else return (left ++ " " ++ usedOperator ++ " " ++ right)
+    then return ("(" ++ left ++ " " ++ showOperator usedOperator ++ " " ++ right ++ ")")
+    else return (left ++ " " ++ showOperator usedOperator ++ " " ++ right)
 
 
 
-illegalShow :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> String -> Gen String
+illegalShow :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> BinOp -> Gen String
 illegalShow notFirstLayer a b usedLiterals usedOperator =
     if notFirstLayer
     then  do
@@ -70,6 +70,8 @@ illegalShow notFirstLayer a b usedLiterals usedOperator =
 
 
 combineNormalShow :: SynTree BinOp Char -> SynTree BinOp Char -> String -> Bool -> Gen String
+combineNormalShow a b "" False = return (normalShow a ++ " " ++ normalShow b)
+combineNormalShow a b "" True = return ("(" ++ normalShow a ++ " " ++ normalShow b ++ ")")
 combineNormalShow a b replacedOperator False = return (normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b)
 combineNormalShow a b replacedOperator True =
     return $ "(" ++ normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b ++ ")"
@@ -78,7 +80,7 @@ combineNormalShow a b replacedOperator True =
 
 implementIllegal :: Bool -> SynTree BinOp Char -> String -> Gen String
 implementIllegal notFirstLayer (Binary operator a b) usedLiterals =
-    illegalShow notFirstLayer a b usedLiterals (showOperator operator)
+    illegalShow notFirstLayer a b usedLiterals operator
 implementIllegal _ (Not a) usedLiterals = do
     letter <- elements usedLiterals
     elements  $ map (++ (' ' : normalShow a)) ([letter] : map showOperator allBinaryOperators)
@@ -88,6 +90,6 @@ implementIllegal _ (Leaf _) _ = do
 
 
 
-illegalParentheses :: SynTree BinOp Char -> SynTree BinOp Char -> String -> [(Int, Gen String)]
+illegalParentheses :: SynTree BinOp Char -> SynTree BinOp Char -> BinOp -> [(Int, Gen String)]
 illegalParentheses  a b usedOperator = [(1, return (formulaStr ++ ")")),(1, return ("(" ++ formulaStr))]
-    where formulaStr = normalShow a ++ " " ++ usedOperator ++ " " ++ normalShow b
+    where formulaStr = normalShow a ++ " " ++ showOperator usedOperator ++ " " ++ normalShow b
