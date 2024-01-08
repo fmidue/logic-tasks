@@ -11,7 +11,14 @@ import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
-import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes, numOfUniqueBinOpsInSynTree)
+import Trees.Helpers (
+  collectLeaves,
+  treeDepth,
+  treeNodes,
+  maxLeavesForNodes,
+  maxNodesForDepth,
+  minDepthForNodes,
+  numOfUniqueBinOpsInSynTree)
 import Tasks.SynTree.Quiz (generateSynTreeInst)
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Generate (genSynTree)
@@ -80,7 +87,8 @@ spec = do
         it "should return 1 if there are two operators of same kind" $
             numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c')))) == 1
         it "should return 2 if there are two unique operators" $
-            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary And (Leaf 'a') (Binary And (Leaf 'a') (Leaf 'c'))))) == 2
+            let subtree = Binary And (Leaf 'a') in
+            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (subtree (subtree (Leaf 'c'))))) == 2
   describe "genSynTree" $ do
     it "should generate a random SyntaxTree that satisfies the required amount of unique binary operators" $
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->

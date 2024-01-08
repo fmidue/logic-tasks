@@ -22,7 +22,14 @@ randomList availableLetters atLeastOccurring listLength = let
         shuffle (atLeastOccurring ++ randomRest)
 
 genSynTree :: (Integer, Integer) -> Integer -> [c] -> Integer -> Bool -> Integer -> Integer -> Gen (SynTree BinOp c)
-genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring allowArrowOperators maxConsecutiveNegations minUniqueBinOps =
+genSynTree
+  (minNodes, maxNodes)
+  maxDepth
+  availableLetters
+  atLeastOccurring
+  allowArrowOperators
+  maxConsecutiveNegations
+  minUniqueBinOps =
     if maxConsecutiveNegations /= 0
         then do
         nodes <- choose (minNodes, maxNodes)
@@ -37,10 +44,12 @@ genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring allow
         else do
         nodes <- choose (minNodes, maxNodes) `suchThat` odd
         sample <- syntaxShape nodes maxDepth allowArrowOperators False
-          `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring && numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOps
+          `suchThat` \synTree -> checkAtLeastOccurring synTree  && checkMinUniqueOps synTree
         usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
           fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
+  where checkAtLeastOccurring synTree = fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
+        checkMinUniqueOps synTree = numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOps
 
 syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())
 syntaxShape nodes maxDepth allowArrowOperators allowNegation
