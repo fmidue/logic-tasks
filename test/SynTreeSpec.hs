@@ -123,13 +123,13 @@ spec = do
     it "a syntax tree's formula is semantically equivalent to itself with commutativity applied" $ do
       isSemanticEqual (Leaf 'A' `treeAnd` Leaf 'B') (Leaf 'B' `treeAnd` Leaf 'A') &&
         isSemanticEqual (Leaf 'A' `treeOr` Leaf 'B') (Leaf 'B' `treeOr` Leaf 'A') &&
-          isSemanticEqual (Leaf 'A' `treeBiimpl` Leaf 'B') (Leaf 'B' `treeBiimpl` Leaf 'A')
+          isSemanticEqual (Leaf 'A' `treeBiImpl` Leaf 'B') (Leaf 'B' `treeBiImpl` Leaf 'A')
     it "a syntax tree's formula is semantically equivalent to itself with distributivity applied" $ do
       isSemanticEqual ((Leaf 'A' `treeAnd` Leaf 'B') `treeOr` Leaf 'C') ((Leaf 'A' `treeOr` Leaf 'C') `treeAnd` (Leaf 'B' `treeOr` Leaf 'C')) &&
         isSemanticEqual ((Leaf 'A' `treeOr` Leaf 'B') `treeAnd` Leaf 'C') ((Leaf 'A' `treeAnd` Leaf 'C') `treeOr` (Leaf 'B' `treeAnd` Leaf 'C'))
 
 -- shorthands
-treeAnd, treeOr, treeBiimpl :: SynTree BinOp a -> SynTree BinOp a -> SynTree BinOp a 
+treeAnd, treeOr, treeBiImpl :: SynTree BinOp a -> SynTree BinOp a -> SynTree BinOp a
 treeAnd = Binary And
 treeOr = Binary Or
-treeBiimpl = Binary Equi
+treeBiImpl = Binary Equi
