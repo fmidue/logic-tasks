@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 module Formula.Resolution
        (
          genRes
@@ -19,7 +20,8 @@ import Test.QuickCheck (Gen,choose,elements,shuffle)
 
 import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
-import Data.List (nub, find, elemIndex)
+import Data.List (find, elemIndex)
+import Data.Containers.ListUtils (nubOrd)
 
 
 
@@ -148,12 +150,9 @@ setElements set
 
 ----------------------------------------------------------------------------------------------------------
 
-initResolution :: [Clause] -> [([Clause], Clause)]
-initResolution = foldr (\ x -> (:) ([], x)) []
-
 resolutions :: [([Clause], Clause)] -> [([Clause], Clause)]
 resolutions [] = []
-resolutions xss@((cs, r):xs) = nub $ (cs,r) : [ ([x,y], fromJust res) | x <- allClauses, l <- Set.toList (literalSet x), y <- allClauses, let res = resolve x y l, isJust res]  ++ resolutions xs
+resolutions xss@((cs, r):xs) = nubOrd $ (cs,r) : [ ([x,y], fromJust res) | x <- allClauses, l <- Set.toList (literalSet x), y <- allClauses, let res = resolve x y l, isJust res]  ++ resolutions xs
   where allClauses = map snd xss
 
 solution' :: [([Clause], Clause)] -> [([Clause], Clause)]
@@ -192,5 +191,4 @@ showResSteps [x] = [pretty' x True]
 showResSteps (x:xs) = pretty' x False : showResSteps xs
 
 computeResSteps :: [Clause] -> [ResStep]
-computeResSteps clauses = convertSteps (applyNum clauses (reconstructSolution (Clause empty) (solution' (initResolution clauses))))
-
+computeResSteps clauses = convertSteps (applyNum clauses (reconstructSolution (Clause empty) (solution' (map ([],) clauses))))
