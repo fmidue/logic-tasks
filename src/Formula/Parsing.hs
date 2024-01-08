@@ -297,12 +297,12 @@ instance Parse PickInst where
         cs <- parser
         tokenSymbol ","
         index <- lexeme $ many1 digit
-        text <- optionMaybe $ lexeme bonusText
-        printSol <- lexeme $ many1 digit
+        text <- optionMaybe $ lexeme text'
+        printSol <- lexeme text'
         char ')'
-        pure $ PickInst cs (read index) text (read printSol :: Bool)
+        pure $ PickInst cs (read index) text (read printSol)
           where
-            bonusText = between start (char '}') $ many1 $ satisfy ( /= '}')
+            text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
               char ','
               spaces

@@ -145,7 +145,7 @@ instance Pretty PickInst where
                            [ nest 2 $ pretty cnfs
                            , char ',' <+> pretty correct
                            , maybe empty (\s -> myText (", {" ++ s ++ "}")) addText
-                           , char ',' <+> pretty showSolution
+                           , char ',' <+> myText (", {" ++ show showSolution ++ "}")
                            , char ')'
                            ]
 
