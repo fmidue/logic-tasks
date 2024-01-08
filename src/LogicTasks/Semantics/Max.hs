@@ -194,7 +194,7 @@ completeMinMax showSolution correct solution =
           itemizeM $ map (text . show) diff
           pure ()
         when showSolution $ example (show correct) $ do
-          english "One possible solutions for this task is:"
+          english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
         pure ()
       )

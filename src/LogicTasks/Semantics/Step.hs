@@ -156,7 +156,7 @@ completeGrade StepInst{..} sol =
     correctLiteral = head [ x | x <- toList (literalSet clause1), opposite x `elem` toList (literalSet clause2) ]
     correctResolvent = (literalSet clause1 `union` literalSet clause2) `difference` fromList [correctLiteral, opposite correctLiteral]
     displaySolution = when showSolution $ example (replace "¬" "~" ("(" ++ show correctLiteral ++ ", " ++ show (Clause correctResolvent) ++ ")")) $ do
-          english "One possible solutions for this task is:"
+          english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
 
 

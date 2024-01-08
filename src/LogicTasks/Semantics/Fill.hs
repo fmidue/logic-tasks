@@ -174,8 +174,8 @@ completeGrade FillInst{..} sol = do
         german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
         english $ "Your solution contains " ++ display ++ " mistakes."
       when showSolution $ example (show missing) $ do
-        english "One possible solutions for this task is:"
-        german "Eine mögliche Lösung für die Aufgabe ist:"
+        english "The solution for this task is:"
+        german "Die Lösung für die Aufgabe ist:"
       pure ()
     )
   where

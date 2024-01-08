@@ -78,7 +78,7 @@ completeGrade inst sol
 
       when (showSolution inst) $ do
         example (show (toList (serialsOfWrong inst))) $ do
-          english "One possible solutions for this task is:"
+          english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
 
       pure ()

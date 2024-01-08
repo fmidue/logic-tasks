@@ -216,7 +216,7 @@ completeGrade ResolutionInst{..} sol =
         steps = replaceAll sol $ baseMapping clauses
         displaySolution = when showSolution $
           example (show (showResSteps (computeResSteps clauses))) $ do
-            english "One possible solutions for this task is:"
+            english "A possible solution for this task is:"
             german "Eine mögliche Lösung für die Aufgabe ist:"
 
 baseMapping :: [Clause] -> [(Int,Clause)]

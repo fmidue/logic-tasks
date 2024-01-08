@@ -142,5 +142,5 @@ completeGrade PickInst{..} sol = do
 
           pure ()
   where displaySolution = when showSolution $ example (show correct) $ do
-          english "One possible solutions for this task is:"
-          german "Eine mögliche Lösung für die Aufgabe ist:"
+          english "The solution for this task is:"
+          german "Die Lösung für die Aufgabe ist:"

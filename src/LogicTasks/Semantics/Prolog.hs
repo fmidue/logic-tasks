@@ -183,7 +183,7 @@ completeGrade PrologInst{..} sol =
     resolveResult = resolve clause1 clause2 transSol1
     displaySolution = when showSolution $ do
           example ("(" ++ show transSol1 ++ ", " ++ show (fromJust resolveResult) ++ ")") $ do
-            english "One possible solutions for this task is:"
+            english "A possible solution for this task is:"
             german "Eine mögliche Lösung für die Aufgabe ist:"
           pure ()
 

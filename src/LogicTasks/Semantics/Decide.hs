@@ -155,7 +155,7 @@ completeGrade DecideInst{..} sol = do
         german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
         english $ "Your solution contains " ++ display ++ " mistakes."
       when showSolution $ example (show changed) $ do
-        english "One possible solutions for this task is:"
+        english "A possible solution for this task is:"
         german "Eine mögliche Lösung für die Aufgabe ist:"
       pure ()
     )
