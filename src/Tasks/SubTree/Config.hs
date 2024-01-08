@@ -40,7 +40,7 @@ defaultSubTreeConfig =
     { syntaxTreeConfig = defaultSynTreeConfig
     , allowSameSubTree = True
     , minSubTrees = 3
-    , printSolution = True
+    , printSolution = False
     }
 
 
@@ -66,7 +66,6 @@ checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, minS
 data SubTreeInst =
     SubTreeInst
     { tree :: SynTree BinOp Char
-    , correctFormulas :: Set String
     , correctTrees :: Set (SynTree BinOp Char)
     , minInputTrees :: Integer
     , extraText :: Maybe String

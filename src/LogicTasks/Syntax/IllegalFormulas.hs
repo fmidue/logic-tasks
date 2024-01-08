@@ -73,28 +73,28 @@ partialGrade LegalPropositionInst{..} sol
 
 
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> LegalPropositionInst -> [Int] -> LangM m
-completeGrade path inst sol
-    | wrongSolution = refuse $ do
-      instruct $ do
+completeGrade path inst sol = refuseIfWrong $ do
+  when wrongSolution $ do
+     instruct $ do
         english "Your solution is incorrect."
         german "Ihre Lösung ist falsch."
 
-      when (showSolution inst) $ do
-        example (show (toList (serialsOfWrong inst))) $ do
-          english "One possible solutions for this task is:"
+  when (showSolution inst) $ do
+    example (show (toList (serialsOfWrong inst))) $ do
+          english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
-
-      instruct $ do
+    instruct $ do
         english "The following syntax trees represent the well-formed formulae:"
         german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
-      applyForAll (correctTrees inst) $ \x -> do
-        code (display x)
-        image $=<< liftIO $ cacheTree (transferToPicture x) path
-        pure ()
-
+    applyForAll (correctTrees inst) $ \x -> do
+      code (display x)
+      image $=<< liftIO $ cacheTree (transferToPicture x) path
       pure ()
 
-    | otherwise = pure()
+    pure ()
+
+  pure ()
   where
     wrongSolution = sort (nub sol) /= sort (toList $ serialsOfWrong inst)
+    refuseIfWrong = if wrongSolution then refuse else id

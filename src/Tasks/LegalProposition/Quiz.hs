@@ -44,7 +44,7 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
-        , correctTrees = treeList
+        , correctTrees = [ tree | (index, tree) <- zip [1..] treeList, index `notElem` serialsOfWrong ]
         , extraText = extraText
         , showSolution = printSolution
         }

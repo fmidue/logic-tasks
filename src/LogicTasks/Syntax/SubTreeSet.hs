@@ -8,6 +8,7 @@ module LogicTasks.Syntax.SubTreeSet where
 import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text, GenericOutputMonad (refuse, indent, code, image), ($=<<))
 import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf, toList)
+import qualified Data.Set (map)
 import Data.Maybe (isNothing, fromJust, fromMaybe)
 
 import LogicTasks.Helpers
@@ -15,7 +16,7 @@ import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
 import Trees.Helpers
-import Control.Monad (when)
+import Control.Monad (when, unless)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 
@@ -99,25 +100,24 @@ partialGrade SubTreeInst{..} fs
 
 
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> [FormulaAnswer] -> LangM m
-completeGrade path SubTreeInst{..} sol
-    | not partOfSolution = refuse $ do
-      instruct $ do
+completeGrade path SubTreeInst{..} sol = refuseIfWrong $ do
+  unless partOfSolution $ do
+    instruct $ do
         english "Your solution is incorrect."
         german "Ihre Lösung ist falsch."
 
-      when showSolution $ indent $ do
-        instruct $ do
-          english ("One possible solutions for this task contains " ++ show minInputTrees ++ " of the following subformulae:")
-          german ("Eine mögliche Lösung für die Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
+  when showSolution $ indent $ do
+    instruct $ do
+      english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulae:")
+      german ("Eine mögliche Lösung für die Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
 
-        applyForAll (toList correctTrees) $ \x -> do
-          code (display x)
-          image $=<< liftIO $ cacheTree (transferToPicture x) path
-          pure ()
-
-        pure()
-
+    applyForAll (toList correctTrees) $ \x -> do
+      code (display x)
+      image $=<< liftIO $ cacheTree (transferToPicture x) path
       pure ()
-    | otherwise = pure()
+
+    pure ()
+  pure ()
   where
-    partOfSolution = fromList (map show sol) `isSubsetOf` correctFormulas
+    partOfSolution = fromList (map show sol) `isSubsetOf` Data.Set.map display correctTrees
+    refuseIfWrong = if not partOfSolution then refuse else id
