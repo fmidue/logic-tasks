@@ -152,24 +152,32 @@ setElements set
 
 resolutions :: [([Clause], Clause)] -> [([Clause], Clause)]
 resolutions [] = []
-resolutions xss@((cs, r):xs) = nubOrd $ (cs,r) : [ ([x,y], fromJust res) | x <- allClauses, l <- Set.toList (literalSet x), y <- allClauses, let res = resolve x y l, isJust res]  ++ resolutions xs
-  where allClauses = map snd xss
+resolutions xss@((cs, r):xs) = nubOrd $ (cs,r) : [ ([x,y], fromJust res) |
+  x <- allClauses,
+  l <- Set.toList (literalSet x),
+  y <- allClauses,
+  let res = resolve x y l, isJust res]  ++ resolutions xs
+    where allClauses = map snd xss
 
 solution' :: [([Clause], Clause)] -> [([Clause], Clause)]
 solution' xs = if any (\(_, Clause x) -> null x) xs then xs else solution' (resolutions xs)
 
 reconstructSolution :: Clause -> [([Clause], Clause)] -> [([Clause], Clause)]
-reconstructSolution c xs = if isJust rOrigin then [ fromJust rOrigin ] else reconstructSolution (head (fst (fromJust r))) xs ++ reconstructSolution (last (fst (fromJust r))) xs  ++ [(fst (fromJust r) ,c)]
+reconstructSolution c xs = if isJust rOrigin then [ fromJust rOrigin ]
+                                             else recursiveLeft ++ recursiveRight ++ [(fst (fromJust r) ,c)]
   where rOrigin = find (\(ps,x) -> x == c && null ps) xs
         r = find (\(ps,x) -> x == c && not (null ps)) xs
+        recursiveLeft = reconstructSolution (head (fst (fromJust r))) xs
+        recursiveRight = reconstructSolution (last (fst (fromJust r))) xs
 
 applyNum :: [Clause] -> [([Clause], Clause)] -> [([Clause], Clause, Int)]
 applyNum _ [] = []
-applyNum origs xs = map (\(ys, c) -> (ys, c, fromJust (elemIndex c correctedOrigs) +1)) old ++ zipWith (curry (\((ys, c),i) -> (ys, c,i))) new [length origs + 1..]
+applyNum original xs = map (\(ys, c) -> (ys, c, fromJust (elemIndex c correctedOriginal) +1)) old ++ zipped
   where
     old = filter (\(ps, _) -> null ps) xs
     new = filter (\(ps, _) -> not (null ps)) xs
-    correctedOrigs = Set.toList $ clauseSet $ mkCnf origs
+    correctedOriginal = Set.toList $ clauseSet $ mkCnf original
+    zipped = zipWith (curry (\((ys, c),i) -> (ys, c,i))) new [length original + 1..]
 
 convertSteps :: [([Clause], Clause, Int)] -> [ResStep]
 convertSteps [] = []
@@ -191,4 +199,5 @@ showResSteps [x] = [pretty' x True]
 showResSteps (x:xs) = pretty' x False : showResSteps xs
 
 computeResSteps :: [Clause] -> [ResStep]
-computeResSteps clauses = convertSteps (applyNum clauses (reconstructSolution (Clause empty) (solution' (map ([],) clauses))))
+computeResSteps clauses = convertSteps (applyNum clauses reconstructed)
+  where reconstructed = reconstructSolution (Clause empty) (solution' (map ([],) clauses))
