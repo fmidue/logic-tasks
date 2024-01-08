@@ -44,7 +44,8 @@ generateLegalCNFInst config@LegalCNFConfig {..} = do
       `suchThat` (listNoDuplicate . map (simplestDisplay . fmap (const '_')))
     return $ LegalCNFInst { serialsOfWrong = fromList serialsOfWrong
                           , formulaStrings = map simplestDisplay treeList
-                          , extraText }
+                          , extraText
+                          , showSolution = False }
 
 
 genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]
