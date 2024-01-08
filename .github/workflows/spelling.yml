@@ -26,6 +26,8 @@ name: Check Spelling
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: ['**']
   issue_comment:
     types: [created]
 

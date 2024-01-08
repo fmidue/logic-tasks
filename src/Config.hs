@@ -17,7 +17,7 @@ newtype Number = Number {value :: Maybe Int} deriving (Show,Typeable, Generic)
 newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)} deriving (Typeable, Generic)
 
 instance Show StepAnswer where
-  show (StepAnswer (Just a)) = show a
+  show (StepAnswer (Just (b,c))) = '(' : show b ++ ',' : ' ' : show c ++ ")"
   show _ = ""
 
 

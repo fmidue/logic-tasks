@@ -33,6 +33,7 @@ MReport
 oneof
 parseable
 println
+Rightarrow
 scanl
 snd
 subformula

@@ -23,6 +23,7 @@ import LogicTasks.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Control.Monad (when)
+import Trees.Print (transferToPicture)
 
 
 
@@ -75,20 +76,23 @@ partialGrade _ sol
 
 
 
-completeGrade :: OutputMonad m => SynTreeInst -> TreeFormulaAnswer -> LangM m
-completeGrade inst sol
-    | fromJust ( maybeTree sol) /= tree inst = refuse $ do
-      instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> TreeFormulaAnswer -> LangM m
+completeGrade path inst sol
+    | treeAnswer /= tree inst = refuse $ do
+        instruct $ do
+          english "Your solution is not correct. The syntax tree for the entered formula looks like this:"
+          german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu der eingegebenen Formel sieht so aus:"
 
-      when (showSolution inst) $ do
-        example (show (correct inst)) $ do
-          english "A possible solution for this task is:"
-          german "Eine mögliche Lösung für die Aufgabe ist:"
+        image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
-      pure ()
+        when (showSolution inst) $
+          example (show (correct inst)) $ do
+            english "A possible solution for this task is:"
+            german "Eine mögliche Lösung für die Aufgabe ist:"
+
+        pure ()
     | otherwise = pure()
+  where treeAnswer = fromJust (maybeTree sol)
 
 
 
