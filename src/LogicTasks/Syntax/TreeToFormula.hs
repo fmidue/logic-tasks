@@ -22,8 +22,7 @@ import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 import LogicTasks.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
-import Trees.Helpers (binSynTreeToMiniSatFormula)
-import Formula.Util (isSemanticEqualSat)
+import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 
@@ -91,7 +90,7 @@ completeGrade path inst sol
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
-        when (extraHintsOnSemanticEquivalence inst && isSemanticEqualSat (binSynTreeToMiniSatFormula treeAnswer) (binSynTreeToMiniSatFormula (tree inst))) $
+        when (extraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer (tree inst)) $
           instruct $ do
             english "This syntax tree is semantically equivalent to the original one, but not identical."
             german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."

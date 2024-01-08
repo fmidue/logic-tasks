@@ -1,5 +1,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeApplications #-}
 
 module SynTreeSpec (spec, validBoundsSynTree) where
 
@@ -10,12 +11,13 @@ import Data.List.Extra (nubOrd, isInfixOf)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
-import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
-import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes, binSynTreeToMiniSatFormula)
+import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..), defaultSynTreeConfig)
+import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Tasks.SynTree.Quiz (generateSynTreeInst)
 import SAT.MiniSat hiding (Formula(Not))
 import qualified SAT.MiniSat as Sat (Formula(Not))
 import Trees.Types (SynTree(..), BinOp(..))
+import LogicTasks.Formula (ToSAT(convert), isSemanticEqual)
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
@@ -96,17 +98,38 @@ spec = do
       forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
         forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
           not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))
-  describe "binSynTreeToMiniSatFormula" $ do
+  describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $
-      binSynTreeToMiniSatFormula (Leaf 'A') == Var 'A'
+      convert @(SynTree BinOp Char) (Leaf 'A') == Var 'A'
     it "should correctly convert Not" $ do
-      binSynTreeToMiniSatFormula (Not (Leaf 'A')) == Sat.Not (Var 'A') &&
-        binSynTreeToMiniSatFormula (Not (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Leaf 'C')))
+      convert @(SynTree BinOp Char) (Not (Leaf 'A')) == Sat.Not (Var 'A') &&
+        convert (Not (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Leaf 'C')))
           == Sat.Not((Var 'A' :->: Sat.Not (Var 'B')) :&&: Var 'C')
     it "should correctly convert Binary" $
-      binSynTreeToMiniSatFormula (Binary And (Leaf 'A') (Leaf 'B')) == (Var 'A' :&&: Var 'B') &&
-      binSynTreeToMiniSatFormula (Binary Or (Leaf 'A') (Leaf 'B')) == (Var 'A' :||: Var 'B') &&
-      binSynTreeToMiniSatFormula (Binary Impl (Leaf 'A') (Leaf 'B')) == (Var 'A' :->: Var 'B') &&
-      binSynTreeToMiniSatFormula (Binary Equi (Leaf 'A') (Leaf 'B')) == (Var 'A' :<->: Var 'B') &&
-      binSynTreeToMiniSatFormula (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Binary Equi (Binary Or (Leaf 'C') (Leaf 'D')) (Leaf 'E')))
+      convert (Binary And (Leaf 'A') (Leaf 'B')) == (Var 'A' :&&: Var 'B') &&
+      convert (Binary Or (Leaf 'A') (Leaf 'B')) == (Var 'A' :||: Var 'B') &&
+      convert (Binary Impl (Leaf 'A') (Leaf 'B')) == (Var 'A' :->: Var 'B') &&
+      convert (Binary Equi (Leaf 'A') (Leaf 'B')) == (Var 'A' :<->: Var 'B') &&
+      convert (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Binary Equi (Binary Or (Leaf 'C') (Leaf 'D')) (Leaf 'E')))
         == (Var 'A' :->: Sat.Not (Var 'B')) :&&: ((Var 'C' :||: Var 'D') :<->: Var 'E')
+
+  describe "semantic equivalence of syntax trees (isSemanticEqual)" $  do
+    it "a syntax tree's formula is semantically equivalent to itself" $
+      forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _ _ _) ->
+        isSemanticEqual tree tree
+    it "a syntax tree's formula is semantically equivalent to itself with associativity applied" $ do
+      isSemanticEqual ((Leaf 'A' `treeAnd` Leaf 'B') `treeAnd` Leaf 'C') (Leaf 'A' `treeAnd` (Leaf 'B' `treeAnd` Leaf 'C')) &&
+        isSemanticEqual ((Leaf 'A' `treeOr` Leaf 'B') `treeOr` Leaf 'C') (Leaf 'A' `treeOr` (Leaf 'B' `treeOr` Leaf 'C'))
+    it "a syntax tree's formula is semantically equivalent to itself with commutativity applied" $ do
+      isSemanticEqual (Leaf 'A' `treeAnd` Leaf 'B') (Leaf 'B' `treeAnd` Leaf 'A') &&
+        isSemanticEqual (Leaf 'A' `treeOr` Leaf 'B') (Leaf 'B' `treeOr` Leaf 'A') &&
+          isSemanticEqual (Leaf 'A' `treeBiimpl` Leaf 'B') (Leaf 'B' `treeBiimpl` Leaf 'A')
+    it "a syntax tree's formula is semantically equivalent to itself with distributivity applied" $ do
+      isSemanticEqual ((Leaf 'A' `treeAnd` Leaf 'B') `treeOr` Leaf 'C') ((Leaf 'A' `treeOr` Leaf 'C') `treeAnd` (Leaf 'B' `treeOr` Leaf 'C')) &&
+        isSemanticEqual ((Leaf 'A' `treeOr` Leaf 'B') `treeAnd` Leaf 'C') ((Leaf 'A' `treeAnd` Leaf 'C') `treeOr` (Leaf 'B' `treeAnd` Leaf 'C'))
+
+-- shorthands
+treeAnd, treeOr, treeBiimpl :: SynTree BinOp a -> SynTree BinOp a -> SynTree BinOp a 
+treeAnd = Binary And
+treeOr = Binary Or
+treeBiimpl = Binary Equi

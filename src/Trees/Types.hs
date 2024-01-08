@@ -16,7 +16,8 @@ module Trees.Types
 
 
 import GHC.Generics
-
+import Formula.Types (ToSAT(..))
+import qualified SAT.MiniSat as Sat
 
 
 data BinOp = And | Or | Impl | Equi
@@ -49,6 +50,16 @@ instance Monad (SynTree o) where
   Not a               >>= k = Not (a >>= k)
   Leaf a              >>= k = k a
 
+instance ToSAT (SynTree BinOp Char) where
+  convert (Leaf a) = Sat.Var a
+  convert (Not f) = Sat.Not (convert f)
+  convert (Binary op l r) = convertBinOp op leftFormula rightFormula
+    where leftFormula = convert l
+          rightFormula = convert r
+          convertBinOp And = (Sat.:&&:)
+          convertBinOp Or = (Sat.:||:)
+          convertBinOp Impl = (Sat.:->:)
+          convertBinOp Equi = (Sat.:<->:)
 
 newtype TreeFormulaAnswer = TreeFormulaAnswer {maybeTree :: Maybe (SynTree BinOp Char)} deriving (Eq, Generic)
 

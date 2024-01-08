@@ -18,7 +18,7 @@ module Formula.Util
        , transformProlog
        , flipPol
        , isSemanticEqual
-       , isSemanticEqualSat
+       -- , isSemanticEqualSat
        ) where
 
 
@@ -26,7 +26,6 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Maybe(fromJust)
-import Data.List (sort)
 
 import Formula.Types
 
@@ -95,7 +94,7 @@ hasEmptyCon (Dnf set) = Con Set.empty `Set.member` set
 ---------------------------------------------------------------------------------------------------
 
 
-logOpSat :: (Formula a, Formula b)
+logOpSat :: (ToSAT a, ToSAT b)
          => (Sat.Formula Char -> Sat.Formula Char -> Sat.Formula Char)
          -> a
          -> b
@@ -105,26 +104,21 @@ logOpSat op f1 f2 = Sat.satisfiable (op (convert f1) (convert f2))
 
 
 -- | (f1 ``xorSat`` f2) indicates whether (f1 XOR f2) is satisfiable
-xorSat :: (Formula a, Formula b) => a -> b -> Bool
+xorSat :: (ToSAT a, ToSAT b) => a -> b -> Bool
 xorSat = logOpSat (Sat.:++:)
 
 
 -- | (f1 ``andSat`` f2) indicates whether (f1 /\\ f2) is satisfiable
-andSat :: (Formula a, Formula b) => a -> b -> Bool
+andSat :: (ToSAT a, ToSAT b) => a -> b -> Bool
 andSat = logOpSat (Sat.:&&:)
 
-
-
 -- | Indicates whether the given formula is satisfiable
-sat :: Formula a => a -> Bool
+sat :: ToSAT a => a -> Bool
 sat f = Sat.satisfiable $ convert f
 
 -- | Are two formulas semantically equal?
-isSemanticEqual :: Formula a => a -> a -> Bool
-isSemanticEqual a b = isSemanticEqualSat (convert a) (convert b)
-
-isSemanticEqualSat :: Ord a => Sat.Formula a -> Sat.Formula a -> Bool
-isSemanticEqualSat a b = sort (Sat.solve_all a) == sort (Sat.solve_all b)
+isSemanticEqual :: ToSAT a => a -> a -> Bool
+isSemanticEqual a b = not $ xorSat a b
 
 ----------------------------------------------------------------------------------------------------------
 

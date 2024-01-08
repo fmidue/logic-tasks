@@ -10,10 +10,6 @@ import LogicTasks.Config
 import LogicTasks.Util
 import LogicTasks.Debug (checkConfigWith)
 import Formula.Types (lengthBound)
-import Trees.Helpers (binSynTreeToMiniSatFormula)
-import Tasks.SynTree.Config (SynTreeInst(..), defaultSynTreeConfig)
-import Tasks.SynTree.Quiz (generateSynTreeInst)
-import SAT.MiniSat
 
 validBoundsClause :: Gen ((Int,Int),[Char])
 validBoundsClause = do
@@ -84,18 +80,3 @@ spec = do
            sizes = map (length . literals) (getClauses cnf)
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
-
-  describe "isSemanticEqualSat" $  do
-    it "a formula is semantically equal to itself" $
-      forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _ _ _) ->
-        isSemanticEqualSat (binSynTreeToMiniSatFormula tree) (binSynTreeToMiniSatFormula tree)
-    it "a formula is semantically equal to itself with associativity applied" $ do
-      isSemanticEqualSat ((Var 'A' :&&: Var 'B') :&&: Var 'C') (Var 'A' :&&: (Var 'B' :&&: Var 'C')) &&
-        isSemanticEqualSat ((Var 'A' :||: Var 'B') :||: Var 'C') (Var 'A' :||: (Var 'B' :||: Var 'C'))
-    it "a formula is semantically equal to itself with commutativity applied" $ do
-      isSemanticEqualSat (Var 'A' :&&: Var 'B') (Var 'B' :&&: Var 'A') &&
-        isSemanticEqualSat (Var 'A' :||: Var 'B') (Var 'B' :||: Var 'A') &&
-          isSemanticEqualSat (Var 'A' :<->: Var 'B') (Var 'B' :<->: Var 'A')
-    it "a formula is semantically equal to itself with distributivity applied" $ do
-      isSemanticEqualSat ((Var 'A' :&&: Var 'B') :||: Var 'C') ((Var 'A' :||: Var 'C') :&&: (Var 'B' :||: Var 'C')) &&
-        isSemanticEqualSat ((Var 'A' :||: Var 'B') :&&: Var 'C') ((Var 'A' :&&: Var 'C') :||: (Var 'B' :&&: Var 'C'))

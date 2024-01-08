@@ -20,7 +20,6 @@ module Trees.Helpers
     literalToSynTree,
     numOfOps,
     numOfOpsInFormula,
-    binSynTreeToMiniSatFormula
     ) where
 
 import Control.Monad (void)
@@ -31,8 +30,6 @@ import qualified Data.Foldable as Foldable (toList)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
-import SAT.MiniSat as Sat hiding (Not)
-import qualified SAT.MiniSat as Sat (Formula(Not))
 
 numberAllBinaryNodes :: SynTree o c -> SynTree (o, Integer) c
 numberAllBinaryNodes = flip evalState 1 . go
@@ -142,14 +139,3 @@ numOfOpsInFormula (Atomic _) = 0
 numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
-
-binSynTreeToMiniSatFormula :: SynTree BinOp a -> Formula a
-binSynTreeToMiniSatFormula (Leaf a) = Sat.Var a
-binSynTreeToMiniSatFormula (Not f) = Sat.Not (binSynTreeToMiniSatFormula f)
-binSynTreeToMiniSatFormula (Binary op l r) = convertBinOp op leftFormula rightFormula
-  where leftFormula = binSynTreeToMiniSatFormula l
-        rightFormula = binSynTreeToMiniSatFormula r
-        convertBinOp And = (:&&:)
-        convertBinOp Or = (:||:)
-        convertBinOp Impl = (:->:)
-        convertBinOp Equi = (:<->:)
