@@ -152,12 +152,12 @@ setElements set
 
 resolutions :: [([Clause], Clause)] -> [([Clause], Clause)]
 resolutions [] = []
-resolutions xss@((cs, r):xs) = nubOrd $ (cs,r) : [ ([x,y], fromJust res) |
+resolutions clauseMap@((cs, r):xs) = nubOrd $ (cs,r) : [ ([x,y], fromJust res) |
   x <- allClauses,
   l <- Set.toList (literalSet x),
   y <- allClauses,
   let res = resolve x y l, isJust res]  ++ resolutions xs
-    where allClauses = map snd xss
+    where allClauses = map snd clauseMap
 
 solution' :: [([Clause], Clause)] -> [([Clause], Clause)]
 solution' xs = if any (\(_, Clause x) -> null x) xs then xs else solution' (resolutions xs)
