@@ -106,11 +106,12 @@ spec = do
         convert (Not (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Leaf 'C')))
           == Sat.Not((Var 'A' :->: Sat.Not (Var 'B')) :&&: Var 'C')
     it "should correctly convert Binary" $
+      let orTree = Binary Or (Leaf 'C') (Leaf 'D') in
       convert (Binary And (Leaf 'A') (Leaf 'B')) == (Var 'A' :&&: Var 'B') &&
-      convert (Binary Or (Leaf 'A') (Leaf 'B')) == (Var 'A' :||: Var 'B') &&
+      convert orTree == (Var 'C' :||: Var 'D') &&
       convert (Binary Impl (Leaf 'A') (Leaf 'B')) == (Var 'A' :->: Var 'B') &&
       convert (Binary Equi (Leaf 'A') (Leaf 'B')) == (Var 'A' :<->: Var 'B') &&
-      convert (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Binary Equi (Binary Or (Leaf 'C') (Leaf 'D')) (Leaf 'E')))
+      convert (Binary And (Binary Impl (Leaf 'A') (Not (Leaf 'B'))) (Binary Equi orTree (Leaf 'E')))
         == (Var 'A' :->: Sat.Not (Var 'B')) :&&: ((Var 'C' :||: Var 'D') :<->: Var 'E')
 
   describe "semantic equivalence of syntax trees (isSemanticEqual)" $  do
@@ -118,15 +119,23 @@ spec = do
       forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _ _ _) ->
         isSemanticEqual tree tree
     it "a syntax tree's formula is semantically equivalent to itself with associativity applied" $ do
-      isSemanticEqual ((Leaf 'A' `treeAnd` Leaf 'B') `treeAnd` Leaf 'C') (Leaf 'A' `treeAnd` (Leaf 'B' `treeAnd` Leaf 'C')) &&
-        isSemanticEqual ((Leaf 'A' `treeOr` Leaf 'B') `treeOr` Leaf 'C') (Leaf 'A' `treeOr` (Leaf 'B' `treeOr` Leaf 'C'))
+      isSemanticEqual
+        ((Leaf 'A' `treeAnd` Leaf 'B') `treeAnd` Leaf 'C')
+        (Leaf 'A' `treeAnd` (Leaf 'B' `treeAnd` Leaf 'C')) &&
+        isSemanticEqual
+          ((Leaf 'A' `treeOr` Leaf 'B') `treeOr` Leaf 'C')
+          (Leaf 'A' `treeOr` (Leaf 'B' `treeOr` Leaf 'C'))
     it "a syntax tree's formula is semantically equivalent to itself with commutativity applied" $ do
       isSemanticEqual (Leaf 'A' `treeAnd` Leaf 'B') (Leaf 'B' `treeAnd` Leaf 'A') &&
         isSemanticEqual (Leaf 'A' `treeOr` Leaf 'B') (Leaf 'B' `treeOr` Leaf 'A') &&
           isSemanticEqual (Leaf 'A' `treeBiImpl` Leaf 'B') (Leaf 'B' `treeBiImpl` Leaf 'A')
     it "a syntax tree's formula is semantically equivalent to itself with distributivity applied" $ do
-      isSemanticEqual ((Leaf 'A' `treeAnd` Leaf 'B') `treeOr` Leaf 'C') ((Leaf 'A' `treeOr` Leaf 'C') `treeAnd` (Leaf 'B' `treeOr` Leaf 'C')) &&
-        isSemanticEqual ((Leaf 'A' `treeOr` Leaf 'B') `treeAnd` Leaf 'C') ((Leaf 'A' `treeAnd` Leaf 'C') `treeOr` (Leaf 'B' `treeAnd` Leaf 'C'))
+      isSemanticEqual
+        ((Leaf 'A' `treeAnd` Leaf 'B') `treeOr` Leaf 'C')
+        ((Leaf 'A' `treeOr` Leaf 'C') `treeAnd` (Leaf 'B' `treeOr` Leaf 'C')) &&
+        isSemanticEqual
+          ((Leaf 'A' `treeOr` Leaf 'B') `treeAnd` Leaf 'C')
+          ((Leaf 'A' `treeAnd` Leaf 'C') `treeOr` (Leaf 'B' `treeAnd` Leaf 'C'))
 
 -- shorthands
 treeAnd, treeOr, treeBiImpl :: SynTree BinOp a -> SynTree BinOp a -> SynTree BinOp a
