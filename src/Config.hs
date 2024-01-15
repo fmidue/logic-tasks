@@ -272,7 +272,8 @@ data PrologConfig = PrologConfig {
     , maxClauseLength :: Int
     , usedPredicates :: [PrologLiteral]
     , extraText :: Maybe String
-    , createOnlyHornClauses :: Bool
+    , firstClauseShape :: ClauseShape
+    , secondClauseShape :: ClauseShape
     }
     deriving (Show, Typeable, Generic)
 
@@ -282,7 +283,8 @@ dPrologConf = PrologConfig
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
-    , createOnlyHornClauses = True
+    , firstClauseShape = HornClause Procedure
+    , secondClauseShape = HornClause Query
     }
 
 

@@ -24,7 +24,7 @@ import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transfo
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
-import Formula.Helpers (isHornClause)
+import Formula.Helpers (hasTheClauseShape)
 
 
 genPrologInst :: PrologConfig -> Gen PrologInst
@@ -34,7 +34,7 @@ genPrologInst PrologConfig{..} = (do
       termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
       termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
     pure $ PrologInst termAddedClause1 termAddedClause2 extraText)
-  `suchThat` \(PrologInst clause1 clause2 _) -> not createOnlyHornClauses || (isHornClause clause1 && isHornClause clause2)
+  `suchThat` \(PrologInst clause1 clause2 _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
   where
     mapping = zip usedPredicates ['A'..'Z']
     usedLiterals = map snd mapping

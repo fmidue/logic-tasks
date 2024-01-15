@@ -29,6 +29,8 @@ module Formula.Types
        , PrologClause(..)
        , terms
        , lengthBound
+       , ClauseShape(..)
+       , HornShape(..)
        ) where
 
 
@@ -56,9 +58,8 @@ class Formula a where
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
 
-
-
-
+data ClauseShape = AnyClause | HornClause HornShape deriving Show
+data HornShape = AnyHornClause | Fact | Procedure | Query deriving Show
 
 
 ---------------------------------------------------
