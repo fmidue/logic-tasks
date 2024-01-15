@@ -283,8 +283,8 @@ dPrologConf = PrologConfig
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
-    , firstClauseShape = HornClause Procedure
-    , secondClauseShape = HornClause Query
+    , firstClauseShape = HornClause Query
+    , secondClauseShape = HornClause Procedure
     }
 
 
