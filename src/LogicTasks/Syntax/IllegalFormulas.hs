@@ -80,9 +80,11 @@ completeGrade path inst sol = refuseIfWrong $ do
         german "Ihre Lösung ist falsch."
 
   when (showSolution inst) $ do
-    example (show (toList (serialsOfWrong inst))) $ do
+    when wrongSolution $
+      example (show (toList (serialsOfWrong inst))) $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
+
     instruct $ do
         english "The following syntax trees represent the well-formed formulae:"
         german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
