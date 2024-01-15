@@ -189,7 +189,7 @@ completeMinMax showSolution correct solution =
       (do
         paragraph $ do
           translate $ do
-            german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
+            german "Es existieren falsche Einträge in den folgenden Tabellenzeilen: "
             english "The following rows are not correct: "
           itemizeM $ map (text . show) diff
           pure ()
