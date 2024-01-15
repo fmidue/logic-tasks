@@ -12,4 +12,5 @@ spec = do
   describe "genPrologInst" $
     it "should only generate PrologInst with horn clauses by default" $
       forAll (genPrologInst dPrologConf) $ \PrologInst {..} ->
-        hasTheClauseShape (firstClauseShape dPrologConf) literals1 && hasTheClauseShape (secondClauseShape dPrologConf) literals2
+        hasTheClauseShape (firstClauseShape dPrologConf) literals1
+          && hasTheClauseShape (secondClauseShape dPrologConf) literals2
