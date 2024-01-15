@@ -19,6 +19,7 @@ import Trees.Helpers
 import Control.Monad (when, unless)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
+import Data.Foldable (for_)
 
 
 description :: OutputMonad m => SubTreeInst -> LangM m
@@ -111,7 +112,7 @@ completeGrade path SubTreeInst{..} sol = refuseIfWrong $ do
       english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulas:")
       german ("Eine mögliche Lösung für die Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
 
-    applyForAll (toList correctTrees) $ \x -> do
+    for_ (toList correctTrees) $ \x -> do
       code (display x)
       image $=<< liftIO $ cacheTree (transferToPicture x) path
       pure ()

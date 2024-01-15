@@ -16,6 +16,7 @@ import Control.Monad (when)
 import Trees.Print (display, transferToPicture)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
+import Data.Foldable (for_)
 
 
 
@@ -89,7 +90,7 @@ completeGrade path inst sol = refuseIfWrong $ do
         english "The following syntax trees represent the well-formed formulas:"
         german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
-    applyForAll (correctTrees inst) $ \x -> do
+    for_ (correctTrees inst) $ \x -> do
       code (display x)
       image $=<< liftIO $ cacheTree (transferToPicture x) path
       pure ()
