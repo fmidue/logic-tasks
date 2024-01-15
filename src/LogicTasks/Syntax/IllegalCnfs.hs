@@ -19,21 +19,21 @@ import Control.Monad (when)
 description :: OutputMonad m => LegalCNFInst -> LangM m
 description LegalCNFInst{..} = do
     instruct $ do
-      english "Consider the following propositional logic formulae:"
+      english "Consider the following propositional logic formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
 
     focus $ unlines $ indexed formulaStrings
 
     instruct $ do
-      english "Which of these formulae are not given in conjunctive normal form (cnf)?"
+      english "Which of these formulas are not given in conjunctive normal form (cnf)?"
       german "Welche dieser Formeln sind nicht in konjunktiver Normalform (KNF) angegeben?"
 
     instruct $ do
-      english "Enter a list containing the indices of the non-cnf formulae to submit your answer."
+      english "Enter a list containing the indices of the non-cnf formulas to submit your answer."
       german "Geben Sie eine Liste der Indizes aller nicht in KNF vorliegenden Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
-      english "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
+      english "For example, if only choices 2 and 3 are non-cnf formulas, then the solution is:"
       german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 nicht in KNF vor, dann ist diese Lösung korrekt:"
 
     paragraph $ text (fromMaybe "" extraText)
@@ -60,7 +60,7 @@ partialGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
 partialGrade LegalCNFInst{..} sol
     | invalidIndex = reject $ do
       english "At least one index in the list does not exist."
-      german "Mindestens einer der Indices existiert nicht."
+      german "Mindestens einer der Indizes existiert nicht."
 
     | otherwise = pure()
   where

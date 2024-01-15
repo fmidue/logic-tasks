@@ -178,7 +178,7 @@ instance Arbitrary Clause where
 
 
 -- | Generates a random clause. The length of the generated clause lies in the given length bounds.
---   The used atomic formulae are drawn from the list of chars.
+--   The used atomic formulas are drawn from the list of chars.
 genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minLength,maxLength) lits = do
     genLits <- genForBasic (minLength,maxLength) lits
@@ -259,7 +259,7 @@ instance Arbitrary Cnf where
 
 -- | Generates a random cnf satisfying the given bounds
 --   for the amount and the length of the contained clauses.
---   The used atomic formulae are drawn from the list of chars.
+--   The used atomic formulas are drawn from the list of chars.
 --   Every char from the list will occur at least once in the formula.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
 genCnf (minNum,maxNum) (minLen,maxLen) lits = do
@@ -333,7 +333,7 @@ instance Arbitrary Con where
 
 
 -- | Generates a random conjunction. The length of the generated conjunction lies in the given length bounds.
---   The used atomic formulae are drawn from the list of chars.
+--   The used atomic formulas are drawn from the list of chars.
 genCon :: (Int,Int) -> [Char] -> Gen Con
 genCon (minLength,maxLength) lits = do
     genLits <- genForBasic (minLength,maxLength) lits
@@ -408,7 +408,7 @@ instance Arbitrary Dnf where
 
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
---   The used atomic formulae are drawn from the list of chars.
+--   The used atomic formulas are drawn from the list of chars.
 --   Every char from the list will occur at least once in the formula.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Dnf
 genDnf (minNum,maxNum) (minLen,maxLen) lits = do

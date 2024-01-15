@@ -68,7 +68,7 @@ checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {
         german "Die Anzahl der Formeln kann nicht niedriger als die Summe von falschen und richtigen Formeln."
     | let leaves = maxLeavesForNodes maxNodes, (if allowArrowOperators then 4 else 2) ^ (maxNodes - leaves) < formulas
       = reject $ do
-        english "Settings may result in extremely large formulae."
+        english "Settings may result in extremely large formulas."
         german "Einstellungen führen zu extrem großen Formeln."
     | otherwise = pure()
 

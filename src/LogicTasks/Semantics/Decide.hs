@@ -56,7 +56,7 @@ description DecideInst{..} = do
     indent $ code $ show (flipAt (getTable cnf) changed)
     pure ()
   paragraph $ translate $ do
-    english  "Provide the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulae counts as row 1."
+    english  "Provide the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
     german  "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
 
   paragraph $ indent $ do
@@ -114,21 +114,21 @@ partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
   preventWithHint (solLen > acLen)
     (translate $ do
-      german "Lösung enthält nicht zu viele Indices?"
-      english "Solution does not contains too many indices?"
+      german "Lösung enthält nicht zu viele Indizes?"
+      english "Solution does not contain too many indices?"
     )
     (translate $ do
-      german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
+      german $ "Lösung enthält zu viele Indizes. Es " ++ ger ++" entfernt werden."
       english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
     )
 
   preventWithHint (acLen > solLen)
     (translate $ do
-      german "Lösung enthält genügend Indices?"
+      german "Lösung enthält genügend Indizes?"
       english "Solution contains enough indices?"
     )
     (translate $ do
-      german $ "Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."
+      german $ "Lösung enthält zu wenige Indizes. Es " ++ ger ++ " hinzugefügt werden."
       english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
     )
   pure ()

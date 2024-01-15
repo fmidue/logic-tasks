@@ -37,7 +37,7 @@ Rightarrow
 scanl
 snd
 subformula
-subformulae
+subformulas
 tupled
 UML
 uncurry
