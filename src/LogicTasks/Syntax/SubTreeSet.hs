@@ -108,7 +108,7 @@ completeGrade path SubTreeInst{..} sol = refuseIfWrong $ do
 
   when showSolution $ indent $ do
     instruct $ do
-      english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulae:")
+      english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulas:")
       german ("Eine mögliche Lösung für die Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
 
     applyForAll (toList correctTrees) $ \x -> do

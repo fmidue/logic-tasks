@@ -86,7 +86,7 @@ completeGrade path inst sol = refuseIfWrong $ do
           german "Eine mögliche Lösung für die Aufgabe ist:"
 
     instruct $ do
-        english "The following syntax trees represent the well-formed formulae:"
+        english "The following syntax trees represent the well-formed formulas:"
         german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
     applyForAll (correctTrees inst) $ \x -> do
