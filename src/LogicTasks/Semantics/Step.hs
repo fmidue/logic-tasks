@@ -25,7 +25,6 @@ import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (clauseKey, example)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when)
-import Data.List.Extra (replace)
 
 
 
