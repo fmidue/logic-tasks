@@ -19,7 +19,7 @@ import Data.Tuple (swap)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite)
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite, ClauseShape (HornClause), HornShape (Fact, Query))
 import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
@@ -115,6 +115,11 @@ verifyQuiz PrologConfig{..}
         refuse $ indent $ translate $ do
           german "Es wurden keine Literale angegeben."
           english "You did not specify which literals should be used."
+
+    | (firstClauseShape `elem` [HornClause Fact, HornClause Query]) && firstClauseShape == secondClauseShape =
+        refuse $ indent $ translate $ do
+          german "Mit diesen Klauselformen ist keine Resolution möglich."
+          english "No resolution is possible with these clause forms."
 
     | otherwise = pure()
 

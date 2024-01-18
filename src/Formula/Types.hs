@@ -58,8 +58,8 @@ class Formula a where
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
 
-data ClauseShape = AnyClause | HornClause HornShape deriving Show
-data HornShape = AnyHornClause | Fact | Procedure | Query deriving Show
+data ClauseShape = AnyClause | HornClause HornShape deriving (Show, Eq)
+data HornShape = AnyHornClause | Fact | Procedure | Query deriving (Show, Eq)
 
 
 ---------------------------------------------------
