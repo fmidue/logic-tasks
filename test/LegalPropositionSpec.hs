@@ -68,7 +68,7 @@ spec = do
                   ) $ \synTree ->
                       forAll (deleteSpaces <$> illegalDisplay synTree) $
                       all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
-        it "the String after illegalDisplay can not parse " $
+        it "the string after illegalDisplay cannot be parsed" $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
                 forAll
                   (genSynTree

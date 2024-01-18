@@ -58,7 +58,7 @@ checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {
         english "The number of formulas must be positive."
         german "Anzahl der Formeln muss positiv sein."
     | illegals < 0 = reject $ do
-        english "The number of illegals can not be negative."
+        english "The number of illegals cannot be negative."
         german "Anzahl falscher Formeln muss 0 oder höher sein."
     | bracketFormulas < 0 = reject $ do
         english "The number of bracketFormulas cannot be less than 0."

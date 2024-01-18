@@ -160,7 +160,7 @@ completeGrade PrologInst{..} sol =
         Nothing -> refuse $ indent $  do
           translate $ do
             german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
-            english "This literal can not be used for a resolution step!"
+            english "This literal cannot be used for a resolution step!"
 
           displaySolution
 

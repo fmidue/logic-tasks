@@ -62,7 +62,7 @@ checkSynTreeConfig SynTreeConfig {..}
         english "Minimal number of consecutive negations must not be negative"
         german "Minimale Anzahl aufeinander folgender Negationen kann nicht negativ sein."
     | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes) = reject $ do
-        english "Syntax tree with no negation can not have even nodes"
+        english "Syntax tree with no negation cannot have even number of nodes."
         german "Syntaxbaum ohne Negation kann keine gerade Anzahl Blätter haben."
     | minNodes < 1 = reject$ do
         english"Minimal number of nodes must be positive."

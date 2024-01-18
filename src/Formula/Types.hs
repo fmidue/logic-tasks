@@ -115,7 +115,7 @@ instance Arbitrary Literal where
 -- | Generates a literal with random sign from the given list of chars.
 --   throws an error if called with the empty list.
 genLiteral :: [Char] -> Gen Literal
-genLiteral [] = error "Can not construct Literal from empty list."
+genLiteral [] = error "Cannot construct literal from empty list."
 genLiteral lits = do
    rChar <- elements lits
    elements [Literal rChar, Not rChar]
