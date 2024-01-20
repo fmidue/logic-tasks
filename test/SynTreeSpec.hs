@@ -52,7 +52,7 @@ validBoundsSynTree = do
         allowArrowOperators,
         maxConsecutiveNegations,
         extraText = Nothing,
-        extraHintsOnSemanticEquivalence = False
+        extraHintsOnSemanticEquivalence = False,
         minUniqueBinOperators = 0
       }
 
@@ -73,7 +73,7 @@ invalidBoundsSynTree = do
         allowArrowOperators = True,
         maxConsecutiveNegations,
         extraText = Nothing,
-        extraHintsOnSemanticEquivalence = False
+        extraHintsOnSemanticEquivalence = False,
         minUniqueBinOperators = 0
       }
 
