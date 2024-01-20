@@ -10,6 +10,7 @@ import Formula.Types
 
 import Control.Monad (void)
 import Data.Char (toLower)
+import Data.Map (fromList)
 import Text.ParserCombinators.Parsec (
   Parser,
   (<?>),
@@ -299,7 +300,7 @@ instance Parse PickInst where
         index <- lexeme $ many1 digit
         text <- optionMaybe $ lexeme bonusText
         char ')'
-        pure $ PickInst cs (read index) text
+        pure $ PickInst cs (read index) (fromList . read <$> text)
           where
             bonusText = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do

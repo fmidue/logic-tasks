@@ -47,7 +47,7 @@ spec = do
 
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $
-      Exc.evaluate (genLiteral []) `shouldThrow` errorCall "Can not construct Literal from empty list."
+      Exc.evaluate (genLiteral []) `shouldThrow` errorCall "Cannot construct literal from empty list."
     it "should generate a random literal from the given char list" $
       property $ \chars -> not (null chars) ==> forAll (genLiteral chars) $ \char -> letter char `elem` chars
 

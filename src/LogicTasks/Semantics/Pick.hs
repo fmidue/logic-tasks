@@ -13,7 +13,7 @@ import Control.Monad.Output (
   german,
   translate,
   )
-import Data.Maybe (fromMaybe)
+
 import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
@@ -21,6 +21,7 @@ import Formula.Util (mkCnf, xorSat)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
+import LogicTasks.Helpers (extra)
 
 
 
@@ -61,7 +62,7 @@ description PickInst{..} = do
         english "A valid solution could look like this: "
       code "1"
       pure ()
-    paragraph $ text (fromMaybe "" addText)
+    extra addText
     pure ()
   where
     sTable = cnfs !! (correct - 1)
@@ -72,7 +73,7 @@ verifyStatic PickInst{..}
     | null cnfs =
         refuse $ indent $ translate $ do
           german "Die Liste der Formeln ist leer."
-          english "The list of formulae is empty."
+          english "The list of formulas is empty."
 
     | mkCnf [] `elem` cnfs =
         refuse $ indent $ translate $ do
@@ -99,7 +100,7 @@ verifyQuiz PickConfig{..}
     | amountOfOptions > 4*2^ length (usedLiterals base) =
         refuse $ indent $ translate $ do
           german "Die Anzahl Optionen übersteigt die Anzahl möglicher, unterschiedlicher Formeln."
-          english "The amount of options is higher than the amount of possible, distinct formulae."
+          english "The amount of options is higher than the amount of possible, distinct formulas."
 
     | otherwise = checkCnfConf cnfConf
   where

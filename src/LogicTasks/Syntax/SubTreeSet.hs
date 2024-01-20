@@ -5,12 +5,12 @@
 module LogicTasks.Syntax.SubTreeSet where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf)
-import Data.Maybe (isNothing, fromJust, fromMaybe)
+import Data.Maybe (isNothing, fromJust)
 
-import LogicTasks.Helpers
+import LogicTasks.Helpers (example, extra, focus, fullKey, instruct, keyHeading, reject)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display)
@@ -26,11 +26,11 @@ description SubTreeInst{..} = do
     focus (display tree)
 
     instruct $ do
-      english $ "Find " ++ show minInputTrees ++ " non-atomic subformulae that are contained in it."
+      english $ "Find " ++ show minInputTrees ++ " non-atomic subformulas that are contained in it."
       german $ "Finden Sie " ++ show minInputTrees ++ " nicht-atomare Teilformeln, die in dieser Formel enthalten sind."
 
     instruct $ do
-      english "Submit your solution as a list of subformulae."
+      english "Submit your solution as a list of subformulas."
       german "Geben Sie die Lösung als eine Liste der Teilformeln an."
 
     instruct $ do
@@ -38,13 +38,13 @@ description SubTreeInst{..} = do
       german "Entfernen Sie dabei Klammerpaare, die eine angegebene Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
     example "[ A or (B and C), B and C ]" $ do
-      english "For example, if ¬(A ∨ (B ∧ C)) is the given formula and two subformulae are required, then a correct solution is:"
+      english "For example, if ¬(A ∨ (B ∧ C)) is the given formula and two subformulas are required, then a correct solution is:"
       german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformeln gesucht, dann ist die folgende Lösung korrekt:"
 
     keyHeading
     fullKey
 
-    paragraph $ text (fromMaybe "" extraText)
+    extra addText
     pure ()
 
 
@@ -82,7 +82,7 @@ partialGrade SubTreeInst{..} fs
 
     | amount < minInputTrees =
       reject $ do
-        english $ "Your solution does not contain enough subformulae. Add " ++ show (minInputTrees - amount) ++ "."
+        english $ "Your solution does not contain enough subformulas. Add " ++ show (minInputTrees - amount) ++ "."
         german $ "Ihre Abgabe beinhaltet nicht genügend Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
 
     | otherwise = pure()

@@ -26,11 +26,12 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
         atLeastOccurring
         allowArrowOperators
         maxConsecutiveNegations
+        minUniqueBinOperators
       `suchThat` sameAssociativeOperatorAdjacent
     stringWithSuperfluousBrackets <- superfluousBracketsDisplay tree superfluousBracketPairs
     return $ SuperfluousBracketsInst
       { tree
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
-      , extraText = extraText
+      , addText = extraText
       }

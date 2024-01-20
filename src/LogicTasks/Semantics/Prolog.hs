@@ -13,28 +13,29 @@ import Control.Monad.Output (
   german,
   translate,
   )
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust)
 import Data.Set (difference, member, toList, union)
 import Data.Tuple (swap)
-import Test.QuickCheck (Gen)
+import Test.QuickCheck (Gen, suchThat)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite)
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite, ClauseShape (HornClause), HornShape (Fact, Query))
 import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
-
-
+import LogicTasks.Helpers (extra)
+import Formula.Helpers (hasTheClauseShape)
 
 
 genPrologInst :: PrologConfig -> Gen PrologInst
-genPrologInst PrologConfig{..} = do
+genPrologInst PrologConfig{..} = (do
     (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
     let
       termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
       termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
-    pure $ PrologInst termAddedClause1 termAddedClause2 extraText
+    pure $ PrologInst termAddedClause1 termAddedClause2 extraText)
+  `suchThat` \(PrologInst clause1 clause2 _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
   where
     mapping = zip usedPredicates ['A'..'Z']
     usedLiterals = map snd mapping
@@ -72,7 +73,7 @@ description PrologInst{..} = do
       english "A valid solution with the clauses a(x) and not(a(x)) could look like this:"
     code "(a(x), { })"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra addText
   pure ()
 
 
@@ -116,6 +117,11 @@ verifyQuiz PrologConfig{..}
           german "Es wurden keine Literale angegeben."
           english "You did not specify which literals should be used."
 
+    | (firstClauseShape `elem` [HornClause Fact, HornClause Query]) && firstClauseShape == secondClauseShape =
+        refuse $ indent $ translate $ do
+          german "Mit diesen Klauselformen ist keine Resolution möglich."
+          english "No resolution is possible with these clause forms."
+
     | otherwise = pure()
 
 
@@ -132,7 +138,7 @@ partialGrade PrologInst{..} sol = do
       german "Gewähltes Literal kommt in den Klauseln vor?"
       english "Chosen literal is contained in any of the clauses?"
 
-  preventWithHint (not $ null extra)
+  preventWithHint (not $ null extraLiterals)
     (translate $ do
        german "Resolvente besteht aus bekannten Literalen?"
        english "Resolvent contains only known literals?"
@@ -141,14 +147,14 @@ partialGrade PrologInst{..} sol = do
       translate $ do
         german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
         english "The resolvent contains unknown literals. These are incorrect:"
-      itemizeM $ map (text . show) extra
+      itemizeM $ map (text . show) extraLiterals
       pure ()
     )
   pure ()
   where
      availLits = pLiterals literals1 `union` pLiterals literals2
      solLits = pLiterals $ snd sol
-     extra = toList $ solLits `difference` availLits
+     extraLiterals = toList $ solLits `difference` availLits
 
 
 
@@ -157,7 +163,7 @@ completeGrade PrologInst{..} sol =
     case resolve clause1 clause2 transSol1 of
         Nothing -> refuse $ indent $ translate $ do
                      german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
-                     english "This literal can not be used for a resolution step!"
+                     english "This literal cannot be used for a resolution step!"
 
         Just solClause -> if solClause == transSol2
                             then pure()

@@ -23,7 +23,7 @@ import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
-import LogicTasks.Helpers (formulaKey)
+import LogicTasks.Helpers (extra, formulaKey)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 
@@ -61,7 +61,7 @@ description MaxInst{..} = do
       german "(A oder nicht B) und (nicht C oder nicht D)"
       english "(A or not B) and (not C or not D)"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra addText
   pure ()
 
 
@@ -90,7 +90,7 @@ start = mkCnf [mkClause [Literal 'A']]
 
 partialMinMax :: (OutputMonad m, Formula f) => [Literal] -> f -> f -> Bool -> Bool -> LangM m
 partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
-  preventWithHint (not $ null extra)
+  preventWithHint (not $ null extraLiterals)
     (translate $ do
       german "Angegebene Literale kommen in Aufgabe vor?"
       english "Given literals are used in task?"
@@ -100,7 +100,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
       translate $ do
         german "Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
         english "Your submission contains unknown literals. These do not appear in a correct solution: "
-      itemizeM $ map (text . show) extra
+      itemizeM $ map (text . show) extraLiterals
       pure ()
     )
 
@@ -156,7 +156,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
   pure ()
  where
     solLits = atomics solution
-    extra = solLits \\ correctLits
+    extraLiterals = solLits \\ correctLits
     missing = correctLits \\ solLits
     table = getTable correct
     corrLen = length $ filter (== Just False) (readEntries table)

@@ -40,10 +40,10 @@ tableGenSpec :: Spec
 tableGenSpec =
   describe "getTable" $ do
     context "When generating different tables" $
-      it "should have used different formulae" $
+      it "should have used different formulas" $
         forAll (applySize (arbitrary :: Gen (Cnf,Cnf))) $ \(x,y) -> getTable x /= getTable y ==> x /= y
 
-    context "When using equivalent formulae" $
+    context "When using equivalent formulas" $
       it "should produce the same table twice" $
         forAll (applySize equivGen) $ \(x,y) -> getTable x == getTable y
 

@@ -15,7 +15,7 @@ import Data.Text.Lazy (pack)
 import qualified Data.Set as Set (null)
 
 import Text.PrettyPrint.Leijen.Text
-
+import Data.Map (toList)
 
 
 
@@ -144,7 +144,7 @@ instance Pretty PickInst where
       text "PickInst(" <> vcat
                            [ nest 2 $ pretty cnfs
                            , char ',' <+> pretty correct
-                           , maybe empty (\s -> myText (", {" ++ s ++ "}")) addText
+                           , maybe empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
                            , char ')'
                            ]
 

@@ -65,30 +65,30 @@ spec = do
       forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           fromIntegral (size correctFormulas) >= minSubTrees
-    it "all subformulae are the sublist of the formula" $
+    it "all subformulas are the sublist of the formula" $
       forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
             correctFormulas' = toList correctFormulas
           in
             all (`isInfixOf` display tree) correctFormulas'
-    it "Converting correct subformulae Strings into formulae and parsing them again should yield the original" $
+    it "Converting correct subformulas Strings into formulas and parsing them again should yield the original" $
       forAll validBoundsSubTree $ \config ->
           forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
             let
-              propFormulae = map
+              propFormulas = map
                 (fromRight' . parse (parser @(PropFormula Char)) "")
                 (toList correctFormulas)
-              inputSet = fromList (map show propFormulae)
+              inputSet = fromList (map show propFormulas)
             in
               inputSet == correctFormulas
     xit "The above should be true even when deleting spaces in the input" $
       forAll validBoundsSubTree $ \config ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
-            propFormulae = map
+            propFormulas = map
               (fromRight' . parse (parser @(PropFormula Char)) "" . deleteSpaces)
               (toList correctFormulas)
-            inputSet = fromList (map show propFormulae)
+            inputSet = fromList (map show propFormulas)
           in
             inputSet == correctFormulas

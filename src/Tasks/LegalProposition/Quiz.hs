@@ -32,6 +32,7 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
           atLeastOccurring
           allowArrowOperators
           maxConsecutiveNegations
+          minUniqueBinOperators
         )
       `suchThat` (not . similarExist)
     serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` listNoDuplicate
@@ -43,7 +44,7 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
-        , extraText = extraText
+        , addText = extraText
         }
 
 

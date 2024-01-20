@@ -23,7 +23,7 @@ superfluousBracketsDisplay synTree brackets =
 
 
 rootDisplay :: SynTree (BinOp, Integer) Char -> Integer -> Integer -> Gen String
-rootDisplay (Leaf _) _ _ =  error "can not have only one node"
+rootDisplay (Leaf _) _ _ =  error "cannot have only one node"
 rootDisplay synTree@(Not a) brackets serial = do
     ifUseBrackets <- frequency
       [ (fromIntegral brackets, return True)

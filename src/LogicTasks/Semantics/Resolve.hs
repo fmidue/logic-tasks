@@ -17,14 +17,14 @@ import Control.Monad.Output (
   localise,
   )
 import Data.List (sort)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (clauseKey)
+import LogicTasks.Helpers (clauseKey, extra)
 import Util (checkBaseConf, prevent, preventWithHint)
 
 
@@ -94,7 +94,7 @@ description ResolutionInst{..} = do
       english "[(1, 2, {A, not B} = 5), (4, 5, { })]"
       german "[(1, 2, {A, nicht B} = 5), (4, 5, { })]"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra addText
   pure ()
 
 
@@ -214,7 +214,7 @@ correctMapping [] _ = pure()
 correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
   prevent checkIndices $
     translate $ do
-      german "Alle Schritte verwenden existierende Indices?"
+      german "Alle Schritte verwenden existierende Indizes?"
       english "All steps use valid indices?"
 
   prevent (alreadyUsed i) $
