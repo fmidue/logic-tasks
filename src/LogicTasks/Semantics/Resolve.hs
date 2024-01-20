@@ -24,8 +24,9 @@ import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
+import LogicTasks.Helpers (clauseKey, extra)
 import Util (checkBaseConf, prevent, preventWithHint)
-import LogicTasks.Helpers
+
 
 
 
