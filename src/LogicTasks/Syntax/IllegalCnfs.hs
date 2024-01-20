@@ -8,7 +8,7 @@ import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.List (nub, sort)
 import Data.Set (toList)
 
-import LogicTasks.Helpers (extra)
+import LogicTasks.Helpers (example, extra, focus, instruct, reject)
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 
 
