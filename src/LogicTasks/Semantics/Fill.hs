@@ -21,7 +21,7 @@ import Formula.Util (hasEmptyClause, isEmptyCnf)
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
 import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
-import LogicTasks.Helpers
+import LogicTasks.Helpers (extra)
 
 
 
