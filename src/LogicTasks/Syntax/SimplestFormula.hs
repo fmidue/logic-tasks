@@ -9,7 +9,7 @@ import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, tra
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 
-import LogicTasks.Helpers
+import LogicTasks.Helpers (extra)
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
