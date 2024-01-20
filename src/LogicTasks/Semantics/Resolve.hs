@@ -213,7 +213,7 @@ correctMapping [] _ = pure()
 correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
   prevent checkIndices $
     translate $ do
-      german "Alle Schritte verwenden existierende Indices?"
+      german "Alle Schritte verwenden existierende Indizes?"
       english "All steps use valid indices?"
 
   prevent (alreadyUsed i) $

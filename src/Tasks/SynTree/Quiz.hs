@@ -23,6 +23,7 @@ generateSynTreeInst SynTreeConfig {..} = do
       atLeastOccurring
       allowArrowOperators
       maxConsecutiveNegations
+      minUniqueBinOperators
     return $ SynTreeInst
       { tree
       , latexImage = transferToPicture tree

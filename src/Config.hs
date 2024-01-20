@@ -142,7 +142,7 @@ data PrologInst = PrologInst {
                , literals2 :: !PrologClause
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Show, Typeable, Generic)
 
 
 dPrologInst :: PrologInst
@@ -274,8 +274,10 @@ data PrologConfig = PrologConfig {
     , maxClauseLength :: Int
     , usedPredicates :: [PrologLiteral]
     , extraText :: Maybe (Map Language String)
+    , firstClauseShape :: ClauseShape
+    , secondClauseShape :: ClauseShape
     }
-    deriving (Typeable, Generic)
+    deriving (Show, Typeable, Generic)
 
 dPrologConf :: PrologConfig
 dPrologConf = PrologConfig
@@ -283,6 +285,8 @@ dPrologConf = PrologConfig
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
+    , firstClauseShape = HornClause Query
+    , secondClauseShape = HornClause Procedure
     }
 
 

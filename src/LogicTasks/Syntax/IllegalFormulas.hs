@@ -18,18 +18,18 @@ import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalProposition
 description :: OutputMonad m => LegalPropositionInst -> LangM m
 description LegalPropositionInst{..} = do
     instruct $ do
-      english "Consider the following propositional (pseudo) formulae:"
+      english "Consider the following propositional (pseudo) formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
 
     focus $ unlines $ indexed pseudoFormulas
 
     instruct $ do
-      english "Some of these are syntactically incorrect. Which of these formulae have an invalid format?"
+      english "Some of these are syntactically incorrect. Which of these formulas have an invalid format?"
       german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt geformt sind."
 
     instruct $ do
-      english "Enter a list containing the indices of the invalid formulae to submit your answer."
-      german "Geben Sie eine Liste der Indices aller syntaktisch falschen Formeln als Ihre Lösung an."
+      english "Enter a list containing the indices of the invalid formulas to submit your answer."
+      german "Geben Sie eine Liste der Indizes aller syntaktisch falschen Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
       english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
@@ -58,7 +58,7 @@ partialGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
 partialGrade LegalPropositionInst{..} sol
     | invalidIndex = reject $ do
       english "At least one index in the list does not exist."
-      german "Mindestens einer der Indices existiert nicht."
+      german "Mindestens einer der Indizes existiert nicht."
 
     | otherwise = pure()
   where

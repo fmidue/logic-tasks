@@ -34,7 +34,7 @@ defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
 defaultSuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
-      syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
+      syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True, minUniqueBinOperators = 2 }
     , superfluousBracketPairs = 2
     }
 

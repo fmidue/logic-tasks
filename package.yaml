@@ -69,6 +69,7 @@ library:
     - Trees.Helpers
     - Trees.Generate
     - Formula.Parsing
+    - Formula.Helpers
     - ParsingHelpers
     - Config
     - Formula.Types
@@ -80,7 +81,6 @@ library:
     - -Werror
     - -Wwarn=incomplete-uni-patterns
     - -fdefer-typed-holes
-
 
 tests:
   src-test:

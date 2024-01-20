@@ -77,7 +77,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
         german "Mindestens eine Obergrenze ist niedriger als die zugehörige Untergrenze."
     | (maxClauseLength > 2 * length usedLiterals) || (externalGenFormulas > 0 && maxClauseLength > length usedLiterals)
       = reject $ do
-        english "The Used Literals can not generate a Clause with maxClauseLength"
+        english "The used literals cannot generate a clause with maxClauseLength."
         german "Die angegebenen Literale können die maximale Klauselgröße nicht generieren."
     | fromIntegral formulas >
        (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
@@ -96,13 +96,13 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
     | externalGenFormulas > 0
         && minClauseAmount > lengthBound (length usedLiterals) maxClauseLength
       = reject $ do
-        english "minClauseAmount is too large. The external generator can not generate a CNF."
+        english "minClauseAmount is too large. The external generator cannot generate a CNF."
         german "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 5 + 1) = reject $ do
-        english "Can not generate String with given minStringSize."
+        english "Cannot generate string with given minStringSize."
         german "String kann mit gegebenen minStringSize nicht generiert werden."
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
-        english "Can not generate String with given maxStringSize."
+        english "Cannot generate string with given maxStringSize."
         german "String kann mit gegebenen maxStringSize nicht generiert werden."
     | otherwise = checkCnfConf cnfConf
   where

@@ -26,6 +26,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
         atLeastOccurring
         allowArrowOperators
         maxConsecutiveNegations
+        minUniqueBinOperators
       `suchThat` \synTree ->
         (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
     let correctTrees = allNotLeafSubTrees tree

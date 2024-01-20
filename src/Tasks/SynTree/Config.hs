@@ -33,6 +33,7 @@ data SynTreeConfig =
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   , extraText :: Maybe (Map Language String)
+  , minUniqueBinOperators :: Integer
   } deriving (Show,Generic)
 
 
@@ -48,6 +49,7 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , extraText = Nothing
+    , minUniqueBinOperators = 0
     }
 
 
@@ -61,7 +63,7 @@ checkSynTreeConfig SynTreeConfig {..}
         english "Minimal number of consecutive negations must not be negative"
         german "Minimale Anzahl aufeinander folgender Negationen kann nicht negativ sein."
     | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes) = reject $ do
-        english "Syntax tree with no negation can not have even nodes"
+        english "Syntax tree with no negation cannot have even number of nodes."
         german "Syntaxbaum ohne Negation kann keine gerade Anzahl Blätter haben."
     | minNodes < 1 = reject$ do
         english"Minimal number of nodes must be positive."
@@ -92,6 +94,12 @@ checkSynTreeConfig SynTreeConfig {..}
       = reject $ do
         english "Your maximum depth value is unreasonably large, given your other settings."
         german "Maximale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
+    | minUniqueBinOperators < 0 = reject $ do
+        english "There should be a non-negative number of unique operators"
+        german "Es sollte eine nicht-negative Anzahl an unterschiedlichen Operatoren geben"
+    | minUniqueBinOperators > fromIntegral (length [minBound .. maxBound :: BinOp]) = reject $ do
+        english "The number of unique operators cannot exceed the maximum number of operators."
+        german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
     | otherwise = pure()
 
 

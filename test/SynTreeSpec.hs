@@ -11,8 +11,17 @@ import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
-import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
+import Trees.Helpers (
+  collectLeaves,
+  treeDepth,
+  treeNodes,
+  maxLeavesForNodes,
+  maxNodesForDepth,
+  minDepthForNodes,
+  numOfUniqueBinOpsInSynTree)
 import Tasks.SynTree.Quiz (generateSynTreeInst)
+import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Generate (genSynTree)
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
@@ -38,7 +47,8 @@ validBoundsSynTree = do
         atLeastOccurring,
         allowArrowOperators,
         maxConsecutiveNegations,
-        extraText = Nothing
+        extraText = Nothing,
+        minUniqueBinOperators = 0
       }
 
 invalidBoundsSynTree :: Gen SynTreeConfig
@@ -57,7 +67,8 @@ invalidBoundsSynTree = do
         atLeastOccurring = fromIntegral (length usedLiterals),
         allowArrowOperators = True,
         maxConsecutiveNegations,
-        extraText = Nothing
+        extraText = Nothing,
+        minUniqueBinOperators = 0
       }
 
 
@@ -68,6 +79,28 @@ spec = do
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \config ->
         forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse (tail correct) /= Right tree
+  describe "numOfUniqueBinOpsInSynTree" $ do
+        it "should return 0 if there is only a leaf" $
+            numOfUniqueBinOpsInSynTree (Leaf 'a') == 0
+        it "should return 1 if there is only one operator" $
+            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Leaf 'b')) == 1
+        it "should return 1 if there are two operators of same kind" $
+            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c')))) == 1
+        it "should return 2 if there are two unique operators" $
+            let subtree = Binary And (Leaf 'a') in
+            numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (subtree (subtree (Leaf 'c'))))) == 2
+  describe "genSynTree" $ do
+    it "should generate a random SyntaxTree that satisfies the required amount of unique binary operators" $
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \synTree -> numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \config ->

@@ -128,8 +128,8 @@ partialGrade FillInst{..} sol = do
 
   preventWithHint (missingLen > solLen)
     (translate $ do
-      german "Lösung hat genügend Werte?."
-      english "Solution contains enough values?."
+      german "Lösung hat genügend Werte?"
+      english "Solution contains enough values?"
     )
     (translate $ do
       german $ "Lösung enthält zu wenige Werte. Es " ++ gerShort ++ " hinzugefügt werden."
