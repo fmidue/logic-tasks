@@ -23,7 +23,7 @@ import Test.QuickCheck (Gen)
 import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
 import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
 import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
-import LogicTasks.Helpers
+import LogicTasks.Helpers (extra, formulaKey)
 import Util (tryGen, withRatio)
 
 
