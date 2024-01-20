@@ -23,8 +23,8 @@ import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
+import LogicTasks.Helpers (extra, formulaKey)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
-import LogicTasks.Helpers (extra)
 
 
 
