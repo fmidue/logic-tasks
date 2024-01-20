@@ -21,7 +21,7 @@ import Formula.Util (mkCnf, xorSat)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
-import LogicTasks.Helpers
+import LogicTasks.Helpers (extra)
 
 
 
