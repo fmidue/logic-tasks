@@ -22,7 +22,7 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers as LogicHelpers
+import LogicTasks.Helpers as LogicHelpers (clauseKey, extra)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 
 
