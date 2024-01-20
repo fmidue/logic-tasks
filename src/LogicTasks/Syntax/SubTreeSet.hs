@@ -10,7 +10,7 @@ import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf)
 import Data.Maybe (isNothing, fromJust)
 
-import LogicTasks.Helpers
+import LogicTasks.Helpers (extra)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display)
