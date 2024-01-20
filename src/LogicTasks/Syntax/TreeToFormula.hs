@@ -19,7 +19,7 @@ import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
-import LogicTasks.Helpers (extra)
+import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Trees.Print (transferToPicture)
