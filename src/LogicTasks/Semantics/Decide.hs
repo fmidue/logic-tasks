@@ -21,7 +21,7 @@ import Formula.Util (isEmptyCnf, hasEmptyClause)
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, literals)
 import Util (checkCnfConf, isOutside, preventWithHint, remove)
-import LogicTasks.Helpers
+import LogicTasks.Helpers (extra)
 
 
 
