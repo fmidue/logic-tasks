@@ -46,7 +46,7 @@ description path SynTreeInst{..} = do
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
     when extraHintsOnSemanticEquivalence $ instruct $ do
-      english "Remarks: The exact formula of the syntax tree must be specified. Other formulae that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
+      english "Remarks: The exact formula of the syntax tree must be specified. Other formulas that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
       german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
