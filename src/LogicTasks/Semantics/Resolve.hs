@@ -206,8 +206,8 @@ completeGrade ResolutionInst{..} sol =
           then pure ()
           else refuse $ indent $ do
             translate $ do
-              german "Die Leere Klausel wurde nicht korrekt abgeleitet."
-              english "The Empty clause was not derived correctly."
+              german "Die leere Klausel wurde nicht korrekt abgeleitet."
+              english "The empty clause was not derived correctly."
 
             displaySolution
 
