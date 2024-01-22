@@ -10,6 +10,7 @@ import Formula.Types
 
 import Control.Monad (void)
 import Data.Char (toLower)
+import Data.Map (fromList)
 import Text.ParserCombinators.Parsec (
   Parser,
   (<?>),
@@ -31,7 +32,6 @@ import Text.ParserCombinators.Parsec (
   )
 
 import UniversalParser
-import Data.Map (fromList)
 
 instance Parse ResStep where
   parser = do

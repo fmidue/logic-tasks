@@ -59,8 +59,8 @@ validBoundsLegalCNF = do
           maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
           minStringSize = minClauseAmount * ((minClauseLength - 1) * 5 + 1),
           allowArrowOperators,
-          extraText = Nothing,
-          printSolution = False
+          printSolution = False,
+          extraText = Nothing
         }
 
 invalidBoundsLegalCNF :: Gen LegalCNFConfig
@@ -95,8 +95,8 @@ invalidBoundsLegalCNF = do
           maxStringSize,
           minStringSize,
           allowArrowOperators = False,
-          extraText = Nothing,
-          printSolution = False
+          printSolution = False,
+          extraText = Nothing
         }
 
 timeout :: Int

@@ -53,8 +53,8 @@ validBoundsSynTree = do
         maxConsecutiveNegations,
         extraText = Nothing,
         extraHintsOnSemanticEquivalence = False,
-        minUniqueBinOperators = 0,
-        printSolution = False
+        printSolution = False,
+        minUniqueBinOperators = 0
       }
 
 invalidBoundsSynTree :: Gen SynTreeConfig
@@ -75,8 +75,8 @@ invalidBoundsSynTree = do
         maxConsecutiveNegations,
         extraText = Nothing,
         extraHintsOnSemanticEquivalence = False,
-        minUniqueBinOperators = 0,
-        printSolution = False
+        printSolution = False,
+        minUniqueBinOperators = 0
       }
 
 

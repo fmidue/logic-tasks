@@ -299,10 +299,10 @@ data PrologConfig = PrologConfig {
       minClauseLength :: Int
     , maxClauseLength :: Int
     , usedPredicates :: [PrologLiteral]
+    , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     , firstClauseShape :: ClauseShape
     , secondClauseShape :: ClauseShape
-    , extraText :: Maybe (Map Language String)
     }
     deriving (Show, Typeable, Generic)
 
@@ -311,10 +311,10 @@ dPrologConf = PrologConfig
     { minClauseLength = 1
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
+    , extraText = Nothing
     , printSolution = False
     , firstClauseShape = HornClause Query
     , secondClauseShape = HornClause Procedure
-    , extraText = Nothing
     }
 
 

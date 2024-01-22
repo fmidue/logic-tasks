@@ -32,10 +32,10 @@ data SynTreeConfig =
   , atLeastOccurring :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
+  , extraText :: Maybe (Map Language String)
   , printSolution :: Bool
   , extraHintsOnSemanticEquivalence :: Bool
   , minUniqueBinOperators :: Integer
-  , extraText :: Maybe (Map Language String)
   } deriving (Show,Generic)
 
 
@@ -113,7 +113,7 @@ data SynTreeInst =
     { tree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
+    , addText :: Maybe (Map Language String)
     , showSolution :: Bool
     , extraHintsOnSemanticEquivalence :: Bool
-    , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

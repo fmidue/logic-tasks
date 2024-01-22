@@ -58,6 +58,8 @@ example correct s = indent $ do
 reject :: OutputMonad m => State (Map Language String) () -> LangM m
 reject  = refuse . indent . translate
 
+
+
 clauseKey :: OutputMonad m => LangM m
 clauseKey = do
   keyHeading
