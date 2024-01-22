@@ -24,7 +24,7 @@ import Trees.Types (BinOp, SynTree)
 
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
-generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, extraText}, ..} = do
+generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, minUniqueBinOperators, extraText}, ..} = do
     treeList <- vectorOf
         (fromIntegral formulas)
         (genSynTree (minNodes, maxNodes)
@@ -33,6 +33,7 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
           atLeastOccurring
           allowArrowOperators
           maxConsecutiveNegations
+          minUniqueBinOperators
         )
       `suchThat` (not . similarExist)
     serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` listNoDuplicate
@@ -45,8 +46,8 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
         { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
         , correctTrees = [ tree | (index, tree) <- zip [1..] treeList, index `notElem` serialsOfWrong ]
-        , extraText = extraText
         , showSolution = printSolution
+        , addText = extraText
         }
 
 

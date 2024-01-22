@@ -5,12 +5,11 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text, GenericOutputMonad (refuse, code, image), ($=<<))
+import Control.Monad.Output (LangM, OutputMonad, english, german, GenericOutputMonad (refuse, code, image), ($=<<))
 import Data.List (nub, sort)
 import Data.Set (toList)
-import Data.Maybe (fromMaybe)
 
-import LogicTasks.Helpers
+import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
 import Trees.Print (display, transferToPicture)
@@ -41,7 +40,7 @@ description LegalPropositionInst{..} = do
       english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
       german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
 
-    paragraph $ text (fromMaybe "" extraText)
+    extra addText
     pure ()
 
 

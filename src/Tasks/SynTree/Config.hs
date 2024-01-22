@@ -11,9 +11,10 @@ module Tasks.SynTree.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
+import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
@@ -31,8 +32,10 @@ data SynTreeConfig =
   , atLeastOccurring :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
-  , extraText :: Maybe String
   , printSolution :: Bool
+  , extraHintsOnSemanticEquivalence :: Bool
+  , minUniqueBinOperators :: Integer
+  , extraText :: Maybe (Map Language String)
   } deriving (Show,Generic)
 
 
@@ -48,6 +51,8 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , extraText = Nothing
+    , extraHintsOnSemanticEquivalence = True
+    , minUniqueBinOperators = 0
     , printSolution = False
     }
 
@@ -93,6 +98,12 @@ checkSynTreeConfig SynTreeConfig {..}
       = reject $ do
         english "Your maximum depth value is unreasonably large, given your other settings."
         german "Maximale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
+    | minUniqueBinOperators < 0 = reject $ do
+        english "There should be a non-negative number of unique operators"
+        german "Es sollte eine nicht-negative Anzahl an unterschiedlichen Operatoren geben"
+    | minUniqueBinOperators > fromIntegral (length [minBound .. maxBound :: BinOp]) = reject $ do
+        english "The number of unique operators cannot exceed the maximum number of operators."
+        german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
     | otherwise = pure()
 
 
@@ -102,6 +113,7 @@ data SynTreeInst =
     { tree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
-    , extraText :: Maybe String
     , showSolution :: Bool
+    , extraHintsOnSemanticEquivalence :: Bool
+    , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

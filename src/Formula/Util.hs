@@ -17,6 +17,8 @@ module Formula.Util
        , sat
        , transformProlog
        , flipPol
+       , isSemanticEqual
+       -- , isSemanticEqualSat
        ) where
 
 
@@ -92,7 +94,7 @@ hasEmptyCon (Dnf set) = Con Set.empty `Set.member` set
 ---------------------------------------------------------------------------------------------------
 
 
-logOpSat :: (Formula a, Formula b)
+logOpSat :: (ToSAT a, ToSAT b)
          => (Sat.Formula Char -> Sat.Formula Char -> Sat.Formula Char)
          -> a
          -> b
@@ -102,20 +104,21 @@ logOpSat op f1 f2 = Sat.satisfiable (op (convert f1) (convert f2))
 
 
 -- | (f1 ``xorSat`` f2) indicates whether (f1 XOR f2) is satisfiable
-xorSat :: (Formula a, Formula b) => a -> b -> Bool
+xorSat :: (ToSAT a, ToSAT b) => a -> b -> Bool
 xorSat = logOpSat (Sat.:++:)
 
 
 -- | (f1 ``andSat`` f2) indicates whether (f1 /\\ f2) is satisfiable
-andSat :: (Formula a, Formula b) => a -> b -> Bool
+andSat :: (ToSAT a, ToSAT b) => a -> b -> Bool
 andSat = logOpSat (Sat.:&&:)
 
-
-
 -- | Indicates whether the given formula is satisfiable
-sat :: Formula a => a -> Bool
+sat :: ToSAT a => a -> Bool
 sat f = Sat.satisfiable $ convert f
 
+-- | Are two formulas semantically equal?
+isSemanticEqual :: ToSAT a => a -> a -> Bool
+isSemanticEqual a b = not $ xorSat a b
 
 ----------------------------------------------------------------------------------------------------------
 

@@ -11,9 +11,10 @@ module Tasks.LegalProposition.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
 import Data.Set (Set)
 import GHC.Generics (Generic)
+import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxLeavesForNodes)
@@ -79,7 +80,7 @@ data LegalPropositionInst =
     {
       serialsOfWrong :: Set Int
     , pseudoFormulas :: [String]
-    , extraText :: Maybe String
     , showSolution :: Bool
     , correctTrees :: [SynTree BinOp Char]
+    , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

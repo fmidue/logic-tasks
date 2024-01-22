@@ -5,13 +5,12 @@
 module LogicTasks.Syntax.SubTreeSet where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text, GenericOutputMonad (refuse, indent, code, image), ($=<<))
+import Control.Monad.Output (LangM, OutputMonad, english, german, GenericOutputMonad (refuse, indent, code, image), ($=<<))
 import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf, toList)
 import qualified Data.Set (map)
-import Data.Maybe (isNothing, fromJust, fromMaybe)
-
-import LogicTasks.Helpers
+import Data.Maybe (isNothing, fromJust)
+import LogicTasks.Helpers (example, extra, focus, fullKey, instruct, keyHeading, reject)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
@@ -49,7 +48,7 @@ description SubTreeInst{..} = do
     keyHeading
     fullKey
 
-    paragraph $ text (fromMaybe "" extraText)
+    extra addText
     pure ()
 
 

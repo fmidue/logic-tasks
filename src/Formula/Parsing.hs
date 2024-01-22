@@ -31,6 +31,7 @@ import Text.ParserCombinators.Parsec (
   )
 
 import UniversalParser
+import Data.Map (fromList)
 
 instance Parse ResStep where
   parser = do
@@ -297,10 +298,10 @@ instance Parse PickInst where
         cs <- parser
         tokenSymbol ","
         index <- lexeme $ many1 digit
-        text <- optionMaybe $ lexeme text'
         printSol <- lexeme text'
+        bonusText <- optionMaybe $ lexeme text'
         char ')'
-        pure $ PickInst cs (read index) text (read printSol)
+        pure $ PickInst cs (read index) (read printSol) (fromList . read <$> bonusText)
           where
             text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do

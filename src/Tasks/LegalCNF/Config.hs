@@ -12,9 +12,10 @@ module Tasks.LegalCNF.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
 import Data.Char (isLetter)
 import Data.Set (Set)
+import Data.Map (Map)
 import GHC.Generics (Generic)
 
 import Config (BaseConfig(..), CnfConfig(..), dCnfConf)
@@ -37,8 +38,8 @@ data LegalCNFConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
-    , extraText :: Maybe String
     , printSolution :: Bool
+    , extraText :: Maybe (Map Language String)
   } deriving (Show,Generic)
 
 
@@ -56,8 +57,8 @@ defaultLegalCNFConfig =
   , maxStringSize = 35
   , minStringSize = 12
   , allowArrowOperators = True
-  , extraText = Nothing
   , printSolution = True
+  , extraText = Nothing
   }
 
 
@@ -119,6 +120,6 @@ data LegalCNFInst =
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]
-      , extraText :: Maybe String
       , showSolution :: Bool
+      , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

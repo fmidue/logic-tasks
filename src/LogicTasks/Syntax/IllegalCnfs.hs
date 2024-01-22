@@ -4,14 +4,13 @@
 module LogicTasks.Syntax.IllegalCnfs where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, text, GenericOutputMonad (refuse))
+import Control.Monad.Output (LangM, OutputMonad, english, german, GenericOutputMonad (refuse))
 import Data.List (nub, sort)
 import Data.Set (toList)
-import Data.Maybe (fromMaybe)
-
 import LogicTasks.Helpers
-import Tasks.LegalCNF.Config(LegalCNFConfig, LegalCNFInst(..), checkLegalCNFConfig)
+import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 import Control.Monad (when)
+
 
 
 
@@ -36,7 +35,8 @@ description LegalCNFInst{..} = do
       english "For example, if only choices 2 and 3 are non-cnf formulas, then the solution is:"
       german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 nicht in KNF vor, dann ist diese Lösung korrekt:"
 
-    paragraph $ text (fromMaybe "" extraText)
+    extra addText
+
     pure ()
 
 

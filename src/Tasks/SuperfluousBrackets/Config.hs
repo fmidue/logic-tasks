@@ -11,8 +11,9 @@ module Tasks.SuperfluousBrackets.Config (
     )where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
 import GHC.Generics (Generic)
+import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
@@ -35,7 +36,7 @@ defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
 defaultSuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
-      syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
+      syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True, minUniqueBinOperators = 2 }
     , superfluousBracketPairs = 2
     , printSolution = True
     }
@@ -69,6 +70,6 @@ data SuperfluousBracketsInst =
       tree :: SynTree BinOp Char
     , stringWithSuperfluousBrackets :: String
     , simplestString :: String
-    , extraText :: Maybe String
     , showSolution :: Bool
+    , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

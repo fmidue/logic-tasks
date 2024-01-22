@@ -18,7 +18,7 @@ import Trees.Print (simplestDisplay)
 
 
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
-generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, extraText}, ..} = do
+generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, minUniqueBinOperators, extraText}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
         maxDepth
@@ -26,12 +26,13 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
         atLeastOccurring
         allowArrowOperators
         maxConsecutiveNegations
+        minUniqueBinOperators
       `suchThat` sameAssociativeOperatorAdjacent
     stringWithSuperfluousBrackets <- superfluousBracketsDisplay tree superfluousBracketPairs
     return $ SuperfluousBracketsInst
       { tree
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
-      , extraText = extraText
       , showSolution = printSolution
+      , addText = extraText
       }

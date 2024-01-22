@@ -24,11 +24,14 @@ module Formula.Types
        , genDnf
        , possibleAllocations
        , Formula(..)
+       , ToSAT(..)
        , ResStep(..)
        , PrologLiteral(..)
        , PrologClause(..)
        , terms
        , lengthBound
+       , ClauseShape(..)
+       , HornShape(..)
        ) where
 
 
@@ -50,15 +53,18 @@ newtype TruthValue = TruthValue {truth :: Bool} deriving (Show, Typeable, Generi
 
 
 class Formula a where
-    convert :: a -> Sat.Formula Char
     literals :: a -> [Literal]
     atomics :: a -> [Literal]
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
 
+class ToSAT f where
+    convert :: f -> Sat.Formula Char
 
 
 
+data ClauseShape = AnyClause | HornClause HornShape deriving (Show, Eq)
+data HornShape = AnyHornClause | Fact | Procedure | Query deriving (Show, Eq)
 
 
 ---------------------------------------------------
@@ -94,9 +100,6 @@ instance Read Literal where
 
 
 instance Formula Literal where
-   convert (Literal c) = Sat.Var c
-   convert (Not c) = Sat.Not (Sat.Var c)
-
    literals lit = [lit]
 
    atomics (Not x) = [Literal x]
@@ -107,6 +110,9 @@ instance Formula Literal where
    evaluate xs (Not y) = not <$> evaluate xs (Literal y)
    evaluate xs z = lookup z xs
 
+instance ToSAT Literal where
+  convert (Literal c) = Sat.Var c
+  convert (Not c) = Sat.Not (Sat.Var c)
 
 instance Arbitrary Literal where
    arbitrary = genLiteral ['A'..'Z']
@@ -154,10 +160,6 @@ instance Show Clause where
        listShow (x:xs) = show x ++ " ∨ " ++ listShow xs
 
 instance Formula Clause where
-   convert (Clause set)
-        | Set.null set = Sat.No
-        | otherwise = Sat.Some (map convert (Set.toList set))
-
    literals (Clause set) = Set.toList set
 
    atomics (Clause set) = concat $ Set.toList $ Set.map atomics set
@@ -168,6 +170,10 @@ instance Formula Clause where
      where
        lits = map (evaluate xs) (literals ys)
 
+instance ToSAT Clause where
+  convert (Clause set)
+       | Set.null set = Sat.No
+       | otherwise = Sat.Some (map convert (Set.toList set))
 
 instance Arbitrary Clause where
    arbitrary = sized clause
@@ -224,10 +230,6 @@ instance Show Cnf where
         withBraces cl = if amount cl == 1 then show cl else "(" ++ show cl ++ ")"
 
 instance Formula Cnf where
-    convert (Cnf set)
-        | Set.null set = Sat.Yes
-        | otherwise = Sat.All (map convert (Set.toList set))
-
     literals (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
 
     atomics (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
@@ -238,9 +240,10 @@ instance Formula Cnf where
       where
         clauses = map (evaluate xs) (getClauses cnf)
 
-
-
-
+instance ToSAT Cnf where
+  convert (Cnf set)
+      | Set.null set = Sat.Yes
+      | otherwise = Sat.All (map convert (Set.toList set))
 
 instance Arbitrary Cnf where
     arbitrary = sized cnf
@@ -308,10 +311,6 @@ instance Show Con where
 
 
 instance Formula Con where
-   convert (Con set)
-        | Set.null set = Sat.Yes
-        | otherwise = Sat.All (map convert (Set.toList set))
-
    literals (Con set) = Set.toList set
 
    atomics (Con set) = concat $ Set.toList $ Set.map atomics set
@@ -322,7 +321,10 @@ instance Formula Con where
      where
        lits = map (evaluate xs) (literals ys)
 
-
+instance ToSAT Con where
+  convert (Con set)
+       | Set.null set = Sat.Yes
+       | otherwise = Sat.All (map convert (Set.toList set))
 
 instance Arbitrary Con where
    arbitrary = sized conjunction
@@ -375,10 +377,6 @@ instance Show Dnf where
 
 
 instance Formula Dnf where
-    convert (Dnf set)
-        | Set.null set = Sat.No
-        | otherwise = Sat.Some (map convert (Set.toList set))
-
     literals (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
 
     atomics (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
@@ -389,7 +387,10 @@ instance Formula Dnf where
       where
         cons = map (evaluate xs) (getConjunctions dnf)
 
-
+instance ToSAT Dnf where
+  convert (Dnf set)
+      | Set.null set = Sat.No
+      | otherwise = Sat.Some (map convert (Set.toList set))
 
 instance Arbitrary Dnf where
     arbitrary = sized dnf

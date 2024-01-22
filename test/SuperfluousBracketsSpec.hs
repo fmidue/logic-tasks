@@ -66,6 +66,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                     sameAssociativeOperatorAdjacent synTree ==>
                       notNull (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing)
@@ -81,6 +82,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                     length (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing) *2
                       == length (display synTree) - length (simplestDisplay synTree)
@@ -98,6 +100,7 @@ spec = do
                   atLeastOccurring
                   allowArrowOperators
                   maxConsecutiveNegations
+                  minUniqueBinOperators
                 ) $
                   \synTree -> not (sameAssociativeOperatorAdjacent synTree) ==>
                     display synTree == simplestDisplay synTree
@@ -116,6 +119,7 @@ spec = do
                         atLeastOccurring
                         allowArrowOperators
                         maxConsecutiveNegations
+                        minUniqueBinOperators
                       `suchThat` sameAssociativeOperatorAdjacent
                     ) $
                       \synTree -> forAll (superfluousBracketsDisplay synTree (treeNodes synTree + 1)) $

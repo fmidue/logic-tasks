@@ -17,14 +17,14 @@ import Control.Monad.Output (
   localise,
   )
 import Data.List (sort)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (clauseKey, example)
+import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (when)
 
@@ -47,7 +47,7 @@ third3 (_,_,c) = c
 genResInst :: ResolutionConfig -> Gen ResolutionInst
 genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
   clauses <- inst
-  pure $ ResolutionInst clauses extraText printSolution
+  pure $ ResolutionInst clauses printSolution extraText
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
 
@@ -97,7 +97,7 @@ description ResolutionInst{..} = do
       english "[(1, 2, {A, not B} = 5), (4, 5, { })]"
       german "[(1, 2, {A, nicht B} = 5), (4, 5, { })]"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra addText
   pure ()
 
 

@@ -19,13 +19,14 @@ module Trees.Helpers
     clauseToSynTree,
     literalToSynTree,
     numOfOps,
-    numOfOpsInFormula
+    numOfOpsInFormula,
+    numOfUniqueBinOpsInSynTree
     ) where
 
 import Control.Monad (void)
 import Control.Monad.State (get, put, runState, evalState)
 import Data.Set(fromList, Set, toList)
-import Data.List.Extra (nubBy)
+import Data.List.Extra (nubBy, nubOrd)
 import qualified Data.Foldable as Foldable (toList)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
@@ -139,3 +140,10 @@ numOfOpsInFormula (Atomic _) = 0
 numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
+
+numOfUniqueBinOpsInSynTree :: SynTree BinOp c -> Integer
+numOfUniqueBinOpsInSynTree x = fromIntegral (length (nubOrd (ops x)))
+  where ops :: SynTree BinOp c -> [BinOp]
+        ops (Leaf _) = []
+        ops (Not f) = ops f
+        ops (Binary op s1 s2) = concat [[op], ops s1, ops s2]

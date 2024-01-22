@@ -20,7 +20,7 @@ import Control.Monad.Output (
   translatedCode,
   localise,
   )
-import Control.Monad.State (State)
+import Control.Monad.State (State, put)
 import Data.Map (Map)
 import Data.ByteString.Lazy (fromStrict)
 import Data.ByteString.UTF8 (fromString)
@@ -29,6 +29,9 @@ import System.Directory (doesFileExist)
 
 
 
+extra :: OutputMonad m => Maybe (Map Language String) -> LangM m
+extra (Just extraMap) = paragraph $ translate $ put extraMap
+extra _ = pure ()
 
 indexed :: [String] -> [String]
 indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])

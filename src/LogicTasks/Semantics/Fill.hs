@@ -22,7 +22,7 @@ import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
 import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 import Control.Monad (when)
-import LogicTasks.Helpers (example)
+import LogicTasks.Helpers (example, extra)
 
 
 
@@ -34,7 +34,7 @@ genFillInst FillConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..
       tableLen = length $ readEntries $ getTable cnf
       gapCount = max (tableLen * percentageOfGaps `div` 100) 1
     gaps <- remove (tableLen - gapCount) [1..tableLen]
-    pure $ FillInst cnf gaps extraText printSolution
+    pure $ FillInst cnf gaps printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -69,7 +69,8 @@ description FillInst{..} = do
       english "A valid solution for four blanks could look like this:"
     code "[0,1,1,1]"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+
+  extra addText
   pure ()
 
 

@@ -65,6 +65,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                       forAll (deleteSpaces <$> illegalDisplay synTree) $
                       all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
@@ -78,6 +79,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                       forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
     describe "bracket display" $ do
@@ -91,6 +93,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
         it "the String can be parsed by formulaParse" $
@@ -103,6 +106,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> formulaParse str == Right synTree
         it "the String remove all brackets should same with display remove all brackets" $
@@ -115,6 +119,7 @@ spec = do
                     atLeastOccurring
                     allowArrowOperators
                     maxConsecutiveNegations
+                    minUniqueBinOperators
                   ) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
     describe "generateLegalPropositionInst" $ do

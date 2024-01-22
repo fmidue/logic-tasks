@@ -13,7 +13,7 @@ import Control.Monad.Output (
   german,
   translate,
   )
-import Data.Maybe (fromJust, fromMaybe, isNothing)
+import Data.Maybe (fromJust, isNothing)
 import Data.List (delete)
 import Data.Set (difference, fromList, member, toList, union)
 import Test.QuickCheck (Gen, elements)
@@ -22,7 +22,7 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause(Clause, literalSet), Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (clauseKey, example)
+import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when)
 
@@ -35,7 +35,7 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
     let
       litAddedClause1 = mkClause $ resolveLit : lits1
       litAddedClause2 = mkClause $ opposite resolveLit : literals clause2
-    pure $ StepInst litAddedClause1 litAddedClause2 extraText printSolution
+    pure $ StepInst litAddedClause1 litAddedClause2 printSolution extraText
 
 
 
@@ -64,7 +64,7 @@ description StepInst{..} = do
       english "A valid solution could look like this: "
     code "(A, not B or C)"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra addText
   pure ()
 
 
@@ -107,7 +107,7 @@ partialGrade StepInst{..} sol = do
       german "Das gewählte Literal kommt in einer der Klauseln vor?"
       english "The chosen literal is contained in any of the clauses?"
 
-  preventWithHint (not $ null extra)
+  preventWithHint (not $ null extraLiterals)
     (translate $ do
       german "Resolvente besteht aus bekannten Literalen?"
       english "Resolvent contains only known literals?"
@@ -116,7 +116,7 @@ partialGrade StepInst{..} sol = do
       translate $ do
         german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
         english "The resolvent contains unknown literals. These literals are incorrect:"
-      itemizeM $ map (text . show) extra
+      itemizeM $ map (text . show) extraLiterals
       pure ()
     )
   pure ()
@@ -124,7 +124,7 @@ partialGrade StepInst{..} sol = do
      mSol = fromJust $ step sol
      availLits = fromList (literals clause1) `union` fromList (literals clause2)
      solLits = fromList $ literals $ snd mSol
-     extra = toList (solLits `difference` availLits)
+     extraLiterals = toList (solLits `difference` availLits)
 
 
 

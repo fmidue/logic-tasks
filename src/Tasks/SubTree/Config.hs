@@ -11,9 +11,10 @@ module Tasks.SubTree.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
 import Data.Set (Set)
 import GHC.Generics (Generic)
+import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
@@ -68,6 +69,6 @@ data SubTreeInst =
     { tree :: SynTree BinOp Char
     , correctTrees :: Set (SynTree BinOp Char)
     , minInputTrees :: Integer
-    , extraText :: Maybe String
     , showSolution :: Bool
+    , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

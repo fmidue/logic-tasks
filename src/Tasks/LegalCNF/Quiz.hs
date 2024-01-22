@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Tasks.LegalCNF.Quiz (
     generateLegalCNFInst
@@ -44,8 +44,9 @@ generateLegalCNFInst config@LegalCNFConfig {..} = do
       `suchThat` (listNoDuplicate . map (simplestDisplay . fmap (const '_')))
     return $ LegalCNFInst { serialsOfWrong = fromList serialsOfWrong
                           , formulaStrings = map simplestDisplay treeList
-                          , extraText
-                          , showSolution = False }
+                          , showSolution = False
+                          , addText = extraText}
+
 
 
 genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]

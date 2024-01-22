@@ -23,10 +23,12 @@ generateSynTreeInst SynTreeConfig {..} = do
       atLeastOccurring
       allowArrowOperators
       maxConsecutiveNegations
+      minUniqueBinOperators
     return $ SynTreeInst
       { tree
       , latexImage = transferToPicture tree
       , correct = display tree
-      , extraText = extraText
       , showSolution = printSolution
+      , extraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
+      , addText = extraText
       }

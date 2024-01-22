@@ -23,7 +23,7 @@ import Test.QuickCheck (Gen)
 import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
 import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
 import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
-import LogicTasks.Helpers (formulaKey)
+import LogicTasks.Helpers (extra, formulaKey)
 import Util (tryGen, withRatio)
 
 
@@ -32,7 +32,7 @@ import Util (tryGen, withRatio)
 genMinInst :: MinMaxConfig -> Gen MinInst
 genMinInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
     dnf <- dnfInRange
-    pure $ MinInst dnf extraText printSolution
+    pure $ MinInst dnf printSolution extraText
    where
      getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
      dnfInRange = tryGen getDnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -62,7 +62,7 @@ description MinInst{..} = do
       german "(A und nicht B) oder (nicht C und nicht D)"
       english "(A and not B) or (not C and not D)"
     pure ()
-  paragraph $ text (fromMaybe "" addText)
+  extra addText
   pure ()
 
 

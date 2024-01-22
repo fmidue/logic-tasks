@@ -17,7 +17,7 @@ import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
 
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
-generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, extraText}, ..} = do
+generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, minUniqueBinOperators, extraText}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
         maxDepth
@@ -25,6 +25,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {minNodes, m
         atLeastOccurring
         allowArrowOperators
         maxConsecutiveNegations
+        minUniqueBinOperators
       `suchThat` \synTree ->
         (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
     let correctTrees = allNotLeafSubTrees tree
@@ -32,6 +33,6 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {minNodes, m
       { tree
       , minInputTrees = minSubTrees
       , correctTrees = correctTrees
-      , extraText = extraText
       , showSolution = printSolution
+      , addText = extraText
       }

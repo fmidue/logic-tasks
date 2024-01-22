@@ -13,7 +13,7 @@ import Control.Monad.Output (
   german,
   translate,
   )
-import Data.Maybe (fromMaybe)
+
 import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
@@ -21,7 +21,7 @@ import Formula.Util (mkCnf, xorSat)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
-import LogicTasks.Helpers (example)
+import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 
 
@@ -37,7 +37,7 @@ genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     let
       cnfs = first : rest
     corrIndex <- elements [1..length cnfs -1]
-    pure $ PickInst cnfs corrIndex extraText printSolution
+    pure $ PickInst cnfs corrIndex printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
 
@@ -63,7 +63,7 @@ description PickInst{..} = do
         english "A valid solution could look like this: "
       code "1"
       pure ()
-    paragraph $ text (fromMaybe "" addText)
+    extra addText
     pure ()
   where
     sTable = cnfs !! (correct - 1)

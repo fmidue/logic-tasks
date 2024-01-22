@@ -14,6 +14,7 @@ module LogicTasks.Formula
        , getClauses
        , getConjunctions
        , Formula(..)
+       , ToSAT(..)
        , genLiteral
        , genClause
        , genCon
