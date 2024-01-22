@@ -20,17 +20,18 @@ import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
 import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject)
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
+import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
+import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
 
 
 
 
-description :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> LangM m
-description path SynTreeInst{..} = do
+description :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
+description path TreeToFormulaInst{..} = do
     instruct $ do
       english "Consider the following syntax tree:"
       german "Betrachten Sie den folgenden Syntaxbaum:"
@@ -45,7 +46,7 @@ description path SynTreeInst{..} = do
       english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    when extraHintsOnSemanticEquivalence $ instruct $ do
+    when addExtraHintsOnSemanticEquivalence $ instruct $ do
       english "Remarks: The exact formula of the syntax tree must be specified. Other formulae that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
       german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
@@ -57,7 +58,7 @@ description path SynTreeInst{..} = do
 
 
 
-verifyInst :: OutputMonad m => SynTreeInst -> LangM m
+verifyInst :: OutputMonad m => TreeToFormulaInst -> LangM m
 verifyInst _ = pure ()
 
 
@@ -72,7 +73,7 @@ start = TreeFormulaAnswer Nothing
 
 
 
-partialGrade :: OutputMonad m => SynTreeInst -> TreeFormulaAnswer -> LangM m
+partialGrade :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade _ sol
     | isNothing $ maybeTree sol = reject $ do
       english "You did not submit a solution."
@@ -81,7 +82,7 @@ partialGrade _ sol
 
 
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> TreeFormulaAnswer -> LangM m
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 completeGrade path inst sol
     | treeAnswer /= tree inst = refuse $ do
         instruct $ do
@@ -90,7 +91,7 @@ completeGrade path inst sol
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
-        when (extraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer (tree inst)) $
+        when (addExtraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer (tree inst)) $
           instruct $ do
             english "This syntax tree is semantically equivalent to the original one, but not identical."
             german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."

@@ -29,6 +29,7 @@ validBoundsSubTree = do
         syntaxTreeConfig
       , allowSameSubTree
       , minSubTrees
+      , extraText = Nothing
       }
 
 invalidBoundsSubTree :: Gen SubTreeConfig
@@ -41,6 +42,7 @@ invalidBoundsSubTree = do
         syntaxTreeConfig
       , allowSameSubTree
       , minSubTrees
+      , extraText = Nothing
       }
 
 spec :: Spec

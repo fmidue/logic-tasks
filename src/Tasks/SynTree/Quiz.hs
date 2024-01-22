@@ -28,6 +28,4 @@ generateSynTreeInst SynTreeConfig {..} = do
       { tree
       , latexImage = transferToPicture tree
       , correct = display tree
-      , addText = extraText
-      , extraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
       }

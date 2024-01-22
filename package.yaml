@@ -59,6 +59,8 @@ library:
     - Tasks.SuperfluousBrackets.Parsing
     - Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
     - Tasks.SuperfluousBrackets.Quiz
+    - Tasks.TreeToFormula.Config
+    - Tasks.TreeToFormula.Quiz
     - Tasks.LegalCNF.Config
     - Tasks.LegalCNF.Quiz
     - Tasks.LegalCNF.GenerateIllegal

@@ -26,6 +26,7 @@ data SuperfluousBracketsConfig =
     {
       syntaxTreeConfig :: SynTreeConfig
     , superfluousBracketPairs :: Integer
+    , extraText :: Maybe (Map Language String)
     } deriving (Show,Generic)
 
 
@@ -36,6 +37,7 @@ defaultSuperfluousBracketsConfig =
     {
       syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True, minUniqueBinOperators = 2 }
     , superfluousBracketPairs = 2
+    , extraText = Nothing
     }
 
 

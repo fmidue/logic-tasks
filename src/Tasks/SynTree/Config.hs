@@ -11,10 +11,9 @@ module Tasks.SynTree.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
-import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
@@ -32,8 +31,6 @@ data SynTreeConfig =
   , atLeastOccurring :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
-  , extraText :: Maybe (Map Language String)
-  , extraHintsOnSemanticEquivalence :: Bool
   , minUniqueBinOperators :: Integer
   } deriving (Show,Generic)
 
@@ -49,8 +46,6 @@ defaultSynTreeConfig =
     , atLeastOccurring = 3
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
-    , extraText = Nothing
-    , extraHintsOnSemanticEquivalence = True
     , minUniqueBinOperators = 0
     }
 
@@ -111,6 +106,4 @@ data SynTreeInst =
     { tree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
-    , addText :: Maybe (Map Language String)
-    , extraHintsOnSemanticEquivalence :: Bool
     } deriving (Show,Generic)

@@ -29,6 +29,7 @@ data LegalPropositionConfig =
     , formulas :: Integer
     , illegals :: Integer
     , bracketFormulas :: Integer
+    , extraText :: Maybe (Map Language String)
     } deriving (Show,Generic)
 
 defaultLegalPropositionConfig :: LegalPropositionConfig
@@ -39,6 +40,7 @@ defaultLegalPropositionConfig =
     , formulas = 5
     , illegals = 2
     , bracketFormulas = 1
+    , extraText = Nothing
     }
 
 checkLegalPropositionConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
