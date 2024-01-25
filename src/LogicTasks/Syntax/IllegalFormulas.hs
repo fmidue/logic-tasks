@@ -5,12 +5,17 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german, GenericOutputMonad (refuse, code, image), ($=<<))
 import Data.List (nub, sort)
 import Data.Set (toList)
 
 import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
+import Control.Monad (when)
+import Trees.Print (display, transferToPicture)
+import Control.Monad.IO.Class (MonadIO (liftIO))
+import LogicTasks.Syntax.TreeToFormula (cacheTree)
+import Data.Foldable (for_)
 
 
 
@@ -67,12 +72,31 @@ partialGrade LegalPropositionInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
-completeGrade inst sol
-    | wrongSolution = reject $ do
-      english "Your solution is incorrect."
-      german "Ihre Lösung ist falsch."
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> LegalPropositionInst -> [Int] -> LangM m
+completeGrade path inst sol = refuseIfWrong $ do
+  when wrongSolution $ do
+     instruct $ do
+        english "Your solution is incorrect."
+        german "Ihre Lösung ist falsch."
 
-    | otherwise = pure()
+  when (showSolution inst) $ do
+    when wrongSolution $
+      example (show (toList (serialsOfWrong inst))) $ do
+          english "A possible solution for this task is:"
+          german "Eine mögliche Lösung für die Aufgabe ist:"
+
+    instruct $ do
+        english "The following syntax trees represent the well-formed formulas:"
+        german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
+
+    for_ (correctTrees inst) $ \x -> do
+      code (display x)
+      image $=<< liftIO $ cacheTree (transferToPicture x) path
+      pure ()
+
+    pure ()
+
+  pure ()
   where
     wrongSolution = sort (nub sol) /= sort (toList $ serialsOfWrong inst)
+    refuseIfWrong = if wrongSolution then refuse else id

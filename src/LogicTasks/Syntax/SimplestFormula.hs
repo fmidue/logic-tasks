@@ -5,7 +5,7 @@
 module LogicTasks.Syntax.SimplestFormula where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, translate)
+import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, translate, GenericOutputMonad (refuse))
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 
@@ -17,6 +17,7 @@ import Tasks.SuperfluousBrackets.Config (
     )
 import Trees.Helpers
 import Trees.Types
+import Control.Monad (when)
 
 
 
@@ -112,7 +113,15 @@ partialGrade SuperfluousBracketsInst{..} f
 
 completeGrade :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
 completeGrade inst sol
-    | show (fromJust (maybeForm sol)) /= simplestString inst = reject $ do
-      english "Your solution is not correct."
-      german "Ihre Abgabe ist nicht die korrekte Lösung."
+    | show (fromJust (maybeForm sol)) /= simplestString inst = refuse $ do
+      instruct $ do
+        english "Your solution is incorrect."
+        german "Ihre Lösung ist falsch."
+
+      when (showSolution inst) $ do
+        example (simplestString inst) $ do
+          english "The solution for this task is:"
+          german "Die Lösung für die Aufgabe ist:"
+
+      pure ()
     | otherwise = pure()

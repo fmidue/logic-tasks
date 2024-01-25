@@ -44,6 +44,7 @@ generateLegalCNFInst config@LegalCNFConfig {..} = do
       `suchThat` (listNoDuplicate . map (simplestDisplay . fmap (const '_')))
     return $ LegalCNFInst { serialsOfWrong = fromList serialsOfWrong
                           , formulaStrings = map simplestDisplay treeList
+                          , showSolution = False
                           , addText = extraText}
 
 

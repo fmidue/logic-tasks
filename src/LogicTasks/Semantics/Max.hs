@@ -23,15 +23,17 @@ import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
-import LogicTasks.Helpers (extra, formulaKey)
+import LogicTasks.Helpers (formulaKey, example, extra)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
+import Control.Monad (when)
 
 
 
 
 genMaxInst :: MinMaxConfig -> Gen MaxInst
-genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} =
-    MaxInst <$> cnfInRange <*> pure extraText
+genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
+    cnf <- cnfInRange
+    pure $ MaxInst cnf printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -176,19 +178,24 @@ partialGrade MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
 
 
 
-completeMinMax :: (OutputMonad m, Formula f) => f -> f -> LangM m
-completeMinMax correct solution =
+completeMinMax :: (OutputMonad m, Formula f, Show f) => Bool -> f -> f -> LangM m
+completeMinMax showSolution correct solution =
     preventWithHint (not $ null diff)
       (translate $ do
          german "Lösung liefert korrekte Wahrheitstabelle?"
          english "Solution gives correct truth table?"
       )
 
-      (paragraph $ do
-        translate $ do
-          german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
-          english "The following rows are not correct: "
-        itemizeM $ map (text . show) diff
+      (do
+        paragraph $ do
+          translate $ do
+            german "Es existieren falsche Einträge in den folgenden Tabellenzeilen: "
+            english "The following rows are not correct: "
+          itemizeM $ map (text . show) diff
+          pure ()
+        when showSolution $ example (show correct) $ do
+          english "A possible solution for this task is:"
+          german "Eine mögliche Lösung für die Aufgabe ist:"
         pure ()
       )
   where
@@ -198,4 +205,4 @@ completeMinMax correct solution =
 
 
 completeGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-completeGrade MaxInst{..} = completeMinMax cnf
+completeGrade MaxInst{..} = completeMinMax showSolution cnf

@@ -35,6 +35,7 @@ validBoundsLegalProposition = do
             , illegals
             , bracketFormulas
             , extraText = Nothing
+            , printSolution = False
         }
 
 invalidBoundsLegalProposition :: Gen LegalPropositionConfig
@@ -50,6 +51,7 @@ invalidBoundsLegalProposition = do
             , illegals
             , bracketFormulas
             , extraText = Nothing
+            , printSolution = False
         }
 
 spec :: Spec

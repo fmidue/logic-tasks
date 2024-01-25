@@ -38,6 +38,7 @@ data LegalCNFConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
+    , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
   } deriving (Show,Generic)
 
@@ -56,6 +57,7 @@ defaultLegalCNFConfig =
   , maxStringSize = 35
   , minStringSize = 12
   , allowArrowOperators = True
+  , printSolution = True
   , extraText = Nothing
   }
 
@@ -98,7 +100,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
       = reject $ do
         english "minClauseAmount is too large. The external generator cannot generate a CNF."
         german "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
-    | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 5 + 1) = reject $ do
+    | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 4 + 1) = reject $ do
         english "Cannot generate string with given minStringSize."
         german "String kann mit gegebenen minStringSize nicht generiert werden."
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
@@ -118,5 +120,6 @@ data LegalCNFInst =
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]
+      , showSolution :: Bool
       , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

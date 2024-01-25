@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Tasks.SuperfluousBrackets.Config (
     SuperfluousBracketsConfig (..),
@@ -27,6 +28,7 @@ data SuperfluousBracketsConfig =
       syntaxTreeConfig :: SynTreeConfig
     , superfluousBracketPairs :: Integer
     , extraText :: Maybe (Map Language String)
+    , printSolution :: Bool
     } deriving (Show,Generic)
 
 
@@ -38,6 +40,7 @@ defaultSuperfluousBracketsConfig =
       syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True, minUniqueBinOperators = 2 }
     , superfluousBracketPairs = 2
     , extraText = Nothing
+    , printSolution = True
     }
 
 
@@ -49,7 +52,7 @@ checkSuperfluousBracketsConfig config@SuperfluousBracketsConfig {..} =
 
 
 checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
-checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}
+checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, superfluousBracketPairs}
     | minNodes < 5 = reject $ do
         english "Minimal number of nodes must larger than 4"
         german "Minimale Anzahl Blätter muss größer 4 sein."
@@ -69,5 +72,6 @@ data SuperfluousBracketsInst =
       tree :: SynTree BinOp Char
     , stringWithSuperfluousBrackets :: String
     , simplestString :: String
+    , showSolution :: Bool
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

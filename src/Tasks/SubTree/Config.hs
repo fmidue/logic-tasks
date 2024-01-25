@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Tasks.SubTree.Config (
     SubTreeInst(..),
@@ -30,6 +31,7 @@ data SubTreeConfig =
     , allowSameSubTree :: Bool
     , minSubTrees :: Integer
     , extraText :: Maybe (Map Language String)
+    , printSolution :: Bool
     } deriving (Show,Generic)
 
 
@@ -41,6 +43,7 @@ defaultSubTreeConfig =
     , allowSameSubTree = True
     , minSubTrees = 3
     , extraText = Nothing
+    , printSolution = False
     }
 
 
@@ -52,7 +55,7 @@ checkSubTreeConfig subConfig@SubTreeConfig {..} =
 
 
 checkAdditionalConfig :: OutputMonad m => SubTreeConfig -> LangM m
-checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, minSubTrees}
     | minSubTrees < 2 = reject $ do
         english "The task makes no sense if not at least two subtrees are generated."
         german "Es müssen mindestens zwei Unterbäume erzeugt werden."
@@ -66,7 +69,8 @@ checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
 data SubTreeInst =
     SubTreeInst
     { tree :: SynTree BinOp Char
-    , correctFormulas :: Set String
+    , correctTrees :: Set (SynTree BinOp Char)
     , minInputTrees :: Integer
+    , showSolution :: Bool
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

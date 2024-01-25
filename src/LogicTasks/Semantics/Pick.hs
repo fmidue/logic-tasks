@@ -21,7 +21,8 @@ import Formula.Util (mkCnf, xorSat)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
-import LogicTasks.Helpers (extra)
+import LogicTasks.Helpers (example, extra)
+import Control.Monad (when)
 
 
 
@@ -36,7 +37,7 @@ genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     let
       cnfs = first : rest
     corrIndex <- elements [1..length cnfs -1]
-    pure $ PickInst cnfs corrIndex extraText
+    pure $ PickInst cnfs corrIndex printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
 
@@ -119,12 +120,27 @@ partialGrade _ _ = pure()
 
 
 completeGrade :: OutputMonad m => PickInst -> Number -> LangM m
-completeGrade PickInst{..} sol =
-    case sol of Number Nothing -> refuse $ indent $ translate $ do
-                                    german "Es wurde kein Index angegeben."
-                                    english "You did not give an index."
-                Number (Just index) ->
-                  if index == correct then pure()
-                                      else refuse $ indent $ translate $ do
-                                             german "Der gewählte Index ist falsch."
-                                             english "You submitted the wrong index."
+completeGrade PickInst{..} sol = do
+    case sol of
+      Number Nothing -> refuse $ indent $ do
+        translate $ do
+          german "Es wurde kein Index angegeben."
+          english "You did not give an index."
+
+        displaySolution
+
+        pure ()
+
+      Number (Just index) -> if index == correct
+        then pure ()
+        else refuse $ indent $ do
+          translate $ do
+            german "Der gewählte Index ist falsch."
+            english "You submitted the wrong index."
+
+          displaySolution
+
+          pure ()
+  where displaySolution = when showSolution $ example (show correct) $ do
+          english "The solution for this task is:"
+          german "Die Lösung für die Aufgabe ist:"

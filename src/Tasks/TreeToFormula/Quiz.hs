@@ -30,4 +30,5 @@ generateTreeToFormulaInst TreeToFormulaConfig {syntaxTreeConfig = SynTreeConfig 
       , latexImage = transferToPicture tree
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
       , addText = extraText
+      , showSolution = printSolution
       }

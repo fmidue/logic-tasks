@@ -7,6 +7,7 @@ import Text.Parsec (parse)
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (isInfixOf )
 import Data.Set (fromList, size, toList)
+import qualified Data.Set (map)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
 import Tasks.SubTree.Quiz (generateSubTreeInst)
@@ -30,6 +31,7 @@ validBoundsSubTree = do
       , allowSameSubTree
       , minSubTrees
       , extraText = Nothing
+      , printSolution = False
       }
 
 invalidBoundsSubTree :: Gen SubTreeConfig
@@ -43,6 +45,7 @@ invalidBoundsSubTree = do
       , allowSameSubTree
       , minSubTrees
       , extraText = Nothing
+      , printSolution = False
       }
 
 spec :: Spec
@@ -59,18 +62,18 @@ spec = do
       forAll validBoundsSubTree $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
           let
-            correctTrees = allNotLeafSubTrees tree
+            correctTrees' = allNotLeafSubTrees tree
           in
-            fromList (map display $ toList correctTrees)
-              == correctFormulas
+            correctTrees == correctTrees'
     it "it should generate not less Syntax Sub tree number it required as excepted" $
       forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
-          fromIntegral (size correctFormulas) >= minSubTrees
+          fromIntegral (size correctTrees) >= minSubTrees
     it "all subformulas are the sublist of the formula" $
       forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
+            correctFormulas = Data.Set.map display correctTrees
             correctFormulas' = toList correctFormulas
           in
             all (`isInfixOf` display tree) correctFormulas'
@@ -78,6 +81,7 @@ spec = do
       forAll validBoundsSubTree $ \config ->
           forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
             let
+              correctFormulas = Data.Set.map display correctTrees
               propFormulas = map
                 (fromRight' . parse (parser @(PropFormula Char)) "")
                 (toList correctFormulas)
@@ -88,6 +92,7 @@ spec = do
       forAll validBoundsSubTree $ \config ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
+            correctFormulas = Data.Set.map display correctTrees
             propFormulas = map
               (fromRight' . parse (parser @(PropFormula Char)) "" . deleteSpaces)
               (toList correctFormulas)

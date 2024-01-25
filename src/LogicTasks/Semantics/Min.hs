@@ -30,8 +30,9 @@ import Util (tryGen, withRatio)
 
 
 genMinInst :: MinMaxConfig -> Gen MinInst
-genMinInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} =
-    MinInst <$> dnfInRange <*> pure extraText
+genMinInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
+    dnf <- dnfInRange
+    pure $ MinInst dnf printSolution extraText
    where
      getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
      dnfInRange = tryGen getDnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -95,4 +96,4 @@ partialGrade MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms Fal
 
 
 completeGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
-completeGrade MinInst{..} = Max.completeMinMax dnf
+completeGrade MinInst{..} = Max.completeMinMax showSolution dnf

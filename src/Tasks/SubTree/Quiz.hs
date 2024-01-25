@@ -5,14 +5,13 @@ module Tasks.SubTree.Quiz(
     ) where
 
 
-import Data.Set (map, size)
+import Data.Set (size)
 import Trees.Generate (genSynTree)
 import Test.QuickCheck (Gen, suchThat)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
-import Trees.Print (display)
 
 
 
@@ -33,6 +32,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
     return $ SubTreeInst
       { tree
       , minInputTrees = minSubTrees
-      , correctFormulas = Data.Set.map display correctTrees
+      , correctTrees = correctTrees
+      , showSolution = printSolution
       , addText = extraText
       }

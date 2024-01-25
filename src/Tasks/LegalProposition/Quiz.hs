@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Tasks.LegalProposition.Quiz (
     generateLegalPropositionInst,
@@ -44,6 +45,8 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
+        , correctTrees = [ tree | (index, tree) <- zip [1..] treeList, index `notElem` serialsOfWrong ]
+        , showSolution = printSolution
         , addText = extraText
         }
 

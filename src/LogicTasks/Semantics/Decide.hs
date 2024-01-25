@@ -21,7 +21,8 @@ import Formula.Util (isEmptyCnf, hasEmptyClause)
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, literals)
 import Util (checkCnfConf, isOutside, preventWithHint, remove)
-import LogicTasks.Helpers (extra)
+import LogicTasks.Helpers (example, extra)
+import Control.Monad (when)
 
 
 
@@ -33,7 +34,7 @@ genDecideInst DecideConfig{cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, 
       tableLen = length $ readEntries $ getTable cnf
       mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1
     mistakes <- remove (tableLen - mistakeCount) [1..tableLen]
-    pure $ DecideInst cnf mistakes extraText
+    pure $ DecideInst cnf mistakes printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
@@ -148,9 +149,14 @@ completeGrade DecideInst{..} sol = do
       german "Lösung ist korrekt?"
       english "Solution is correct?"
     )
-    (translate $ do
-      german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
-      english $ "Your solution contains " ++ display ++ " mistakes."
+    (do
+      translate $ do
+        german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
+        english $ "Your solution contains " ++ display ++ " mistakes."
+      when showSolution $ example (show changed) $ do
+        english "A possible solution for this task is:"
+        german "Eine mögliche Lösung für die Aufgabe ist:"
+      pure ()
     )
   where
     nubSol = nub sol

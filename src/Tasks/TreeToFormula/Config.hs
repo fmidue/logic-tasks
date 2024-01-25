@@ -20,6 +20,7 @@ data TreeToFormulaConfig = TreeToFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
     , extraHintsOnSemanticEquivalence :: Bool
     , extraText :: Maybe (Map Language String)
+    , printSolution :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -28,6 +29,7 @@ defaultTreeToFormulaConfig = TreeToFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
     , extraHintsOnSemanticEquivalence = True
     , extraText = Nothing
+    , printSolution = True
     }
 
 
@@ -47,6 +49,7 @@ data TreeToFormulaInst = TreeToFormulaInst {
                , latexImage :: String
                , addExtraHintsOnSemanticEquivalence :: Bool
                , addText :: Maybe (Map Language String)
+               , showSolution :: Bool
                }
                deriving (Show, Typeable, Generic)
 

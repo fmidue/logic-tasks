@@ -24,7 +24,8 @@ import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transfo
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
-import LogicTasks.Helpers (extra)
+import Control.Monad (when)
+import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
 
 
@@ -34,8 +35,8 @@ genPrologInst PrologConfig{..} = (do
     let
       termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
       termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
-    pure $ PrologInst termAddedClause1 termAddedClause2 extraText)
-  `suchThat` \(PrologInst clause1 clause2 _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
+    pure $ PrologInst termAddedClause1 termAddedClause2 printSolution extraText)
+  `suchThat` \(PrologInst clause1 clause2 _ _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
   where
     mapping = zip usedPredicates ['A'..'Z']
     usedLiterals = map snd mapping
@@ -160,20 +161,36 @@ partialGrade PrologInst{..} sol = do
 
 completeGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade PrologInst{..} sol =
-    case resolve clause1 clause2 transSol1 of
-        Nothing -> refuse $ indent $ translate $ do
-                     german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
-                     english "This literal cannot be used for a resolution step!"
+    case resolveResult of
+        Nothing -> refuse $ indent $  do
+          translate $ do
+            german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
+            english "This literal cannot be used for a resolution step!"
+
+          displaySolution
+
+          pure ()
 
         Just solClause -> if solClause == transSol2
-                            then pure()
-                            else refuse $ indent $ translate $ do
-                                   german "Resolvente ist nicht korrekt."
-                                   english "Resolvent is not correct."
+                            then pure ()
+                            else refuse $ indent $ do
+                                    translate $ do
+                                      german "Resolvente ist nicht korrekt."
+                                      english "Resolvent is not correct."
+
+                                    displaySolution
+
+                                    pure ()
   where
     (clause1, clause2, mapping) = transform (literals1, literals2)
     transSol1 = fromJust $ lookup (fst sol) mapping
     transSol2 = transformProlog (snd sol) mapping
+    resolveResult = resolve clause1 clause2 transSol1
+    displaySolution = when showSolution $ do
+          example ("(" ++ show transSol1 ++ ", " ++ show (fromJust resolveResult) ++ ")") $ do
+            english "A possible solution for this task is:"
+            german "Eine mögliche Lösung für die Aufgabe ist:"
+          pure ()
 
 
 

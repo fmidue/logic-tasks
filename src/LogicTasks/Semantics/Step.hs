@@ -20,10 +20,11 @@ import Test.QuickCheck (Gen, elements)
 
 import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
-import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
+import Formula.Types (Clause(Clause, literalSet), Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (clauseKey, extra)
+import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
+import Control.Monad (when)
 
 
 
@@ -34,7 +35,7 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
     let
       litAddedClause1 = mkClause $ resolveLit : lits1
       litAddedClause2 = mkClause $ opposite resolveLit : literals clause2
-    pure $ StepInst litAddedClause1 litAddedClause2 extraText
+    pure $ StepInst litAddedClause1 litAddedClause2 printSolution extraText
 
 
 
@@ -130,17 +131,32 @@ partialGrade StepInst{..} sol = do
 completeGrade :: OutputMonad m => StepInst -> StepAnswer -> LangM m
 completeGrade StepInst{..} sol =
     case resolve clause1 clause2 (fst mSol) of
-        Nothing -> refuse $ indent $ translate $ do
-                     german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
-                     english "This literal cannot be used for a resolution step!"
+        Nothing -> refuse $ indent $ do
+          translate $ do
+            german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
+            english "This literal cannot be used for a resolution step!"
+
+          displaySolution
+
+          pure ()
 
         Just solClause -> if solClause == snd mSol
-                            then pure()
-                            else refuse $ indent $ translate $ do
-                                   german "Resolvente ist nicht korrekt."
-                                   english "Resolvent is not correct."
+          then pure()
+          else refuse $ indent $ do
+            translate $ do
+              german "Resolvente ist nicht korrekt."
+              english "Resolvent is not correct."
+
+            displaySolution
+
+            pure ()
   where
     mSol = fromJust $ step sol
+    correctLiteral = head [ x | x <- toList (literalSet clause1), opposite x `elem` toList (literalSet clause2) ]
+    correctResolvent = (literalSet clause1 `union` literalSet clause2) `difference` fromList [correctLiteral, opposite correctLiteral]
+    displaySolution = when showSolution $ example ("(" ++ show correctLiteral ++ ", " ++ show (Clause correctResolvent) ++ ")") $ do
+          english "A possible solution for this task is:"
+          german "Eine mögliche Lösung für die Aufgabe ist:"
 
 
 genResStepClause :: Int -> Int -> [Char] -> Gen (Clause, Literal, [Literal])

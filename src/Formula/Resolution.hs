@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 module Formula.Resolution
        (
          genRes
@@ -5,6 +6,8 @@ module Formula.Resolution
        , resolvable
        , resolvableWith
        , applySteps
+       , computeResSteps
+       , showResSteps
        ) where
 
 
@@ -12,11 +15,13 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Set (empty,Set)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromJust)
 import Test.QuickCheck (Gen,choose,elements,shuffle)
 
-import Formula.Types
+import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
+import Data.List (find, elemIndex, intercalate)
+import Data.Containers.ListUtils (nubOrd)
 
 
 
@@ -142,3 +147,59 @@ setElements :: Set a -> Gen a
 setElements set
     | null set = error "setElements used with empty set."
     | otherwise = (`Set.elemAt` set) `fmap` choose (0, Set.size set - 1)
+
+----------------------------------------------------------------------------------------------------------
+
+resolutions :: [([Clause], Clause)] -> [([Clause], Clause)]
+resolutions [] = []
+resolutions clauseMap@((cs, r):xs) = nubOrd $ (cs,r) : [ ([x,y], fromJust res) |
+  x <- allClauses,
+  l <- Set.toList (literalSet x),
+  y <- allClauses,
+  let res = resolve x y l, isJust res]  ++ resolutions xs
+    where allClauses = map snd clauseMap
+
+solution' :: [([Clause], Clause)] -> [([Clause], Clause)]
+solution' xs = if any (\(_, Clause x) -> null x) xs then xs else solution' (resolutions xs)
+
+reconstructSolution :: Clause -> [([Clause], Clause)] -> [([Clause], Clause)]
+reconstructSolution c xs = if isJust rOrigin then [ fromJust rOrigin ]
+                                             else recursiveLeft ++ recursiveRight ++ [(fst (fromJust r) ,c)]
+  where rOrigin = find (\(ps,x) -> x == c && null ps) xs
+        r = find (\(ps,x) -> x == c && not (null ps)) xs
+        recursiveLeft = reconstructSolution (head (fst (fromJust r))) xs
+        recursiveRight = reconstructSolution (last (fst (fromJust r))) xs
+
+applyNum :: [Clause] -> [([Clause], Clause)] -> [([Clause], Clause, Int)]
+applyNum _ [] = []
+applyNum original xs = map (\(ys, c) -> (ys, c, fromJust (elemIndex c correctedOriginal) +1)) old ++ zipped
+  where
+    old = filter (\(ps, _) -> null ps) xs
+    new = filter (\(ps, _) -> not (null ps)) xs
+    correctedOriginal = Set.toList $ clauseSet $ mkCnf original
+    zipped = zipWith (curry (\((ys, c),i) -> (ys, c,i))) new [length original + 1..]
+
+convertSteps :: [([Clause], Clause, Int)] -> [ResStep]
+convertSteps [] = []
+convertSteps xs = map mapFn new
+  where new = filter (\(a,_,_) -> not (null a)) xs
+        mapFn (ys,c,i) = let (_,_,l) = fromJust (find (\(_,b,_) -> b == head ys) xs)
+                             (_,_,r) = fromJust (find (\(_,b,_) -> b == last ys) xs)
+                          in Res (Right l, Right r, (c, Just i))
+
+pretty' :: ResStep -> Bool -> String
+pretty' (Res (a,b,(c,d))) isLast = "(" ++ showEither a ++ ", " ++ showEither b ++ ", " ++ showClause ++ showNum ++ ")"
+  where showEither (Left x) = show x
+        showEither (Right y) = show y
+        showNum = if isJust d && not isLast then " = " ++ show (fromJust d) else ""
+        litSet = literalSet c
+        showClause = if null litSet then "{ }" else "{" ++ intercalate "," (map show (Set.toList litSet)) ++ "}"
+
+showResSteps :: [ResStep] -> [String]
+showResSteps [] = []
+showResSteps [x] = [pretty' x True]
+showResSteps (x:xs) = pretty' x False : showResSteps xs
+
+computeResSteps :: [Clause] -> [ResStep]
+computeResSteps clauses = convertSteps (applyNum clauses reconstructed)
+  where reconstructed = reconstructSolution (Clause empty) (solution' (map ([],) clauses))

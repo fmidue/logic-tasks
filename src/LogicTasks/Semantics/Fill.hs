@@ -21,7 +21,8 @@ import Formula.Util (hasEmptyClause, isEmptyCnf)
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
 import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
-import LogicTasks.Helpers (extra)
+import Control.Monad (when)
+import LogicTasks.Helpers (example, extra)
 
 
 
@@ -33,7 +34,7 @@ genFillInst FillConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..
       tableLen = length $ readEntries $ getTable cnf
       gapCount = max (tableLen * percentageOfGaps `div` 100) 1
     gaps <- remove (tableLen - gapCount) [1..tableLen]
-    pure $ FillInst cnf gaps extraText
+    pure $ FillInst cnf gaps printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -169,11 +170,15 @@ completeGrade FillInst{..} sol = do
       german "Lösung ist korrekt?"
       english "Solution is correct?"
     )
-    (translate $ do
-      german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
-      english $ "Your solution contains " ++ display ++ " mistakes."
+    (do
+      translate $ do
+        german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
+        english $ "Your solution contains " ++ display ++ " mistakes."
+      when showSolution $ example (show missing) $ do
+        english "The solution for this task is:"
+        german "Die Lösung für die Aufgabe ist:"
+      pure ()
     )
-
   where
     table = getTable cnf
     allEntries = map fromJust $ readEntries table

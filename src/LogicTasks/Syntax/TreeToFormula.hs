@@ -19,12 +19,12 @@ import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
-import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject)
+import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject, example)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
-import Trees.Print (transferToPicture)
+import Trees.Print (transferToPicture, display)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
 
 
@@ -84,14 +84,19 @@ partialGrade _ sol
 
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 completeGrade path inst sol
-    | treeAnswer /= tree inst = refuse $ do
+    | treeAnswer /= correctTree = refuse $ do
         instruct $ do
           english "Your solution is not correct. The syntax tree for your entered formula looks like this:"
           german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
-        when (addExtraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer (tree inst)) $
+        when (showSolution inst) $
+          example (show (display correctTree)) $ do
+            english "A possible solution for this task is:"
+            german "Eine mögliche Lösung für die Aufgabe ist:"
+
+        when (addExtraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer correctTree) $
           instruct $ do
             english "This syntax tree is semantically equivalent to the original one, but not identical."
             german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
@@ -99,6 +104,7 @@ completeGrade path inst sol
         pure ()
     | otherwise = pure ()
   where treeAnswer = fromJust (maybeTree sol)
+        correctTree = tree inst
 
 
 
