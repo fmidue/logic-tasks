@@ -5,7 +5,6 @@
 
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
-    SynTreeInst(..),
     checkSynTreeConfig,
     defaultSynTreeConfig,
     ) where
@@ -17,7 +16,7 @@ import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
-import Trees.Types (SynTree, BinOp)
+import Trees.Types (BinOp)
 
 
 
@@ -98,12 +97,3 @@ checkSynTreeConfig SynTreeConfig {..}
         english "The number of unique operators cannot exceed the maximum number of operators."
         german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
     | otherwise = pure()
-
-
-
-data SynTreeInst =
-    SynTreeInst
-    { tree :: SynTree BinOp Char
-    , latexImage :: String
-    , correct :: String
-    } deriving (Show,Generic)

@@ -32,7 +32,6 @@ library
       LogicTasks.Syntax.SubTreeSet
       LogicTasks.Syntax.TreeToFormula
       Tasks.SynTree.Config
-      Tasks.SynTree.Quiz
       Tasks.SubTree.Config
       Tasks.SubTree.Quiz
       Tasks.LegalProposition.Config
