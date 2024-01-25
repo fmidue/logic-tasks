@@ -57,7 +57,7 @@ defaultLegalCNFConfig =
   , maxStringSize = 35
   , minStringSize = 12
   , allowArrowOperators = True
-  , printSolution = True
+  , printSolution = False
   , extraText = Nothing
   }
 

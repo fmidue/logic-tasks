@@ -40,7 +40,7 @@ defaultSuperfluousBracketsConfig =
       syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True, minUniqueBinOperators = 2 }
     , superfluousBracketPairs = 2
     , extraText = Nothing
-    , printSolution = True
+    , printSolution = False
     }
 
 

@@ -29,7 +29,7 @@ defaultTreeToFormulaConfig = TreeToFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
     , extraHintsOnSemanticEquivalence = True
     , extraText = Nothing
-    , printSolution = True
+    , printSolution = False
     }
 
 
