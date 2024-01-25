@@ -11,7 +11,7 @@ import Data.List.Extra (nubOrd, isInfixOf)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
-import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..), defaultSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Helpers (
   collectLeaves,
   treeDepth,
@@ -20,7 +20,6 @@ import Trees.Helpers (
   maxNodesForDepth,
   minDepthForNodes,
   numOfUniqueBinOpsInSynTree)
-import Tasks.SynTree.Quiz (generateSynTreeInst)
 import SAT.MiniSat hiding (Formula(Not))
 import qualified SAT.MiniSat as Sat (Formula(Not))
 import Trees.Types (SynTree(..), BinOp(..))
@@ -79,8 +78,16 @@ spec :: Spec
 spec = do
   describe "feedback" $
     it "rejects nonsense" $
-      forAll validBoundsSynTree $ \config ->
-        forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse (tail correct) /= Right tree
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> formulaParse (tail (display tree)) /= Right tree
   describe "numOfUniqueBinOpsInSynTree" $ do
         it "should return 0 if there is only a leaf" $
             numOfUniqueBinOpsInSynTree (Leaf 'a') == 0
@@ -105,27 +112,72 @@ spec = do
                   ) $ \synTree -> numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
-      forAll validBoundsSynTree $ \config ->
-        forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse correct == Right tree
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> formulaParse (display tree) == Right tree
     xit ("should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, " ++
         "even without spaces") $
-      forAll validBoundsSynTree $ \config ->
-        forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse (deleteSpaces correct) == Right tree
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> formulaParse (deleteSpaces (display tree)) == Right tree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
-      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
-          treeNodes tree >= minNodes && treeNodes tree <= maxNodes
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> treeNodes tree >= minNodes && treeNodes tree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
-      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> treeDepth tree <= maxDepth
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
-      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
-          fromIntegral (length (nubOrd (collectLeaves tree))) >= atLeastOccurring
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> fromIntegral (length (nubOrd (collectLeaves tree))) >= atLeastOccurring
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
-      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
-          not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))
   describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $
       convert @(SynTree BinOp Char) (Leaf 'A') == Var 'A'
@@ -144,8 +196,16 @@ spec = do
 
   describe "semantic equivalence of syntax trees (isSemanticEqual)" $  do
     it "a syntax tree's formula is semantically equivalent to itself" $
-      forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _) ->
-        isSemanticEqual tree tree
+      forAll validBoundsSynTree $ \SynTreeConfig {..} ->
+        forAll (genSynTree
+                    (minNodes, maxNodes)
+                    maxDepth
+                    usedLiterals
+                    atLeastOccurring
+                    allowArrowOperators
+                    maxConsecutiveNegations
+                    minUniqueBinOperators
+                  ) $ \tree -> isSemanticEqual tree tree
     it "a syntax tree's formula is semantically equivalent to itself with associativity applied" $ do
       isSemanticEqual
         ((Leaf 'A' `treeAnd` Leaf 'B') `treeAnd` Leaf 'C')
