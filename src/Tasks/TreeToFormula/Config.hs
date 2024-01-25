@@ -47,6 +47,7 @@ checkAdditionalConfig TreeToFormulaConfig {syntaxTreeConfig = SynTreeConfig {}} 
 data TreeToFormulaInst = TreeToFormulaInst {
                  tree :: SynTree BinOp Char
                , latexImage :: String
+               , correct :: String
                , addExtraHintsOnSemanticEquivalence :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool

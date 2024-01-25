@@ -10,7 +10,7 @@ import Test.QuickCheck (Gen,)
 
 import Tasks.TreeToFormula.Config (TreeToFormulaConfig(..), TreeToFormulaInst(..))
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Trees.Print (transferToPicture)
+import Trees.Print (transferToPicture, display)
 
 
 
@@ -28,6 +28,7 @@ generateTreeToFormulaInst TreeToFormulaConfig {syntaxTreeConfig = SynTreeConfig 
     return $ TreeToFormulaInst
       { tree
       , latexImage = transferToPicture tree
+      , correct = display tree
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
       , addText = extraText
       , showSolution = printSolution

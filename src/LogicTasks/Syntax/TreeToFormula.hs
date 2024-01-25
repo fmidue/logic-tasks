@@ -24,7 +24,7 @@ import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
-import Trees.Print (transferToPicture, display)
+import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
 
 
@@ -97,7 +97,7 @@ completeGrade path inst sol
             german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
 
         when (showSolution inst) $
-          example (show (display correctTree)) $ do
+          example (show (correct inst)) $ do
             english "A possible solution for this task is:"
             german "Eine mögliche Lösung für die Aufgabe ist:"
 
