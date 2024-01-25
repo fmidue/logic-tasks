@@ -1,5 +1,4 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE NamedFieldPuns #-}
 
 module Tasks.LegalProposition.Quiz (
     generateLegalPropositionInst,
