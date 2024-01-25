@@ -177,7 +177,8 @@ spec = do
                     allowArrowOperators
                     maxConsecutiveNegations
                     minUniqueBinOperators
-                  ) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))
+                  ) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
+                    `isInfixOf` deleteSpaces (display tree))
   describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $
       convert @(SynTree BinOp Char) (Leaf 'A') == Var 'A'
