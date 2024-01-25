@@ -91,15 +91,15 @@ completeGrade path inst sol
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
-        when (showSolution inst) $
-          example (show (display correctTree)) $ do
-            english "A possible solution for this task is:"
-            german "Eine mögliche Lösung für die Aufgabe ist:"
-
         when (addExtraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer correctTree) $
           instruct $ do
             english "This syntax tree is semantically equivalent to the original one, but not identical."
             german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
+
+        when (showSolution inst) $
+          example (show (display correctTree)) $ do
+            english "A possible solution for this task is:"
+            german "Eine mögliche Lösung für die Aufgabe ist:"
 
         pure ()
     | otherwise = pure ()
