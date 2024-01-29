@@ -22,7 +22,7 @@ import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, literals, Table)
 import Util (checkCnfConf, isOutside, preventWithHint, remove, printWithHint)
 import LogicTasks.Helpers (example, extra)
-import Control.Monad (when)
+import Control.Monad (when, unless)
 
 
 
@@ -152,35 +152,35 @@ completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
 completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
   printWithHint (solLen > acLen)
     (translate $ do
-      german "Lösung enthält nicht zu viele Indizes?"
-      english "Solution does not contain too many indices?"
+      german "Lösung enthält nicht zu viele unterschiedliche Indizes?"
+      english "Solution does not contain too many unique indices?"
     )
     (translate $ do
-      german "Lösung enthält zu viele Indizes."
-      english "Solution contains too many indices."
+      german "Lösung enthält zu viele unterschiedliche Indizes."
+      english "Solution contains too many unique indices."
     )
 
-  printWithHint (acLen > solLen)
+  unless (solLen > acLen) $
+    printWithHint (acLen > solLen)
+      (translate $ do
+        german "Lösung enthält genügend unterschiedliche Indizes?"
+        english "Solution contains enough unique indices?"
+      )
+      (translate $ do
+        german "Lösung enthält zu wenige unterschiedliche Indizes."
+        english "Solution does not contain enough unique indices."
+      )
+
+  printWithHint (diff /= 0)
     (translate $ do
-      german "Lösung enthält genügend Indizes?"
-      english "Solution contains enough indices?"
+      german "Indizes in der Lösung sind korrekt?"
+      english "Indices in the solution are correct?"
     )
     (translate $ do
-      german "Lösung enthält zu wenige Indizes."
-      english "Solution does not contain enough indices."
+      german $ "In der Menge der unterschiedlichen Indizes " ++ ger ++ " falsch."
+      english $ "The set of unique indices contains " ++ eng
     )
 
-  printWithHint incorrect
-    (translate $ do
-      german "Lösung ist korrekt?"
-      english "Solution is correct?"
-    )
-    (do
-      translate $ do
-        german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
-        english $ "Your solution contains " ++ display ++ " mistakes."
-      pure ()
-    )
 
   when (incorrect && showSolution) $ example (show changed) $ do
       english "A possible solution for this task is:"
@@ -192,6 +192,7 @@ completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
     diff = length $ filter (`notElem` changed) nubSol
     acLen = length $ nub changed
     solLen = length $ nub sol
-    distance = abs (solLen - acLen)
-    display = show distance
     incorrect = solLen > acLen || acLen > solLen || diff /= 0
+    (ger, eng) = if diff == 1
+      then ("ist 1 Index", "1 wrong index")
+      else ("sind " ++ show diff ++ " Indizes", show diff ++ " wrong indices")
