@@ -11,7 +11,7 @@ import Control.Monad.Output (
   OutputMonad,
   english,
   german,
-  translate,
+  translate, yesNo,
   )
 import Data.List (nub)
 import Test.QuickCheck (Gen)
@@ -149,8 +149,8 @@ partialGrade DecideInst{..} sol = do
 
 
 completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
-completeGrade DecideInst{..} sol = do
-  preventWithHint (solLen > acLen)
+completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
+  printWithHint (solLen > acLen)
     (translate $ do
       german "Lösung enthält nicht zu viele Indizes?"
       english "Solution does not contain too many indices?"
@@ -160,7 +160,7 @@ completeGrade DecideInst{..} sol = do
       english "Solution contains too many indices."
     )
 
-  preventWithHint (acLen > solLen)
+  printWithHint (acLen > solLen)
     (translate $ do
       german "Lösung enthält genügend Indizes?"
       english "Solution contains enough indices?"
@@ -170,7 +170,7 @@ completeGrade DecideInst{..} sol = do
       english "Solution does not contain enough indices."
     )
 
-  preventWithHint (diff /= 0)
+  printWithHint incorrect
     (translate $ do
       german "Lösung ist korrekt?"
       english "Solution is correct?"
@@ -179,11 +179,12 @@ completeGrade DecideInst{..} sol = do
       translate $ do
         german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
         english $ "Your solution contains " ++ display ++ " mistakes."
-      when showSolution $ example (show changed) $ do
-        english "A possible solution for this task is:"
-        german "Eine mögliche Lösung für die Aufgabe ist:"
       pure ()
     )
+
+  when (incorrect && showSolution) $ example (show changed) $ do
+      english "A possible solution for this task is:"
+      german "Eine mögliche Lösung für die Aufgabe ist:"
 
   pure ()
   where
@@ -193,4 +194,9 @@ completeGrade DecideInst{..} sol = do
     solLen = length $ nub sol
     distance = abs (solLen - acLen)
     display = show distance
+    incorrect = solLen > acLen || acLen > solLen || diff /= 0
+    printWithHint b desc hint = do
+      yesNo (not b) desc
+      when b (indent hint)
+      pure ()
 
