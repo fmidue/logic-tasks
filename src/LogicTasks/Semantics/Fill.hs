@@ -23,7 +23,7 @@ import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, li
 import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
-import LogicTasks.Semantics.Decide (preventIfMoreIndicesThanTableRows)
+import LogicTasks.Semantics.Decide (preventIfSolutionExceedsTableSize)
 
 
 
@@ -148,7 +148,7 @@ partialGrade FillInst{..} sol = do
       english $ "The solution must contain exactly " ++ show missingLen ++ " gaps."
     )
 
-  preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)
+  preventIfSolutionExceedsTableSize (length sol) (getTable cnf)
 
   pure ()
     where

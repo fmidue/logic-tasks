@@ -48,7 +48,12 @@ third3 (_,_,c) = c
 genResInst :: ResolutionConfig -> Gen ResolutionInst
 genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
   clauses <- inst
-  pure $ ResolutionInst clauses printFeedbackImmediately printSolution extraText
+  pure $ ResolutionInst {
+    clauses = clauses,
+    printFeedbackImmediately = printFeedbackImmediately,
+    showSolution = printSolution,
+    addText = extraText
+  }
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
 
@@ -195,7 +200,7 @@ partialGrade ResolutionInst{..} sol = do
       pure ()
     )
 
-  when showFeedbackOnPartialGrade $ do
+  when printFeedbackImmediately $ do
     gradeSteps sol clauses
 
   pure ()
@@ -208,7 +213,7 @@ partialGrade ResolutionInst{..} sol = do
 
 completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol = do
-    unless showFeedbackOnPartialGrade $ do
+    unless printFeedbackImmediately $ do
       gradeSteps sol clauses
 
     when (showSolution && not isCorrect) $

@@ -107,8 +107,8 @@ verifyQuiz DecideConfig{..}
 start :: [Int]
 start = []
 
-preventIfMoreIndicesThanTableRows :: OutputMonad m => Int -> Table -> LangM m
-preventIfMoreIndicesThanTableRows solLen table = preventWithHint (solLen > tableLen)
+preventIfSolutionExceedsTableSize :: OutputMonad m => Int -> Table -> LangM m
+preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > tableLen)
     (translate $ do
       german "Lösung überschreitet nicht Anzahl der Zeilen?"
       english "Solution does not exceed count of rows?"
@@ -143,7 +143,7 @@ partialGrade DecideInst{..} sol = do
       english "The solution must contain at least one index."
     )
 
-  preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)
+  preventIfSolutionExceedsTableSize (length sol) (getTable cnf)
 
   pure ()
 

@@ -131,7 +131,7 @@ dStepInst =  StepInst
 
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
-               , showFeedbackOnPartialGrade :: Bool
+               , printFeedbackImmediately :: Bool
                , showSolution :: Bool
                , addText    :: Maybe (Map Language String)
                }
@@ -145,7 +145,7 @@ dResInst =  ResolutionInst
               , mkClause [Literal 'C']
               , mkClause [Not 'B']
               ]
-          , showFeedbackOnPartialGrade = True
+          , printFeedbackImmediately = True
           , showSolution = False
           , addText = Nothing
           }
