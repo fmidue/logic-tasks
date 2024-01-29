@@ -11,7 +11,7 @@ import Control.Monad.Output (
   OutputMonad,
   english,
   german,
-  translate, yesNo,
+  translate,
   )
 import Data.List (nub)
 import Test.QuickCheck (Gen)
@@ -20,7 +20,7 @@ import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
 import Formula.Util (isEmptyCnf, hasEmptyClause)
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, literals, Table)
-import Util (checkCnfConf, isOutside, preventWithHint, remove)
+import Util (checkCnfConf, isOutside, preventWithHint, remove, printWithHint)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 
@@ -195,8 +195,3 @@ completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
     distance = abs (solLen - acLen)
     display = show distance
     incorrect = solLen > acLen || acLen > solLen || diff /= 0
-    printWithHint b desc hint = do
-      yesNo (not b) desc
-      when b (indent hint)
-      pure ()
-
