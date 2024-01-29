@@ -24,7 +24,7 @@ import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (clauseKey, example, extra)
+import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (when)
 
@@ -69,7 +69,16 @@ description ResolutionInst{..} = do
     german "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
     english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
 
-  clauseKey
+  -- clauseKey
+  keyHeading
+  negationKey
+
+  paragraph $ indent $ do
+    translate $ do
+      german "Nicht-leere Klausel:"
+      english "Non-empty clause:"
+    code "{ ... }"
+    pure ()
 
   paragraph $ indent $ do
     translate $ do
