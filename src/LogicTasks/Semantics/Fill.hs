@@ -128,14 +128,6 @@ partialGrade FillInst{..} sol = do
       english "The solution must contain at least one value."
     )
 
-  preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)
-
-  pure ()
-
-
-
-completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
-completeGrade FillInst{..} sol = do
   preventWithHint (missingLen > solLen)
     (translate $ do
       german "Lösung hat genügend Werte?"
@@ -156,6 +148,19 @@ completeGrade FillInst{..} sol = do
       english $ "The solution must contain exactly " ++ show missingLen ++ " gaps."
     )
 
+  preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)
+
+  pure ()
+    where
+      table = getTable cnf
+      tableLen = length $ readEntries table
+      boolSol = map truth sol
+      solLen = length boolSol
+      missingLen = length missing
+
+
+completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
+completeGrade FillInst{..} sol = do
   preventWithHint (not ((null diffShort && solLen == length missing) || (null diffLong && solLen == length allEntries)))
     (translate $ do
       german "Lösung ist korrekt?"
@@ -174,7 +179,6 @@ completeGrade FillInst{..} sol = do
   pure ()
   where
     table = getTable cnf
-    tableLen = length $ readEntries table
     allEntries = map fromJust $ readEntries table
     correctShort = [allEntries !! i | i <- map (\x -> x-1) missing]
     boolSol = map truth sol
@@ -184,4 +188,3 @@ completeGrade FillInst{..} sol = do
     (_,diffShort) = pairwiseCheck zippedShort
     (_,diffLong) = pairwiseCheck zippedLong
     displayMistake = show (max (length diffShort) (length diffLong))
-    missingLen = length missing
