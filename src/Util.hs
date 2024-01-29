@@ -35,6 +35,12 @@ preventWithHint b desc hint = do
   when b (refuse $ indent hint)
   pure ()
 
+printWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
+printWithHint b desc hint = do
+  yesNo (not b) desc
+  when b (indent hint)
+  pure ()
+
 
 pairwiseCheck :: Eq a => [(a,a,Int)] -> ([Int],[Int])
 pairwiseCheck [] = ([],[])
