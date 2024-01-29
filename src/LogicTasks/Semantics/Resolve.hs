@@ -23,7 +23,7 @@ import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
-import Formula.Resolution (genRes, resolvableWith, resolve, computeResSteps, showResSteps, applySteps)
+import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
 import Util (checkBaseConf, prevent, preventWithHint)
