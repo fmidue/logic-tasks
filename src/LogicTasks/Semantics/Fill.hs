@@ -124,8 +124,8 @@ partialGrade FillInst{..} sol = do
       english "Solution contains values?"
     )
     (translate $ do
-      german "Die Lösung beinhaltet mindestens einen Wert."
-      english "The solution contains at least one value."
+      german "Die Lösung muss mindestens einen Wert enthalten."
+      english "The solution must contain at least one value."
     )
 
   preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)

@@ -114,8 +114,8 @@ preventIfMoreIndicesThanTableRows solLen table = preventWithHint (solLen > table
       english "Solution does not exceed count of rows?"
     )
     (translate $ do
-      german $ "Lösung enthält mehr Werte als es Zeilen gibt. " ++ gerHint
-      english $ "Solution contains more values than there are rows. " ++ engHint
+      german $ "Ihre Lösung enthält mehr Werte als es Zeilen gibt. " ++ gerHint
+      english $ "Your solution contains more values than there are rows. " ++ engHint
     )
   where
     tableLen = length $ readEntries table
@@ -139,8 +139,8 @@ partialGrade DecideInst{..} sol = do
       english "Solution contains indices?"
     )
     (translate $ do
-      german "Die Lösung beinhaltet mindestens einen Index."
-      english "The solution contains at least one index."
+      german "Die Lösung muss mindestens einen Index enthalten."
+      english "The solution must contain at least one index."
     )
 
   preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)
