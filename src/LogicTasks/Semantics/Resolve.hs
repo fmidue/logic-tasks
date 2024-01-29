@@ -69,7 +69,6 @@ description ResolutionInst{..} = do
     german "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
     english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
 
-  -- clauseKey
   keyHeading
   negationKey
 
