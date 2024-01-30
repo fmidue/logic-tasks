@@ -23,6 +23,7 @@ import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, li
 import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
+import Data.Foldable.Extra (notNull)
 
 
 
@@ -117,27 +118,7 @@ start = []
 
 partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
-  preventWithHint (null sol)
-    (translate $ do
-      german "Lösung enthält Werte?"
-      english "Solution contains values?"
-    )
-    (translate $ do
-      german "Die Lösung muss mindestens einen Wert enthalten."
-      english "The solution must contain at least one value."
-    )
-
-  preventWithHint (missingLen > solLen)
-    (translate $ do
-      german "Lösung hat genügend Werte?"
-      english "Solution contains enough values?"
-    )
-    (translate $ do
-      german "Lösung enthält zu wenige Werte."
-      english "Solution does not contain enough values."
-    )
-
-  preventWithHint (not (solLen == tableLen || solLen == missingLen))
+  preventWithHint (solLen /= missingLen)
     (translate $ do
       german "Lösung hat korrekte Länge?"
       english "Solution has correct length?"
@@ -149,8 +130,6 @@ partialGrade FillInst{..} sol = do
 
   pure ()
     where
-      table = getTable cnf
-      tableLen = length $ readEntries table
       boolSol = map truth sol
       solLen = length boolSol
       missingLen = length missing
@@ -158,13 +137,13 @@ partialGrade FillInst{..} sol = do
 
 completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 completeGrade FillInst{..} sol = do
-  preventWithHint (not ((null diffShort && isShort) || (null diffLong && isLong)))
+  preventWithHint (notNull diff || solLen /= length missing)
     (translate $ do
       german "Lösung ist korrekt?"
       english "Solution is correct?"
     )
     (do
-      when (solLen == length missing ||solLen == length allEntries) $ translate $ do
+      translate $ do
         german $ "Die Lösung beinhaltet " ++ displayMistake ++ " Fehler."
         english $ "Your solution contains " ++ displayMistake ++ " mistakes."
       when showSolution $ example (show correctShort) $ do
@@ -181,9 +160,5 @@ completeGrade FillInst{..} sol = do
     boolSol = map truth sol
     solLen = length boolSol
     zippedShort = zip3 boolSol correctShort [1..]
-    zippedLong = zip3 boolSol allEntries [1..]
-    (_,diffShort) = pairwiseCheck zippedShort
-    (_,diffLong) = pairwiseCheck zippedLong
-    isShort = solLen == length missing
-    isLong = solLen == length allEntries
-    displayMistake = show $ length (if isShort then diffShort else diffLong)
+    (_,diff) = pairwiseCheck zippedShort
+    displayMistake = show $ length diff
