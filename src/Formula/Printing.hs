@@ -16,8 +16,7 @@ import qualified Data.Set as Set (null)
 
 import Text.PrettyPrint.Leijen.Text
 import Data.Map (toList)
-
-
+import Data.Maybe (isJust, fromJust)
 
 
 myText :: String -> Doc
@@ -40,11 +39,12 @@ instance Pretty TruthValue where
 
 
 instance Pretty ResStep where
-  pretty (Res (a,b,(c,_))) = tupled [litsOrNum a, litsOrNum b, prettyClause c]
+  pretty (Res (a,b,(c,d))) = tupled [litsOrNum a, litsOrNum b, withNumber]
     where
       litsOrNum = either prettyClause pretty
       curlyBracesList = encloseSep (char '{') (char '}') (char ',')
       prettyClause = curlyBracesList . map pretty . literals
+      withNumber = prettyClause c <> if isJust d then myText (" = " ++ show (fromJust d))  else empty
 
 
 
