@@ -158,16 +158,16 @@ partialGrade FillInst{..} sol = do
 
 completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 completeGrade FillInst{..} sol = do
-  preventWithHint (not ((null diffShort && solLen == length missing) || (null diffLong && solLen == length allEntries)))
+  preventWithHint (not ((null diffShort && isShort) || (null diffLong && isLong)))
     (translate $ do
       german "Lösung ist korrekt?"
       english "Solution is correct?"
     )
     (do
-      translate $ do
+      when (solLen == length missing ||solLen == length allEntries) $ translate $ do
         german $ "Die Lösung beinhaltet " ++ displayMistake ++ " Fehler."
         english $ "Your solution contains " ++ displayMistake ++ " mistakes."
-      when showSolution $ example (show missing) $ do
+      when showSolution $ example (show correctShort) $ do
         english "The solution for this task is:"
         german "Die Lösung für die Aufgabe ist:"
       pure ()
@@ -184,4 +184,6 @@ completeGrade FillInst{..} sol = do
     zippedLong = zip3 boolSol allEntries [1..]
     (_,diffShort) = pairwiseCheck zippedShort
     (_,diffLong) = pairwiseCheck zippedLong
-    displayMistake = show (max (length diffShort) (length diffLong))
+    isShort = solLen == length missing
+    isLong = solLen == length allEntries
+    displayMistake = show $ length (if isShort then diffShort else diffLong)
