@@ -1,6 +1,14 @@
 {-# LANGUAGE RecordWildCards #-}
 module Formula.Helpers where
-import Formula.Types (PrologLiteral (..), PrologClause(..), terms, ClauseShape(AnyClause, HornClause), HornShape (..), Clause(..), Cnf(..))
+import Formula.Types (
+  PrologLiteral (..),
+  PrologClause(..),
+  ClauseShape(AnyClause, HornClause),
+  HornShape (..),
+  Clause(..),
+  Cnf(..),
+  terms
+  )
 import Data.Foldable (Foldable(toList))
 import Data.List (intercalate)
 
