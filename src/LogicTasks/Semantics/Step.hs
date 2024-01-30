@@ -27,6 +27,9 @@ import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
+import Formula.Helpers (showClauseAsSet)
+
+
 
 
 genStepInst :: StepConfig -> Gen StepInst
@@ -35,7 +38,13 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
     let
       litAddedClause1 = mkClause $ resolveLit : lits1
       litAddedClause2 = mkClause $ opposite resolveLit : literals clause2
-    pure $ StepInst litAddedClause1 litAddedClause2 printSolution extraText
+    pure $ StepInst {
+      clause1 = litAddedClause1,
+      clause2 = litAddedClause2,
+      showAsSet = displayUsingSetNotation,
+      showSolution = printSolution,
+      addText = extraText
+    }
 
 
 
@@ -45,8 +54,8 @@ description StepInst{..} = do
     translate $ do
       german "Betrachten Sie die zwei folgenden Klauseln:"
       english "Consider the two following clauses:"
-    indent $ code $ show clause1
-    indent $ code $ show clause2
+    indent $ code $ show' clause1
+    indent $ code $ show' clause2
     pure ()
   paragraph $ translate $ do
     german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
@@ -66,6 +75,10 @@ description StepInst{..} = do
     pure ()
   extra addText
   pure ()
+    where
+      show' clause = if showAsSet
+        then showClauseAsSet clause
+        else show clause
 
 
 verifyStatic :: OutputCapable m => StepInst -> LangM m

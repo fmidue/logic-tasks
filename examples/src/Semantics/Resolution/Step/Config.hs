@@ -18,6 +18,7 @@ task12 =
       , maxClauseLength = 2
       , usedLiterals = "ABCD"
       }
+    , displayUsingSetNotation = False
     , extraText = Nothing
     , printSolution = True
     }
@@ -35,6 +36,7 @@ task14 =
       , maxClauseLength = 3
       , usedLiterals = "ABCD"
       }
+    , displayUsingSetNotation = False
     , extraText = Nothing
     , printSolution = True
     }

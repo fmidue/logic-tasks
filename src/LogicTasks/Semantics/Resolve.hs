@@ -36,6 +36,8 @@ import Data.Foldable.Extra (notNull)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
+import Formula.Helpers (showCnfAsSet)
+
 
 
 
@@ -59,6 +61,7 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
     clauses = clauses,
     solution,
     printFeedbackImmediately = printFeedbackImmediately,
+    showAsSet = displayUsingSetNotation,
     showSolution = printSolution,
     addText = extraText
   }
@@ -73,7 +76,7 @@ description ResolutionInst{..} = do
     translate $ do
       german "Betrachten Sie die folgende Formel in KNF:"
       english "Consider the following formula in cnf:"
-    indent $ code $ show $ mkCnf clauses
+    indent $ code $ show' clauses
     pure ()
   paragraph $ translate $ do
     german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
@@ -121,6 +124,10 @@ description ResolutionInst{..} = do
     pure ()
   extra addText
   pure ()
+    where
+      show' = if showAsSet
+        then showCnfAsSet . mkCnf
+        else show . mkCnf
 
 
 verifyStatic :: OutputCapable m => ResolutionInst -> LangM m
