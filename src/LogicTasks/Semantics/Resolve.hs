@@ -30,6 +30,7 @@ import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
 import Util (checkBaseConf, prevent, preventWithHint, printWithHint)
 import Control.Monad (unless, when)
 import Data.Foldable.Extra (notNull)
+import Formula.Helpers (showCnfAsSet)
 
 
 
@@ -53,6 +54,7 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
   pure $ ResolutionInst {
     clauses = clauses,
     printFeedbackImmediately = printFeedbackImmediately,
+    showAsSet = displayUsingSetNotation,
     showSolution = printSolution,
     addText = extraText
   }
@@ -67,7 +69,7 @@ description ResolutionInst{..} = do
     translate $ do
       german "Betrachten Sie die folgende Formel in KNF:"
       english "Consider the following formula in cnf:"
-    indent $ code $ show $ mkCnf clauses
+    indent $ code $ show' clauses
     pure ()
   paragraph $ translate $ do
     german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
@@ -115,6 +117,10 @@ description ResolutionInst{..} = do
     pure ()
   extra addText
   pure ()
+    where
+      show' = if showAsSet
+        then showCnfAsSet . mkCnf
+        else show . mkCnf
 
 
 verifyStatic :: OutputMonad m => ResolutionInst -> LangM m

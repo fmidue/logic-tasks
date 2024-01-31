@@ -114,6 +114,7 @@ dDecideInst =  DecideInst
 data StepInst = StepInst {
                  clause1 :: !Clause
                , clause2 :: !Clause
+               , showAsSet :: Bool
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -123,6 +124,7 @@ dStepInst :: StepInst
 dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
+          , showAsSet = False
           , showSolution = False
           , addText = Nothing
           }
@@ -132,6 +134,7 @@ dStepInst =  StepInst
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
                , printFeedbackImmediately :: Bool
+               , showAsSet :: Bool
                , showSolution :: Bool
                , addText    :: Maybe (Map Language String)
                }
@@ -146,6 +149,7 @@ dResInst =  ResolutionInst
               , mkClause [Not 'B']
               ]
           , printFeedbackImmediately = True
+          , showAsSet = False
           , showSolution = False
           , addText = Nothing
           }
@@ -283,6 +287,7 @@ dDecideConf = DecideConfig
 
 data StepConfig = StepConfig {
       baseConf :: BaseConfig
+    , displayUsingSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -291,6 +296,7 @@ data StepConfig = StepConfig {
 dStepConf :: StepConfig
 dStepConf = StepConfig
     { baseConf = dBaseConf
+    , displayUsingSetNotation = False
     , printSolution = False
     , extraText = Nothing
     }
@@ -324,6 +330,7 @@ data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
     , printFeedbackImmediately :: Bool
+    , displayUsingSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -334,6 +341,7 @@ dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
     , printFeedbackImmediately = True
+    , displayUsingSetNotation = False
     , printSolution = False
     , extraText = Nothing
     }
