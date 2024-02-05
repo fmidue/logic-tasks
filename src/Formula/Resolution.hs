@@ -20,8 +20,10 @@ import Test.QuickCheck (Gen,choose,elements,shuffle)
 
 import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
-import Data.List (find, elemIndex, intercalate)
+import Data.List (find, elemIndex)
 import Data.Containers.ListUtils (nubOrd)
+import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
+import Formula.Printing ()
 
 
 
@@ -187,18 +189,15 @@ convertSteps xs = map mapFn new
                              (_,_,r) = fromJust (find (\(_,b,_) -> b == last ys) xs)
                           in Res (Right l, Right r, (c, Just i))
 
-pretty' :: ResStep -> Bool -> String
-pretty' (Res (a,b,(c,d))) isLast = "(" ++ showEither a ++ ", " ++ showEither b ++ ", " ++ showClause ++ showNum ++ ")"
-  where showEither (Left x) = show x
-        showEither (Right y) = show y
-        showNum = if isJust d && not isLast then " = " ++ show (fromJust d) else ""
-        litSet = literalSet c
-        showClause = if null litSet then "{ }" else "{" ++ intercalate "," (map show (Set.toList litSet)) ++ "}"
+removeNumberAtEmptyClause :: ResStep -> ResStep
+removeNumberAtEmptyClause res@(Res (a,b,(Clause c,_)))
+  | null c = Res (a,b,(Clause c,Nothing))
+  | otherwise = res
 
 showResSteps :: [ResStep] -> [String]
 showResSteps [] = []
-showResSteps [x] = [pretty' x True]
-showResSteps (x:xs) = pretty' x False : showResSteps xs
+showResSteps [x] = [show $ pretty (removeNumberAtEmptyClause x)]
+showResSteps (x:xs) = show (pretty (removeNumberAtEmptyClause x)) : showResSteps xs
 
 computeResSteps :: [Clause] -> [ResStep]
 computeResSteps clauses = convertSteps (applyNum clauses reconstructed)
