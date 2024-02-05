@@ -23,6 +23,7 @@ import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
+import Data.Maybe (fromJust)
 
 
 
@@ -115,23 +116,17 @@ start = Number Nothing
 
 
 partialGrade :: OutputMonad m => PickInst -> Number -> LangM m
-partialGrade _ _ = pure()
-
-
-
-completeGrade :: OutputMonad m => PickInst -> Number -> LangM m
-completeGrade PickInst{..} sol = do
-    case sol of
-      Number Nothing -> refuse $ indent $ do
+partialGrade _ (Number Nothing) = refuse $ indent $
         translate $ do
           german "Es wurde kein Index angegeben."
           english "You did not give an index."
 
-        displaySolution
+partialGrade _ _ = pure ()
 
-        pure ()
 
-      Number (Just index) -> if index == correct
+completeGrade :: OutputMonad m => PickInst -> Number -> LangM m
+completeGrade PickInst{..} (Number index) =
+    if fromJust index == correct
         then pure ()
         else refuse $ indent $ do
           translate $ do

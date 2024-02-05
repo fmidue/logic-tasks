@@ -114,7 +114,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
 
     (paragraph $ do
       translate $ do
-        german "Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
+        german "Es fehlen Literale. Fügen Sie diese Literale der Abgabe hinzu: "
         english "Some literals are missing. Add these literals to your submission: "
       itemizeM $ map (text . show) missing
       pure ()
