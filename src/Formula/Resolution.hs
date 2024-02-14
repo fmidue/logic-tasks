@@ -7,7 +7,7 @@ module Formula.Resolution
        , resolvableWith
        , applySteps
        , computeResSteps
-       , showResStep
+       , showResSteps
        ) where
 
 
@@ -194,8 +194,8 @@ removeNumberAtEmptyClause res@(Res (a,b,(Clause c,_)))
   | null c = Res (a,b,(Clause c,Nothing))
   | otherwise = res
 
-showResStep :: ResStep -> String
-showResStep = show . pretty . removeNumberAtEmptyClause
+showResSteps :: [ResStep] -> String
+showResSteps = show . pretty . map removeNumberAtEmptyClause
 
 computeResSteps :: [Clause] -> [ResStep]
 computeResSteps clauses = convertSteps (applyNum clauses reconstructed)
