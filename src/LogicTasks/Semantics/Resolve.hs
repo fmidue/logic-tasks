@@ -19,12 +19,12 @@ import Control.Monad.Output (
   yesNo,
   )
 import Data.List (sort)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, fromMaybe)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
-import Formula.Resolution (genRes, resolvableWith, resolve, showResStep, computeResSteps)
+import Formula.Resolution (genRes, resolvableWith, resolve, showResStep, computeResSteps, applySteps)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
 import Util (checkBaseConf, prevent, preventWithHint, printWithHint)
@@ -234,7 +234,9 @@ completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
     pure ()
   where
     stepsGraded = gradeSteps sol clauses
-    isCorrect = printFeedbackImmediately || fst stepsGraded
+    steps = replaceAll sol $ baseMapping clauses
+    applied = applySteps clauses steps
+    isCorrect = any isEmptyClause (fromMaybe [] applied)
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
