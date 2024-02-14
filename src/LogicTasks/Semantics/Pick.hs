@@ -17,27 +17,22 @@ import Control.Monad.Output (
 import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
-import Formula.Util (mkCnf, xorSat)
-import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
+import Formula.Util (mkCnf, isSemanticEqual)
+import Formula.Types (availableLetter, genCnf, getTable, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 import Data.Maybe (fromJust)
+import Data.List (nubBy)
 
 
 
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..} = do
-    first <- getCnf usedLiterals
-    let
-      cnfLits = atomics first
-      generator = tryGen (getCnf $ map letter cnfLits) 100 (\cnf -> atomics cnf == cnfLits && xorSat first cnf)
-    rest <- vectorOf (amountOfOptions - 1) generator
-    let
-      cnfs = first : rest
-    corrIndex <- elements [1..length cnfs -1]
+    cnfs <- tryGen (vectorOf amountOfOptions (getCnf usedLiterals)) 100 ((amountOfOptions ==) . length . nubBy isSemanticEqual)
+    corrIndex <- elements [1..amountOfOptions]
     pure $ PickInst cnfs corrIndex printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
