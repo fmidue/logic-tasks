@@ -17,9 +17,10 @@ import Control.Monad.Output (
   translations,
   localise,
   yesNo,
+  recoverFrom,
   )
 import Data.List (sort)
-import Data.Maybe (fromJust, isNothing)
+import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
@@ -27,8 +28,9 @@ import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
-import Util (checkBaseConf, prevent, preventWithHint, printWithHint)
+import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
+import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
 
 
@@ -157,10 +159,9 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
--- Returns (True, ...) when the steps are correct
-gradeSteps :: OutputMonad m => [ResStep] -> [Clause] -> (Bool, LangM m)
-gradeSteps sol clauses = (not incorrect, do
-    printWithHint (notNull noResolveSteps)
+gradeSteps :: OutputMonad m => [ResStep] -> [Clause] -> LangM m
+gradeSteps sol clauses = do
+    preventWithHint (notNull noResolveSteps)
         (translate $ do
           german "Alle Schritte sind gültig?"
           english "All steps are valid?"
@@ -173,19 +174,29 @@ gradeSteps sol clauses = (not incorrect, do
           pure ()
         )
 
-    yesNo (not checkEmptyClause) $
+    prevent checkEmptyClause $
       translate $ do
         german "Letzter Schritt leitet die leere Klausel ab?"
         english "The last step derives the empty clause?"
 
+    preventWithHint (isNothing applied)
+      (translate $ do
+        german "Alle Schritte nutzen vorhandene oder zuvor abgeleitete Klauseln?"
+        english "All steps utilize existing or previously derived clauses?"
+      )
+      (paragraph $ do
+        translate $ do
+          german "Mindestens ein Schritt beinhaltet Klauseln, die weder in der Formel vorhanden sind, noch zuvor abgeleitet wurden."
+          english "At least one step contains clauses that are neither present in the formula nor were previously derived."
+      )
+
     pure ()
-  )
     where
       noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
             fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
       steps = replaceAll sol $ baseMapping clauses
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
-      incorrect = notNull noResolveSteps || checkEmptyClause
+      applied = applySteps clauses steps
 
 
 partialGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
@@ -205,19 +216,8 @@ partialGrade ResolutionInst{..} sol = do
       pure ()
     )
 
-  preventWithHint (isNothing applied)
-    (translate $ do
-      german "Alle Schritte nutzen vorhandene oder zuvor abgeleitete Klauseln?"
-      english "All steps utilize existing or previously derived clauses?"
-    )
-    (paragraph $ do
-      translate $ do
-        german "Mindestens ein Schritt beinhaltet Klauseln, die weder in der Formel vorhanden sind noch zuvor abgeleitet wurden."
-        english "At least one step contains clauses that are neither present in the formula nor were previously derived. "
-    )
-
   when printFeedbackImmediately $ do
-    (if fst stepsGraded then id else refuse) $ snd stepsGraded
+    stepsGraded
 
   pure ()
   where
@@ -227,12 +227,11 @@ partialGrade ResolutionInst{..} sol = do
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
     stepsGraded = gradeSteps sol clauses
-    applied = applySteps clauses steps
 
-completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
+completeGrade :: (OutputMonad m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
     unless printFeedbackImmediately $ do
-      snd stepsGraded
+      recoverFrom stepsGraded
 
     yesNo isCorrect $ translate $ do
       german "Lösung ist korrekt?"
@@ -245,8 +244,10 @@ completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
 
     pure ()
   where
+    steps = replaceAll sol $ baseMapping clauses
+    applied = applySteps clauses steps
     stepsGraded = gradeSteps sol clauses
-    isCorrect = fst stepsGraded
+    isCorrect = any isEmptyClause (fromMaybe [] applied)
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
