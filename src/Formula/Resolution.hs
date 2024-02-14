@@ -20,7 +20,7 @@ import Test.QuickCheck (Gen,choose,elements,shuffle)
 
 import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
-import Data.List (find, elemIndex, intercalate)
+import Data.List (find, elemIndex)
 import Data.Containers.ListUtils (nubOrd)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Printing ()
@@ -195,8 +195,7 @@ removeNumberAtEmptyClause res@(Res (a,b,(Clause c,_)))
   | otherwise = res
 
 showResSteps :: [ResStep] -> String
-showResSteps steps = "[" ++ intercalate ", " prettyMap ++ "]"
-  where prettyMap = map (show . pretty . removeNumberAtEmptyClause) steps
+showResSteps = show . pretty . map removeNumberAtEmptyClause
 
 computeResSteps :: [Clause] -> [ResStep]
 computeResSteps clauses = convertSteps (applyNum clauses reconstructed)
