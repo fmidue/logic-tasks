@@ -19,7 +19,7 @@ import Control.Monad.Output (
   yesNo,
   )
 import Data.List (sort)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust, isNothing)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
@@ -205,6 +205,17 @@ partialGrade ResolutionInst{..} sol = do
       pure ()
     )
 
+  preventWithHint (isNothing applied)
+    (translate $ do
+      german "Alle Schritte nutzen vorhandene oder zuvor abgeleitete Klauseln?"
+      english "All steps utilize existing or previously derived clauses?"
+    )
+    (paragraph $ do
+      translate $ do
+        german "Mindestens ein Schritt beinhaltet Klauseln, die weder in der Formel vorhanden sind noch zuvor abgeleitet wurden."
+        english "At least one step contains clauses that are neither present in the formula nor were previously derived. "
+    )
+
   when printFeedbackImmediately $ do
     (if fst stepsGraded then id else refuse) $ snd stepsGraded
 
@@ -216,6 +227,7 @@ partialGrade ResolutionInst{..} sol = do
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
     stepsGraded = gradeSteps sol clauses
+    applied = applySteps clauses steps
 
 completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
@@ -234,9 +246,7 @@ completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
     pure ()
   where
     stepsGraded = gradeSteps sol clauses
-    steps = replaceAll sol $ baseMapping clauses
-    applied = applySteps clauses steps
-    isCorrect = any isEmptyClause (fromMaybe [] applied)
+    isCorrect = fst stepsGraded
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
