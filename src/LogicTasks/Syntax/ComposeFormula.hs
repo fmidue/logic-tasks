@@ -146,6 +146,11 @@ completeGrade path ComposeFormulaInst{..} (l,r)
     image $=<< liftIO $ cacheTree (transferToPicture lSol) path
     image $=<< liftIO $ cacheTree (transferToPicture rSol) path
 
+    when (lSol == rSol && (rSol == lrTree || rSol == rlTree)) $
+      instruct $ do
+        english "The two formulas entered only cover one of the two compositions."
+        german "Die beiden eingegebenen Formeln decken nur eine der zwei Kompositionen ab."
+
     when (addExtraHintsOnSemanticEquivalence && (isSemanticEqual lSol lrTree || isSemanticEqual rSol lrTree)) $
         instruct $ do
           english "At least one syntax tree is semantically equivalent to the desired solution, but not identical."
