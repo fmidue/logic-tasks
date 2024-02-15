@@ -211,7 +211,7 @@ partialGrade ResolutionInst{..} sol = do
 
   pure ()
   where
-    checkMapping = correctMapping sol $ baseMapping clauses
+    checkMapping = correctMapping (zip [1..] sol) $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
     availLits = unions (map (fromList . literals) clauses)
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
@@ -244,18 +244,18 @@ baseMapping xs = zip [1..] $ sort xs
 
 
 
-correctMapping :: OutputMonad m => [ResStep] -> [(Int,Clause)] -> LangM m
+correctMapping :: OutputMonad m => [(Int,ResStep)] -> [(Int,Clause)] -> LangM m
 correctMapping [] _ = pure()
-correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
+correctMapping ((j, Res (c1,c2,(c3,i))): rest) mapping = do
   prevent checkIndices $
     translate $ do
-      german "Alle Schritte verwenden existierende Indizes?"
-      english "All steps use valid indices?"
+      german $ show j ++ ". Schritt verwendet existierende Indizes?"
+      english $ "Step " ++ show j ++ " uses valid indices?"
 
   prevent (alreadyUsed i) $
     translate $ do
-      german "Kein Index wird mehrfach vergeben?"
-      english "No index is in duplicate use?"
+      german $ show j ++ ". Schritt vergibt keinen Index wiederholt?"
+      english $ "Step " ++ show j ++ " does not assign an index twice?"
 
   correctMapping rest newMapping
   pure ()
