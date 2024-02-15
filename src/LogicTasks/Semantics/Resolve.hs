@@ -160,8 +160,8 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
-gradeSteps :: OutputMonad m => [ResStep] -> [Clause] -> LangM m
-gradeSteps sol clauses = do
+gradeSteps :: OutputMonad m => Bool -> [ResStep] -> [Clause] -> LangM m
+gradeSteps appliedIsNothing sol clauses = do
     preventWithHint (notNull noResolveSteps)
         (translate $ do
           german "Alle Schritte sind gültig?"
@@ -180,7 +180,7 @@ gradeSteps sol clauses = do
         german "Letzter Schritt leitet die leere Klausel ab?"
         english "The last step derives the empty clause?"
 
-    preventWithHint (isNothing applied)
+    preventWithHint appliedIsNothing
       (translate $ do
         german "Alle Schritte nutzen vorhandene oder zuvor abgeleitete Klauseln?"
         english "All steps utilize existing or previously derived clauses?"
@@ -197,7 +197,6 @@ gradeSteps sol clauses = do
             fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
       steps = replaceAll sol $ baseMapping clauses
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
-      applied = applySteps clauses steps
 
 
 partialGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
@@ -227,7 +226,8 @@ partialGrade ResolutionInst{..} sol = do
     availLits = unions (map (fromList . literals) clauses)
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
-    stepsGraded = gradeSteps sol clauses
+    applied = applySteps clauses steps
+    stepsGraded = gradeSteps (isNothing applied) sol clauses
 
 completeGrade :: (OutputMonad m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
@@ -247,7 +247,7 @@ completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
   where
     steps = replaceAll sol $ baseMapping clauses
     applied = applySteps clauses steps
-    stepsGraded = gradeSteps sol clauses
+    stepsGraded = gradeSteps (isNothing applied) sol clauses
     isCorrect = any isEmptyClause (fromMaybe [] applied)
 
 baseMapping :: [Clause] -> [(Int,Clause)]
