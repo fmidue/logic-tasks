@@ -7,7 +7,6 @@ module Formula.Resolution
        , resolvableWith
        , applySteps
        , computeResSteps
-       , showResSteps
        ) where
 
 
@@ -22,7 +21,6 @@ import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
 import Data.List (find, elemIndex)
 import Data.Containers.ListUtils (nubOrd)
-import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Printing ()
 
 
@@ -173,7 +171,6 @@ reconstructSolution c xs = if isJust rOrigin then [ fromJust rOrigin ]
         recursiveRight = reconstructSolution (last (fst (fromJust r))) xs
 
 applyNum :: [Clause] -> [([Clause], Clause)] -> [([Clause], Clause, Int)]
-applyNum _ [] = []
 applyNum original xs = map (\(ys, c) -> (ys, c, fromJust (elemIndex c correctedOriginal) +1)) old ++ zipped
   where
     old = filter (\(ps, _) -> null ps) xs
@@ -182,20 +179,12 @@ applyNum original xs = map (\(ys, c) -> (ys, c, fromJust (elemIndex c correctedO
     zipped = zipWith (curry (\((ys, c),i) -> (ys, c,i))) new [length original + 1..]
 
 convertSteps :: [([Clause], Clause, Int)] -> [ResStep]
-convertSteps [] = []
 convertSteps xs = map mapFn new
   where new = filter (\(a,_,_) -> not (null a)) xs
-        mapFn (ys,c,i) = let (_,_,l) = fromJust (find (\(_,b,_) -> b == head ys) xs)
+        mapFn (ys,c@(Clause d),i)
+                       = let (_,_,l) = fromJust (find (\(_,b,_) -> b == head ys) xs)
                              (_,_,r) = fromJust (find (\(_,b,_) -> b == last ys) xs)
-                          in Res (Right l, Right r, (c, Just i))
-
-removeNumberAtEmptyClause :: ResStep -> ResStep
-removeNumberAtEmptyClause res@(Res (a,b,(Clause c,_)))
-  | null c = Res (a,b,(Clause c,Nothing))
-  | otherwise = res
-
-showResSteps :: [ResStep] -> String
-showResSteps = show . pretty . map removeNumberAtEmptyClause
+                         in Res (Right l, Right r, (c, if null d then Nothing else Just i))
 
 computeResSteps :: [Clause] -> [ResStep]
 computeResSteps clauses = convertSteps (applyNum clauses reconstructed)

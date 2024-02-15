@@ -24,12 +24,13 @@ import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
-import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
+import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, computeResSteps)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
 import Util (checkBaseConf, prevent, preventWithHint, printWithHint)
 import Control.Monad (unless, when)
 import Data.Foldable.Extra (notNull)
+import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 
 
 
@@ -227,7 +228,7 @@ completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
       english "Solution is correct?"
 
     when (showSolution && not isCorrect) $
-      example (showResSteps (computeResSteps clauses)) $ do
+      example (show . pretty $ computeResSteps clauses) $ do
         english "A possible solution for this task is:"
         german "Eine mögliche Lösung für die Aufgabe ist:"
 
