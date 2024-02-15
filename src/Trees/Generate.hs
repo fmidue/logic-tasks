@@ -7,7 +7,7 @@ import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
 import Test.QuickCheck.Gen (vectorOf)
 
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
-import Trees.Helpers (collectLeaves, relabelShape, maxNodesForDepth, consecutiveNegations, numOfUniqueBinOpsInSynTree)
+import Trees.Helpers (collectLeaves, relabelShape, maxNodesForDepth, consecutiveNegations, numOfUniqueBinOpsInSynTree, treeDepth)
 
 chooseList :: Bool -> [BinOp]
 chooseList allowArrowOperators = if allowArrowOperators
@@ -21,9 +21,10 @@ randomList availableLetters atLeastOccurring listLength = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-genSynTree :: (Integer, Integer) -> Integer -> [c] -> Integer -> Bool -> Integer -> Integer -> Gen (SynTree BinOp c)
+genSynTree :: (Integer, Integer) -> Integer -> Integer -> [c] -> Integer -> Bool -> Integer -> Integer -> Gen (SynTree BinOp c)
 genSynTree
   (minNodes, maxNodes)
+  minDepth
   maxDepth
   availableLetters
   atLeastOccurring
@@ -37,14 +38,15 @@ genSynTree
           `suchThat` \synTree ->
             (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) &&
             consecutiveNegations synTree <= maxConsecutiveNegations &&
-            numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOps
+            numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOps &&
+            treeDepth synTree >= minDepth
         usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
           fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
         else do
         nodes <- choose (minNodes, maxNodes) `suchThat` odd
         sample <- syntaxShape nodes maxDepth allowArrowOperators False
-          `suchThat` \synTree -> checkAtLeastOccurring synTree  && checkMinUniqueOps synTree
+          `suchThat` \synTree -> checkAtLeastOccurring synTree  && checkMinUniqueOps synTree && treeDepth synTree >= minDepth
         usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
           fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )

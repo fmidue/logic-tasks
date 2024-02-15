@@ -45,6 +45,7 @@ validBoundsSynTree = do
     SynTreeConfig
       { maxNodes,
         minNodes = max minNodes' (atLeastOccurring * 2 - 1),
+        minDepth = 1,
         maxDepth,
         usedLiterals,
         atLeastOccurring,
@@ -64,6 +65,7 @@ invalidBoundsSynTree = do
     SynTreeConfig
       { maxNodes,
         minNodes,
+        minDepth = 1,
         maxDepth,
         usedLiterals,
         atLeastOccurring = fromIntegral (length usedLiterals),
@@ -81,6 +83,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -103,6 +106,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -115,6 +119,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -127,6 +132,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -138,6 +144,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -149,6 +156,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -160,6 +168,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -171,6 +180,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -200,6 +210,7 @@ spec = do
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
         forAll (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring

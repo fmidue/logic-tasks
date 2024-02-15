@@ -25,6 +25,7 @@ data SynTreeConfig =
   SynTreeConfig
   { minNodes :: Integer
   , maxNodes :: Integer
+  , minDepth :: Integer
   , maxDepth :: Integer
   , usedLiterals :: String
   , atLeastOccurring :: Integer
@@ -40,6 +41,7 @@ defaultSynTreeConfig =
     SynTreeConfig
     { maxNodes = 10
     , minNodes = 6
+    , minDepth = 1
     , maxDepth = 6
     , usedLiterals = "ABCDE"
     , atLeastOccurring = 3

@@ -63,6 +63,7 @@ spec = do
                 forAll
                   (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -79,6 +80,7 @@ spec = do
                 forAll
                   (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -97,6 +99,7 @@ spec = do
                 forAll
                 (genSynTree
                   (minNodes, maxNodes)
+                  minDepth
                   maxDepth
                   usedLiterals
                   atLeastOccurring
@@ -116,6 +119,7 @@ spec = do
               \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
                 forAll
                     (genSynTree (minNodes, maxNodes)
+                        minDepth
                         maxDepth
                         usedLiterals
                         atLeastOccurring

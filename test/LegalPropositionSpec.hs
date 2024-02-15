@@ -62,6 +62,7 @@ spec = do
                 forAll
                   (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -76,6 +77,7 @@ spec = do
                 forAll
                   (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -90,6 +92,7 @@ spec = do
                 forAll
                   (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -103,6 +106,7 @@ spec = do
                 forAll
                   (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
@@ -116,6 +120,7 @@ spec = do
                 forAll
                   (genSynTree
                     (minNodes, maxNodes)
+                    minDepth
                     maxDepth
                     usedLiterals
                     atLeastOccurring
