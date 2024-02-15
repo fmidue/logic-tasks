@@ -14,12 +14,9 @@ import Control.Monad.Output (
   english,
   german, translate, localise, translations,
   )
-import Data.ByteString.Lazy.UTF8 (fromString)
-import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
-import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
-import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject, example)
+import LogicTasks.Helpers (extra, fullKey, instruct, keyHeading, reject, example)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
@@ -28,6 +25,7 @@ import Tasks.ComposeFormula.Config (ComposeFormulaInst(..), TreeDisplayMode (Tre
 import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree)
 import Data.Containers.ListUtils (nubOrd)
 import Formula.Util (isSemanticEqual)
+import LogicTasks.Syntax.TreeToFormula (cacheTree)
 
 
 
@@ -35,8 +33,14 @@ import Formula.Util (isSemanticEqual)
 description :: (OutputMonad m, MonadIO m) => FilePath -> ComposeFormulaInst -> LangM m
 description path ComposeFormulaInst{..} = do
     instruct $ do
-      english $ "Imagine that the two displayed trees/formulas are hung below a root node with operator " ++ showOperator operator ++". One subtree on the left and the other subtree on the right, and once the other way round."
-      german $ "Stellen Sie sich vor, die beiden angezeigten Bäume/Formeln würden unterhalb eines Wurzelknotens mit Operator " ++ showOperator operator ++" gehängt. Einmal der eine Teilbaum links und der andere Teilbaum rechts, und einmal genau andersherum."
+      english $ concat [
+        "Imagine that the two displayed trees/formulas are hung below a root node with operator " ,
+        showOperator operator,
+        ". One subtree on the left and the other subtree on the right, and once the other way round."]
+      german $ concat [
+        "Stellen Sie sich vor, die beiden angezeigten Bäume/Formeln würden unterhalb eines Wurzelknotens mit Operator ",
+        showOperator operator,
+        " gehängt. Einmal der eine Teilbaum links und der andere Teilbaum rechts, und einmal genau andersherum."]
 
     when (leftTreeDisplayMode == TreeDisplay) $ image $=<< liftIO $ cacheTree leftTreeImage path
     when (leftTreeDisplayMode == FormulaDisplay) $ paragraph $ code $ display leftTree
@@ -53,8 +57,14 @@ description path ComposeFormulaInst{..} = do
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
     when addExtraHintsOnSemanticEquivalence $ instruct $ do
-      english "Remarks: The exact formulas of the syntax trees must be specified. Other formulas that are semantically equivalent to these formulas are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
-      german "Hinweise: Es müssen die exakten Formeln der Syntaxbäume angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
+      english $ concat [
+        "Remarks: The exact formulas of the syntax trees must be specified. ",
+        "Other formulas that are semantically equivalent to these formulas are incorrect solutions! ",
+        "You are also not allowed to use associativity in this task in order to save brackets."]
+      german $ concat [
+        "Hinweise: Es müssen die exakten Formeln der Syntaxbäume angegeben werden. ",
+        "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! ",
+        "Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."]
 
     keyHeading
     fullKey
@@ -125,7 +135,8 @@ partialGrade ComposeFormulaInst{..} (l,r)
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
 
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> ComposeFormulaInst -> (TreeFormulaAnswer, TreeFormulaAnswer) -> LangM m
+completeGrade :: (OutputMonad m, MonadIO m) =>
+  FilePath -> ComposeFormulaInst -> (TreeFormulaAnswer, TreeFormulaAnswer) -> LangM m
 completeGrade path ComposeFormulaInst{..} (l,r)
   | not ((lSol,rSol) == (lrTree, rlTree) || (lSol,rSol) == (rlTree,lrTree)) = refuse $ do
     instruct $ do
@@ -152,30 +163,3 @@ completeGrade path ComposeFormulaInst{..} (l,r)
       rSol = fromJust $ maybeTree r
       lrTree = Binary operator leftTree rightTree
       rlTree = Binary operator rightTree leftTree
-
-
-treeOptions :: FormulaOptions
-treeOptions = FormulaOptions "\\usepackage[linguistics]{forest}" Nothing
-
-
-
-getImage :: String -> IO SVG
-getImage s = do
-  let iTree = "\\begin{forest}" ++ s ++ "\\end{forest}"
-  render <- imageForFormula defaultEnv treeOptions iTree
-  case render of (Left err) -> error $ unlines ["failed to render an image with the given formula: ", show err]
-                 (Right svg) -> pure svg
-
-
-
-outputImage :: FilePath -> String -> IO FilePath
-outputImage path tree = do
-  picture <- getImage tree
-  writeFile path picture
-  pure path
-
-
-
-cacheTree :: String -> FilePath -> IO FilePath
-cacheTree tree path = cacheIO path ext "tree-" tree outputImage
-  where ext = showDigest (sha1 . fromString $ tree) ++ ".svg"
