@@ -6,7 +6,7 @@
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
     checkSynTreeConfig,
-    defaultSynTreeConfig,
+    defaultSynTreeConfig
     ) where
 
 
@@ -17,7 +17,6 @@ import GHC.Generics (Generic)
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
 import Trees.Types (BinOp)
-
 
 
 
@@ -58,8 +57,8 @@ checkSynTreeConfig SynTreeConfig {..}
         english "Only letters are allowed as literals."
         german "Nur Buchstaben dürfen Literale sein."
     | maxConsecutiveNegations < 0 = reject $ do
-        english "Minimal number of consecutive negations must not be negative"
-        german "Minimale Anzahl aufeinander folgender Negationen kann nicht negativ sein."
+        english "Maximal number of consecutive negations must not be negative"
+        german "Maximale Anzahl aufeinander folgender Negationen kann nicht negativ sein."
     | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes) = reject $ do
         english "Syntax tree with no negation cannot have even number of nodes."
         german "Syntaxbaum ohne Negation kann keine gerade Anzahl Blätter haben."
@@ -81,9 +80,18 @@ checkSynTreeConfig SynTreeConfig {..}
     | minNodes < atLeastOccurring * 2 - 1 = reject $ do
         english "Your minimum number of nodes does not permit enough leaves for all desired literals."
         german "Minimale Anzahl der Blätter ist zu niedrig um alle Literale zu verwenden."
+    | minDepth < 1 = reject $ do
+        english "Minimal depth must be positive"
+        german "Minimale Tiefe muss positiv sein."
+    | maxNodes < minDepth = reject $ do
+        english "Your maximum number of nodes is less than what your minimum depth requires."
+        german "Maximale Anzahl der Blätter würde eingestelle minimale Tiefe verletzen."
+    | maxDepth < minDepth = reject $ do
+        english "Maximal depth must not be smaller than minimal depth"
+        german "Maximale Tiefe ist kleiner als minimale Tiefe"
     | maxNodes > maxNodesForDepth maxDepth = reject $ do
         english "Your minimum number of nodes is larger than what your maximum depth enables."
-        german "Minimale Anzahl der Blätter würde eingestellte Tiefe verletzen."
+        german "Minimale Anzahl der Blätter würde eingestellte maximale Tiefe verletzen."
     | let maxNodes' = maxNodes - 1
           maxConsecutiveNegations' = maxConsecutiveNegations + 2
           (result, rest) =
