@@ -65,6 +65,9 @@ library
       Formula.Table
       Formula.Util
       LogicTasks.Helpers
+      LogicTasks.Syntax.ComposeFormula
+      Tasks.ComposeFormula.Config
+      Tasks.ComposeFormula.Quiz
       UniversalParser
       Util
       Paths_logic_tasks
