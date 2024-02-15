@@ -43,3 +43,7 @@ spec = do
       let clauses = [justA, notAnotB, notAjustB]
       let steps = [(justA, notAnotB, justB)]
       isNothing $ applySteps clauses steps
+    it "should return Nothing if some steps use unavailable clauses" $ do
+      let clauses = [justB, notAnotB]
+      let steps = [(justB, notB, emptyClause)]
+      isNothing $ applySteps clauses steps
