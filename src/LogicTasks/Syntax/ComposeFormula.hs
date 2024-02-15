@@ -33,14 +33,12 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 description :: (OutputMonad m, MonadIO m) => FilePath -> ComposeFormulaInst -> LangM m
 description path ComposeFormulaInst{..} = do
     instruct $ do
-      english $ concat [
-        "Imagine that the two displayed trees/formulas are hung below a root node with operator " ,
-        showOperator operator,
-        ". One subtree on the left and the other subtree on the right, and once the other way round."]
-      german $ concat [
-        "Stellen Sie sich vor, die beiden angezeigten Bäume/Formeln würden unterhalb eines Wurzelknotens mit Operator ",
-        showOperator operator,
-        " gehängt. Einmal der eine Teilbaum links und der andere Teilbaum rechts, und einmal genau andersherum."]
+      english "Imagine that the two displayed trees/formulas are hung below a root node with operator "
+      english $ showOperator operator
+      english ". One subtree on the left and the other subtree on the right, and once the other way round."
+      german "Stellen Sie sich vor, die beiden angezeigten Bäume/Formeln würden unterhalb eines Wurzelknotens mit Operator "
+      german $ showOperator operator
+      german " gehängt. Einmal der eine Teilbaum links und der andere Teilbaum rechts, und einmal genau andersherum."
 
     when (leftTreeDisplayMode == TreeDisplay) $ image $=<< liftIO $ cacheTree leftTreeImage path
     when (leftTreeDisplayMode == FormulaDisplay) $ paragraph $ code $ display leftTree
@@ -57,14 +55,12 @@ description path ComposeFormulaInst{..} = do
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
     when addExtraHintsOnSemanticEquivalence $ instruct $ do
-      english $ concat [
-        "Remarks: The exact formulas of the syntax trees must be specified. ",
-        "Other formulas that are semantically equivalent to these formulas are incorrect solutions! ",
-        "You are also not allowed to use associativity in this task in order to save brackets."]
-      german $ concat [
-        "Hinweise: Es müssen die exakten Formeln der Syntaxbäume angegeben werden. ",
-        "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! ",
-        "Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."]
+        english "Remarks: The exact formulas of the syntax trees must be specified. "
+        english "Other formulas that are semantically equivalent to these formulas are incorrect solutions! "
+        english "You are also not allowed to use associativity in this task in order to save brackets."
+        german "Hinweise: Es müssen die exakten Formeln der Syntaxbäume angegeben werden. "
+        german "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
+        german "Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
     fullKey
