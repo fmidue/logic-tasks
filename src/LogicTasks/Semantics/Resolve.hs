@@ -160,8 +160,8 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
-gradeSteps :: OutputMonad m => Bool -> [ResStep] -> [Clause] -> LangM m
-gradeSteps appliedIsNothing sol clauses = do
+gradeSteps :: OutputMonad m => [(Clause,Clause,Clause)] -> Bool -> LangM m
+gradeSteps steps appliedIsNothing = do
     preventWithHint (notNull noResolveSteps)
         (translate $ do
           german "Alle Schritte sind gültig?"
@@ -195,7 +195,6 @@ gradeSteps appliedIsNothing sol clauses = do
     where
       noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
             fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
-      steps = replaceAll sol $ baseMapping clauses
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
 
 
@@ -227,7 +226,7 @@ partialGrade ResolutionInst{..} sol = do
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
     applied = applySteps clauses steps
-    stepsGraded = gradeSteps (isNothing applied) sol clauses
+    stepsGraded = gradeSteps steps (isNothing applied)
 
 completeGrade :: (OutputMonad m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
@@ -247,7 +246,7 @@ completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
   where
     steps = replaceAll sol $ baseMapping clauses
     applied = applySteps clauses steps
-    stepsGraded = gradeSteps (isNothing applied) sol clauses
+    stepsGraded = gradeSteps steps (isNothing applied)
     isCorrect = any isEmptyClause (fromMaybe [] applied)
 
 baseMapping :: [Clause] -> [(Int,Clause)]
