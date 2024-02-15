@@ -5,13 +5,13 @@
 module SynTreeSpec (spec, validBoundsSynTree) where
 
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
+import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat, ioProperty)
 import Data.List.Extra (nubOrd, isInfixOf)
 
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
-import Tasks.SynTree.Config (SynTreeConfig (..))
+import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig)
 import Trees.Helpers (
   collectLeaves,
   treeDepth,
@@ -25,6 +25,9 @@ import qualified SAT.MiniSat as Sat (Formula(Not))
 import Trees.Types (SynTree(..), BinOp(..))
 import LogicTasks.Formula (ToSAT(convert), isSemanticEqual)
 import Trees.Generate (genSynTree)
+import Control.Monad.Output (Language (English))
+import Control.Monad.Output.Debug (run)
+import Data.Maybe (isJust)
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
@@ -78,6 +81,11 @@ invalidBoundsSynTree = do
 
 spec :: Spec
 spec = do
+  describe "config" $
+    it "default config should pass config check" $
+      ioProperty $ do
+        output <- run English (checkSynTreeConfig defaultSynTreeConfig)
+        return $ isJust output
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
