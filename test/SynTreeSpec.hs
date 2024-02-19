@@ -26,8 +26,7 @@ import Trees.Types (SynTree(..), BinOp(..))
 import LogicTasks.Formula (ToSAT(convert), isSemanticEqual)
 import Trees.Generate (genSynTree)
 import Control.Monad.Output (Language (English))
-import Control.Monad.Output.Debug (run)
-import Data.Maybe (isJust)
+import Control.Monad.Output.Debug (checkConfigWith)
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
@@ -83,9 +82,7 @@ spec :: Spec
 spec = do
   describe "config" $
     it "default config should pass config check" $
-      ioProperty $ do
-        output <- run English (checkSynTreeConfig defaultSynTreeConfig)
-        return $ isJust output
+      ioProperty $ checkConfigWith English defaultSynTreeConfig checkSynTreeConfig
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->

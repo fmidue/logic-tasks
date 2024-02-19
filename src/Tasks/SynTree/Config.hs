@@ -62,9 +62,9 @@ checkSynTreeConfig SynTreeConfig {..}
     | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes) = reject $ do
         english "Syntax tree with no negation cannot have even number of nodes."
         german "Syntaxbaum ohne Negation kann keine gerade Anzahl Blätter haben."
-    | minNodes < 1 = reject$ do
-        english"Minimal number of nodes must be positive."
-        german "Minimale Anzahl Blätter muss positiv sein."
+    | minNodes < minDepth = reject$ do
+        english "Minimal number of nodes must be at least as big as the minimal depth."
+        german "Minimale Anzahl Blätter muss mindestens so groß wie die minimale Tiefe sein."
     | maxNodes < minNodes = reject $ do
         english "Maximal number of nodes must not be smaller than minimal number."
         german "Maximale Anzahl Blätter ist kleiner als minimale."
@@ -87,8 +87,8 @@ checkSynTreeConfig SynTreeConfig {..}
         english "Maximal depth must not be smaller than minimal depth"
         german "Maximale Tiefe ist kleiner als minimale Tiefe"
     | maxNodes > maxNodesForDepth maxDepth = reject $ do
-        english "Your minimum number of nodes is larger than what your maximum depth enables."
-        german "Minimale Anzahl der Blätter würde eingestellte maximale Tiefe verletzen."
+        english "Your maximum number of nodes is larger than what your maximum depth enables."
+        german "Maximale Anzahl der Blätter würde eingestellte maximale Tiefe verletzen."
     | let maxNodes' = maxNodes - 1
           maxConsecutiveNegations' = maxConsecutiveNegations + 2
           (result, rest) =
