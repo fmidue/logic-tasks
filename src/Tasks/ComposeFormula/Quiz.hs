@@ -35,7 +35,7 @@ generateComposeFormulaInst ComposeFormulaConfig {syntaxTreeConfig = SynTreeConfi
       , rightTree = rightTree
       , leftTreeImage = if fst treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture leftTree
       , rightTreeImage = if snd treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture rightTree
-      , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
+      , addExtraHintsOnAssociativity = extraHintsOnAssociativity
       , addText = extraText
       , showSolution = printSolution
       }

@@ -22,7 +22,7 @@ data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq)
 data ComposeFormulaConfig = ComposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
     , treeDisplayModes :: (TreeDisplayMode, TreeDisplayMode)
-    , extraHintsOnSemanticEquivalence :: Bool
+    , extraHintsOnAssociativity :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     }
@@ -32,7 +32,7 @@ defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
-    , extraHintsOnSemanticEquivalence = True
+    , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = False
     }
@@ -50,7 +50,7 @@ data ComposeFormulaInst = ComposeFormulaInst
                , rightTree :: SynTree BinOp Char
                , leftTreeImage :: Maybe String
                , rightTreeImage :: Maybe String
-               , addExtraHintsOnSemanticEquivalence :: Bool
+               , addExtraHintsOnAssociativity :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
                }

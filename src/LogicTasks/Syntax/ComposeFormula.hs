@@ -33,12 +33,12 @@ import Data.Foldable (for_)
 description :: (OutputMonad m, MonadIO m) => FilePath -> ComposeFormulaInst -> LangM m
 description path ComposeFormulaInst{..} = do
     instruct $ do
-      english "Imagine that the two displayed trees/formulas are hung below a root node with operator "
+      english $ "Imagine that the two displayed " ++ eTreesOrFormulas ++ " are hung below a root node with operator "
       english $ showOperator operator
-      english ". One subtree on the left and the other subtree on the right, and once the other way round."
-      german "Stellen Sie sich vor, die beiden angezeigten Bäume/Formeln würden unterhalb eines Wurzelknotens mit Operator "
+      english $ ". One " ++ eTreeOrFormula ++" on the left and the other " ++ eTreeOrFormula ++" on the right, and once the other way round."
+      german $ "Stellen Sie sich vor, die beiden angezeigten " ++ gTreesOrFormulas ++" würden unterhalb eines Wurzelknotens mit Operator "
       german $ showOperator operator
-      german " gehängt. Einmal der eine Teilbaum links und der andere Teilbaum rechts, und einmal genau andersherum."
+      german $ " gehängt. Einmal " ++ derDie ++" eine " ++ gTreeOrFormula ++" links und " ++ derDie ++" andere " ++ gTreeOrFormula ++" rechts, und einmal genau andersherum."
 
     when (isJust leftTreeImage) $ image $=<< liftIO $ cacheTree (fromJust leftTreeImage) path
     when (isNothing leftTreeImage) $ paragraph $ code $ display leftTree
@@ -47,20 +47,18 @@ description path ComposeFormulaInst{..} = do
     when (isNothing rightTreeImage) $ paragraph $ code $ display rightTree
 
     instruct $ do
-      english "Enter the formula represented by each of the two resulting trees."
-      german "Geben Sie für die beiden entstehenden Bäume jeweils die dadurch repräsentierte Formel ein."
+      english "Derive the representing formulas for the two resulting trees and insert them into a list. "
+      english "The order of the formulas in the list does not matter."
+      german "Bilden Sie für die beiden entstehenden Bäume die repräsentierenden Formeln und fügen Sie diese in eine Liste ein. "
+      german "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Liste stehen."
 
     instruct $ do
-      english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
-      german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+      english "(You are allowed to add arbitrarily many additional pairs of brackets while deriving the formulas.)"
+      german "(Während der Formelbildung dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    when addExtraHintsOnSemanticEquivalence $ instruct $ do
-        english "Remarks: The exact formulas of the syntax trees must be specified. "
-        english "Other formulas that are semantically equivalent to these formulas are incorrect solutions! "
-        english "You are also not allowed to use associativity in this task in order to save brackets."
-        german "Hinweise: Es müssen die exakten Formeln der Syntaxbäume angegeben werden. "
-        german "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
-        german "Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
+    when addExtraHintsOnAssociativity $ instruct $ do
+        english "Remark: You are not allowed to use associativity in this task in order to save brackets."
+        german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
     fullKey
@@ -70,13 +68,25 @@ description path ComposeFormulaInst{..} = do
         english "A valid solution could look like this: "
         german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       translatedCode $ flip localise $ translations $ do
-        english "((A or not B) and C, C and (A or not B))"
-        german "((A oder nicht B) und C, C und (A oder nicht B))"
+        english "[(A or not B) and C, C and (A or not B)]"
+        german "[(A oder nicht B) und C, C und (A oder nicht B)]"
       pure ()
 
     extra addText
     pure ()
-
+      where
+        derDie = derDie' leftTreeImage rightTreeImage
+        derDie' Nothing Nothing = "die"
+        derDie' (Just _) (Just _) = "der"
+        derDie' _ _ = "der/die"
+        (gTreeOrFormula, eTreeOrFormula) = treeOrFormula leftTreeImage rightTreeImage
+        treeOrFormula Nothing Nothing = ("Formel", "formula")
+        treeOrFormula (Just _) (Just _) = ("Baum", "tree")
+        treeOrFormula _ _ = ("Baum/Formel", "tree/formula")
+        (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
+        treesOrFormulas Nothing Nothing = ("Formeln", "formulas")
+        treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
+        treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas")
 
 
 verifyInst :: OutputMonad m => ComposeFormulaInst -> LangM m
