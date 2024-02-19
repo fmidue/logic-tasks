@@ -68,9 +68,6 @@ checkSynTreeConfig SynTreeConfig {..}
     | maxNodes < minNodes = reject $ do
         english "Maximal number of nodes must not be smaller than minimal number."
         german "Maximale Anzahl Blätter ist kleiner als minimale."
-    | maxDepth < 1 = reject $ do
-        english "Non-positive depth makes no sense."
-        german "Baum hat negative Tiefe."
     | atLeastOccurring < 1 = reject $ do
         english "At least one literal occurs in each formula."
         german "Formel ohne Literale existiert nicht."
