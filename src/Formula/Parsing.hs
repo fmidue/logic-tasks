@@ -1,7 +1,6 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-{-# LANGUAGE FlexibleInstances #-}
 module Formula.Parsing where
 
 import Config
@@ -82,16 +81,6 @@ instance Parse a => Parse [a] where
         xs <- parser `sepBy` (tokenSymbol "," <|> fail "parsed a wrong separator: Lists are comma-separated.")
         tokenSymbol "]" <|> fail "could not parse an enclosing ']'"
         pure xs
-
-instance (Parse a, Parse b) => Parse (a, b) where
-  parser = do
-    tokenSymbol "("
-    l <- parser
-    tokenSymbol ","
-    r <- parser
-    tokenSymbol ")"
-    pure (l, r)
-
 
 
 instance Parse Number where

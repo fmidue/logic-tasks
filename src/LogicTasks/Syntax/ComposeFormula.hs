@@ -24,8 +24,8 @@ import Trees.Print (transferToPicture, display)
 import Tasks.ComposeFormula.Config (ComposeFormulaInst(..))
 import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree)
 import Data.Containers.ListUtils (nubOrd)
-import Formula.Util (isSemanticEqual)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
+import Data.Foldable (for_)
 
 
 
@@ -94,13 +94,18 @@ start = TreeFormulaAnswer Nothing
 
 
 
-partialGrade :: OutputMonad m => ComposeFormulaInst -> (TreeFormulaAnswer, TreeFormulaAnswer) -> LangM m
-partialGrade ComposeFormulaInst{..} (l,r)
-  | isNothing (maybeTree l) || isNothing (maybeTree r) =
+partialGrade :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
+partialGrade ComposeFormulaInst{..} sol
+  | length sol /= 2 =
     reject $ do
-      english "Your submission misses at least one formula."
-      german "Sie haben mindestens eine Formel nicht angegeben."
-  | not (all containsOperator [l,r]) =
+      english "Your submission does not contain the right amount of formulas"
+      german  "Sie haben nicht die richtige Anzahl an Formeln eingegeben."
+      german $ show $ length sol
+  | any (isNothing . maybeTree) sol =
+    reject $ do
+      english "At least one formula does not represent a syntax tree."
+      german "Mindestens eine der eingegebenen Formeln entspricht nicht einem Syntaxbaum."
+  | not (all containsOperator sol) =
     reject $ do
       english "At least one of your formulas does not contain the given operator."
       german "Mindestens eine der Formeln beinhaltet nicht den vorgegebenen Operator."
@@ -117,40 +122,33 @@ partialGrade ComposeFormulaInst{..} (l,r)
       english "Your solutions contains too many unique operators."
       german $ "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren." ++ show usedOperators
 
-  | otherwise = pure()
+  | otherwise = pure ()
     where
       containsOperator = (operator `elem`) . collectUniqueBinOpsInSynTree . fromJust . maybeTree
       correctLits = nubOrd $ collectLeaves leftTree ++ collectLeaves rightTree
-      literals = nubOrd $ collectLeaves (pForm l) ++ collectLeaves (pForm r)
+      literals = nubOrd $ concatMap (collectLeaves . pForm) sol
       pForm = fromJust . maybeTree
-      usedOperators = length $ nubOrd $
-        collectUniqueBinOpsInSynTree (pForm l) ++
-          collectUniqueBinOpsInSynTree (pForm r) ++ [operator]
+      usedOperators = length $ nubOrd $ operator : concatMap (collectUniqueBinOpsInSynTree . pForm) sol
       correctOperators = length $ nubOrd $
         collectUniqueBinOpsInSynTree leftTree ++
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
 
 
 completeGrade :: (OutputMonad m, MonadIO m) =>
-  FilePath -> ComposeFormulaInst -> (TreeFormulaAnswer, TreeFormulaAnswer) -> LangM m
-completeGrade path ComposeFormulaInst{..} (l,r)
-  | not ((lSol,rSol) == (lrTree, rlTree) || (lSol,rSol) == (rlTree,lrTree)) = refuse $ do
+  FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
+completeGrade path ComposeFormulaInst{..} sol
+  | lrTree `notElem` parsedSol || rlTree `notElem` parsedSol = refuse $ do
     instruct $ do
       english "Your solution is not correct. The syntax tree for your entered formulas look like this:"
       german "Ihre Abgabe ist nicht die korrekte Lösung. Die Syntaxbäume zu Ihren eingegebenen Formeln sehen so aus:"
 
-    image $=<< liftIO $ cacheTree (transferToPicture lSol) path
-    image $=<< liftIO $ cacheTree (transferToPicture rSol) path
+    for_ parsedSol $ \synTree ->
+      image $=<< liftIO $ cacheTree (transferToPicture synTree) path
 
-    when (lSol == rSol && (rSol == lrTree || rSol == rlTree)) $
+    when (length (nubOrd parsedSol) == 1) $
       instruct $ do
         english "The two formulas entered only cover one of the two compositions."
         german "Die beiden eingegebenen Formeln decken nur eine der zwei Kompositionen ab."
-
-    when (addExtraHintsOnSemanticEquivalence && (isSemanticEqual lSol lrTree || isSemanticEqual rSol lrTree)) $
-        instruct $ do
-          english "At least one syntax tree is semantically equivalent to the desired solution, but not identical."
-          german "Mindestens ein Syntaxbaum ist semantisch äquivalent zum gewünschten Ergebnis, aber nicht identisch."
 
     when showSolution $
       example (show (display lrTree)) $ do
@@ -160,7 +158,6 @@ completeGrade path ComposeFormulaInst{..} (l,r)
     pure ()
   | otherwise = pure ()
     where
-      lSol = fromJust $ maybeTree l
-      rSol = fromJust $ maybeTree r
+      parsedSol = map (fromJust . maybeTree) sol
       lrTree = Binary operator leftTree rightTree
       rlTree = Binary operator rightTree leftTree
