@@ -106,11 +106,10 @@ start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
 partialGrade ComposeFormulaInst{..} sol
-  | length sol /= 2 =
+  | length (nubOrd sol) /= 2 =
     reject $ do
-      english "Your submission does not contain the right amount of formulas"
-      german  "Sie haben nicht die richtige Anzahl an Formeln eingegeben."
-      german $ show $ length sol
+      english "Your submission does not contain the right amount of unique formulas. There needs to be two unique formulas."
+      german  "Sie haben nicht die richtige Anzahl an einzigartigen Formeln eingegeben. Es werden zwei unterschiedliche Formeln erwartet."
   | any (isNothing . maybeTree) sol =
     reject $ do
       english "At least one formula does not represent a syntax tree."
@@ -154,11 +153,6 @@ completeGrade path ComposeFormulaInst{..} sol
 
     for_ parsedSol $ \synTree ->
       image $=<< liftIO $ cacheTree (transferToPicture synTree) path
-
-    when (length (nubOrd parsedSol) == 1) $
-      instruct $ do
-        english "The two formulas entered only cover one of the two compositions."
-        german "Die beiden eingegebenen Formeln decken nur eine der zwei Kompositionen ab."
 
     when showSolution $
       example (show [display lrTree, display rlTree]) $ do
