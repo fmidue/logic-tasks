@@ -14,14 +14,14 @@ import Control.Monad.Output (
   english,
   german, translate, localise, translations,
   )
-import Data.Maybe (fromJust, isNothing)
+import Data.Maybe (fromJust, isNothing, isJust)
 
 import LogicTasks.Helpers (extra, fullKey, instruct, keyHeading, reject, example)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
-import Tasks.ComposeFormula.Config (ComposeFormulaInst(..), TreeDisplayMode (TreeDisplay, FormulaDisplay))
+import Tasks.ComposeFormula.Config (ComposeFormulaInst(..))
 import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree)
 import Data.Containers.ListUtils (nubOrd)
 import Formula.Util (isSemanticEqual)
@@ -40,11 +40,11 @@ description path ComposeFormulaInst{..} = do
       german $ showOperator operator
       german " gehängt. Einmal der eine Teilbaum links und der andere Teilbaum rechts, und einmal genau andersherum."
 
-    when (leftTreeDisplayMode == TreeDisplay) $ image $=<< liftIO $ cacheTree leftTreeImage path
-    when (leftTreeDisplayMode == FormulaDisplay) $ paragraph $ code $ display leftTree
+    when (isJust leftTreeImage) $ image $=<< liftIO $ cacheTree (fromJust leftTreeImage) path
+    when (isNothing leftTreeImage) $ paragraph $ code $ display leftTree
 
-    when (rightTreeDisplayMode == TreeDisplay) $ image $=<< liftIO $ cacheTree rightTreeImage path
-    when (rightTreeDisplayMode == FormulaDisplay) $ paragraph $ code $ display rightTree
+    when (isJust rightTreeImage) $ image $=<< liftIO $ cacheTree (fromJust rightTreeImage) path
+    when (isNothing rightTreeImage) $ paragraph $ code $ display rightTree
 
     instruct $ do
       english "Enter the formula represented by each of the two resulting trees."

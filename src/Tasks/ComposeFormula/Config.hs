@@ -48,10 +48,8 @@ data ComposeFormulaInst = ComposeFormulaInst
                { operator :: BinOp
                , leftTree :: SynTree BinOp Char
                , rightTree :: SynTree BinOp Char
-               , leftTreeDisplayMode :: TreeDisplayMode
-               , rightTreeDisplayMode :: TreeDisplayMode
-               , leftTreeImage :: String
-               , rightTreeImage :: String
+               , leftTreeImage :: Maybe String
+               , rightTreeImage :: Maybe String
                , addExtraHintsOnSemanticEquivalence :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool

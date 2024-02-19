@@ -8,7 +8,7 @@ module Tasks.ComposeFormula.Quiz(
 import Trees.Generate (genSynTree)
 import Test.QuickCheck (Gen, suchThat,)
 
-import Tasks.ComposeFormula.Config (ComposeFormulaConfig(..), ComposeFormulaInst(..))
+import Tasks.ComposeFormula.Config (ComposeFormulaConfig(..), ComposeFormulaInst(..), TreeDisplayMode (FormulaDisplay))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Helpers (binOp, subTrees)
 import Data.Maybe (fromJust, isJust)
@@ -33,10 +33,8 @@ generateComposeFormulaInst ComposeFormulaConfig {syntaxTreeConfig = SynTreeConfi
       { operator = fromJust $ binOp tree
       , leftTree = head subtrees
       , rightTree = head $ tail subtrees
-      , leftTreeDisplayMode = fst treeDisplayModes
-      , rightTreeDisplayMode = snd treeDisplayModes
-      , leftTreeImage = transferToPicture $ head subtrees
-      , rightTreeImage = transferToPicture $ head $ tail subtrees
+      , leftTreeImage = if fst treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture $ head subtrees
+      , rightTreeImage = if snd treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture $ head $ tail subtrees
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
       , addText = extraText
       , showSolution = printSolution
