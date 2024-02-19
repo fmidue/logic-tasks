@@ -22,7 +22,7 @@ module Trees.Helpers
     numOfOpsInFormula,
     numOfUniqueBinOpsInSynTree,
     binOp,
-    subTrees,
+    bothKids,
     collectUniqueBinOpsInSynTree
     ) where
 
@@ -151,10 +151,9 @@ binOp :: SynTree BinOp a -> Maybe BinOp
 binOp (Binary op _ _) = Just op
 binOp _ = Nothing
 
-subTrees :: SynTree BinOp a -> [SynTree BinOp a]
-subTrees (Leaf _) = []
-subTrees (Not x) = [x]
-subTrees (Binary _ l r) = [l, r]
+bothKids :: SynTree o a -> (SynTree o a, SynTree o a)
+bothKids (Binary _ l r) = (l, r)
+bothKids _ = error "impossible to land here"
 
 collectUniqueBinOpsInSynTree :: SynTree BinOp a -> [BinOp]
 collectUniqueBinOpsInSynTree (Leaf _) = []

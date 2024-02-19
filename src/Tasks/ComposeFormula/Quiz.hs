@@ -10,7 +10,7 @@ import Test.QuickCheck (Gen, suchThat,)
 
 import Tasks.ComposeFormula.Config (ComposeFormulaConfig(..), ComposeFormulaInst(..), TreeDisplayMode (FormulaDisplay))
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Trees.Helpers (binOp, subTrees)
+import Trees.Helpers (binOp, bothKids)
 import Data.Maybe (fromJust, isJust)
 import Trees.Print (transferToPicture)
 
@@ -28,13 +28,13 @@ generateComposeFormulaInst ComposeFormulaConfig {syntaxTreeConfig = SynTreeConfi
         maxConsecutiveNegations
         minUniqueBinOperators
           `suchThat` \synTree -> isJust $ binOp synTree
-    let subtrees = subTrees tree
+    let (leftTree, rightTree) = bothKids tree
     return $ ComposeFormulaInst
       { operator = fromJust $ binOp tree
-      , leftTree = head subtrees
-      , rightTree = head $ tail subtrees
-      , leftTreeImage = if fst treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture $ head subtrees
-      , rightTreeImage = if snd treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture $ head $ tail subtrees
+      , leftTree = leftTree
+      , rightTree = rightTree
+      , leftTreeImage = if fst treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture leftTree
+      , rightTreeImage = if snd treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture rightTree
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
       , addText = extraText
       , showSolution = printSolution
