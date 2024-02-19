@@ -7,7 +7,13 @@ import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
 import Test.QuickCheck.Gen (vectorOf)
 
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
-import Trees.Helpers (collectLeaves, relabelShape, maxNodesForDepth, consecutiveNegations, numOfUniqueBinOpsInSynTree, treeDepth)
+import Trees.Helpers (
+  collectLeaves,
+  relabelShape,
+  maxNodesForDepth,
+  consecutiveNegations,
+  numOfUniqueBinOpsInSynTree,
+  treeDepth)
 
 chooseList :: Bool -> [BinOp]
 chooseList allowArrowOperators = if allowArrowOperators
@@ -21,7 +27,16 @@ randomList availableLetters atLeastOccurring listLength = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-genSynTree :: (Integer, Integer) -> Integer -> Integer -> [c] -> Integer -> Bool -> Integer -> Integer -> Gen (SynTree BinOp c)
+genSynTree ::
+  (Integer, Integer)
+  -> Integer
+  -> Integer
+  -> [c]
+  -> Integer
+  -> Bool
+  -> Integer
+  -> Integer
+  -> Gen (SynTree BinOp c)
 genSynTree
   (minNodes, maxNodes)
   minDepth
