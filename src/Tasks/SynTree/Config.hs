@@ -80,9 +80,6 @@ checkSynTreeConfig SynTreeConfig {..}
     | minDepth < 1 = reject $ do
         english "Minimal depth must be positive"
         german "Minimale Tiefe muss positiv sein."
-    | maxNodes < minDepth = reject $ do
-        english "Your maximum number of nodes is less than what your minimum depth requires."
-        german "Maximale Anzahl der Blätter würde eingestelle minimale Tiefe verletzen."
     | maxDepth < minDepth = reject $ do
         english "Maximal depth must not be smaller than minimal depth"
         german "Maximale Tiefe ist kleiner als minimale Tiefe"
