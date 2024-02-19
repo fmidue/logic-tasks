@@ -27,7 +27,7 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
     treeList <- vectorOf
         (fromIntegral formulas)
         (genSynTree (minNodes, maxNodes)
-        minDepth
+          minDepth
           maxDepth
           usedLiterals
           atLeastOccurring
