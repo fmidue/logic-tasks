@@ -14,7 +14,7 @@ import Control.Monad.Output (
   english,
   german, translate, localise, translations,
   )
-import Data.Maybe (fromJust, isNothing, isJust)
+import Data.Maybe (fromJust, isNothing)
 
 import LogicTasks.Helpers (extra, fullKey, instruct, keyHeading, reject, example)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
@@ -40,11 +40,13 @@ description path ComposeFormulaInst{..} = do
       german $ showOperator operator
       german $ " gehängt. Einmal " ++ derDie ++" eine " ++ gTreeOrFormula ++" links und " ++ derDie ++" andere " ++ gTreeOrFormula ++" rechts, und einmal genau andersherum."
 
-    when (isJust leftTreeImage) $ image $=<< liftIO $ cacheTree (fromJust leftTreeImage) path
-    when (isNothing leftTreeImage) $ paragraph $ code $ display leftTree
+    case leftTreeImage of
+      Nothing -> paragraph $ code $ display leftTree
+      Just img -> image $=<< liftIO $ cacheTree img path
 
-    when (isJust rightTreeImage) $ image $=<< liftIO $ cacheTree (fromJust rightTreeImage) path
-    when (isNothing rightTreeImage) $ paragraph $ code $ display rightTree
+    case rightTreeImage of
+      Nothing -> paragraph $ code $ display rightTree
+      Just img -> image $=<< liftIO $ cacheTree img path
 
     instruct $ do
       english "Derive the representing formulas for the two resulting trees and insert them into a list. "
