@@ -151,7 +151,7 @@ completeGrade path ComposeFormulaInst{..} sol
         german "Die beiden eingegebenen Formeln decken nur eine der zwei Kompositionen ab."
 
     when showSolution $
-      example (show (display lrTree)) $ do
+      example (show [display lrTree, display rlTree]) $ do
         english "A possible solution for this task is:"
         german "Eine mögliche Lösung für die Aufgabe ist:"
 
