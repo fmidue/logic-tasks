@@ -20,6 +20,7 @@ import Trees.Types (BinOp)
 
 
 
+
 data SynTreeConfig =
   SynTreeConfig
   { minNodes :: Integer
