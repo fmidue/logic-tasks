@@ -63,9 +63,10 @@ checkSynTreeConfig SynTreeConfig {..}
     | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes) = reject $ do
         english "Syntax tree with no negation cannot have even number of nodes."
         german "Syntaxbaum ohne Negation kann keine gerade Anzahl Knoten haben."
-    | minNodes < minDepth = reject$ do
-        english "Minimal number of nodes must be at least as big as the minimal depth."
-        german "Minimale Anzahl Knoten muss mindestens so groß wie die minimale Tiefe sein."
+    | weirdCheckThatNobodyUnderstands maxConsecutiveNegations minDepth minNodes
+      = reject $ do
+        english "Your minimum depth value is unreasonably large, given your other settings."
+        german "Minimale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
     | maxNodes < minNodes = reject $ do
         english "Maximal number of nodes must not be smaller than minimal number."
         german "Maximale Anzahl Knoten ist kleiner als minimale."
@@ -87,11 +88,7 @@ checkSynTreeConfig SynTreeConfig {..}
     | maxNodes > maxNodesForDepth maxDepth = reject $ do
         english "Your maximum number of nodes is larger than what your maximum depth enables."
         german "Maximale Anzahl der Knoten würde eingestellte maximale Tiefe verletzen."
-    | let maxNodes' = maxNodes - 1
-          maxConsecutiveNegations' = maxConsecutiveNegations + 2
-          (result, rest) =
-            maxNodes' `divMod` maxConsecutiveNegations',
-            maxDepth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
+    | weirdCheckThatNobodyUnderstands maxConsecutiveNegations maxDepth maxNodes
       = reject $ do
         english "Your maximum depth value is unreasonably large, given your other settings."
         german "Maximale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
@@ -108,3 +105,12 @@ checkSynTreeConfig SynTreeConfig {..}
         english "Minimum number of nodes does not allow a tree with minimum depth."
         german "Minimale Anzahl an Knoten ermöglicht keinen Baum mit minimaler Tiefe."
     | otherwise = pure()
+
+weirdCheckThatNobodyUnderstands :: Integer -> Integer -> Integer -> Bool
+weirdCheckThatNobodyUnderstands maxConsecutiveNegations depth nodes =
+  let nodes' = nodes - 1
+      maxConsecutiveNegations' = maxConsecutiveNegations + 2
+      (result, rest) =
+        nodes' `divMod` maxConsecutiveNegations'
+  in
+    depth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
