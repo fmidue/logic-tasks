@@ -40,7 +40,7 @@ defaultSynTreeConfig =
     SynTreeConfig
     { maxNodes = 10
     , minNodes = 6
-    , minDepth = 1
+    , minDepth = 3
     , maxDepth = 6
     , usedLiterals = "ABCDE"
     , atLeastOccurring = 3
@@ -100,4 +100,10 @@ checkSynTreeConfig SynTreeConfig {..}
     | minUniqueBinOperators > fromIntegral (length [minBound .. maxBound :: BinOp]) = reject $ do
         english "The number of unique operators cannot exceed the maximum number of operators."
         german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
+    | maxConsecutiveNegations >= maxDepth = reject $ do
+        english "The maximum number of consecutive negations cannot exceed the maximum depth."
+        german "Die maximale Anzahl aufeinanderfolgender Negationen kann die maximale Tiefe nicht überschreiten."
+    | minNodes > maxNodesForDepth minDepth = reject $ do
+        english "Minimum number of nodes does not allow a tree with minimum depth"
+        german "Minimale Anzahl an Blättern ermöglicht keinen Baum mit minimaler Tiefe"
     | otherwise = pure()
