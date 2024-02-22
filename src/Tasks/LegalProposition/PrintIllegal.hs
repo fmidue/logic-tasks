@@ -86,7 +86,7 @@ implementIllegal _ (Not a) usedLiterals = do
     elements  $ map (++ (' ' : normalShow a)) ([letter] : map showOperator allBinaryOperators)
 implementIllegal _ (Leaf _) _ = do
     operator <- elements (showOperatorNot : map showOperator allBinaryOperators)
-    elements [operator,""]
+    elements [operator,"_"]
 
 
 

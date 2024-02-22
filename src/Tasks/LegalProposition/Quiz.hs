@@ -7,6 +7,7 @@ module Tasks.LegalProposition.Quiz (
 
 import Data.Char (isLetter)
 import Data.Set (fromList)
+import qualified Data.List.Extra as DLE (replace)
 import Test.QuickCheck (Gen, choose, suchThat, vectorOf)
 
 import Auxiliary (listNoDuplicate)
@@ -18,7 +19,6 @@ import Trees.Generate (genSynTree)
 import Trees.Helpers (similarExist)
 import Trees.Print (display)
 import Trees.Types (BinOp, SynTree)
-
 
 
 
@@ -43,11 +43,12 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
     pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` noSimilarFormulas
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
-        , pseudoFormulas = pseudoFormulas
+        , pseudoFormulas = map replaceUnderscores pseudoFormulas
         , correctTrees = [ tree | (index, tree) <- zip [1..] treeList, index `notElem` serialsOfWrong ]
         , showSolution = printSolution
         , addText = extraText
         }
+          where replaceUnderscores = DLE.replace "_" "" . DLE.replace "_ " "" . DLE.replace " _" ""
 
 
 
