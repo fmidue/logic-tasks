@@ -83,6 +83,7 @@ instance Parse a => Parse [a] where
         pure xs
 
 
+
 instance Parse Number where
   parser = (lexeme numParse <?> "Number") <|> fail "Could not parse a number"
     where numParse = do
