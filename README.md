@@ -4,6 +4,7 @@
 
 | in Autotool inventory | Direct | Quiz | Autotool module | `logic-tasks` module(s) |
 | :-- | :-: | :-: | :-- | :-- |
+| TODO | | | | [`LogicTasks.Syntax.ComposeFormula`](src/LogicTasks/Syntax/ComposeFormula.hs), [`Tasks.ComposeFormula.Quiz`](src/Tasks/ComposeFormula/Quiz.hs) |
 | Aussagenlogik/Syntax/LogicInvalidCnfs | | x | `Logic.Syntax.LegalCnf` | [`LogicTasks.Syntax.IllegalCnfs`](src/LogicTasks/Syntax/IllegalCnfs.hs), [`Tasks.LegalCNF.Quiz`](src/Tasks/LegalCNF/Quiz.hs) |
 | Aussagenlogik/Syntax/LogicInvalidFormulas | | x | `Logic.Syntax.LegalFormula` | [`LogicTasks.Syntax.IllegalFormulas`](src/LogicTasks/Syntax/IllegalFormulas.hs), [`Tasks.LegalProposition.Quiz`](src/Tasks/LegalProposition/Quiz.hs) |
 | Aussagenlogik/Syntax/LogicRemoveBrackets | | x | `Logic.Syntax.SimplestFormula` | [`LogicTasks.Syntax.SimplestFormula`](src/LogicTasks/Syntax/SimplestFormula.hs), [`Tasks.SuperfluousBrackets.Quiz`](src/Tasks/SuperfluousBrackets/Quiz.hs) |
