@@ -131,7 +131,7 @@ partialGrade ComposeFormulaInst{..} sol
   | usedOperators > correctOperators =
     reject $ do
       english "Your solution contains too many different operators."
-      german $ "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren."
+      german "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren."
 
   | otherwise = pure ()
     where
