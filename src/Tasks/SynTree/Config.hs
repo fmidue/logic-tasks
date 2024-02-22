@@ -6,7 +6,7 @@
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
     checkSynTreeConfig,
-    defaultSynTreeConfig
+    defaultSynTreeConfig,
     ) where
 
 
@@ -107,3 +107,4 @@ checkSynTreeConfig SynTreeConfig {..}
         english "Minimum number of nodes does not allow a tree with minimum depth"
         german "Minimale Anzahl an Blättern ermöglicht keinen Baum mit minimaler Tiefe"
     | otherwise = pure()
+
