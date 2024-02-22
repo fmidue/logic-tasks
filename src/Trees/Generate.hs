@@ -49,11 +49,11 @@ genSynTree
     sample <-
       (do nodes <- choose (minNodes, maxNodes) `suchThat` if hasNegations then const True else odd
           syntaxShape nodes maxDepth allowArrowOperators hasNegations
-        ) `suchThat` \synTree ->
-            checkAtLeastOccurring synTree &&
-            checkMinUniqueOps synTree &&
-            treeDepth synTree >= minDepth &&
-            (not hasNegations || (consecutiveNegations synTree <= maxConsecutiveNegations))
+            `suchThat` \synTree ->
+              checkAtLeastOccurring synTree &&
+              checkMinUniqueOps synTree &&
+              (not hasNegations || (consecutiveNegations synTree <= maxConsecutiveNegations))
+        ) `suchThat` \synTree -> treeDepth synTree >= minDepth
     usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
            fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedList)
