@@ -10,7 +10,7 @@ import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf, toList)
 import qualified Data.Set (map)
 import Data.Maybe (isNothing, fromJust)
-import LogicTasks.Helpers (example, extra, focus, fullKey, instruct, keyHeading, reject)
+import LogicTasks.Helpers (example, extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
@@ -46,7 +46,8 @@ description SubTreeInst{..} = do
       german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformeln gesucht, dann ist die folgende Lösung korrekt:"
 
     keyHeading
-    fullKey
+    basicOpKey
+    when arrowOperatorsAllowed arrowsKey
 
     extra addText
     pure ()

@@ -9,7 +9,7 @@ import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, tra
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 
-import LogicTasks.Helpers (basicOpKey, example, extra, focus, instruct, reject)
+import LogicTasks.Helpers (basicOpKey, example, extra, focus, instruct, reject, arrowsKey)
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
@@ -54,6 +54,7 @@ description SuperfluousBracketsInst{..} = do
       german "Sie können dafür die Ausgangsformel in die Abgabe kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
       english "You can copy the original formula into the solution box and remove unnecessary brackets or use the following syntax:"
     basicOpKey
+    when arrowOperatorsAllowed arrowsKey
 
     extra addText
     pure ()

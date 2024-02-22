@@ -33,6 +33,7 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       { tree
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
+      , arrowOperatorsAllowed = allowArrowOperators
       , showSolution = printSolution
       , addText = extraText
       }

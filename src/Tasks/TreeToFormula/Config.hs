@@ -44,6 +44,7 @@ data TreeToFormulaInst = TreeToFormulaInst {
                , latexImage :: String
                , correct :: String
                , addExtraHintsOnSemanticEquivalence :: Bool
+               , arrowOperatorsAllowed :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
                }

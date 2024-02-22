@@ -19,7 +19,7 @@ import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
-import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject, example)
+import LogicTasks.Helpers (cacheIO, extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
@@ -51,7 +51,8 @@ description path TreeToFormulaInst{..} = do
       german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
-    fullKey
+    basicOpKey
+    when arrowOperatorsAllowed arrowsKey
 
     extra addText
     pure ()
