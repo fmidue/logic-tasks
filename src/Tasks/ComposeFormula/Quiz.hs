@@ -11,8 +11,9 @@ import Test.QuickCheck (Gen, suchThat,)
 import Tasks.ComposeFormula.Config (ComposeFormulaConfig(..), ComposeFormulaInst(..), TreeDisplayMode (FormulaDisplay))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Helpers (binOp, bothKids)
-import Data.Maybe (fromJust, isJust)
+import Data.Maybe (fromJust)
 import Trees.Print (transferToPicture)
+import Trees.Types (BinOp(Equi, Or, And))
 
 
 
@@ -27,7 +28,7 @@ generateComposeFormulaInst ComposeFormulaConfig {syntaxTreeConfig = SynTreeConfi
         allowArrowOperators
         maxConsecutiveNegations
         minUniqueBinOperators
-          `suchThat` \synTree -> isJust $ binOp synTree
+          `suchThat` \synTree -> binOp synTree `elem` map Just [And, Or, Equi]
     let (leftTree, rightTree) = bothKids tree
     return $ ComposeFormulaInst
       { operator = fromJust $ binOp tree

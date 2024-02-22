@@ -30,7 +30,7 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
 
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
-    { syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = False }
+    { syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
     , extraHintsOnAssociativity = True
     , extraText = Nothing
