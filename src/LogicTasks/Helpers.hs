@@ -86,12 +86,6 @@ basicOpKey = do
   orKey
   pure()
 
-fullKey :: OutputMonad m => LangM m
-fullKey = do
-  basicOpKey
-  arrowsKey
-  pure ()
-
 keyHeading :: OutputMonad m => LangM m
 keyHeading =
   paragraph $ translate $ do

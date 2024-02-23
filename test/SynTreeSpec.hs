@@ -58,27 +58,6 @@ validBoundsSynTree = do
         minUniqueBinOperators = 0
       }
 
-invalidBoundsSynTree :: Gen SynTreeConfig
-invalidBoundsSynTree = do
-  usedLiterals <- sublistOf ['A' .. 'Z']
-  minNodes <- choose (2, 100)
-  maxNodes <- choose (1, minNodes - 1)
-  maxDepth <- choose (minDepthForNodes minNodes, maxNodes)
-  maxConsecutiveNegations <- choose(1, 3)
-  return $
-    SynTreeConfig
-      { maxNodes,
-        minNodes,
-        minDepth = 1,
-        maxDepth,
-        usedLiterals,
-        atLeastOccurring = fromIntegral (length usedLiterals),
-        allowArrowOperators = True,
-        maxConsecutiveNegations,
-        minUniqueBinOperators = 0
-      }
-
-
 
 spec :: Spec
 spec = do

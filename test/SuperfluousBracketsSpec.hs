@@ -36,18 +36,6 @@ validBoundsSuperfluousBrackets = do
         , printSolution = False
         }
 
-invalidBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
-invalidBoundsSuperfluousBrackets = do
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree
-    superfluousBracketPairs <- choose (minNodes + 1, 26)
-    return $ SuperfluousBracketsConfig
-        {
-          syntaxTreeConfig
-        , superfluousBracketPairs
-        , extraText = Nothing
-        , printSolution = False
-        }
-
 spec :: Spec
 spec = do
     describe "sameAssociativeOperatorAdjacent" $ do

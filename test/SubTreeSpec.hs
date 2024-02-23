@@ -34,20 +34,6 @@ validBoundsSubTree = do
       , printSolution = False
       }
 
-invalidBoundsSubTree :: Gen SubTreeConfig
-invalidBoundsSubTree = do
-    allowSameSubTree <- elements [True,False]
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree
-    minSubTrees <- choose (minNodes - maxLeavesForNodes minNodes + 1, 100)
-    return $ SubTreeConfig
-      {
-        syntaxTreeConfig
-      , allowSameSubTree
-      , minSubTrees
-      , extraText = Nothing
-      , printSolution = False
-      }
-
 spec :: Spec
 spec = do
   describe "generateSubTreeInst" $ do

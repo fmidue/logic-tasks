@@ -38,22 +38,6 @@ validBoundsLegalProposition = do
             , printSolution = False
         }
 
-invalidBoundsLegalProposition :: Gen LegalPropositionConfig
-invalidBoundsLegalProposition = do
-    syntaxTreeConfig <- validBoundsSynTree
-    formulas <- choose (1, 19)
-    illegals <- choose (formulas + 1, 20)
-    bracketFormulas <- choose (1, 20)
-    return $ LegalPropositionConfig
-        {
-            syntaxTreeConfig
-            , formulas
-            , illegals
-            , bracketFormulas
-            , extraText = Nothing
-            , printSolution = False
-        }
-
 spec :: Spec
 spec = do
     describe "illegalDisplay" $ do
