@@ -11,5 +11,8 @@ max_line_length = 135
 [**.{yml,yaml,md}]
 max_line_length = unset
 
-[src/{LogicTasks/{Semantics,Syntax}/*,Tasks/*/Config.hs},.github/actions/spelling/*]
+[src/{LogicTasks/{Semantics,Syntax}/*,Tasks/*/Config.hs}]
+max_line_length = unset
+
+[.github/actions/spelling/*]
 max_line_length = unset
