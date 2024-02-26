@@ -1,3 +1,4 @@
+---
 name: Check .cabal Consistency
 
 on: [push, pull_request]
