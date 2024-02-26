@@ -1,0 +1,50 @@
+name: Check .cabal Consistency
+
+on: [push, pull_request]
+
+jobs:
+  check-consistency:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Save original cabal file
+        run: cp *.cabal original.txt # Assuming there is only one cabal file in the project
+
+      - name: Set up Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "latest"
+          enable-stack: true
+          stack-no-global: true
+
+      - name: Install hpack
+        run: |
+          stack install hpack
+          echo "/root/.local/bin" >> $GITHUB_PATH
+
+      - name: Generate .cabal file from package.yaml
+        run: hpack
+
+      - name: Remove comments and blank lines for comparison
+        run: |
+          for file in *.cabal; do
+            grep -v '^--' "$file" | grep -v '^$' > "generated.txt"
+          done
+
+      - name: Check for differences
+        run: |
+          {
+            echo "DIFF<<EOF"
+            echo "$(diff -u <(grep -v '^--' original.txt | grep -v '^$') <(grep -v '^--' generated.txt | grep -v '^$'))"
+            echo EOF
+          } >> $GITHUB_ENV
+
+      - name: Print differences
+        if: env.DIFF != ''
+        run: |
+          echo "Found differences in cabal file:"
+          echo "$DIFF"
+          exit 1
