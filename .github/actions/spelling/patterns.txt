@@ -5,6 +5,7 @@ Ors Ors
 Ands Ands
 Neg Neg
 Nothing Nothing
+True True
 
 # ls directory listings
 [-bcdlpsw](?:[-r][-w][-sx]){3}\s+\d+\s+(\S+)\s+\g{-1}\s+\d+\s+

@@ -71,6 +71,7 @@ data SubTreeInst =
     { tree :: SynTree BinOp Char
     , correctTrees :: Set (SynTree BinOp Char)
     , minInputTrees :: Integer
+    , showArrowOperators :: Bool
     , showSolution :: Bool
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

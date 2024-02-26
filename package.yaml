@@ -96,6 +96,7 @@ tests:
       - -Wmissing-signatures
       - -Wunused-matches
       - -Widentities
+      - -Wunused-top-binds
       - -Werror
     dependencies:
       - logic-tasks
