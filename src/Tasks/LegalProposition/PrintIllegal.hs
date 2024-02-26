@@ -9,6 +9,7 @@ import Test.QuickCheck (Gen, elements, frequency)
 import Trees.Helpers (collectLeaves, treeNodes)
 import Trees.Print (normalShow)
 import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators, showOperator, showOperatorNot)
+import Data.List.Extra (replace)
 
 
 
@@ -17,7 +18,8 @@ illegalDisplay :: SynTree BinOp Char -> Gen String
 illegalDisplay (Leaf _) = elements (showOperatorNot : map showOperator allBinaryOperators)
 illegalDisplay synTree =
     let usedLiterals = collectLeaves synTree
-    in ifUseIllegal True False synTree usedLiterals
+    in replace' <$> ifUseIllegal True False synTree usedLiterals
+      where replace' = replace "_" "" . replace "_ " "" . replace " _" ""
 
 ifUseIllegal :: Bool -> Bool -> SynTree BinOp Char -> String -> Gen String
 ifUseIllegal useBug notFirstLayer synTree usedLiterals =
@@ -86,7 +88,7 @@ implementIllegal _ (Not a) usedLiterals = do
     elements  $ map (++ (' ' : normalShow a)) ([letter] : map showOperator allBinaryOperators)
 implementIllegal _ (Leaf _) _ = do
     operator <- elements (showOperatorNot : map showOperator allBinaryOperators)
-    elements [operator,""]
+    elements [operator,"_"]
 
 
 

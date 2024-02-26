@@ -33,6 +33,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       { tree
       , minInputTrees = minSubTrees
       , correctTrees = correctTrees
+      , showArrowOperators = allowArrowOperators
       , showSolution = printSolution
       , addText = extraText
       }
