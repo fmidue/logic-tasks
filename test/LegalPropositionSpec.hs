@@ -70,7 +70,7 @@ spec = do
                     minUniqueBinOperators
                   ) $ \synTree ->
                       forAll (deleteSpaces <$> illegalDisplay synTree) $
-                      all (\c -> c `elem` "()∧∨¬<=>" || isLetter c || c == '_')
+                      all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
         it "the string after illegalDisplay cannot be parsed" $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
                 forAll
