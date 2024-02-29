@@ -39,7 +39,7 @@ jobs:
         run: |
           {
             echo "DIFF<<EOF"
-            echo "$(diff -u <(grep -v '^--' original.txt | grep -v '^$') <(grep -v '^--' generated.txt | grep -v '^$'))"
+            echo "$(diff -u <(grep -v '^--' "original.txt" | grep -v '^$') <(grep -v '^--' "generated.txt" | grep -v '^$'))"
             echo EOF
           } >> $GITHUB_ENV
 
