@@ -24,7 +24,7 @@ jobs:
       - name: Install hpack
         run: |
           stack install hpack
-          echo "/root/.local/bin" >> $GITHUB_PATH
+          echo "/root/.local/bin" >> "$GITHUB_PATH"
 
       - name: Generate .cabal file from package.yaml
         run: hpack
@@ -32,16 +32,16 @@ jobs:
       - name: Remove comments and blank lines for comparison
         run: |
           for file in ./*.cabal; do
-            grep -v '^--' "$file" | grep -v '^$' > "generated.txt"
+            grep -v "^--" "$file" | grep -v "^$" > "generated.txt"
           done
 
       - name: Check for differences
         run: |
           {
             echo "DIFF<<EOF"
-            echo "$(diff -u <(grep -v '^--' "original.txt" | grep -v '^$') <(grep -v '^--' "generated.txt" | grep -v '^$'))"
+            echo "$(diff -u <(grep -v "^--" "original.txt" | grep -v '^$') <(grep -v "^--" "generated.txt" | grep -v "^$"))"
             echo EOF
-          } >> $GITHUB_ENV
+          } >> "$GITHUB_ENV"
 
       - name: Print differences
         if: env.DIFF != ''
