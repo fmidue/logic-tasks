@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Save original cabal file
-        run: cp *.cabal original.txt # Assuming there is only one cabal file in the project
+        run: cp ./*.cabal original.txt # Assuming there is only one cabal file in the project
 
       - name: Set up Haskell
         uses: haskell-actions/setup@v2
@@ -31,7 +31,7 @@ jobs:
 
       - name: Remove comments and blank lines for comparison
         run: |
-          for file in *.cabal; do
+          for file in ./*.cabal; do
             grep -v '^--' "$file" | grep -v '^$' > "generated.txt"
           done
 
