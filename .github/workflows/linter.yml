@@ -31,4 +31,3 @@ jobs:
           VALIDATE_JSCPD_ALL_CODEBASE: true
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHELLCHECK_OPTS: "--exclude SC2005"
