@@ -35,17 +35,5 @@ jobs:
             grep -v "^--" "$file" | grep -v "^$" > "generated.txt"
           done
 
-      - name: Check for differences
-        run: |
-          {
-            echo "DIFF<<EOF"
-            echo "$(diff -u <(grep -v "^--" "original.txt" | grep -v '^$') <(grep -v "^--" "generated.txt" | grep -v "^$"))"
-            echo EOF
-          } >> "$GITHUB_ENV"
-
       - name: Print differences
-        if: env.DIFF != ''
-        run: |
-          echo "Found differences in cabal file:"
-          echo "$DIFF"
-          exit 1
+        run: diff -u <(grep -v "^--" "original.txt" | grep -v '^$') <(grep -v "^--" "generated.txt" | grep -v "^$")
