@@ -70,7 +70,7 @@ library
       Paths_logic_tasks
   hs-source-dirs:
       src
-  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -fdefer-typed-holes
+  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -Wwarn=x-partial -Wwarn=unrecognised-warning-flags -fdefer-typed-holes
   build-depends:
       QuickCheck >=2.14
     , SHA
