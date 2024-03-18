@@ -104,6 +104,9 @@ checkSynTreeConfig SynTreeConfig {..}
     | minUniqueBinOperators > fromIntegral (length [minBound .. maxBound :: BinOp]) = reject $ do
         english "The number of unique operators cannot exceed the maximum number of operators."
         german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
+    | not allowArrowOperators && minUniqueBinOperators > fromIntegral (length [minBound .. maxBound :: BinOp]) - 2 = reject $ do
+        english "This number of unique operators cannot be reached with allowArrowOperators = False ."
+        german "Die angegebene Anzahl der unterschiedlichen Operatoren kann mit allowArrowOperators = False nicht erreicht werden."
     | otherwise = pure()
 
 maxDepthForNodes :: Integer -> Integer -> Integer

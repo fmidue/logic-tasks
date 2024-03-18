@@ -16,9 +16,7 @@ import Trees.Helpers (
   collectLeaves,
   treeDepth,
   treeNodes,
-  maxLeavesForNodes,
   maxNodesForDepth,
-  minDepthForNodes,
   numOfUniqueBinOpsInSynTree)
 import SAT.MiniSat hiding (Formula(Not))
 import qualified SAT.MiniSat as Sat (Formula(Not))
@@ -33,37 +31,36 @@ import Control.Monad.Output.Generic (evalLangM)
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
   allowArrowOperators <- elements [True, False]
-  maxConsecutiveNegations <- choose(0, 3)
+  maxConsecutiveNegations <- choose (0, 3)
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNodes' <- choose (1, 20) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
-  maxNodes' <- choose (minNodes', 25) `suchThat` \maxNodes' -> maxConsecutiveNegations /= 0 || odd maxNodes'
-  let maxNodes'' = maxNodes' - 1
-      maxConsecutiveNegations' = maxConsecutiveNegations + 2
-      (result, rest) = maxNodes'' `divMod` maxConsecutiveNegations'
-  maxDepth <- choose
-    (minDepthForNodes minNodes', 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest)
-  let maxNodes = min maxNodes' (maxNodesForDepth maxDepth)
-  useChars <- choose (1, maxLeavesForNodes maxNodes)
-  let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
-  return $
-    SynTreeConfig
-      { maxNodes,
-        minNodes = max minNodes' (atLeastOccurring * 2 - 1),
-        minDepth = 1,
-        maxDepth,
-        usedLiterals,
-        atLeastOccurring,
-        allowArrowOperators,
-        maxConsecutiveNegations,
-        minUniqueBinOperators = 0
-      }
+  atLeastOccurring <- choose (1, fromIntegral $ length usedLiterals)
+  minNodes <- choose (atLeastOccurring * 2, 50) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
+  let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
+  maxDepth <- choose (max (maxConsecutiveNegations + 1) minDepth, 10)
+  maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
+  let availableBinOpsCount = fromIntegral $ length [minBound .. maxBound :: BinOp] - if allowArrowOperators then 0 else 2
+  minUniqueBinOperators <- choose (1, min (minDepth - 1) availableBinOpsCount)
+  return $ SynTreeConfig {
+    maxNodes,
+    minNodes,
+    minDepth,
+    maxDepth,
+    usedLiterals,
+    atLeastOccurring,
+    allowArrowOperators,
+    maxConsecutiveNegations,
+    minUniqueBinOperators
+  }
 
 
 spec :: Spec
 spec = do
-  describe "config" $
+  describe "config" $ do
     it "default config should pass config check" $
       isJust $ runIdentity $ evalLangM (checkSynTreeConfig defaultSynTreeConfig :: LangM Maybe)
+    it "validBoundsSynTree should generate a valid config" $
+      forAll validBoundsSynTree $ \synTreeConfig ->
+        isJust $ runIdentity $ evalLangM (checkSynTreeConfig synTreeConfig :: LangM Maybe)
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \SynTreeConfig {..} ->
