@@ -86,6 +86,7 @@ library:
     - -Werror
     - -Wwarn=incomplete-uni-patterns
     - -Wwarn=x-partial
+    - -Wwarn=unrecognised-warning-flags # should be removed when on lts-22 or later
     - -fdefer-typed-holes
 
 tests:
