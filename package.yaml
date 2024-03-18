@@ -85,6 +85,7 @@ library:
     - -fno-warn-unused-do-bind
     - -Werror
     - -Wwarn=incomplete-uni-patterns
+    - -Wwarn=x-partial
     - -fdefer-typed-holes
 
 tests:

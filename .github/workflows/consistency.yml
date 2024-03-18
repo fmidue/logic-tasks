@@ -1,0 +1,36 @@
+---
+name: Check .cabal Consistency
+
+on: [push, pull_request]
+
+jobs:
+  check-consistency:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Save original cabal file
+        run: cp "$(find . -maxdepth 1 -type f -name "*.cabal" -print -quit)" original.txt
+
+      - name: Set up Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "latest"
+          enable-stack: true
+          stack-no-global: true
+
+      - name: Install hpack
+        run: |
+          stack install hpack
+          echo "/root/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Generate .cabal file from package.yaml
+        run: hpack --force
+
+      - name: Save generated cabal file
+        run: cp "$(find . -maxdepth 1 -type f -name "*.cabal" -print -quit)" generated.txt
+
+      - name: Print differences
+        run: diff -u <(grep -v "^--" "original.txt" | grep -v '^$') <(grep -v "^--" "generated.txt" | grep -v "^$")
