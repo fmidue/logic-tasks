@@ -42,11 +42,11 @@ description path ComposeFormulaInst{..} = do
 
     case leftTreeImage of
       Nothing -> paragraph $ code $ display leftTree
-      Just img -> image $=<< liftIO $ cacheTree img path
+      Just image' -> image $=<< liftIO $ cacheTree image' path
 
     case rightTreeImage of
       Nothing -> paragraph $ code $ display rightTree
-      Just img -> image $=<< liftIO $ cacheTree img path
+      Just image' -> image $=<< liftIO $ cacheTree image' path
 
     instruct $ do
       english "Build the corresponding formulas for the two resulting trees and put them into a list. "
@@ -67,7 +67,7 @@ description path ComposeFormulaInst{..} = do
 
     paragraph $ indent $ do
       translate $ do
-        english "A solution attemt could look like this: "
+        english "A solution attempt could look like this: "
         german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       translatedCode $ flip localise $ translations $ do
         english "[(A or not B) and C, C and (A or not B)]"
@@ -86,9 +86,9 @@ description path ComposeFormulaInst{..} = do
         treeOrFormula (Just _) (Just _) = ("Baum", "tree")
         treeOrFormula _ _ = ("Baum/Formel", "tree/formula")
         (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
-        treesOrFormulas Nothing Nothing = ("Formeln", "formulas")
+        treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
         treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
-        treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas")
+        treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
 
 
 verifyInst :: OutputMonad m => ComposeFormulaInst -> LangM m
