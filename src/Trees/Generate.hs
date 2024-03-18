@@ -7,7 +7,13 @@ import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
 import Test.QuickCheck.Gen (vectorOf)
 
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
-import Trees.Helpers (collectLeaves, relabelShape, maxNodesForDepth, consecutiveNegations, numOfUniqueBinOpsInSynTree)
+import Trees.Helpers (
+  collectLeaves,
+  relabelShape,
+  maxNodesForDepth,
+  consecutiveNegations,
+  numOfUniqueBinOpsInSynTree,
+  treeDepth)
 
 chooseList :: Bool -> [BinOp]
 chooseList allowArrowOperators = if allowArrowOperators
@@ -21,34 +27,38 @@ randomList availableLetters atLeastOccurring listLength = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-genSynTree :: (Integer, Integer) -> Integer -> [c] -> Integer -> Bool -> Integer -> Integer -> Gen (SynTree BinOp c)
+genSynTree ::
+  (Integer, Integer)
+  -> Integer
+  -> Integer
+  -> [c]
+  -> Integer
+  -> Bool
+  -> Integer
+  -> Integer
+  -> Gen (SynTree BinOp c)
 genSynTree
   (minNodes, maxNodes)
+  minDepth
   maxDepth
   availableLetters
   atLeastOccurring
   allowArrowOperators
   maxConsecutiveNegations
-  minUniqueBinOps =
-    if maxConsecutiveNegations /= 0
-        then do
-        nodes <- choose (minNodes, maxNodes)
-        sample <- syntaxShape nodes maxDepth allowArrowOperators True
-          `suchThat` \synTree ->
-            (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) &&
-            consecutiveNegations synTree <= maxConsecutiveNegations &&
-            numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOps
-        usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
-          fromIntegral $ length $ collectLeaves sample
-        return (relabelShape sample usedList )
-        else do
-        nodes <- choose (minNodes, maxNodes) `suchThat` odd
-        sample <- syntaxShape nodes maxDepth allowArrowOperators False
-          `suchThat` \synTree -> checkAtLeastOccurring synTree  && checkMinUniqueOps synTree
-        usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
-          fromIntegral $ length $ collectLeaves sample
-        return (relabelShape sample usedList )
-  where checkAtLeastOccurring synTree = fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
+  minUniqueBinOps = do
+    sample <-
+      (do nodes <- choose (minNodes, maxNodes) `suchThat` if hasNegations then const True else odd
+          syntaxShape nodes maxDepth allowArrowOperators hasNegations
+            `suchThat` \synTree ->
+              checkAtLeastOccurring synTree &&
+              checkMinUniqueOps synTree &&
+              (not hasNegations || (consecutiveNegations synTree <= maxConsecutiveNegations))
+        ) `suchThat` \synTree -> treeDepth synTree >= minDepth
+    usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
+           fromIntegral $ length $ collectLeaves sample
+    return (relabelShape sample usedList)
+  where hasNegations = maxConsecutiveNegations /= 0
+        checkAtLeastOccurring synTree = fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
         checkMinUniqueOps synTree = numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOps
 
 syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())

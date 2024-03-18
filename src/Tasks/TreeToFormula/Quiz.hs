@@ -19,6 +19,7 @@ generateTreeToFormulaInst :: TreeToFormulaConfig -> Gen TreeToFormulaInst
 generateTreeToFormulaInst TreeToFormulaConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
+        minDepth
         maxDepth
         usedLiterals
         atLeastOccurring

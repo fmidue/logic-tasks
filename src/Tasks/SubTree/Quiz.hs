@@ -20,6 +20,7 @@ generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
 generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
+        minDepth
         maxDepth
         usedLiterals
         atLeastOccurring

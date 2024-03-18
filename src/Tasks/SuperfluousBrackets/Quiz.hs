@@ -21,6 +21,7 @@ generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousB
 generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
+        minDepth
         maxDepth
         usedLiterals
         atLeastOccurring
