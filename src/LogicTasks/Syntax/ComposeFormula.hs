@@ -16,12 +16,11 @@ import Control.Monad.Output (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (extra, fullKey, instruct, keyHeading, reject, example)
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
+import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
-import Tasks.ComposeFormula.Config (ComposeFormulaInst(..))
+import Tasks.ComposeFormula.Config (ComposeFormulaInst(..), ComposeFormulaConfig, checkComposeFormulaConfig)
 import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree)
 import Data.Containers.ListUtils (nubOrd)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
@@ -63,7 +62,8 @@ description path ComposeFormulaInst{..} = do
         german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität einsparen."
 
     keyHeading
-    fullKey
+    basicOpKey
+    arrowsKey
 
     paragraph $ indent $ do
       translate $ do
@@ -96,8 +96,8 @@ verifyInst _ = pure ()
 
 
 
-verifyConfig :: OutputMonad m => SynTreeConfig -> LangM m
-verifyConfig = checkSynTreeConfig
+verifyConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
+verifyConfig = checkComposeFormulaConfig
 
 
 
