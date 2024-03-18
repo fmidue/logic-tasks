@@ -37,7 +37,7 @@ subTreeIllegal ::Bool -> SynTree BinOp Char -> String -> Gen String
 subTreeIllegal notFirstLayer (Binary operator a b) usedLiterals =
     allocateBugToSubtree notFirstLayer a b usedLiterals operator
 subTreeIllegal _ (Not a) usedLiterals = do
-    left <- ifUseIllegal True True a usedLiterals
+    left <- ifUseIllegal True True a usedLiterals -- no-spell-check
     return (showOperatorNot ++ left)
 subTreeIllegal _ (Leaf _) _ = error "This will not happen but must be write"
 
