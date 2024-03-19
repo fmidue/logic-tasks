@@ -24,7 +24,9 @@ import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, re
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
-
+import Formula.Parsing.Compat (Delayed, withDelayed)
+import ParsingHelpers (fully)
+import Formula.Parsing (Parse(..))
 
 
 
@@ -114,10 +116,12 @@ verifyQuiz FillConfig{..}
 start :: [TruthValue]
 start = []
 
+partialGrade :: OutputMonad m => FillInst -> Delayed [TruthValue] -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` fully parser
 
 
-partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
-partialGrade FillInst{..} sol = do
+partialGrade' :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
+partialGrade' FillInst{..} sol = do
   preventWithHint (solLen /= missingLen)
     (translate $ do
       german "Lösung hat korrekte Länge?"
@@ -134,9 +138,11 @@ partialGrade FillInst{..} sol = do
       solLen = length boolSol
       missingLen = length missing
 
+completeGrade :: OutputMonad m => FillInst -> Delayed [TruthValue] -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` fully parser
 
-completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
-completeGrade FillInst{..} sol = do
+completeGrade' :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
+completeGrade' FillInst{..} sol = do
   preventWithHint (notNull diff)
     (translate $ do
       german "Lösung ist korrekt?"

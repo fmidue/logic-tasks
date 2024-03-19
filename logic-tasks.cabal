@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -61,6 +61,7 @@ library
       Formula.Resolution
   other-modules:
       Auxiliary
+      Formula.Parsing.Compat
       Formula.Printing
       Formula.Table
       Formula.Util
@@ -86,6 +87,7 @@ library
     , minisat-solver
     , mtl
     , output-monad
+    , parsec
     , pretty-simple
     , random
     , text
@@ -128,6 +130,7 @@ test-suite src-test
     , minisat-solver
     , mtl
     , output-monad
+    , parsec
     , pretty-simple
     , random
     , text

@@ -19,6 +19,9 @@ import Control.Monad (when, unless)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
+import Formula.Parsing.Compat (Delayed, withDelayed)
+import ParsingHelpers (fully)
+import Formula.Parsing (Parse(..))
 
 
 description :: OutputMonad m => SubTreeInst -> LangM m
@@ -54,7 +57,7 @@ description SubTreeInst{..} = do
 
 
 verifyInst :: OutputMonad m => SubTreeInst -> LangM m
-verifyInst _ = pure()
+verifyInst _ = pure ()
 
 
 
@@ -67,9 +70,11 @@ start :: [FormulaAnswer]
 start = [FormulaAnswer Nothing]
 
 
+partialGrade :: OutputMonad m => SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` fully parser
 
-partialGrade :: OutputMonad m => SubTreeInst -> [FormulaAnswer] -> LangM m
-partialGrade SubTreeInst{..} fs
+partialGrade' :: OutputMonad m => SubTreeInst -> [FormulaAnswer] -> LangM m
+partialGrade' SubTreeInst{..} fs
     | any (isNothing . maybeForm) fs =
       reject $ do
         english "At least one of your answers is not a valid formula."
@@ -90,7 +95,7 @@ partialGrade SubTreeInst{..} fs
         english $ "Your solution does not contain enough subformulas. Add " ++ show (minInputTrees - amount) ++ "."
         german $ "Ihre Abgabe beinhaltet nicht genügend Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
 
-    | otherwise = pure()
+    | otherwise = pure ()
   where
     amount = fromIntegral $ length $ nub fs
     literals = sort $ nub $ concatMap (collectLeaves . fromJust . maybeForm) fs
@@ -99,9 +104,11 @@ partialGrade SubTreeInst{..} fs
     origOpsNum = numOfOps tree
 
 
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
+completeGrade path inst = completeGrade' path inst `withDelayed` fully parser
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> [FormulaAnswer] -> LangM m
-completeGrade path SubTreeInst{..} sol = refuseIfWrong $ do
+completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> [FormulaAnswer] -> LangM m
+completeGrade' path SubTreeInst{..} sol = refuseIfWrong $ do
   unless partOfSolution $ do
     instruct $ do
         english "Your solution is incorrect."

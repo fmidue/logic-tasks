@@ -16,6 +16,7 @@ dependencies:
   - text
   - output-monad
   - pretty-simple
+  - parsec
   - latex-svg-image >= 0.2
   - bytestring
   - utf8-string

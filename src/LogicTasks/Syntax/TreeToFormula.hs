@@ -26,8 +26,10 @@ import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
-
-
+import Formula.Parsing.Compat (Delayed (..), withDelayed)
+import ParsingHelpers ( fully )
+import Formula.Parsing (Parse(..))
+import Trees.Parsing()
 
 
 description :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -72,19 +74,21 @@ verifyConfig = checkSynTreeConfig
 start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
+partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` fully parser
 
+partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
+partialGrade' _ sol
+        | isNothing $ maybeTree sol = reject $ do
+          english "You did not submit a solution."
+          german "Die Abgabe ist leer."
+        | otherwise = pure ()
 
-partialGrade :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
-partialGrade _ sol
-    | isNothing $ maybeTree sol = reject $ do
-      english "You did not submit a solution."
-      german "Die Abgabe ist leer."
-    | otherwise = pure ()
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+completeGrade path inst = completeGrade' path inst `withDelayed` fully parser
 
-
-
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
-completeGrade path inst sol
+completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
+completeGrade' path inst sol
     | treeAnswer /= correctTree = refuse $ do
         instruct $ do
           english "Your solution is not correct. The syntax tree for your entered formula looks like this:"

@@ -25,7 +25,9 @@ import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 import Data.Maybe (fromJust)
 import Data.List (nubBy)
-
+import Formula.Parsing.Compat (Delayed, withDelayed)
+import ParsingHelpers (fully)
+import Formula.Parsing (Parse(..))
 
 
 
@@ -108,19 +110,22 @@ verifyQuiz PickConfig{..}
 start :: Number
 start = Number Nothing
 
+partialGrade :: OutputMonad m => PickInst -> Delayed Number -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` fully parser
 
-
-partialGrade :: OutputMonad m => PickInst -> Number -> LangM m
-partialGrade _ (Number Nothing) = refuse $ indent $
+partialGrade' :: OutputMonad m => PickInst -> Number -> LangM m
+partialGrade' _ (Number Nothing) = refuse $ indent $
         translate $ do
           german "Es wurde kein Index angegeben."
           english "You did not give an index."
 
-partialGrade _ _ = pure ()
+partialGrade' _ _ = pure ()
 
+completeGrade :: OutputMonad m => PickInst -> Delayed Number -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` fully parser
 
-completeGrade :: OutputMonad m => PickInst -> Number -> LangM m
-completeGrade PickInst{..} (Number index) =
+completeGrade' :: OutputMonad m => PickInst -> Number -> LangM m
+completeGrade' PickInst{..} (Number index) =
     if fromJust index == correct
         then pure ()
         else refuse $ indent $ do
