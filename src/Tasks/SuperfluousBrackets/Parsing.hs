@@ -5,10 +5,11 @@ module Tasks.SuperfluousBrackets.Parsing (
 
 
 import Data.Functor (void)
-import Text.Parsec (ParseError, parse, many, (<|>))
-import Text.Parsec.String (Parser)
+import Data.Void
 
-import ParsingHelpers (fully, tokenSymbol)
+import Text.Megaparsec (ParseErrorBundle, parse, many, (<|>))
+
+import ParsingHelpers (Parser, fully, tokenSymbol)
 import UniversalParser (orParser, andParser, implicationParser, biImplicationParser, negationParser, atomParser)
 
 
@@ -24,5 +25,5 @@ operatorAndLeavesParse =
   <|> negationParser
   <|> void atomParser
 
-superfluousBracketsExcParser :: String -> Either ParseError ()
+superfluousBracketsExcParser :: String -> Either (ParseErrorBundle String Void) ()
 superfluousBracketsExcParser = parse (fully operatorAndLeavesParse) ""

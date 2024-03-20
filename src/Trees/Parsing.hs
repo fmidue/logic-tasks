@@ -10,8 +10,9 @@ module Trees.Parsing (
 
 import qualified Control.Applicative as Alternative (optional)
 
-import Text.Parsec (ParseError, parse)
-import Text.Parsec.String (Parser)
+import Data.Void
+
+import Text.Megaparsec (ParseErrorBundle, parse)
 
 import Trees.Types as Formula (PropFormula(..), BinOp(..))
 import Trees.Types as Tree
@@ -22,7 +23,7 @@ import Trees.Types as Tree
 
 import Formula.Parsing (Parse(..))
 
-import ParsingHelpers (fully)
+import ParsingHelpers (Parser, fully)
 import UniversalParser as Parser
 
 instance Parse (SynTree BinOp Char)
@@ -58,7 +59,7 @@ instance FromGrammar (SynTree BinOp Char) where
       fromNeg (OfNested f) = fromNested f
       fromNested (Nested f) = fromGrammar f
 
-formulaParse :: String -> Either ParseError (SynTree BinOp Char)
+formulaParse :: String -> Either (ParseErrorBundle String Void) (SynTree BinOp Char)
 formulaParse = parse (fully formulaParser) ""
 
 instance Parse TreeFormulaAnswer where

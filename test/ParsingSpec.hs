@@ -9,7 +9,7 @@ import LogicTasks.Formula (Cnf, Dnf)
 import Trees.Parsing (formulaParse)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 
-import Text.Parsec (parse)
+import Text.Megaparsec (parse)
 
 spec :: Spec
 spec = do
