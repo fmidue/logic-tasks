@@ -20,7 +20,6 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Compat (Delayed, withDelayed)
-import ParsingHelpers (fully)
 import Formula.Parsing (Parse(..))
 
 
@@ -71,7 +70,7 @@ start = [FormulaAnswer Nothing]
 
 
 partialGrade :: OutputMonad m => SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 partialGrade' :: OutputMonad m => SubTreeInst -> [FormulaAnswer] -> LangM m
 partialGrade' SubTreeInst{..} fs
@@ -105,7 +104,7 @@ partialGrade' SubTreeInst{..} fs
 
 
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
-completeGrade path inst = completeGrade' path inst `withDelayed` fully parser
+completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
 completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> [FormulaAnswer] -> LangM m
 completeGrade' path SubTreeInst{..} sol = refuseIfWrong $ do

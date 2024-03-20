@@ -26,7 +26,6 @@ import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
 import LogicTasks.Helpers (extra, formulaKey)
 import Util (tryGen, withRatio)
 import Formula.Parsing.Compat (Delayed, withDelayed)
-import ParsingHelpers (fully)
 import Formula.Parsing (Parse(..))
 
 
@@ -88,7 +87,7 @@ start :: Dnf
 start = mkDnf [mkCon [Literal 'A']]
 
 partialGrade :: OutputMonad m => MinInst -> Delayed Dnf -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 partialGrade' :: OutputMonad m => MinInst -> Dnf -> LangM m
 partialGrade' MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms False
@@ -98,7 +97,7 @@ partialGrade' MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms Fa
 
 
 completeGrade :: OutputMonad m => MinInst -> Delayed Dnf -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` fully parser
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
 completeGrade' :: OutputMonad m => MinInst -> Dnf -> LangM m
 completeGrade' MinInst{..} = Max.completeMinMax showSolution dnf

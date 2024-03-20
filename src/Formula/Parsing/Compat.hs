@@ -5,7 +5,7 @@ import qualified Text.Parsec as Parsec
 import qualified Text.Megaparsec as Megaparsec
 import Text.Megaparsec (ParseErrorBundle)
 import Data.Void (Void)
-import ParsingHelpers as Megaparsec (Parser)
+import ParsingHelpers as Megaparsec (Parser, fully)
 import Text.Parsec (anyChar)
 import Control.Monad.Output (LangM, english, german, OutputMonad)
 import LogicTasks.Helpers (reject)
@@ -14,7 +14,7 @@ newtype Delayed a = Delayed { parseDelayed :: Megaparsec.Parser a -> Either (Par
 
 withDelayed :: OutputMonad m => (a -> LangM m) -> Parser a -> Delayed a -> LangM m
 withDelayed grade p d =
-  case parseDelayed d p of
+  case parseDelayed d (fully p) of
     Left err -> reject $ do
       english $ Megaparsec.errorBundlePretty err
       german $ Megaparsec.errorBundlePretty err

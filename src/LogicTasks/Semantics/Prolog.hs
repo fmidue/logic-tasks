@@ -28,7 +28,6 @@ import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Compat (Delayed, withDelayed)
-import ParsingHelpers (fully)
 import Formula.Parsing (Parse(..))
 
 genPrologInst :: PrologConfig -> Gen PrologInst
@@ -133,7 +132,7 @@ start :: (PrologLiteral, PrologClause)
 start = (PrologLiteral True "a" ["x"], mkPrologClause [])
 
 partialGrade :: OutputMonad m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 partialGrade' :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 partialGrade' PrologInst{..} sol = do
@@ -161,7 +160,7 @@ partialGrade' PrologInst{..} sol = do
      extraLiterals = toList $ solLits `difference` availLits
 
 completeGrade :: OutputMonad m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` fully parser
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
 completeGrade' :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade' PrologInst{..} sol =

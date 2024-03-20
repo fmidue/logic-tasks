@@ -26,7 +26,6 @@ import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when)
 import Formula.Parsing.Compat (Delayed, withDelayed)
-import ParsingHelpers (fully)
 import Formula.Parsing (Parse(..))
 
 
@@ -94,7 +93,7 @@ start :: StepAnswer
 start = StepAnswer Nothing
 
 partialGrade :: OutputMonad m => StepInst -> Delayed StepAnswer -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 partialGrade' :: OutputMonad m => StepInst -> StepAnswer -> LangM m
 partialGrade' StepInst{..} sol = do
@@ -129,7 +128,7 @@ partialGrade' StepInst{..} sol = do
      extraLiterals = toList (solLits `difference` availLits)
 
 completeGrade :: OutputMonad m => StepInst -> Delayed StepAnswer -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` fully parser
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
 
 completeGrade' :: OutputMonad m => StepInst -> StepAnswer -> LangM m

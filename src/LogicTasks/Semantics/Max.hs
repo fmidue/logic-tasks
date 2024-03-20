@@ -27,7 +27,6 @@ import LogicTasks.Helpers (formulaKey, example, extra)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 import Control.Monad (when)
 import Formula.Parsing.Compat (Delayed, withDelayed)
-import ParsingHelpers (fully)
 import Formula.Parsing (Parse(..))
 
 
@@ -171,7 +170,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
       else ("Minterme", "Konjunktionen", "minterms", "conjunctions") -- no-spell-check
 
 partialGrade :: OutputMonad m => MaxInst -> Delayed Cnf -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 partialGrade' :: OutputMonad m => MaxInst -> Cnf -> LangM m
 partialGrade' MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
@@ -206,7 +205,7 @@ completeMinMax showSolution correct solution =
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable correct) [1..])
 
 completeGrade :: OutputMonad m => MaxInst -> Delayed Cnf -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` fully parser
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
 completeGrade' :: OutputMonad m => MaxInst -> Cnf -> LangM m
 completeGrade' MaxInst{..} = completeMinMax showSolution cnf

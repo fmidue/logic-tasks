@@ -26,7 +26,6 @@ import Control.Monad (when)
 import Data.Maybe (fromJust)
 import Data.List (nubBy)
 import Formula.Parsing.Compat (Delayed, withDelayed)
-import ParsingHelpers (fully)
 import Formula.Parsing (Parse(..))
 
 
@@ -111,7 +110,7 @@ start :: Number
 start = Number Nothing
 
 partialGrade :: OutputMonad m => PickInst -> Delayed Number -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 partialGrade' :: OutputMonad m => PickInst -> Number -> LangM m
 partialGrade' _ (Number Nothing) = refuse $ indent $
@@ -122,7 +121,7 @@ partialGrade' _ (Number Nothing) = refuse $ indent $
 partialGrade' _ _ = pure ()
 
 completeGrade :: OutputMonad m => PickInst -> Delayed Number -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` fully parser
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
 completeGrade' :: OutputMonad m => PickInst -> Number -> LangM m
 completeGrade' PickInst{..} (Number index) =

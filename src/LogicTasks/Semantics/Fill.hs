@@ -25,7 +25,6 @@ import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 import Formula.Parsing.Compat (Delayed, withDelayed)
-import ParsingHelpers (fully)
 import Formula.Parsing (Parse(..))
 
 
@@ -117,7 +116,7 @@ start :: [TruthValue]
 start = []
 
 partialGrade :: OutputMonad m => FillInst -> Delayed [TruthValue] -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 
 partialGrade' :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
@@ -139,7 +138,7 @@ partialGrade' FillInst{..} sol = do
       missingLen = length missing
 
 completeGrade :: OutputMonad m => FillInst -> Delayed [TruthValue] -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` fully parser
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
 completeGrade' :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 completeGrade' FillInst{..} sol = do

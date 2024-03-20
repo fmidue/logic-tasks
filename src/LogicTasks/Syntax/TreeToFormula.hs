@@ -27,7 +27,6 @@ import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
 import Formula.Parsing.Compat (Delayed (..), withDelayed)
-import ParsingHelpers ( fully )
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
 
@@ -75,7 +74,7 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` fully parser
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
 partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' _ sol
@@ -85,7 +84,7 @@ partialGrade' _ sol
         | otherwise = pure ()
 
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-completeGrade path inst = completeGrade' path inst `withDelayed` fully parser
+completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
 completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 completeGrade' path inst sol
