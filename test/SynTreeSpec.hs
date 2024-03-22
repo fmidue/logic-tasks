@@ -32,8 +32,8 @@ validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
   allowArrowOperators <- elements [True, False]
   maxConsecutiveNegations <- choose (0, 3)
-  usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  atLeastOccurring <- choose (1, fromIntegral $ length usedLiterals)
+  availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
+  atLeastOccurring <- choose (1, fromIntegral $ length availableAtoms)
   minNodes <- choose (atLeastOccurring * 2, 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
@@ -46,7 +46,7 @@ validBoundsSynTree = do
     minNodes,
     minDepth,
     maxDepth,
-    usedLiterals,
+    availableAtoms,
     atLeastOccurring,
     allowArrowOperators,
     maxConsecutiveNegations,

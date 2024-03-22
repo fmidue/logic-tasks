@@ -39,7 +39,7 @@ genSynTree SynTreeConfig{..} = do
               checkMinUniqueOps synTree &&
               (not hasNegations || (consecutiveNegations synTree <= maxConsecutiveNegations))
         ) `suchThat` \synTree -> treeDepth synTree >= minDepth
-    usedList <- randomList usedLiterals (take (fromIntegral atLeastOccurring) usedLiterals) $
+    usedList <- randomList availableAtoms (take (fromIntegral atLeastOccurring) availableAtoms) $
            fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedList)
   where hasNegations = maxConsecutiveNegations /= 0

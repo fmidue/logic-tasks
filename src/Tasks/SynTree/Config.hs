@@ -27,7 +27,7 @@ data SynTreeConfig =
   , maxNodes :: Integer
   , minDepth :: Integer
   , maxDepth :: Integer
-  , usedLiterals :: String
+  , availableAtoms :: String
   , atLeastOccurring :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
@@ -43,7 +43,7 @@ defaultSynTreeConfig =
     , minNodes = 6
     , minDepth = 3
     , maxDepth = 6
-    , usedLiterals = "ABCDE"
+    , availableAtoms = "ABCDE"
     , atLeastOccurring = 3
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
@@ -54,10 +54,10 @@ defaultSynTreeConfig =
 
 checkSynTreeConfig :: OutputMonad m => SynTreeConfig -> LangM m
 checkSynTreeConfig SynTreeConfig {..}
-    | not (all isLetter usedLiterals) = reject $ do
+    | not (all isLetter availableAtoms) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben dürfen Literale sein."
-    | fromIntegral (length usedLiterals) < atLeastOccurring = reject $ do
+    | fromIntegral (length availableAtoms) < atLeastOccurring = reject $ do
         english "You have provided too few literals."
         german "Anzahl Literale ist zu niedrig für gegebene Einstellungen."
     | maxConsecutiveNegations < 0 = reject $ do
