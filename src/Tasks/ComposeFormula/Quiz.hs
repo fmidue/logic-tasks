@@ -22,6 +22,7 @@ generateComposeFormulaInst :: ComposeFormulaConfig -> Gen ComposeFormulaInst
 generateComposeFormulaInst ComposeFormulaConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
+        minDepth
         maxDepth
         usedLiterals
         atLeastOccurring
