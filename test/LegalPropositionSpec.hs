@@ -9,7 +9,11 @@ import Data.Char (isLetter)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, within)
 
-import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..), checkLegalPropositionConfig, defaultLegalPropositionConfig)
+import Tasks.LegalProposition.Config (
+  LegalPropositionConfig (..),
+  LegalPropositionInst(..),
+  checkLegalPropositionConfig,
+  defaultLegalPropositionConfig)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst)
