@@ -33,8 +33,8 @@ validBoundsSynTree = do
   allowArrowOperators <- elements [True, False]
   maxConsecutiveNegations <- choose (0, 3)
   availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  atLeastOccurring <- choose (1, fromIntegral $ length availableAtoms)
-  minNodes <- choose (atLeastOccurring * 2, 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
+  minAmountOfUniqueAtoms <- choose (1, fromIntegral $ length availableAtoms)
+  minNodes <- choose (minAmountOfUniqueAtoms * 2, 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
   maxDepth <- choose (minMaxDepth,max (minMaxDepth+ 3) 10)
@@ -47,7 +47,7 @@ validBoundsSynTree = do
     minDepth,
     maxDepth,
     availableAtoms,
-    atLeastOccurring,
+    minAmountOfUniqueAtoms,
     allowArrowOperators,
     maxConsecutiveNegations,
     minUniqueBinOperators
@@ -96,7 +96,7 @@ spec = do
         forAll (genSynTree synTreeConfig) $ \tree -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
       forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> fromIntegral (length (nubOrd (collectLeaves tree))) >= atLeastOccurring
+        forAll (genSynTree synTreeConfig) $ \tree -> fromIntegral (length (nubOrd (collectLeaves tree))) >= minAmountOfUniqueAtoms
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
       forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'

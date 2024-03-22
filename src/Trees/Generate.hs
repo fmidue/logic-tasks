@@ -35,15 +35,16 @@ genSynTree SynTreeConfig{..} = do
       (do nodes <- choose (minNodes, maxNodes) `suchThat` if hasNegations then const True else odd
           syntaxShape nodes maxDepth allowArrowOperators hasNegations
             `suchThat` \synTree ->
-              checkAtLeastOccurring synTree &&
+              checkMinAmountOfUniqueAtoms synTree &&
               checkMinUniqueOps synTree &&
               (not hasNegations || (consecutiveNegations synTree <= maxConsecutiveNegations))
         ) `suchThat` \synTree -> treeDepth synTree >= minDepth
-    usedList <- randomList availableAtoms (take (fromIntegral atLeastOccurring) availableAtoms) $
+    usedList <- randomList availableAtoms (take (fromIntegral minAmountOfUniqueAtoms) availableAtoms) $
            fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedList)
   where hasNegations = maxConsecutiveNegations /= 0
-        checkAtLeastOccurring synTree = fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
+        checkMinAmountOfUniqueAtoms synTree =
+          fromIntegral (length (collectLeaves synTree)) >= minAmountOfUniqueAtoms
         checkMinUniqueOps synTree = numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
 
 syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())
