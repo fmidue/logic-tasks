@@ -13,7 +13,6 @@ import Auxiliary (listNoDuplicate)
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst (..))
 import Tasks.LegalProposition.PrintBracket (bracketDisplay)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
-import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Generate (genSynTree)
 import Trees.Helpers (similarExist)
 import Trees.Print (display)
@@ -23,18 +22,10 @@ import Trees.Types (BinOp, SynTree)
 
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
-generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
+generateLegalPropositionInst LegalPropositionConfig  {..} = do
     treeList <- vectorOf
         (fromIntegral formulas)
-        (genSynTree (minNodes, maxNodes)
-          minDepth
-          maxDepth
-          usedLiterals
-          atLeastOccurring
-          allowArrowOperators
-          maxConsecutiveNegations
-          minUniqueBinOperators
-        )
+        (genSynTree syntaxTreeConfig)
       `suchThat` (not . similarExist)
     serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` listNoDuplicate
     serialsOfBracket <- vectorOf

@@ -16,22 +16,14 @@ import Trees.Print (transferToPicture, display)
 
 
 generateTreeToFormulaInst :: TreeToFormulaConfig -> Gen TreeToFormulaInst
-generateTreeToFormulaInst TreeToFormulaConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- genSynTree
-        (minNodes, maxNodes)
-        minDepth
-        maxDepth
-        usedLiterals
-        atLeastOccurring
-        allowArrowOperators
-        maxConsecutiveNegations
-        minUniqueBinOperators
+generateTreeToFormulaInst TreeToFormulaConfig {..} = do
+    tree <- genSynTree syntaxTreeConfig
     return $ TreeToFormulaInst
       { tree
       , latexImage = transferToPicture tree
       , correct = display tree
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
-      , showArrowOperators = allowArrowOperators
+      , showArrowOperators = allowArrowOperators syntaxTreeConfig
       , addText = extraText
       , showSolution = printSolution
       }

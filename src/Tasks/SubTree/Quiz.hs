@@ -17,16 +17,8 @@ import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
 
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
-generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- genSynTree
-        (minNodes, maxNodes)
-        minDepth
-        maxDepth
-        usedLiterals
-        atLeastOccurring
-        allowArrowOperators
-        maxConsecutiveNegations
-        minUniqueBinOperators
+generateSubTreeInst SubTreeConfig {..} = do
+    tree <- genSynTree syntaxTreeConfig
       `suchThat` \synTree ->
         (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
     let correctTrees = allNotLeafSubTrees tree
@@ -34,7 +26,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       { tree
       , minInputTrees = minSubTrees
       , correctTrees = correctTrees
-      , showArrowOperators = allowArrowOperators
+      , showArrowOperators = allowArrowOperators syntaxTreeConfig
       , showSolution = printSolution
       , addText = extraText
       }
