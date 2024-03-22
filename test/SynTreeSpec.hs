@@ -17,7 +17,8 @@ import Trees.Helpers (
   treeDepth,
   treeNodes,
   maxNodesForDepth,
-  numOfUniqueBinOpsInSynTree)
+  numOfUniqueBinOpsInSynTree,
+  maxDepthForNodes)
 import SAT.MiniSat hiding (Formula(Not))
 import qualified SAT.MiniSat as Sat (Formula(Not))
 import Trees.Types (SynTree(..), BinOp(..))
@@ -38,7 +39,7 @@ validBoundsSynTree = do
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
   maxDepth <- choose (minMaxDepth,max (minMaxDepth+ 3) 10)
-  maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat` \maxNodes' -> maxConsecutiveNegations /= 0 || odd maxNodes'
+  maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat` \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes') && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
   let availableBinOpsCount = if allowArrowOperators then fromIntegral $ length [minBound .. maxBound :: BinOp] else 2
   minUniqueBinOperators <- choose (1, min (minDepth - 1) availableBinOpsCount)
   return $ SynTreeConfig {

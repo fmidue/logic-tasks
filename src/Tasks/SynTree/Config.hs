@@ -15,7 +15,7 @@ import Data.Char (isLetter)
 import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
-import Trees.Helpers (maxNodesForDepth)
+import Trees.Helpers (maxNodesForDepth, maxDepthForNodes)
 import Trees.Types (BinOp)
 
 
@@ -108,10 +108,3 @@ checkSynTreeConfig SynTreeConfig {..}
         english "This number of unique operators cannot be reached with allowArrowOperators = False ."
         german "Die angegebene Anzahl der unterschiedlichen Operatoren kann mit allowArrowOperators = False nicht erreicht werden."
     | otherwise = pure()
-
-maxDepthForNodes :: Integer -> Integer -> Integer
-maxDepthForNodes maxConsecutiveNegations nodes =
-  let
-    (result, rest) = (nodes - 1) `divMod` (maxConsecutiveNegations + 2)
-  in
-    1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
