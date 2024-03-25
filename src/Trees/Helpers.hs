@@ -20,7 +20,10 @@ module Trees.Helpers
     literalToSynTree,
     numOfOps,
     numOfOpsInFormula,
-    numOfUniqueBinOpsInSynTree
+    numOfUniqueBinOpsInSynTree,
+    binOp,
+    bothKids,
+    collectUniqueBinOpsInSynTree
     ) where
 
 import Control.Monad (void)
@@ -142,8 +145,20 @@ numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
 
 numOfUniqueBinOpsInSynTree :: SynTree BinOp c -> Integer
-numOfUniqueBinOpsInSynTree x = fromIntegral (length (nubOrd (ops x)))
-  where ops :: SynTree BinOp c -> [BinOp]
-        ops (Leaf _) = []
-        ops (Not f) = ops f
-        ops (Binary op s1 s2) = concat [[op], ops s1, ops s2]
+numOfUniqueBinOpsInSynTree = fromIntegral . length . collectUniqueBinOpsInSynTree
+
+binOp :: SynTree BinOp a -> Maybe BinOp
+binOp (Binary op _ _) = Just op
+binOp _ = Nothing
+
+bothKids :: SynTree o a -> (SynTree o a, SynTree o a)
+bothKids (Binary _ l r) = (l, r)
+bothKids _ = error "impossible to land here"
+
+collectUniqueBinOpsInSynTree :: SynTree BinOp a -> [BinOp]
+collectUniqueBinOpsInSynTree (Leaf _) = []
+collectUniqueBinOpsInSynTree (Not x) = collectUniqueBinOpsInSynTree x
+collectUniqueBinOpsInSynTree (Binary op l r) = nubOrd $ concat [
+  [op],
+  collectUniqueBinOpsInSynTree l,
+  collectUniqueBinOpsInSynTree r]

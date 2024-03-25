@@ -61,7 +61,7 @@ instance ToSAT (SynTree BinOp Char) where
           convertBinOp Impl = (Sat.:->:)
           convertBinOp Equi = (Sat.:<->:)
 
-newtype TreeFormulaAnswer = TreeFormulaAnswer {maybeTree :: Maybe (SynTree BinOp Char)} deriving (Eq, Generic)
+newtype TreeFormulaAnswer = TreeFormulaAnswer {maybeTree :: Maybe (SynTree BinOp Char)} deriving (Ord, Eq, Generic)
 
 
 

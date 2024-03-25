@@ -47,6 +47,7 @@ library:
     - LogicTasks.Syntax.SimplestFormula
     - LogicTasks.Syntax.SubTreeSet
     - LogicTasks.Syntax.TreeToFormula
+    - LogicTasks.Syntax.ComposeFormula
     - Tasks.SynTree.Config
     - Tasks.SubTree.Config
     - Tasks.SubTree.Quiz
@@ -64,6 +65,8 @@ library:
     - Tasks.LegalCNF.Quiz
     - Tasks.LegalCNF.GenerateIllegal
     - Tasks.LegalCNF.GenerateLegal
+    - Tasks.ComposeFormula.Config
+    - Tasks.ComposeFormula.Quiz
     - Trees.Types
     - Trees.Parsing
     - Trees.Print
