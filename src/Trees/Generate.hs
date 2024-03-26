@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module Trees.Generate (
  genSynTree,
  syntaxShape,
@@ -14,6 +15,7 @@ import Trees.Helpers (
   consecutiveNegations,
   numOfUniqueBinOpsInSynTree,
   treeDepth)
+import Tasks.SynTree.Config (SynTreeConfig(..))
 
 chooseList :: Bool -> [BinOp]
 chooseList allowArrowOperators = if allowArrowOperators
@@ -27,39 +29,23 @@ randomList availableLetters atLeastOccurring listLength = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-genSynTree ::
-  (Integer, Integer)
-  -> Integer
-  -> Integer
-  -> [c]
-  -> Integer
-  -> Bool
-  -> Integer
-  -> Integer
-  -> Gen (SynTree BinOp c)
-genSynTree
-  (minNodes, maxNodes)
-  minDepth
-  maxDepth
-  availableLetters
-  atLeastOccurring
-  allowArrowOperators
-  maxConsecutiveNegations
-  minUniqueBinOps = do
+genSynTree :: SynTreeConfig -> Gen (SynTree BinOp Char)
+genSynTree SynTreeConfig{..} = do
     sample <-
       (do nodes <- choose (minNodes, maxNodes) `suchThat` if hasNegations then const True else odd
           syntaxShape nodes maxDepth allowArrowOperators hasNegations
             `suchThat` \synTree ->
-              checkAtLeastOccurring synTree &&
+              checkMinAmountOfUniqueAtoms synTree &&
               checkMinUniqueOps synTree &&
               (not hasNegations || (consecutiveNegations synTree <= maxConsecutiveNegations))
         ) `suchThat` \synTree -> treeDepth synTree >= minDepth
-    usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $
+    usedList <- randomList availableAtoms (take (fromIntegral minAmountOfUniqueAtoms) availableAtoms) $
            fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedList)
   where hasNegations = maxConsecutiveNegations /= 0
-        checkAtLeastOccurring synTree = fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
-        checkMinUniqueOps synTree = numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOps
+        checkMinAmountOfUniqueAtoms synTree =
+          fromIntegral (length (collectLeaves synTree)) >= minAmountOfUniqueAtoms
+        checkMinUniqueOps synTree = numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
 
 syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())
 syntaxShape nodes maxDepth allowArrowOperators allowNegation
