@@ -31,7 +31,7 @@ import Control.Monad.Output.Generic (evalLangM)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
-    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree `suchThat` ((3 <=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree `suchThat` ((15 <=) . minNodes)
     let leaves = maxLeavesForNodes maxNodes
     formulas <- choose (1, min 15 $ if allowArrowOperators then 4 else 2 ^ (maxNodes - leaves))
     illegals <- choose (0, formulas)
