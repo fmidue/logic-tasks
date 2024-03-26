@@ -20,7 +20,6 @@ import Tasks.LegalProposition.Quiz (generateLegalPropositionInst)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
-import Trees.Helpers (maxLeavesForNodes)
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
 import TestHelpers (deleteBrackets, deleteSpaces)
@@ -28,12 +27,13 @@ import Control.Monad.Output (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
+import Tasks.LegalProposition.Helpers (formulaAmount)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
+    formulas <- choose (1, 15)
     syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree `suchThat` ((15 <=) . minNodes)
-    let leaves = maxLeavesForNodes maxNodes
-    formulas <- choose (1, min 15 $ if allowArrowOperators then 4 else 2 ^ (maxNodes - leaves))
+      `suchThat` \cfg -> formulaAmount cfg >= fromIntegral formulas
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
     return $ LegalPropositionConfig
