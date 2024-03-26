@@ -59,29 +59,29 @@ spec = do
           isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig legalPropConfig :: LangM Maybe)
     describe "illegalDisplay" $ do
         it "at least creates actual formula symbols" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (deleteSpaces <$> illegalDisplay synTree) $
                       all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
         it "the string after illegalDisplay cannot be parsed" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
     describe "bracket display" $ do
         it "the String after bracketDisplay just add a bracket " $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
         it "the String can be parsed by formulaParse" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> formulaParse str == Right synTree
         it "the String remove all brackets should same with display remove all brackets" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
