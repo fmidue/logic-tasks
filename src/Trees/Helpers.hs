@@ -11,6 +11,7 @@ module Trees.Helpers
     minDepthForNodes,
     maxLeavesForNodes,
     maxNodesForDepth,
+    maxDepthForNodes,
     noSameSubTree,
     sameAssociativeOperatorAdjacent,
     similarExist,
@@ -91,6 +92,13 @@ maxNodesForDepth depth = 2 ^ depth - 1
 
 maxLeavesForNodes :: Integer -> Integer
 maxLeavesForNodes nodes = (nodes + 1) `div` 2
+
+maxDepthForNodes :: Integer -> Integer -> Integer
+maxDepthForNodes maxConsecutiveNegations nodes =
+  let
+    (result, rest) = (nodes - 1) `divMod` (maxConsecutiveNegations + 2)
+  in
+    1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
 
 sameAssociativeOperatorAdjacent :: SynTree BinOp c -> Bool
 sameAssociativeOperatorAdjacent (Leaf _) = False

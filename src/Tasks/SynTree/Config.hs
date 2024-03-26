@@ -15,7 +15,7 @@ import Data.Char (isLetter)
 import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
-import Trees.Helpers (maxNodesForDepth)
+import Trees.Helpers (maxNodesForDepth, maxDepthForNodes)
 import Trees.Types (BinOp)
 
 import Data.List.Extra (nubOrd)
@@ -81,6 +81,9 @@ checkSynTreeConfig SynTreeConfig {..}
     | minNodes < minAmountOfUniqueAtoms * 2 - 1 = reject $ do
         english "Your minimum number of nodes does not permit enough leaves for all desired literals."
         german "Minimale Anzahl der Knoten ist zu niedrig um alle Literale zu verwenden."
+    | minNodes <= 2 * minUniqueBinOperators = reject $ do
+        english "The minimal number of nodes is incompatible with the minimal number of unique operators"
+        german "Die minimale Anzahl der Knoten erlaubt nicht die minimale Anzahl an unterschiedlichen Operatoren"
     | minDepth < 1 = reject $ do
         english "Minimal depth must be positive"
         german "Minimale Tiefe muss positiv sein."
@@ -114,10 +117,3 @@ checkSynTreeConfig SynTreeConfig {..}
         english "This number of unique operators cannot be reached with allowArrowOperators = False ."
         german "Die angegebene Anzahl der unterschiedlichen Operatoren kann mit allowArrowOperators = False nicht erreicht werden."
     | otherwise = pure()
-
-maxDepthForNodes :: Integer -> Integer -> Integer
-maxDepthForNodes maxConsecutiveNegations nodes =
-  let
-    (result, rest) = (nodes - 1) `divMod` (maxConsecutiveNegations + 2)
-  in
-    1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest

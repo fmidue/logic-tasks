@@ -55,6 +55,7 @@ library:
     - Tasks.LegalProposition.PrintIllegal
     - Tasks.LegalProposition.PrintBracket
     - Tasks.LegalProposition.Quiz
+    - Tasks.LegalProposition.Helpers
     - Tasks.SuperfluousBrackets.Config
     - Tasks.SuperfluousBrackets.Parsing
     - Tasks.SuperfluousBrackets.PrintSuperfluousBrackets

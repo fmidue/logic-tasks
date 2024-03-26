@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -39,6 +39,7 @@ library
       Tasks.LegalProposition.PrintIllegal
       Tasks.LegalProposition.PrintBracket
       Tasks.LegalProposition.Quiz
+      Tasks.LegalProposition.Helpers
       Tasks.SuperfluousBrackets.Config
       Tasks.SuperfluousBrackets.Parsing
       Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
