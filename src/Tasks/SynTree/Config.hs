@@ -81,6 +81,9 @@ checkSynTreeConfig SynTreeConfig {..}
     | minNodes < minAmountOfUniqueAtoms * 2 - 1 = reject $ do
         english "Your minimum number of nodes does not permit enough leaves for all desired literals."
         german "Minimale Anzahl der Knoten ist zu niedrig um alle Literale zu verwenden."
+    | minNodes <= 2 * minUniqueBinOperators = reject $ do
+        english "The minimal number of nodes is incompatible with the minimal number of unique operators"
+        german "Die minimale Anzahl der Knoten erlaubt nicht die minimale Anzahl an unterschiedlichen Operatoren"
     | minDepth < 1 = reject $ do
         english "Minimal depth must be positive"
         german "Minimale Tiefe muss positiv sein."

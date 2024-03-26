@@ -35,7 +35,7 @@ validBoundsSynTree = do
   maxConsecutiveNegations <- choose (0, 3)
   availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minAmountOfUniqueAtoms <- choose (1, fromIntegral $ length availableAtoms)
-  minNodes <- choose (minAmountOfUniqueAtoms * 2, 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
+  minNodes <- choose (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
   maxDepth <- choose (minMaxDepth,max (minMaxDepth+ 3) 10)
@@ -43,7 +43,7 @@ validBoundsSynTree = do
     \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes')
       && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
   let availableBinOpsCount = if allowArrowOperators then fromIntegral $ length [minBound .. maxBound :: BinOp] else 2
-  minUniqueBinOperators <- choose (1, min (minDepth - 1) availableBinOpsCount)
+  minUniqueBinOperators <- choose (1, min (minDepth - 1) (min availableBinOpsCount ((minNodes `div` 2) - 1)))
   return $ SynTreeConfig {
     maxNodes,
     minNodes,
