@@ -104,6 +104,10 @@ spec = do
       forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
                     `isInfixOf` deleteSpaces (display tree))
+    it "should generate a random SyntaxTree with fixed nodes and depth" $
+      forAll (validBoundsSynTree `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
+        \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
+            treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
   describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $
       convert @(SynTree BinOp Char) (Leaf 'A') == Var 'A'
