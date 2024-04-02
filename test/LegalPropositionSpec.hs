@@ -32,7 +32,7 @@ import Tasks.LegalProposition.Helpers (formulaAmount)
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
     formulas <- choose (1, 15)
-    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree `suchThat` ((15 <=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree
       `suchThat` \cfg -> formulaAmount cfg >= fromIntegral formulas
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
