@@ -9,7 +9,11 @@ import Test.Hspec (Spec, describe, it)
 import Text.Parsec (parse)
 
 import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst)
-import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig, defaultSuperfluousBracketsConfig)
+import Tasks.SuperfluousBrackets.Config(
+  SuperfluousBracketsConfig(..),
+  SuperfluousBracketsInst(..),
+  checkSuperfluousBracketsConfig,
+  defaultSuperfluousBracketsConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula)
