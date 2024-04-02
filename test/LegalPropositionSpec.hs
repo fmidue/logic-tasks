@@ -7,25 +7,33 @@ import Data.Either (isLeft, isRight)
 import Data.List ((\\))
 import Data.Char (isLetter)
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, forAll, suchThat)
+import Test.QuickCheck (Gen, choose, forAll, suchThat, within)
 
-import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..))
+import Tasks.LegalProposition.Config (
+  LegalPropositionConfig (..),
+  LegalPropositionInst(..),
+  checkLegalPropositionConfig,
+  defaultLegalPropositionConfig)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
-import Trees.Helpers (maxLeavesForNodes)
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
 import TestHelpers (deleteBrackets, deleteSpaces)
+import Control.Monad.Output (LangM)
+import Data.Maybe (isJust)
+import Control.Monad.Identity (Identity(runIdentity))
+import Control.Monad.Output.Generic (evalLangM)
+import Tasks.LegalProposition.Helpers (formulaAmount)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
-    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree `suchThat` ((3 <=) . minNodes)
-    let leaves = maxLeavesForNodes maxNodes
-    formulas <- choose (1, min 15 $ if allowArrowOperators then 4 else 2 ^ (maxNodes - leaves))
+    formulas <- choose (1, 15)
+    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree
+      `suchThat` \cfg -> formulaAmount cfg >= formulas
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
     return $ LegalPropositionConfig
@@ -38,43 +46,52 @@ validBoundsLegalProposition = do
             , printSolution = False
         }
 
+timeout :: Int
+timeout = 30000000 -- 30 seconds
+
 spec :: Spec
 spec = do
+    describe "config" $ do
+      it "default config should pass config check" $
+        isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig defaultLegalPropositionConfig :: LangM Maybe)
+      it "validBoundsLegalProposition should generate a valid config" $
+        forAll validBoundsLegalProposition $ \legalPropConfig ->
+          isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig legalPropConfig :: LangM Maybe)
     describe "illegalDisplay" $ do
         it "at least creates actual formula symbols" $
-            forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (deleteSpaces <$> illegalDisplay synTree) $
                       all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
         it "the string after illegalDisplay cannot be parsed" $
-            forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
     describe "bracket display" $ do
         it "the String after bracketDisplay just add a bracket " $
-            forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
         it "the String can be parsed by formulaParse" $
-            forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> formulaParse str == Right synTree
         it "the String remove all brackets should same with display remove all brackets" $
-            forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
-            forAll validBoundsLegalProposition $ \config ->
+            within timeout $ forAll validBoundsLegalProposition $ \config ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
                   all (\x -> isLeft (formulaParse (pseudoFormulas !! (x - 1)))) (toList serialsOfWrong)
         it "the generateLegalPropositionInst should generate expected legal number" $
-            forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
+            within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
                   all
                   (\x -> isRight (formulaParse (pseudoFormulas !! (x - 1))))

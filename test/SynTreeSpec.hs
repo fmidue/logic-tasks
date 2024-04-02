@@ -17,7 +17,8 @@ import Trees.Helpers (
   treeDepth,
   treeNodes,
   maxNodesForDepth,
-  numOfUniqueBinOpsInSynTree)
+  numOfUniqueBinOpsInSynTree,
+  maxDepthForNodes)
 import SAT.MiniSat hiding (Formula(Not))
 import qualified SAT.MiniSat as Sat (Formula(Not))
 import Trees.Types (SynTree(..), BinOp(..))
@@ -34,13 +35,15 @@ validBoundsSynTree = do
   maxConsecutiveNegations <- choose (0, 3)
   availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minAmountOfUniqueAtoms <- choose (1, fromIntegral $ length availableAtoms)
-  minNodes <- choose (minAmountOfUniqueAtoms * 2, 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
+  minNodes <- choose (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
   maxDepth <- choose (minMaxDepth,max (minMaxDepth+ 3) 10)
-  maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat` \maxNodes' -> maxConsecutiveNegations /= 0 || odd maxNodes'
+  maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat`
+    \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes')
+      && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
   let availableBinOpsCount = if allowArrowOperators then fromIntegral $ length [minBound .. maxBound :: BinOp] else 2
-  minUniqueBinOperators <- choose (1, min (minDepth - 1) availableBinOpsCount)
+  minUniqueBinOperators <- choose (1, minimum [minDepth - 1, availableBinOpsCount, (minNodes - 1) `div` 2])
   return $ SynTreeConfig {
     maxNodes,
     minNodes,
@@ -101,6 +104,10 @@ spec = do
       forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
                     `isInfixOf` deleteSpaces (display tree))
+    it "should generate a random SyntaxTree with fixed nodes and depth" $
+      forAll (validBoundsSynTree `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
+        \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
+            treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
   describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $
       convert @(SynTree BinOp Char) (Leaf 'A') == Var 'A'

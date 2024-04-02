@@ -9,7 +9,7 @@ import Data.List.Extra (isInfixOf )
 import Data.Set (fromList, size, toList)
 import qualified Data.Set (map)
 
-import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
+import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
 import Tasks.SubTree.Quiz (generateSubTreeInst)
 import Trees.Helpers (allNotLeafSubTrees, maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
@@ -19,6 +19,10 @@ import Trees.Parsing ()
 import Trees.Types (SynTree, BinOp, PropFormula)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Parsing (Parse(parser))
+import Control.Monad.Output (LangM)
+import Data.Maybe (isJust)
+import Control.Monad.Identity (Identity(runIdentity))
+import Control.Monad.Output.Generic (evalLangM)
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
@@ -36,6 +40,12 @@ validBoundsSubTree = do
 
 spec :: Spec
 spec = do
+  describe "config" $ do
+      it "default config should pass config check" $
+        isJust $ runIdentity $ evalLangM (checkSubTreeConfig defaultSubTreeConfig :: LangM Maybe)
+      it "validBoundsSubTree should generate a valid config" $
+        forAll validBoundsSubTree $ \subTreeConfig ->
+          isJust $ runIdentity $ evalLangM (checkSubTreeConfig subTreeConfig :: LangM Maybe)
   describe "generateSubTreeInst" $ do
     it "parse should works well" $
       forAll validBoundsSubTree $ \subTreeConfig ->

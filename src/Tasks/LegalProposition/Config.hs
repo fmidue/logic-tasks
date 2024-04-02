@@ -20,6 +20,7 @@ import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxLeavesForNodes)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Trees.Types (SynTree, BinOp)
+import Tasks.LegalProposition.Helpers (formulaAmount)
 
 
 
@@ -53,7 +54,7 @@ checkLegalPropositionConfig config@LegalPropositionConfig {..} =
 
 
 checkAdditionalConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
-checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, formulas, illegals, bracketFormulas}
+checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, formulas, illegals, bracketFormulas}
     | minNodes < 3 = reject $ do
         english "form A and ~A is meaningless in this kind of issue"
         german "Minimale Anzahl an Blättern unter 3 kann nur triviale Aufgaben erzeugen."
@@ -73,6 +74,9 @@ checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {
       = reject $ do
         english "Settings may result in extremely large formulas."
         german "Einstellungen führen zu extrem großen Formeln."
+    | formulaAmount (syntaxTreeConfig config) < formulas = reject $ do
+      english "Settings cannot ensure provided amount of formulas."
+      german "Einstellungen können nicht die Anzahl der geforderten Formeln erfüllen."
     | otherwise = pure()
 
 

@@ -53,9 +53,12 @@ checkSuperfluousBracketsConfig config@SuperfluousBracketsConfig {..} =
 
 checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, superfluousBracketPairs}
-    | minNodes < 5 = reject $ do
-        english "Minimal number of nodes must larger than 4"
-        german "Minimale Anzahl Blätter muss größer 4 sein."
+    | minUniqueBinOperators < 1 = reject $ do
+        english "There should be a positive number of (unique) operators."
+        german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
+    | minNodes < 2 * minUniqueBinOperators + 3 = reject $ do
+        english "Minimal number of nodes must larger, given the desired number of unique operators."
+        german "Minimale Anzahl Knoten muss größer sein, angesichts der angestrebten Anzahl unterschiedlicher Operatoren."
     | superfluousBracketPairs > minNodes `div` 2 = reject $ do
         english "The number of superfluous brackets is excessive, given your node numbers."
         german "Die Anzahl zusätzlicher Klammern ist zu hoch für die Menge an Blättern."

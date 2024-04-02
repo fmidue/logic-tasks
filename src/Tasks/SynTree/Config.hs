@@ -15,7 +15,7 @@ import Data.Char (isLetter)
 import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
-import Trees.Helpers (maxNodesForDepth)
+import Trees.Helpers (maxNodesForDepth, maxDepthForNodes, minDepthForNodes)
 import Trees.Types (BinOp)
 
 import Data.List.Extra (nubOrd)
@@ -40,7 +40,7 @@ defaultSynTreeConfig :: SynTreeConfig
 defaultSynTreeConfig =
     SynTreeConfig
     { maxNodes = 10
-    , minNodes = 6
+    , minNodes = 7
     , minDepth = 3
     , maxDepth = 6
     , availableAtoms = "ABCDE"
@@ -81,9 +81,9 @@ checkSynTreeConfig SynTreeConfig {..}
     | minNodes < minAmountOfUniqueAtoms * 2 - 1 = reject $ do
         english "Your minimum number of nodes does not permit enough leaves for all desired literals."
         german "Minimale Anzahl der Knoten ist zu niedrig um alle Literale zu verwenden."
-    | minDepth < 1 = reject $ do
-        english "Minimal depth must be positive"
-        german "Minimale Tiefe muss positiv sein."
+    | minNodes <= 2 * minUniqueBinOperators = reject $ do
+        english "The minimal number of nodes is incompatible with the minimal number of unique operators"
+        german "Die minimale Anzahl der Knoten erlaubt nicht die minimale Anzahl an unterschiedlichen Operatoren"
     | minNodes > maxNodesForDepth minDepth = reject $ do
         english "Minimum number of nodes does not allow a tree with minimum depth."
         german "Minimale Anzahl an Knoten ermöglicht keinen Baum mit minimaler Tiefe."
@@ -113,11 +113,7 @@ checkSynTreeConfig SynTreeConfig {..}
     | not allowArrowOperators && minUniqueBinOperators > 2 = reject $ do
         english "This number of unique operators cannot be reached with allowArrowOperators = False ."
         german "Die angegebene Anzahl der unterschiedlichen Operatoren kann mit allowArrowOperators = False nicht erreicht werden."
+    | minDepth < minDepthForNodes (2 * minUniqueBinOperators + 1) = reject $ do
+        english "The minimal depth is incompatible with the minimal amount of unique operators."
+        german "Die minimale Tiefe ist mit der minimalen Anzahl an unterschiedlichen Operatoren inkompatibel."
     | otherwise = pure()
-
-maxDepthForNodes :: Integer -> Integer -> Integer
-maxDepthForNodes maxConsecutiveNegations nodes =
-  let
-    (result, rest) = (nodes - 1) `divMod` (maxConsecutiveNegations + 2)
-  in
-    1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest

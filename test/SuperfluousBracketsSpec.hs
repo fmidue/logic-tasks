@@ -9,7 +9,11 @@ import Test.Hspec (Spec, describe, it)
 import Text.Parsec (parse)
 
 import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst)
-import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
+import Tasks.SuperfluousBrackets.Config(
+  SuperfluousBracketsConfig(..),
+  SuperfluousBracketsInst(..),
+  checkSuperfluousBracketsConfig,
+  defaultSuperfluousBracketsConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula)
@@ -23,10 +27,14 @@ import Trees.Parsing(formulaParse)
 import TestHelpers (deleteBrackets)
 import Trees.Generate (genSynTree)
 import Formula.Parsing (Parse(parser))
+import Control.Monad.Output (LangM)
+import Data.Maybe (isJust)
+import Control.Monad.Identity (Identity(runIdentity))
+import Control.Monad.Output.Generic (evalLangM)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((5<=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((8<=) . minNodes)
     superfluousBracketPairs <- choose (1, minNodes `div` 2)
     return $ SuperfluousBracketsConfig
         {
@@ -38,6 +46,12 @@ validBoundsSuperfluousBrackets = do
 
 spec :: Spec
 spec = do
+    describe "config" $ do
+      it "default config should pass config check" $
+        isJust $ runIdentity $ evalLangM (checkSuperfluousBracketsConfig defaultSuperfluousBracketsConfig :: LangM Maybe)
+      it "validBoundsSubTree should generate a valid config" $
+        forAll validBoundsSuperfluousBrackets $ \superfluousBracketsConfig ->
+          isJust $ runIdentity $ evalLangM (checkSuperfluousBracketsConfig superfluousBracketsConfig :: LangM Maybe)
     describe "sameAssociativeOperatorAdjacent" $ do
         it "should return false if there are no two \\/s or two /\\s as neighbors" $
             not $ sameAssociativeOperatorAdjacent (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c'))))
