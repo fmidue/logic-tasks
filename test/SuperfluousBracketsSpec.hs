@@ -30,7 +30,7 @@ import Control.Monad.Output.Generic (evalLangM)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((5<=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((8<=) . minNodes)
     superfluousBracketPairs <- choose (1, minNodes `div` 2)
     return $ SuperfluousBracketsConfig
         {
