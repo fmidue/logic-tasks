@@ -23,7 +23,8 @@ module Trees.Helpers
     numOfUniqueBinOpsInSynTree,
     binOp,
     bothKids,
-    collectUniqueBinOpsInSynTree
+    swapKids,
+    collectUniqueBinOpsInSynTree,
     ) where
 
 import Control.Monad (void)
@@ -154,6 +155,10 @@ binOp _ = Nothing
 bothKids :: SynTree o a -> (SynTree o a, SynTree o a)
 bothKids (Binary _ l r) = (l, r)
 bothKids _ = error "impossible to land here"
+
+swapKids :: SynTree o a -> SynTree o a
+swapKids (Binary x l r) = Binary x r l
+swapKids _ = error "impossible to land here"
 
 collectUniqueBinOpsInSynTree :: SynTree BinOp a -> [BinOp]
 collectUniqueBinOpsInSynTree (Leaf _) = []

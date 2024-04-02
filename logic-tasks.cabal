@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -32,6 +32,7 @@ library
       LogicTasks.Syntax.SubTreeSet
       LogicTasks.Syntax.TreeToFormula
       LogicTasks.Syntax.ComposeFormula
+      LogicTasks.Syntax.DecomposeFormula
       Tasks.SynTree.Config
       Tasks.SubTree.Config
       Tasks.SubTree.Quiz
@@ -51,6 +52,8 @@ library
       Tasks.LegalCNF.GenerateLegal
       Tasks.ComposeFormula.Config
       Tasks.ComposeFormula.Quiz
+      Tasks.DecomposeFormula.Config
+      Tasks.DecomposeFormula.Quiz
       Trees.Types
       Trees.Parsing
       Trees.Print
