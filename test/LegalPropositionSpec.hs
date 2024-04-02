@@ -33,7 +33,7 @@ validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
     formulas <- choose (1, 15)
     syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree
-      `suchThat` \cfg -> formulaAmount cfg >= fromIntegral formulas
+      `suchThat` \cfg -> formulaAmount cfg >= formulas
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
     return $ LegalPropositionConfig

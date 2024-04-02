@@ -74,7 +74,7 @@ checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeC
       = reject $ do
         english "Settings may result in extremely large formulas."
         german "Einstellungen führen zu extrem großen Formeln."
-    | formulaAmount (syntaxTreeConfig config) < fromIntegral formulas = reject $ do
+    | formulaAmount (syntaxTreeConfig config) < formulas = reject $ do
       english "Settings cannot ensure provided amount of formulas."
       german "Einstellungen können nicht die Anzahl der geforderten Formeln erfüllen."
     | otherwise = pure()
