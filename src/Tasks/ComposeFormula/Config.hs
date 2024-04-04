@@ -15,7 +15,8 @@ import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
-import Control.Monad.Output (Language, OutputMonad, LangM)
+import Control.Monad.Output (Language, OutputMonad, LangM, english, german)
+import LogicTasks.Helpers (reject)
 
 data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq)
 
@@ -40,8 +41,18 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
 
 
 checkComposeFormulaConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
-checkComposeFormulaConfig ComposeFormulaConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig
+checkComposeFormulaConfig config@ComposeFormulaConfig {..} =
+    checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
+
+checkAdditionalConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
+checkAdditionalConfig ComposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
+    | minUniqueBinOperators < 1 = reject $ do
+        english "There should be a positive number of (unique) operators."
+        german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
+    | minNodes < 2 * minUniqueBinOperators + 3 = reject $ do
+        english "Minimal number of nodes must larger, given the desired number of unique operators."
+        german "Minimale Anzahl Knoten muss größer sein, angesichts der angestrebten Anzahl unterschiedlicher Operatoren."
+    | otherwise = pure ()
 
 
 data ComposeFormulaInst = ComposeFormulaInst

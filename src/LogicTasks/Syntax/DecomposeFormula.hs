@@ -11,7 +11,7 @@ import Control.Monad.Output (
   GenericOutputMonad (paragraph, indent, translatedCode, refuse, image), translate, localise, translations, ($=<<)
   )
 
-import LogicTasks.Helpers (extra, example, instruct, keyHeading, basicOpKey, reject)
+import LogicTasks.Helpers (extra, example, instruct, keyHeading, basicOpKey, arrowsKey, reject)
 import Trees.Types (TreeFormulaAnswer(..))
 import Tasks.DecomposeFormula.Config (DecomposeFormulaInst(..), DecomposeFormulaConfig, checkDecomposeFormulaConfig)
 import Trees.Print (display, transferToPicture)
@@ -48,6 +48,7 @@ description DecomposeFormulaInst{..} = do
 
     keyHeading
     basicOpKey
+    arrowsKey
 
     paragraph $ indent $ do
       translate $ do
@@ -93,8 +94,8 @@ partialGrade DecomposeFormulaInst{..} sol = do
     german "Ihre Abgabe beinhaltet nicht alle Literale aus der ursprünglichen Formel."
 
   unless (length origOperators == length solOperators) $ reject $ do
-    english "Your solution contains too many different operators."
-    german "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren."
+    english "Your solution does not contain the right amount of different operators."
+    german "Ihre Abgabe beinhaltet nicht die richtige Anzahl an unterschiedlichen Operatoren."
 
   pure ()
     where solTree = maybeTree sol
@@ -108,7 +109,7 @@ partialGrade DecomposeFormulaInst{..} sol = do
 
 completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
 completeGrade path DecomposeFormulaInst{..} sol
-  | solTree /= swapKids tree = refuse $ do
+  | solTree /= swappedTree = refuse $ do
     instruct $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist nicht die korrekte Lösung."
@@ -126,7 +127,7 @@ completeGrade path DecomposeFormulaInst{..} sol
     image $=<< liftIO $ cacheTree (transferToPicture solTree) path
 
     when showSolution $ do
-      example (show (swapKids tree)) $ do
+      example (show swappedTree) $ do
         english "The solution for this task is:"
         german "Die Lösung für die Aufgabe ist:"
 
@@ -134,10 +135,12 @@ completeGrade path DecomposeFormulaInst{..} sol
         english "The corresponding syntax tree looks like this:"
         german "Der zugehörige Syntaxbaum sieht so aus:"
 
-      image $=<< liftIO $ cacheTree (transferToPicture (swapKids tree)) path
+      image $=<< liftIO $ cacheTree (transferToPicture swappedTree) path
 
       pure ()
 
     pure ()
   | otherwise = pure ()
     where solTree = fromJust $ maybeTree sol
+          swappedTree = swapKids tree
+

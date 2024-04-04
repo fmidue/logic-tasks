@@ -14,7 +14,8 @@ import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
-import Control.Monad.Output (Language, OutputMonad, LangM)
+import Control.Monad.Output (Language, OutputMonad, LangM, german, english)
+import LogicTasks.Helpers (reject)
 
 data DecomposeFormulaConfig = DecomposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
@@ -26,7 +27,7 @@ data DecomposeFormulaConfig = DecomposeFormulaConfig {
 
 defaultDecomposeFormulaConfig :: DecomposeFormulaConfig
 defaultDecomposeFormulaConfig = DecomposeFormulaConfig
-    { syntaxTreeConfig = defaultSynTreeConfig
+    { syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
     , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = True
@@ -35,9 +36,18 @@ defaultDecomposeFormulaConfig = DecomposeFormulaConfig
 
 
 checkDecomposeFormulaConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
-checkDecomposeFormulaConfig DecomposeFormulaConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig
+checkDecomposeFormulaConfig config@DecomposeFormulaConfig{..} =
+  checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
+checkAdditionalConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
+checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
+    | minUniqueBinOperators < 1 = reject $ do
+        english "There should be a positive number of (unique) operators."
+        german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
+    | minNodes < 2 * minUniqueBinOperators + 3 = reject $ do
+        english "Minimal number of nodes must larger, given the desired number of unique operators."
+        german "Minimale Anzahl Knoten muss größer sein, angesichts der angestrebten Anzahl unterschiedlicher Operatoren."
+    | otherwise = pure ()
 
 data DecomposeFormulaInst = DecomposeFormulaInst
                { tree :: SynTree BinOp Char
