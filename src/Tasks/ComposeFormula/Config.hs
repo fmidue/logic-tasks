@@ -18,7 +18,7 @@ import GHC.Generics
 import Control.Monad.Output (Language, OutputMonad, LangM, english, german)
 import LogicTasks.Helpers (reject)
 
-data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq)
+data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bounded)
 
 data ComposeFormulaConfig = ComposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
@@ -27,7 +27,7 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig

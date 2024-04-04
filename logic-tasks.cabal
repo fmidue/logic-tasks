@@ -104,6 +104,7 @@ test-suite src-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ComposeFormulaSpec
       FormulaSpec
       LegalCNFSpec
       LegalPropositionSpec

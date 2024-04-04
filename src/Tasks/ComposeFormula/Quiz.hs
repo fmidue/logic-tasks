@@ -19,8 +19,8 @@ import Trees.Types (BinOp(Equi, Or, And))
 
 generateComposeFormulaInst :: ComposeFormulaConfig -> Gen ComposeFormulaInst
 generateComposeFormulaInst ComposeFormulaConfig {..} = do
-    tree <- genSynTree syntaxTreeConfig
-          `suchThat` \synTree -> binOp synTree `elem` map Just [And, Or, Equi]
+    tree <- genSynTree syntaxTreeConfig `suchThat` \synTree ->
+      binOp synTree `elem` map Just [And, Or, Equi] && let (lk, rk) = bothKids synTree in lk /= rk
     let (leftTree, rightTree) = bothKids tree
     return $ ComposeFormulaInst
       { operator = fromJust $ binOp tree
