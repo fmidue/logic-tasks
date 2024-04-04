@@ -3,7 +3,12 @@
 module ComposeFormulaSpec where
 
 import Test.Hspec
-import Tasks.ComposeFormula.Config (ComposeFormulaConfig(..), TreeDisplayMode (FormulaDisplay), checkComposeFormulaConfig, defaultComposeFormulaConfig, ComposeFormulaInst(..))
+import Tasks.ComposeFormula.Config (
+  ComposeFormulaConfig(..),
+  TreeDisplayMode (FormulaDisplay),
+  checkComposeFormulaConfig,
+  defaultComposeFormulaConfig,
+  ComposeFormulaInst(..))
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))

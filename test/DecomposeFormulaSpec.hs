@@ -3,7 +3,11 @@
 module DecomposeFormulaSpec where
 
 import Test.Hspec
-import Tasks.DecomposeFormula.Config (DecomposeFormulaConfig(..), checkDecomposeFormulaConfig, defaultDecomposeFormulaConfig, DecomposeFormulaInst(..))
+import Tasks.DecomposeFormula.Config (
+  DecomposeFormulaConfig(..),
+  checkDecomposeFormulaConfig,
+  defaultDecomposeFormulaConfig,
+  DecomposeFormulaInst(..))
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
