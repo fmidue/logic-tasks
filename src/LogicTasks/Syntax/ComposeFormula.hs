@@ -101,8 +101,8 @@ verifyConfig = checkComposeFormulaConfig
 
 
 
-start :: TreeFormulaAnswer
-start = TreeFormulaAnswer Nothing
+start :: [TreeFormulaAnswer]
+start = []
 
 
 

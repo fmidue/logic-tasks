@@ -43,7 +43,7 @@ validBoundsSynTree = do
     \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes')
       && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
   let availableBinOpsCount = if allowArrowOperators then fromIntegral $ length [minBound .. maxBound :: BinOp] else 2
-  minUniqueBinOperators <- choose (1, minimum [minDepth - 1, availableBinOpsCount, (minNodes - 1) `div` 2])
+  minUniqueBinOperators <- choose (1, min availableBinOpsCount ((minNodes - 1) `div` 2))
   return $ SynTreeConfig {
     maxNodes,
     minNodes,

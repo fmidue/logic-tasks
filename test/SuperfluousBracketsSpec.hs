@@ -34,7 +34,7 @@ import Control.Monad.Output.Generic (evalLangM)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((8<=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` \SynTreeConfig{..} -> 2 * minUniqueBinOperators + 2 < minNodes
     superfluousBracketPairs <- choose (1, minNodes `div` 2)
     return $ SuperfluousBracketsConfig
         {
@@ -49,7 +49,7 @@ spec = do
     describe "config" $ do
       it "default config should pass config check" $
         isJust $ runIdentity $ evalLangM (checkSuperfluousBracketsConfig defaultSuperfluousBracketsConfig :: LangM Maybe)
-      it "validBoundsSubTree should generate a valid config" $
+      it "validBoundsSuperfluousBrackets should generate a valid config" $
         forAll validBoundsSuperfluousBrackets $ \superfluousBracketsConfig ->
           isJust $ runIdentity $ evalLangM (checkSuperfluousBracketsConfig superfluousBracketsConfig :: LangM Maybe)
     describe "sameAssociativeOperatorAdjacent" $ do
