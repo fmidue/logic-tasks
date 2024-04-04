@@ -23,7 +23,7 @@ data DecomposeFormulaConfig = DecomposeFormulaConfig {
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 defaultDecomposeFormulaConfig :: DecomposeFormulaConfig
 defaultDecomposeFormulaConfig = DecomposeFormulaConfig
