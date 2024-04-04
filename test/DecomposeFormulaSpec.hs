@@ -21,7 +21,7 @@ import Trees.Helpers (bothKids)
 validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormula = do
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    minUniqueBinOperators >= 1 && minNodes >= 2 * minUniqueBinOperators + 3
+    minUniqueBinOperators >= 1
   return DecomposeFormulaConfig {
     syntaxTreeConfig,
     extraHintsOnAssociativity = False,

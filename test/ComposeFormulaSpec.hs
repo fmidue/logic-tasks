@@ -21,7 +21,7 @@ import Tasks.ComposeFormula.Quiz (generateComposeFormulaInst)
 validBoundsComposeFormula :: Gen ComposeFormulaConfig
 validBoundsComposeFormula = do
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    minUniqueBinOperators >= 1 && minNodes >= 2 * minUniqueBinOperators + 3
+    minUniqueBinOperators >= 1
   displayModeL <- elements [minBound..maxBound :: TreeDisplayMode]
   displayModeR <- elements [minBound..maxBound :: TreeDisplayMode]
   return ComposeFormulaConfig {

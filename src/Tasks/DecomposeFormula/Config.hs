@@ -44,9 +44,6 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."
         german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
-    | minNodes < 2 * minUniqueBinOperators + 3 = reject $ do
-        english "Minimal number of nodes must larger, given the desired number of unique operators."
-        german "Minimale Anzahl Knoten muss größer sein, angesichts der angestrebten Anzahl unterschiedlicher Operatoren."
     | otherwise = pure ()
 
 data DecomposeFormulaInst = DecomposeFormulaInst
