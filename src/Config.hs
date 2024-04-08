@@ -36,7 +36,9 @@ data PickInst = PickInst {
 
 dPickInst :: PickInst
 dPickInst =  PickInst
-          { trees = [ST.Binary ST.And (ST.Binary ST.Or (ST.Leaf 'A') (ST.Not (ST.Leaf 'B'))) (ST.Binary ST.Or (ST.Not (ST.Leaf 'A')) (ST.Leaf 'B'))]
+          { trees = [ST.Binary ST.And
+            (ST.Binary ST.Or (ST.Leaf 'A') (ST.Not (ST.Leaf 'B')))
+            (ST.Binary ST.Or (ST.Not (ST.Leaf 'A')) (ST.Leaf 'B'))]
           , correct = 1
           , showSolution = False
           , addText = Nothing
