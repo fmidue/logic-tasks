@@ -26,6 +26,7 @@ module Trees.Helpers
     bothKids,
     swapKids,
     collectUniqueBinOpsInSynTree,
+    mirrorTree
     ) where
 
 import Control.Monad (void)
@@ -175,3 +176,8 @@ collectUniqueBinOpsInSynTree (Binary op l r) = nubOrd $ concat [
   [op],
   collectUniqueBinOpsInSynTree l,
   collectUniqueBinOpsInSynTree r]
+
+mirrorTree :: SynTree o c -> SynTree o c
+mirrorTree (Binary b l r) = Binary b r l
+mirrorTree (Not x) = Not $ mirrorTree x
+mirrorTree x = x

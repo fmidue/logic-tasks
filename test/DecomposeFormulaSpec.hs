@@ -12,11 +12,13 @@ import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Control.Monad.Output (LangM)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
-import Trees.Helpers (bothKids)
+import Trees.Helpers (bothKids, binOp)
+import Trees.Types (SynTree(..))
+import Trees.Print (display)
 
 validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormula = do
@@ -41,4 +43,6 @@ spec = do
     it "should generate an instance with different subtrees" $
       forAll validBoundsDecomposeFormula $ \decomposeFormulaConfig ->
         forAll (generateDecomposeFormulaInst decomposeFormulaConfig) $ \DecomposeFormulaInst{..} ->
-          let (lk,rk) = bothKids tree in lk /= rk
+          let (lk,rk) = bothKids tree
+              rootOp = fromJust $ binOp tree
+          in notElem (display (Binary rootOp lk rk)) [display (Binary rootOp rk lk), reverse (display (Binary rootOp lk rk))]

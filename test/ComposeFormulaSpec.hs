@@ -17,11 +17,13 @@ import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
 import Tasks.ComposeFormula.Quiz (generateComposeFormulaInst)
+import Trees.Types (SynTree(Binary), TreeFormulaAnswer (TreeFormulaAnswer))
+import LogicTasks.Syntax.ComposeFormula (partialGrade)
 
 validBoundsComposeFormula :: Gen ComposeFormulaConfig
 validBoundsComposeFormula = do
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    minUniqueBinOperators >= 1
+    minUniqueBinOperators >= 1 && minNodes > 6
   displayModeL <- elements [minBound..maxBound :: TreeDisplayMode]
   displayModeR <- elements [minBound..maxBound :: TreeDisplayMode]
   return ComposeFormulaConfig {
@@ -41,10 +43,13 @@ spec = do
       forAll validBoundsComposeFormula $ \composeFormulaConfig ->
         isJust $ runIdentity $ evalLangM (checkComposeFormulaConfig composeFormulaConfig :: LangM Maybe)
   describe "generateComposeFormulaInst" $ do
-    it "should generate an instance with different subtrees" $
+    it "possible solution passes partialGrade" $
       forAll validBoundsComposeFormula $ \composeFormulaConfig ->
-        forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->
-          leftTree /= rightTree
+        forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
+          let lrTree = Binary operator leftTree rightTree
+              rlTree = Binary operator rightTree leftTree
+          in isJust $ runIdentity $ evalLangM
+            (partialGrade inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)] :: LangM Maybe)
     it "leftTreeImage and rightTreeImage has the right value" $
       forAll validBoundsComposeFormula $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->
