@@ -10,6 +10,8 @@ import Formula.Types
 import Formula.Util
 import Data.Map (Map)
 import Control.Monad.Output (Language)
+import Tasks.SynTree.Config (SynTreeConfig, defaultSynTreeConfig)
+import qualified Trees.Types as ST (BinOp(..), SynTree(..))
 
 
 
@@ -76,16 +78,16 @@ dMinInst =  MinInst
 
 
 data FillInst = FillInst {
-                 cnf     :: !Cnf
+                 tree :: ST.SynTree ST.BinOp Char
                , missing :: ![Int]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dFillInst :: FillInst
 dFillInst =  FillInst
-          { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
+          { tree = ST.Binary ST.And (ST.Leaf 'A') (ST.Not (ST.Leaf 'B'))
           , missing = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -226,7 +228,7 @@ dPickConf = PickConfig
 
 
 data FillConfig = FillConfig {
-      cnfConf :: CnfConfig
+      syntaxTreeConfig :: SynTreeConfig
     , percentageOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
@@ -236,7 +238,7 @@ data FillConfig = FillConfig {
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
-    { cnfConf = dCnfConf
+    { syntaxTreeConfig = defaultSynTreeConfig
     , percentageOfGaps = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False
