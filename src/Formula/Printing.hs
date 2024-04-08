@@ -145,8 +145,7 @@ instance Pretty PickInst where
   pretty  PickInst{..} =
       text "PickInst(" <> vcat
                            [ nest 2 $ pretty trees
-                           , char ',' <+>
-                           pretty correct
+                           , char ',' <+> pretty correct
                            , myText (", {" ++ show showSolution ++ "}")
                            , maybe empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
                            , char ')'
