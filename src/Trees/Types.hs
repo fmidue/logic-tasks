@@ -16,8 +16,11 @@ module Trees.Types
 
 
 import GHC.Generics
-import Formula.Types (ToSAT(..))
+import Formula.Types (ToSAT(..), Formula(..))
+import qualified Formula.Types as F (Literal(..))
 import qualified SAT.MiniSat as Sat
+import Data.List (sort, find)
+import Data.List.Extra (nubOrd)
 
 
 data BinOp = And | Or | Impl | Equi
@@ -93,3 +96,33 @@ newtype FormulaAnswer = FormulaAnswer {maybeForm :: Maybe (PropFormula Char)} de
 instance Show FormulaAnswer where
   show (FormulaAnswer (Just p)) = show p
   show _ = ""
+
+
+instance Formula (SynTree BinOp Char) where
+  literals (Leaf x) = [F.Literal x]
+  literals (Not (Leaf x)) = [F.Not x]
+  literals (Not x) = literals x
+  literals (Binary _ l r) = sort $ nubOrd $ literals l ++ literals r
+
+  atomics (Leaf x) = [F.Literal x]
+  atomics (Not x) = atomics x
+  atomics (Binary _ l r) = sort $ nubOrd $ atomics l ++ atomics r
+
+  amount (Leaf _) = 1
+  amount (Not x) = 1 + amount x
+  amount (Binary _ l r) = 1 + amount l + amount r
+
+  evaluate allocation (Leaf x) = snd <$> find (\(k,_) -> F.Literal x == k) allocation
+  evaluate allocation (Not x) = not <$> evaluate allocation x
+  evaluate allocation (Binary op l r) = applyMaybe (
+    case op of
+      And -> (&&)
+      Or -> (||)
+      Impl -> \x y -> not x || y
+      Equi -> (==)
+    ) (evaluate allocation l) (evaluate allocation r)
+    where
+      applyMaybe _ Nothing _ = Nothing
+      applyMaybe _ _ Nothing = Nothing
+      applyMaybe f (Just x) (Just y) = Just $ f x y
+
