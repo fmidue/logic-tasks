@@ -79,6 +79,7 @@ library:
     - Config
     - Formula.Types
     - Formula.Resolution
+    - Parsing
 
   ghc-options:
     - -Wall

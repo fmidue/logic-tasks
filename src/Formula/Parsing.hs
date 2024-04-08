@@ -1,12 +1,14 @@
-{-# LANGUAGE DefaultSignatures #-}
+
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Formula.Parsing where
 
 import Config
 import Formula.Util
 import ParsingHelpers (lexeme, tokenSymbol)
 import Formula.Types
+import Trees.Parsing ()
 
 import Control.Monad (void)
 import Data.Char (toLower)
@@ -32,6 +34,7 @@ import Text.ParserCombinators.Parsec (
   )
 
 import UniversalParser
+import Parsing (Parse(..))
 
 instance Parse ResStep where
   parser = do
@@ -60,13 +63,6 @@ instance Parse ResStep where
 
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
 notFollowedByElse p f = try ((try p >>= f) <|> pure ())
-
-
-
-class Parse a where
-  parser :: Parser a
-  default parser :: FromGrammar a => Parser a
-  parser = formulaParser
 
 
 instance Parse a => Parse [a] where

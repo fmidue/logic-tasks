@@ -27,7 +27,7 @@ instance Show StepAnswer where
 
 
 data PickInst = PickInst {
-                 cnfs    :: ![Cnf]
+                 trees :: [ST.SynTree ST.BinOp Char]
                , correct :: !Int
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
@@ -36,7 +36,7 @@ data PickInst = PickInst {
 
 dPickInst :: PickInst
 dPickInst =  PickInst
-          { cnfs = [mkCnf [mkClause [Literal 'A', Not 'B']], mkCnf [mkClause [Not 'A', Literal 'B']]]
+          { trees = [ST.Binary ST.And (ST.Binary ST.Or (ST.Leaf 'A') (ST.Not (ST.Leaf 'B'))) (ST.Binary ST.Or (ST.Not (ST.Leaf 'A')) (ST.Leaf 'B'))]
           , correct = 1
           , showSolution = False
           , addText = Nothing
@@ -208,7 +208,7 @@ dCnfConf = CnfConfig
 
 
 data PickConfig = PickConfig {
-       cnfConf :: CnfConfig
+       syntaxTreeConfig :: SynTreeConfig
      , amountOfOptions :: Int
      , pickCnf :: Bool
      , printSolution :: Bool
@@ -218,7 +218,7 @@ data PickConfig = PickConfig {
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
-    { cnfConf = dCnfConf
+    { syntaxTreeConfig = defaultSynTreeConfig
     , amountOfOptions = 3
     , pickCnf = False
     , printSolution = False

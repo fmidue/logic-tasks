@@ -63,6 +63,7 @@ library
       Config
       Formula.Types
       Formula.Resolution
+      Parsing
   other-modules:
       Auxiliary
       Formula.Printing

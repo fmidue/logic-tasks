@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Formula.Printing
        ( showIndexedList
@@ -17,6 +18,7 @@ import qualified Data.Set as Set (null)
 import Text.PrettyPrint.Leijen.Text
 import Data.Map (toList)
 import Data.Maybe (isJust, fromJust)
+import Trees.Print ()
 
 
 myText :: String -> Doc
@@ -142,15 +144,13 @@ instance Pretty PrologClause where
 instance Pretty PickInst where
   pretty  PickInst{..} =
       text "PickInst(" <> vcat
-                           [ nest 2 $ pretty cnfs
-                           , char ',' <+> pretty correct
+                           [ nest 2 $ pretty trees
+                           , char ',' <+>
+                           pretty correct
                            , myText (", {" ++ show showSolution ++ "}")
                            , maybe empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
                            , char ')'
                            ]
-
-
-
 
 
 -- show tables side by side

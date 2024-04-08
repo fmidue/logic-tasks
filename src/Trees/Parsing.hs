@@ -20,10 +20,9 @@ import Trees.Types as Tree
     , TreeFormulaAnswer(..)
     )
 
-import Formula.Parsing (Parse(..))
-
 import ParsingHelpers (fully)
 import UniversalParser as Parser
+import Parsing (Parse(..))
 
 instance Parse (SynTree BinOp Char)
 instance FromGrammar (SynTree BinOp Char) where
