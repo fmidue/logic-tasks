@@ -57,6 +57,7 @@ library
       Trees.Print
       Trees.Helpers
       Trees.Generate
+      Trees.Formula
       Formula.Parsing
       Formula.Helpers
       ParsingHelpers

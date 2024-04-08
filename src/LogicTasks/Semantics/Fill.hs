@@ -26,6 +26,7 @@ import Data.Foldable.Extra (notNull)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (checkSynTreeConfig)
 import Trees.Print (display)
+import Trees.Formula ()
 
 
 

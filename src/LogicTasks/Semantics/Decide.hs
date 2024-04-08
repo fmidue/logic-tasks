@@ -26,6 +26,7 @@ import Control.Monad (when, unless)
 import Trees.Generate (genSynTree)
 import Trees.Print (display)
 import Tasks.SynTree.Config (checkSynTreeConfig)
+import Trees.Formula ()
 
 
 

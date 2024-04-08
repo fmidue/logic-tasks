@@ -30,6 +30,7 @@ import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Print (display)
 import Data.List.Extra (nubOrd)
 import Trees.Helpers (collectLeaves)
+import Trees.Formula ()
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
