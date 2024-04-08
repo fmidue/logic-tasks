@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module LogicTasks.Semantics.Decide where
 
@@ -16,27 +17,32 @@ import Control.Monad.Output (
 import Data.List (nub)
 import Test.QuickCheck (Gen)
 
-import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
-import Formula.Util (isEmptyCnf, hasEmptyClause)
+import Config (DecideConfig(..), DecideInst(..))
 import Formula.Table (flipAt, readEntries)
-import Formula.Types (atomics, availableLetter, genCnf, getTable, literals, Table)
-import Util (checkCnfConf, isOutside, preventWithHint, remove, printWithHint)
+import Formula.Types (atomics, availableLetter, getTable, literals, Table)
+import Util (isOutside, preventWithHint, remove, printWithHint)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when, unless)
+import Trees.Generate (genSynTree)
+import Trees.Print (display)
+import Tasks.SynTree.Config (checkSynTreeConfig)
 
 
 
 
 genDecideInst :: DecideConfig -> Gen DecideInst
-genDecideInst DecideConfig{cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..} = do
-    cnf <- getCnf
+genDecideInst DecideConfig{..} = do
+    tree <- genSynTree syntaxTreeConfig
     let
-      tableLen = length $ readEntries $ getTable cnf
+      tableLen = length $ readEntries $ getTable tree
       mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1
     mistakes <- remove (tableLen - mistakeCount) [1..tableLen]
-    pure $ DecideInst cnf mistakes printSolution extraText
-  where
-    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+    pure $ DecideInst {
+      tree
+    , changed = mistakes
+    , showSolution = printSolution
+    , addText = extraText
+    }
 
 
 
@@ -46,13 +52,13 @@ description DecideInst{..} = do
     translate $ do
       english "Consider the following formula:"
       german "Betrachten Sie die folgende Formel:"
-    indent $ code $ availableLetter (literals cnf) : " = " ++ show cnf
+    indent $ code $ availableLetter (literals tree) : " = " ++ display tree
     pure ()
   paragraph $ do
     translate $ do
       english "Find all faulty entries in the last column of the following truth table."
       german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzten Spalte der folgenden Wahrheitstafel."
-    indent $ code $ show (flipAt (getTable cnf) changed)
+    indent $ code $ show (flipAt (getTable tree) changed)
     pure ()
   paragraph $ translate $ do
     english  "Provide the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
@@ -70,14 +76,7 @@ description DecideInst{..} = do
 
 verifyStatic :: OutputMonad m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
-    | isEmptyCnf cnf || hasEmptyClause cnf =
-        refuse $ indent $ translate $ do
-          english "Please give a non empty formula."
-          german "Geben Sie bitte eine nicht-leere Formel an."
-
-
-
-    | any (> 2^length (atomics cnf)) changed || any (<=0) changed =
+    | any (> 2^length (atomics tree)) changed || any (<=0) changed =
         refuse $ indent $ translate $ do
           english "At least one of the given indices does not exist."
           german "Mindestens einer der angegebenen Indizes existiert nicht."
@@ -100,7 +99,7 @@ verifyQuiz DecideConfig{..}
           english "The percentile of mistakes has to be set between 1 and 100."
           german "Der prozentuale Anteil an Fehlern muss zwischen 1 und 100 liegen."
 
-    | otherwise = checkCnfConf cnfConf
+    | otherwise = checkSynTreeConfig syntaxTreeConfig
 
 
 
@@ -126,10 +125,10 @@ preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > table
       "Please remove at least " ++ engLong ++ " to proceed."
       )
     gerEng diff = if diff == 1
-        then ("muss mindestens " ++ display ++ " Wert", display ++ " value") -- no-spell-check
-        else ("müssen mindestens " ++ display ++ " Werte", display ++ " values") -- no-spell-check
+        then ("muss mindestens " ++ display' ++ " Wert", display' ++ " value") -- no-spell-check
+        else ("müssen mindestens " ++ display' ++ " Werte", display' ++ " values") -- no-spell-check
       where
-        display = show diff
+        display' = show diff
 
 partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
@@ -143,7 +142,7 @@ partialGrade DecideInst{..} sol = do
       english "The solution must contain at least one index."
     )
 
-  preventIfSolutionExceedsTableSize (length sol) (getTable cnf)
+  preventIfSolutionExceedsTableSize (length sol) (getTable tree)
 
   pure ()
 
