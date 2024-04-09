@@ -54,6 +54,7 @@ library
       Trees.Helpers
       Trees.Generate
       Formula.Parsing
+      Formula.Parsing.Compat
       Formula.Helpers
       ParsingHelpers
       Config
@@ -61,7 +62,6 @@ library
       Formula.Resolution
   other-modules:
       Auxiliary
-      Formula.Parsing.Compat
       Formula.Printing
       Formula.Table
       Formula.Util
