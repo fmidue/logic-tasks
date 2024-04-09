@@ -13,10 +13,11 @@ import Text.Parsec (anyChar)
 import Control.Monad.Output (LangM, english, german, OutputMonad)
 import LogicTasks.Helpers (reject)
 import qualified Data.Set as Set
+import Formula.Parsing (Parse(parser))
 
 newtype Delayed a = Delayed { parseDelayed :: Megaparsec.Parser a -> Either (ParseErrorBundle String Void) a }
 
-withDelayed :: OutputMonad m => (a -> LangM m) -> Parser a -> Delayed a -> LangM m
+withDelayed :: OutputMonad m => (a -> LangM m) -> Megaparsec.Parser a -> Delayed a -> LangM m
 withDelayed grade p d =
   case parseDelayed d (fully p) of
     Left err -> reject $ do
@@ -26,6 +27,13 @@ withDelayed grade p d =
 
 delayedParser :: Parsec.Parsec String () (Delayed a)
 delayedParser = (\str -> Delayed $ \p -> Megaparsec.parse p "(input)" str) <$> (Parsec.many anyChar <* Parsec.eof)
+
+direct :: Parse a => Parsec.Parsec String () a
+direct = do
+  p <- delayedParser
+  case parseDelayed p parser of
+    Left err -> fail $ Megaparsec.errorBundlePretty err
+    Right x -> pure x
 
 -- filter out unhelpfull (parts of) error messages
 -- (currently only "expecting white space" messages)
