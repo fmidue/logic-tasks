@@ -14,7 +14,7 @@ import LogicTasks.Helpers (reject)
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
-newtype Delayed a = Delayed String deriving (Eq, Typeable, Generic)
+newtype Delayed a = Delayed String deriving (Eq, Show, Typeable, Generic)
 
 delayed :: String -> Delayed a
 delayed = Delayed

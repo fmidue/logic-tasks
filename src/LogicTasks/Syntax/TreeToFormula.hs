@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeApplications #-}
 
 module LogicTasks.Syntax.TreeToFormula where
 
@@ -29,6 +30,9 @@ import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
 import Formula.Parsing.Delayed (Delayed (..), withDelayed)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
+import Text.Parsec (parse)
+import UniversalParser (tokenSequence)
+import ParsingHelpers (fully)
 
 
 description :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -74,7 +78,22 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` parser
+partialGrade inst (Delayed ans) =
+  case parse (fully $ parser @TreeFormulaAnswer) "(delayed input)" ans of
+    Right f -> partialGrade' inst f
+    Left err -> case parse (fully tokenSequence) "" ans of
+      Left _ -> reject $ do
+        german $ show err
+        english $ show err
+      Right () -> reject $ do
+        german $  unlines
+          [ "Ihre Abgabe konnte nicht gelesen werden."
+          , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben."
+          ]
+        english $ unlines
+          [ "Unable to read solution."
+          , "Please make sure that the order of symbols adheres to the rules for well-formed formulas, especially if there are enough parenthesis."
+          ]
 
 partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' _ sol
