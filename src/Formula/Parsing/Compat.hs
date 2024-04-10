@@ -3,17 +3,21 @@
 module Formula.Parsing.Compat where
 
 import qualified Text.Parsec as Parsec
+import qualified Text.Parsec.Pos as Parsec
+
 import qualified Text.Megaparsec as Megaparsec
-import Text.Megaparsec (ParseErrorBundle(..), ParseError (..), ErrorItem(..))
-import Data.Void (Void)
-import Data.List.NonEmpty (NonEmpty((:|)))
-import qualified Data.List.NonEmpty as NonEmpty
 import ParsingHelpers as Megaparsec (Parser, fully)
-import Text.Parsec (anyChar)
+import Text.Megaparsec (ParseErrorBundle(..), ParseError (..), ErrorItem(..))
+
 import Control.Monad.Output (LangM, english, german, OutputMonad)
-import LogicTasks.Helpers (reject)
+
+import qualified Data.List.NonEmpty as NonEmpty
+import Data.List.NonEmpty (NonEmpty((:|)))
 import qualified Data.Set as Set
+import Data.Void (Void)
+
 import Formula.Parsing (Parse(parser))
+import LogicTasks.Helpers (reject)
 
 newtype Delayed a = Delayed { parseDelayed :: Megaparsec.Parser a -> Either (ParseErrorBundle String Void) a }
 
@@ -26,14 +30,38 @@ withDelayed grade p d =
     Right x -> grade x
 
 delayedParser :: Parsec.Parsec String () (Delayed a)
-delayedParser = (\str -> Delayed $ \p -> Megaparsec.parse p "(input)" str) <$> (Parsec.many anyChar <* Parsec.eof)
+delayedParser = (\str -> Delayed $ \p -> Megaparsec.parse p "(input)" str) <$> Parsec.many Parsec.anyChar
 
 direct :: Parse a => Parsec.Parsec String () a
 direct = do
-  p <- delayedParser
-  case parseDelayed p parser of
-    Left err -> fail $ Megaparsec.errorBundlePretty err
-    Right x -> pure x
+  str <- Parsec.getInput
+  pos <- Parsec.getPosition
+  case Megaparsec.parse
+        ( do
+          st <- Megaparsec.getParserState
+          Megaparsec.setParserState st{ Megaparsec.stateInput = str, Megaparsec.statePosState = (Megaparsec.statePosState st){Megaparsec.pstateSourcePos = convertPos pos} }
+          parseWithPosAndRest
+        )
+      "(megaparsec-input)" str of
+    Left err -> fail $ Megaparsec.errorBundlePretty $ filterErrors err
+    Right (x,newPos,rest) -> do
+      Parsec.setInput rest
+      Parsec.setPosition $ convertMegaPos newPos
+      pure x
+  where
+    parseWithPosAndRest :: Parse a => Megaparsec.Parser (a,Megaparsec.SourcePos,String)
+    parseWithPosAndRest = do
+      res <- parser
+      pos <- Megaparsec.getSourcePos
+      rest <- Megaparsec.getInput
+      pure (res,pos,rest)
+
+    convertMegaPos :: Megaparsec.SourcePos -> Parsec.SourcePos
+    convertMegaPos (Megaparsec.SourcePos n l c) = Parsec.newPos n (Megaparsec.unPos l) (Megaparsec.unPos c)
+
+    convertPos :: Parsec.SourcePos -> Megaparsec.SourcePos
+    convertPos pos = Megaparsec.SourcePos (Parsec.sourceName pos) (Megaparsec.mkPos $ Parsec.sourceLine pos) (Megaparsec.mkPos $ Parsec.sourceColumn pos)
+
 
 -- filter out unhelpfull (parts of) error messages
 -- (currently only "expecting white space" messages)
