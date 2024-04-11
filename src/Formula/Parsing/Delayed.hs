@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DeriveGeneric #-}
-module Formula.Parsing.Delayed where
+module Formula.Parsing.Delayed (Delayed, delayed, unDelayed, parseDelayed, withDelayed) where
 
 
 import Text.Parsec
@@ -14,7 +14,7 @@ import LogicTasks.Helpers (reject)
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
-newtype Delayed a = Delayed String deriving (Eq, Show, Typeable, Generic)
+newtype Delayed a = Delayed {unDelayed :: String} deriving (Eq, Typeable, Generic)
 
 delayed :: String -> Delayed a
 delayed = Delayed
