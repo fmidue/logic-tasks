@@ -87,8 +87,8 @@ partialGrade inst (Delayed ans) =
         english $ show err
       Right () -> reject $ do
         german $  unlines
-          [ "Ihre Abgabe konnte nicht gelesen werden."
-          , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben."
+          [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
+          , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben." {- german -}
           ]
         english $ unlines
           [ "Unable to read solution."
