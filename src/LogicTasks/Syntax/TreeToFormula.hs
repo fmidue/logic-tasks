@@ -81,18 +81,18 @@ partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer 
 partialGrade inst ans =
   case parseDelayed ans (fully $ parser @TreeFormulaAnswer) of
     Right f -> partialGrade' inst f
-    Left err -> case parse (fully tokenSequence) "" (unDelayed ans) of
-      Left _ -> reject $ do
+    Left err -> reject $ case parse (fully tokenSequence) "" (unDelayed ans) of
+      Left _ -> do
         german $ show err
         english $ show err
-      Right () -> reject $ do
+      Right () -> do
         german $  unlines
           [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
           , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben." {- german -}
           ]
         english $ unlines
           [ "Unable to read solution."
-          , "Please make sure that the order of symbols adheres to the rules for well-formed formulas, especially if there are enough parenthesis."
+          , "Please make sure that the order of symbols adheres to the rules for well-formed formulas, especially if there are enough parentheses."
           ]
 
 partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
