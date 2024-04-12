@@ -15,35 +15,43 @@ import Control.Monad.Output (
   translate,
   )
 
-import Test.QuickCheck (Gen, elements, vectorOf, suchThat)
+import Test.QuickCheck (Gen, vectorOf, suchThat, sublistOf)
 
 import Config (Number(..), PickConfig(..), PickInst(..))
 import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (example, extra)
-import Control.Monad (when)
+import Control.Monad (when, void)
 import Data.Maybe (fromJust)
 import Data.List (nubBy)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Print (display)
-import Data.List.Extra (nubOrd, nubSort)
-import Trees.Helpers (collectLeaves)
+import Trees.Helpers (collectLeaves, fillTreesRandomly)
 import Trees.Formula ()
+
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
-    trees <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig) `suchThat` \trees ->
-      length (nubBy isSemanticEqual trees) == amountOfOptions &&
-      length (nubOrd (map (nubSort . collectLeaves) trees)) == 1
-    corrIndex <- elements [1..amountOfOptions]
-    pure $ PickInst {
-      trees,
-      correct = corrIndex,
-      showSolution = printSolution,
-      addText = extraText
-    }
+  trees' <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig) `suchThat` \trees ->
+    length (nubBy isSemanticEqual trees) == amountOfOptions
+
+  let shapes = map void trees'
+
+  atomics <- sublistOf (availableAtoms syntaxTreeConfig) `suchThat` \atoms ->
+    length atoms >= fromIntegral (minAmountOfUniqueAtoms syntaxTreeConfig)
+
+  trees <- fillTreesRandomly shapes atomics `suchThat` \generatedTrees ->
+    all (\t -> all (`elem` collectLeaves t) atomics) generatedTrees &&
+    length (nubBy isSemanticEqual generatedTrees) == amountOfOptions
+
+  pure $ PickInst {
+    trees,
+    correct = 1,
+    showSolution = printSolution,
+    addText = extraText
+  }
 
 
 
@@ -86,7 +94,7 @@ verifyStatic PickInst{..}
           german "Der angegebene Index existiert nicht."
           english "The given index does not exist."
 
-    | otherwise = pure()
+    | otherwise = pure ()
 
 
 
