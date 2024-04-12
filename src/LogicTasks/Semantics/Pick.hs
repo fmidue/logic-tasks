@@ -27,8 +27,6 @@ import Data.Maybe (fromJust)
 import Data.List (nubBy)
 
 
-
-
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..} = do
     cnfs <- tryGen (vectorOf amountOfOptions (getCnf usedLiterals)) 100 ((amountOfOptions ==) . length . nubBy isSemanticEqual)
@@ -108,16 +106,12 @@ verifyQuiz PickConfig{..}
 start :: Number
 start = Number Nothing
 
-
-
 partialGrade :: OutputMonad m => PickInst -> Number -> LangM m
 partialGrade _ (Number Nothing) = refuse $ indent $
         translate $ do
           german "Es wurde kein Index angegeben."
           english "You did not give an index."
-
 partialGrade _ _ = pure ()
-
 
 completeGrade :: OutputMonad m => PickInst -> Number -> LangM m
 completeGrade PickInst{..} (Number index) =

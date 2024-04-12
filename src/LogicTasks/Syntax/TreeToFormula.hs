@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeApplications #-}
 
 module LogicTasks.Syntax.TreeToFormula where
 
@@ -26,8 +27,12 @@ import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
-
-
+import Formula.Parsing.Delayed (Delayed (..), withDelayed)
+import Formula.Parsing (Parse(..))
+import Trees.Parsing()
+import Text.Parsec (parse)
+import UniversalParser (tokenSequence)
+import ParsingHelpers (fully)
 
 
 description :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -72,19 +77,36 @@ verifyConfig = checkSynTreeConfig
 start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
+partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+partialGrade inst (Delayed ans) =
+  case parse (fully $ parser @TreeFormulaAnswer) "(delayed input)" ans of
+    Right f -> partialGrade' inst f
+    Left err -> reject $ case parse (fully tokenSequence) "" ans of
+      Left _ -> do
+        german $ show err
+        english $ show err
+      Right () -> do
+        german $  unlines
+          [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
+          , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben." {- german -}
+          ]
+        english $ unlines
+          [ "Unable to read solution."
+          , "Please make sure that the arrangement of symbols adheres to the rules for well-formed formulas, especially that there are enough parentheses."
+          ]
 
+partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
+partialGrade' _ sol
+        | isNothing $ maybeTree sol = reject $ do
+          english "You did not submit a solution."
+          german "Die Abgabe ist leer."
+        | otherwise = pure ()
 
-partialGrade :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
-partialGrade _ sol
-    | isNothing $ maybeTree sol = reject $ do
-      english "You did not submit a solution."
-      german "Die Abgabe ist leer."
-    | otherwise = pure ()
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
-
-
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
-completeGrade path inst sol
+completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
+completeGrade' path inst sol
     | treeAnswer /= correctTree = refuse $ do
         instruct $ do
           english "Your solution is not correct. The syntax tree for your entered formula looks like this:"

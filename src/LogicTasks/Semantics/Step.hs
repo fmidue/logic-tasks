@@ -25,8 +25,8 @@ import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when)
-
-
+import Formula.Parsing.Delayed (Delayed, withDelayed)
+import Formula.Parsing (Parse(..))
 
 
 genStepInst :: StepConfig -> Gen StepInst
@@ -92,10 +92,11 @@ verifyQuiz StepConfig{..} = checkBaseConf baseConf
 start :: StepAnswer
 start = StepAnswer Nothing
 
+partialGrade :: OutputMonad m => StepInst -> Delayed StepAnswer -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-
-partialGrade :: OutputMonad m => StepInst -> StepAnswer -> LangM m
-partialGrade StepInst{..} sol = do
+partialGrade' :: OutputMonad m => StepInst -> StepAnswer -> LangM m
+partialGrade' StepInst{..} sol = do
 
   prevent (isNothing $ step sol) $
     translate $ do
@@ -126,10 +127,12 @@ partialGrade StepInst{..} sol = do
      solLits = fromList $ literals $ snd mSol
      extraLiterals = toList (solLits `difference` availLits)
 
+completeGrade :: OutputMonad m => StepInst -> Delayed StepAnswer -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
 
-completeGrade :: OutputMonad m => StepInst -> StepAnswer -> LangM m
-completeGrade StepInst{..} sol =
+completeGrade' :: OutputMonad m => StepInst -> StepAnswer -> LangM m
+completeGrade' StepInst{..} sol =
     case resolve clause1 clause2 (fst mSol) of
         Nothing -> refuse $ indent $ do
           translate $ do

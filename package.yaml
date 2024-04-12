@@ -16,6 +16,7 @@ dependencies:
   - text
   - output-monad
   - pretty-simple
+  - parsec
   - latex-svg-image >= 0.2
   - bytestring
   - utf8-string
@@ -77,6 +78,7 @@ library:
     - Trees.Helpers
     - Trees.Generate
     - Formula.Parsing
+    - Formula.Parsing.Delayed
     - Formula.Helpers
     - ParsingHelpers
     - Config

@@ -82,7 +82,12 @@ instance Parse a => Parse [a] where
         tokenSymbol "]" <|> fail "could not parse an enclosing ']'"
         pure xs
 
-
+instance (Parse a, Parse b) => Parse (a,b) where
+  parser = between (tokenSymbol "(") (tokenSymbol ")") $ do
+    a <- parser
+    tokenSymbol ","
+    b <- parser
+    pure (a,b)
 
 instance Parse Number where
   parser = (lexeme numParse <?> "Number") <|> fail "Could not parse a number"

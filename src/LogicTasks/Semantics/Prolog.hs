@@ -27,7 +27,8 @@ import Util(prevent, preventWithHint)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
-
+import Formula.Parsing.Delayed (Delayed, withDelayed)
+import Formula.Parsing (Parse(..))
 
 genPrologInst :: PrologConfig -> Gen PrologInst
 genPrologInst PrologConfig{..} = (do
@@ -130,10 +131,11 @@ verifyQuiz PrologConfig{..}
 start :: (PrologLiteral, PrologClause)
 start = (PrologLiteral True "a" ["x"], mkPrologClause [])
 
+partialGrade :: OutputMonad m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-
-partialGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
-partialGrade PrologInst{..} sol = do
+partialGrade' :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
+partialGrade' PrologInst{..} sol = do
   prevent (not (fst sol `member` availLits)) $
     translate $ do
       german "Gewähltes Literal kommt in den Klauseln vor?"
@@ -157,10 +159,11 @@ partialGrade PrologInst{..} sol = do
      solLits = pLiterals $ snd sol
      extraLiterals = toList $ solLits `difference` availLits
 
+completeGrade :: OutputMonad m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
+completeGrade inst = completeGrade' inst `withDelayed` parser
 
-
-completeGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
-completeGrade PrologInst{..} sol =
+completeGrade' :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
+completeGrade' PrologInst{..} sol =
     case resolveResult of
         Nothing -> refuse $ indent $  do
           translate $ do

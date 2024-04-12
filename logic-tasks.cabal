@@ -61,6 +61,7 @@ library
       Trees.Helpers
       Trees.Generate
       Formula.Parsing
+      Formula.Parsing.Delayed
       Formula.Helpers
       ParsingHelpers
       Config
