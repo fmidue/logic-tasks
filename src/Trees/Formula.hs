@@ -14,7 +14,7 @@ instance Formula (SynTree BinOp Char) where
   literals (Not x) = literals x
   literals (Binary _ l r) = sort $ nubOrd $ literals l ++ literals r
 
-  atomics = map F.Literal . collectLeaves
+  atomics = sort . map F.Literal . nubOrd . collectLeaves
 
   amount = fromIntegral . treeNodes
 
