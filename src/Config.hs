@@ -103,7 +103,7 @@ data DecideInst = DecideInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
@@ -273,7 +273,7 @@ data DecideConfig = DecideConfig {
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
