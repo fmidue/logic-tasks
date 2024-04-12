@@ -14,7 +14,7 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import Data.List (nubBy, sort)
 import Formula.Util (isSemanticEqual)
 import Trees.Helpers (collectLeaves)
-import Data.List.Extra (nubOrd)
+import Data.List.Extra (nubOrd, nubSort)
 
 validBoundsPick :: Gen PickConfig
 validBoundsPick = do
@@ -46,4 +46,4 @@ spec = do
     xit "generated formulas should only consist of the same atomics" $
       forAll validBoundsPick $ \pickConfig ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
-          length (nubOrd (map (sort . nubOrd . collectLeaves) trees)) == 1
+          length (nubOrd (map (nubSort . collectLeaves) trees)) == 1
