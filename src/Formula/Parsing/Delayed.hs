@@ -16,9 +16,6 @@ import GHC.Generics (Generic)
 
 newtype Delayed a = Delayed String deriving (Eq, Typeable, Generic)
 
-instance Show (Delayed a) where
-  show (Delayed str) = str
-
 delayed :: String -> Delayed a
 delayed = Delayed
 
