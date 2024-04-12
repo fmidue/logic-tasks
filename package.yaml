@@ -82,6 +82,7 @@ library:
     - Config
     - Formula.Types
     - Formula.Resolution
+    - Formula.Util
     - Parsing
 
   ghc-options:

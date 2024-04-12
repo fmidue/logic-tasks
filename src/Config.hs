@@ -32,7 +32,7 @@ data PickInst = PickInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dPickInst :: PickInst
 dPickInst =  PickInst
@@ -216,7 +216,7 @@ data PickConfig = PickConfig {
      , printSolution :: Bool
      , extraText :: Maybe (Map Language String)
      }
-     deriving (Typeable, Generic)
+     deriving (Typeable, Generic, Show)
 
 dPickConf :: PickConfig
 dPickConf = PickConfig

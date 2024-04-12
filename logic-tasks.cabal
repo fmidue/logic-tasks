@@ -65,12 +65,12 @@ library
       Config
       Formula.Types
       Formula.Resolution
+      Formula.Util
       Parsing
   other-modules:
       Auxiliary
       Formula.Printing
       Formula.Table
-      Formula.Util
       LogicTasks.Helpers
       UniversalParser
       Util
@@ -108,6 +108,7 @@ test-suite src-test
       LegalCNFSpec
       LegalPropositionSpec
       ParsingSpec
+      PickSpec
       PrologSpec
       ResolutionSpec
       SubTreeSpec
