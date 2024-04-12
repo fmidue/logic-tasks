@@ -24,7 +24,7 @@ import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 import Data.Maybe (fromJust)
-import Data.List (nubBy)
+import Data.List (nubBy, sort)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Print (display)
@@ -36,7 +36,7 @@ genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
     trees <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig) `suchThat` \trees ->
       length (nubBy isSemanticEqual trees) == amountOfOptions &&
-      length (nubOrd (map (nubOrd . collectLeaves) trees)) == 1
+      length (nubOrd (map (nubOrd . sort . collectLeaves) trees)) == 1
     corrIndex <- elements [1..amountOfOptions]
     pure $ PickInst {
       trees,
