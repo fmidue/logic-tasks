@@ -4,7 +4,7 @@ module PickSpec where
 import Test.Hspec (Spec, describe, it, xit)
 import Control.Monad.Output (LangM)
 import Config (dPickConf, PickConfig (..), PickInst (..))
-import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst)
+import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
@@ -47,3 +47,7 @@ spec = do
       forAll validBoundsPick $ \pickConfig ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           length (nubOrd (map (nubSort . collectLeaves) trees)) == 1
+    xit "the generated instance should pass verifyStatic" $
+      forAll validBoundsPick $ \pickConfig -> do
+        forAll (genPickInst pickConfig) $ \pickInst ->
+          isJust $ runIdentity $ evalLangM (verifyStatic pickInst :: LangM Maybe)

@@ -3,19 +3,21 @@
 module DecideSpec where
 
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, choose)
+import Test.QuickCheck (forAll, Gen, choose, suchThat)
 import Control.Monad.Output (LangM)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..))
-import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst)
+import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
+import Tasks.SynTree.Config (SynTreeConfig(..))
 
 validBoundsDecide :: Gen DecideConfig
 validBoundsDecide = do
-  syntaxTreeConfig <- validBoundsSynTree
+  -- too large tables lead to too long test runs and are probably not suitable for actual tasks
+  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} -> maxNodes < 30
   percentageOfChanged <- choose (1, 100)
 
   pure $ DecideConfig {
@@ -34,10 +36,14 @@ spec = do
       forAll validBoundsDecide $ \decideConfig ->
         isJust $ runIdentity $ evalLangM (verifyQuiz decideConfig :: LangM Maybe)
   describe "genDecideInst" $ do
-    xit "should generate an instance with the right amount of changed entries" $
+    it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
           let tableLen = length (getEntries (getTable tree))
               mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1 in
           length changed == mistakeCount
+    it "the generated instance should pass verifyStatic" $
+      forAll validBoundsDecide $ \decideConfig -> do
+        forAll (genDecideInst decideConfig) $ \decideInst ->
+          isJust $ runIdentity $ evalLangM (verifyStatic decideInst :: LangM Maybe)
 
