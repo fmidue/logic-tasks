@@ -59,6 +59,7 @@ library
       Trees.Generate
       Trees.Formula
       Formula.Parsing
+      Formula.Parsing.Delayed
       Formula.Helpers
       ParsingHelpers
       Config

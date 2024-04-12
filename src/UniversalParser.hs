@@ -5,10 +5,10 @@
 {-# LANGUAGE TypeApplications #-}
 module UniversalParser where
 
-import Data.Functor (($>))
+import Data.Functor (($>), void)
 import Data.Maybe (fromMaybe)
 
-import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char)
+import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, many)
 import Text.Parsec.String (Parser)
 
 import ParsingHelpers
@@ -162,6 +162,18 @@ negationParser =
 
 atomParser :: Parser Char
 atomParser = token (satisfy (`elem` ['A'..'Z'])) <?> "atomic Proposition"
+
+-- parser for token sequences
+tokenSequence :: Parser ()
+tokenSequence = void $ many $
+      orParser
+  <|> andParser
+  <|> implicationParser
+  <|> biImplicationParser
+  <|> negationParser
+  <|> void atomParser
+  <|> tokenSymbol "("
+  <|> tokenSymbol ")"
 
 -- the universal parser
 formula :: LevelSpec -> Parser FormulaGrammar
