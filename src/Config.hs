@@ -236,7 +236,7 @@ data FillConfig = FillConfig {
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
