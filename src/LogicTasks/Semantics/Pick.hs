@@ -28,7 +28,7 @@ import Data.List (nubBy)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Print (display)
-import Trees.Helpers (collectLeaves, fillTreesRandomly)
+import Trees.Helpers (collectLeaves, fillTreeRandomly)
 import Trees.Formula ()
 
 
@@ -40,10 +40,10 @@ genPickInst PickConfig{..} = do
   let shapes = map void trees'
 
   atomics <- sublistOf (availableAtoms syntaxTreeConfig) `suchThat` \atoms ->
+    length atoms <= minimum (map (length . collectLeaves) shapes) &&
     length atoms >= fromIntegral (minAmountOfUniqueAtoms syntaxTreeConfig)
 
-  trees <- fillTreesRandomly shapes atomics `suchThat` \generatedTrees ->
-    all (\t -> all (`elem` collectLeaves t) atomics) generatedTrees &&
+  trees <- mapM (fillTreeRandomly' atomics) shapes `suchThat` \generatedTrees ->
     length (nubBy isSemanticEqual generatedTrees) == amountOfOptions
 
   pure $ PickInst {
@@ -52,6 +52,8 @@ genPickInst PickConfig{..} = do
     showSolution = printSolution,
     addText = extraText
   }
+    where fillTreeRandomly' atomics tree = fillTreeRandomly atomics tree `suchThat`
+            \t -> all (`elem` collectLeaves t) atomics
 
 
 

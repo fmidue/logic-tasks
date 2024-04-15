@@ -25,8 +25,7 @@ module Trees.Helpers
     binOp,
     bothKids,
     collectUniqueBinOpsInSynTree,
-    fillTreeRandomly,
-    fillTreesRandomly
+    fillTreeRandomly
     ) where
 
 import Control.Monad (void)
@@ -174,12 +173,6 @@ collectUniqueBinOpsInSynTree (Binary op l r) = nubOrd $ concat [
   collectUniqueBinOpsInSynTree l,
   collectUniqueBinOpsInSynTree r]
 
-fillTreesRandomly :: [SynTree a ()] -> [b] -> Gen [SynTree a b]
-fillTreesRandomly _ [] = error "fillTreesRandomly: empty atoms list"
-fillTreesRandomly [] _ = pure []
-fillTreesRandomly (tree:trees) atoms = (:) <$> fillTreeRandomly tree atoms <*> fillTreesRandomly trees atoms
+fillTreeRandomly :: [b] -> SynTree a () -> Gen (SynTree a b)
+fillTreeRandomly atoms = traverse (\_ -> elements atoms)
 
-fillTreeRandomly :: SynTree a () -> [b] -> Gen (SynTree a b)
-fillTreeRandomly (Leaf _) atoms = Leaf <$> elements atoms
-fillTreeRandomly (Not x) atoms = Not <$> fillTreeRandomly x atoms
-fillTreeRandomly (Binary op l r) atoms = Binary op <$> fillTreeRandomly l atoms <*> fillTreeRandomly r atoms
