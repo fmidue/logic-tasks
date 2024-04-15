@@ -21,7 +21,7 @@ import qualified SAT.MiniSat as Sat
 
 
 data BinOp = And | Or | Impl | Equi
-  deriving (Eq, Generic, Ord, Show, Enum, Bounded)
+  deriving (Eq, Generic, Ord, Show, Enum, Bounded, Read)
 
 showOperator :: BinOp -> String
 showOperator And = "∧"
@@ -39,7 +39,7 @@ data SynTree o c
     = Binary o (SynTree o c) (SynTree o c)
     | Not (SynTree o c)
     | Leaf c
-  deriving (Eq, Generic, Ord, Show, Functor, Foldable, Traversable)
+  deriving (Eq, Generic, Ord, Show, Functor, Foldable, Traversable, Read)
 
 instance Applicative (SynTree o) where
   pure = Leaf
