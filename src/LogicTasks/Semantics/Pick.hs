@@ -103,6 +103,11 @@ verifyStatic PickInst{..}
 verifyQuiz :: OutputMonad m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
 
+    | minAmountOfUniqueAtoms syntaxTreeConfig < 2 =
+        refuse $ indent $ translate $ do
+          german "Es muss mindestens zwei unterschiedliche Atome geben."
+          english "At least two unique atoms are required."
+
     | amountOfOptions < 2 =
         refuse $ indent $ translate $ do
           german "Es muss mindestens zwei Optionen geben."

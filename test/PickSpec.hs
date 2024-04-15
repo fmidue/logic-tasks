@@ -20,7 +20,8 @@ validBoundsPick :: Gen PickConfig
 validBoundsPick = do
   amountOfOptions <- choose (2, 5)
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    amountOfOptions <= 4*2^ length availableAtoms
+    amountOfOptions <= 4*2^ length availableAtoms &&
+    minAmountOfUniqueAtoms >= 2
 
   pure $ PickConfig {
       syntaxTreeConfig
