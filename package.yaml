@@ -84,6 +84,7 @@ library:
     - Formula.Resolution
     - Formula.Util
     - Parsing
+    - Util
 
   ghc-options:
     - -Wall

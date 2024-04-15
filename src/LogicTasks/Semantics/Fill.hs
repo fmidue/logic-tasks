@@ -14,12 +14,12 @@ import Control.Monad.Output (
   translate,
   )
 import Data.Maybe (fromMaybe, fromJust)
-import Test.QuickCheck(Gen)
+import Test.QuickCheck(Gen, suchThat)
 
 import Config ( FillConfig(..), FillInst(..))
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, getTable, literals, truth)
-import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove)
+import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, withRatio)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
@@ -31,7 +31,8 @@ import Trees.Formula ()
 
 genFillInst :: FillConfig -> Gen FillInst
 genFillInst FillConfig{..} = do
-    tree <- genSynTree syntaxTreeConfig
+    tree <- genSynTree syntaxTreeConfig `suchThat` \t ->
+      withRatio (fromMaybe (0, 100) percentTrueEntries) t
     let
       tableLen = length $ readEntries $ getTable tree
       gapCount = max (tableLen * percentageOfGaps `div` 100) 1

@@ -106,6 +106,11 @@ checkTruthValueRange (low,high)
           german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
           english "The given restriction on true entries are not a valid range."
 
+    | low == high =
+        refuse $ indent $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge sollte ein gewissen Spielraum zulassen."
+          english "The given restriction on true entries should allow for some flexibility."
+
     | otherwise = pure ()
 
 

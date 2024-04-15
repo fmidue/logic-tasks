@@ -7,20 +7,21 @@ import Test.QuickCheck (forAll, Gen, choose, elements, suchThat)
 import Control.Monad.Output (LangM)
 import Config (dFillConf, FillConfig (..), FillInst (..))
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
+import Util (withRatio)
 
 validBoundsFill :: Gen FillConfig
 validBoundsFill = do
   -- too large tables lead to too long test runs and are probably not suitable for actual tasks
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} -> maxNodes < 30
   percentageOfGaps <- choose (1, 100)
-  percentTrueEntriesLow' <- choose (0, 100)
-  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 100)
+  percentTrueEntriesLow' <- choose (0, 90)
+  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ FillConfig {
@@ -47,7 +48,9 @@ spec = do
               gapCount = max (tableLen * percentageOfGaps `div` 100) 1 in
           length missing == gapCount
     it "should respect percentTrueEntries" $
-      pendingWith "Needs to be reimplemented"
+      forAll validBoundsFill $ \fillConfig@FillConfig{..} ->
+        forAll (genFillInst fillConfig) $ \FillInst{..} ->
+          withRatio (fromMaybe (0, 100) percentTrueEntries) tree
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsFill $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->
