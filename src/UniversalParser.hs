@@ -46,7 +46,7 @@ data NoFixity = NoFixity Basic Op Basic | OfBasic Basic
 data Basic = BasicNested Nested | BasicNeg Neg
   deriving Show
 
-data Op = Or | And | Impl | BiImpl
+data Op = Or | And | Impl | BackImpl | BiImpl
   deriving Show
 
 data Ors = Ors Ors Ands | OfAnds Ands
@@ -212,6 +212,7 @@ formula LevelSpec{..}
         Or -> "Disjunction"
         And -> "Conjunction"
         Impl -> "Implication"
+        BackImpl -> "(Back)-Implication"
         BiImpl -> "Bi-Implication")
       <|> pure ()
 

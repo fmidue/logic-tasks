@@ -50,6 +50,7 @@ instance FromGrammar (SynTree BinOp Char) where
       fromOp Parser.Or = Formula.Or
       fromOp Parser.And = Formula.And
       fromOp Parser.Impl = Formula.Impl
+      fromOp Parser.BackImpl = Formula.BackImpl
       fromOp BiImpl = Equi
       fromNeg :: Neg -> Maybe (SynTree BinOp Char)
       fromNeg (NegAtom (Atom x)) = Just $ Not $ Leaf x
