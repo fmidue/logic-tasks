@@ -32,7 +32,7 @@ data PickInst = PickInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Show)
+               deriving (Typeable, Generic, Show, Eq)
 
 dPickInst :: PickInst
 dPickInst =  PickInst

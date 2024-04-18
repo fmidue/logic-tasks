@@ -78,6 +78,7 @@ library:
     - Formula.Parsing
     - Formula.Parsing.Delayed
     - Formula.Helpers
+    - Formula.Printing
     - ParsingHelpers
     - Config
     - Formula.Types

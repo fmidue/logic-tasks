@@ -61,6 +61,7 @@ library
       Formula.Parsing
       Formula.Parsing.Delayed
       Formula.Helpers
+      Formula.Printing
       ParsingHelpers
       Config
       Formula.Types
@@ -70,7 +71,6 @@ library
       Util
   other-modules:
       Auxiliary
-      Formula.Printing
       Formula.Table
       LogicTasks.Helpers
       UniversalParser
