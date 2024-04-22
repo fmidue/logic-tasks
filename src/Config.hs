@@ -212,7 +212,6 @@ dCnfConf = CnfConfig
 data PickConfig = PickConfig {
        syntaxTreeConfig :: SynTreeConfig
      , amountOfOptions :: Int
-     , pickCnf :: Bool
      , printSolution :: Bool
      , extraText :: Maybe (Map Language String)
      }
@@ -225,7 +224,6 @@ dPickConf = PickConfig
       , minAmountOfUniqueAtoms = 3
       }
     , amountOfOptions = 3
-    , pickCnf = False
     , printSolution = False
     , extraText = Nothing
     }

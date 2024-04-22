@@ -26,7 +26,6 @@ validBoundsPick = do
   pure $ PickConfig {
       syntaxTreeConfig
     , amountOfOptions
-    , pickCnf = False
     , printSolution = False
     , extraText = Nothing
     }
