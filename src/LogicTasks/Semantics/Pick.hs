@@ -26,10 +26,10 @@ import Control.Monad (when)
 import Data.Maybe (fromJust, fromMaybe)
 import Data.List (nubBy)
 import Trees.Generate (genSynTree)
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
+import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Print (display)
 import Trees.Formula ()
-import Util (withRatio, checkTruthValueRange)
+import Util (withRatio, checkTruthValueRangeAndSynTreeConf)
 
 
 genPickInst :: PickConfig -> Gen PickInst
@@ -115,12 +115,9 @@ verifyQuiz PickConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = do
-      checkTruthValueRange (low,high)
-      checkSynTreeConfig syntaxTreeConfig
-      pure ()
+    | otherwise = checkTruthValueRangeAndSynTreeConf range syntaxTreeConfig
   where
-    (low,high) = fromMaybe (0,100) percentTrueEntries
+    range = fromMaybe (0,100) percentTrueEntries
 
 
 

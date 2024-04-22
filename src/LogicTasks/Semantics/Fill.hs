@@ -19,12 +19,12 @@ import Test.QuickCheck(Gen, suchThat)
 import Config ( FillConfig(..), FillInst(..))
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, getTable, literals, truth)
-import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, withRatio)
+import Util (isOutside, pairwiseCheck, preventWithHint, remove, withRatio, checkTruthValueRangeAndSynTreeConf)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 import Trees.Generate (genSynTree)
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
+import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Print (display)
 import Trees.Formula ()
 
@@ -104,12 +104,9 @@ verifyQuiz FillConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = do
-      checkTruthValueRange (low,high)
-      checkSynTreeConfig syntaxTreeConfig
-      pure ()
+    | otherwise = checkTruthValueRangeAndSynTreeConf range syntaxTreeConfig
   where
-    (low,high) = fromMaybe (0,100) percentTrueEntries
+    range = fromMaybe (0,100) percentTrueEntries
 
 
 

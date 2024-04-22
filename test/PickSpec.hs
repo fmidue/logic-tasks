@@ -5,7 +5,7 @@ import Test.Hspec (Spec, describe, it)
 import Control.Monad.Output (LangM)
 import Config (dPickConf, PickConfig (..), PickInst (..))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
@@ -16,7 +16,6 @@ import Formula.Util (isSemanticEqual)
 import Trees.Helpers (collectLeaves)
 import Data.List.Extra (nubOrd, nubSort)
 import Util (withRatio)
-import Data.Maybe (fromMaybe)
 
 validBoundsPick :: Gen PickConfig
 validBoundsPick = do

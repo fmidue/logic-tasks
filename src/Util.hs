@@ -22,6 +22,7 @@ import Test.QuickCheck(Gen, elements)
 import Config (BaseConfig(..), CnfConfig(..))
 import Formula.Types (Formula, getTable, lengthBound)
 import Formula.Table (readEntries)
+import Tasks.SynTree.Config (SynTreeConfig, checkSynTreeConfig)
 
 
 prevent :: OutputMonad m => Bool -> LangM m -> LangM m
@@ -181,3 +182,9 @@ checkCnfConf CnfConfig {..}
           english "Clauses are to short for the desired number of clauses."
 
     | otherwise = checkBaseConf baseConf
+
+checkTruthValueRangeAndSynTreeConf :: OutputMonad m => (Int,Int) -> SynTreeConfig -> LangM m
+checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
+  checkTruthValueRange range
+  checkSynTreeConfig synTreeConfig
+  pure ()
