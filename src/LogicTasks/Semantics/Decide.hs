@@ -15,25 +15,26 @@ import Control.Monad.Output (
   translate,
   )
 import Data.List (nub)
-import Test.QuickCheck (Gen)
+import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..))
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable, literals, Table)
-import Util (isOutside, preventWithHint, remove, printWithHint)
+import Util (isOutside, preventWithHint, remove, printWithHint, withRatio, checkTruthValueRange)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when, unless)
 import Trees.Generate (genSynTree)
 import Trees.Print (display)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Formula ()
+import Data.Maybe (fromMaybe)
 
 
 
 
 genDecideInst :: DecideConfig -> Gen DecideInst
 genDecideInst DecideConfig{..} = do
-    tree <- genSynTree syntaxTreeConfig
+    tree <- genSynTree syntaxTreeConfig  `suchThat` withRatio (fromMaybe (0, 100) percentTrueEntries)
     let
       tableLen = length $ readEntries $ getTable tree
       mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1
@@ -105,7 +106,12 @@ verifyQuiz DecideConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = checkSynTreeConfig syntaxTreeConfig
+    | otherwise = do
+      checkTruthValueRange (low,high)
+      checkSynTreeConfig syntaxTreeConfig
+      pure ()
+  where
+    (low,high) = fromMaybe (0,100) percentTrueEntries
 
 
 

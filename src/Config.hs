@@ -274,6 +274,7 @@ dMinMaxConf = MinMaxConfig
 data DecideConfig = DecideConfig {
       syntaxTreeConfig :: SynTreeConfig
     , percentageOfChanged :: Int
+    , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -286,6 +287,7 @@ dDecideConf = DecideConfig
       , minAmountOfUniqueAtoms = 3
       }
     , percentageOfChanged = 40
+    , percentTrueEntries = Just (30,70)
     , printSolution = False
     , extraText = Nothing
     }

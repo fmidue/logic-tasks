@@ -3,7 +3,7 @@
 module DecideSpec where
 
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, choose, suchThat)
+import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
 import Control.Monad.Output (LangM)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic)
@@ -13,6 +13,8 @@ import Control.Monad.Output.Generic (evalLangM)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
+import Data.Maybe (fromMaybe)
+import Util (withRatio)
 
 validBoundsDecide :: Gen DecideConfig
 validBoundsDecide = do
@@ -21,10 +23,14 @@ validBoundsDecide = do
     maxNodes < 30 &&
     minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
   percentageOfChanged <- choose (1, 100)
+  percentTrueEntriesLow' <- choose (1, 90)
+  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+  percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ DecideConfig {
       syntaxTreeConfig
     , percentageOfChanged
+    , percentTrueEntries
     , printSolution = False
     , extraText = Nothing
     }
@@ -48,4 +54,8 @@ spec = do
       forAll validBoundsDecide $ \decideConfig -> do
         forAll (genDecideInst decideConfig) $ \decideInst ->
           isJust $ runIdentity $ evalLangM (verifyStatic decideInst :: LangM Maybe)
+    it "should respect percentTrueEntries" $
+      forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
+        forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
+          withRatio (fromMaybe (0, 100) percentTrueEntries) tree
 
