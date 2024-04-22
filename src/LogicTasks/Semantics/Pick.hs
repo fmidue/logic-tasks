@@ -15,45 +15,35 @@ import Control.Monad.Output (
   translate,
   )
 
-import Test.QuickCheck (Gen, vectorOf, suchThat, sublistOf)
+import Test.QuickCheck (Gen, vectorOf, suchThat, elements)
 
 import Config (Number(..), PickConfig(..), PickInst(..))
 import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (example, extra)
-import Control.Monad (when, void)
+import Control.Monad (when)
 import Data.Maybe (fromJust)
 import Data.List (nubBy)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Print (display)
-import Trees.Helpers (collectLeaves, fillTreeRandomly)
 import Trees.Formula ()
 
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
-  trees' <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig) `suchThat` \trees ->
+  trees <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig) `suchThat` \trees ->
     length (nubBy isSemanticEqual trees) == amountOfOptions
 
-  let shapes = map void trees'
-
-  atomics <- sublistOf (availableAtoms syntaxTreeConfig) `suchThat` \atoms ->
-    length atoms <= minimum (map (length . collectLeaves) shapes) &&
-    length atoms >= fromIntegral (minAmountOfUniqueAtoms syntaxTreeConfig)
-
-  trees <- mapM (fillTreeRandomly' atomics) shapes `suchThat` \generatedTrees ->
-    length (nubBy isSemanticEqual generatedTrees) == amountOfOptions
+  correct <- elements [1..amountOfOptions]
 
   pure $ PickInst {
     trees,
-    correct = 1,
+    correct,
     showSolution = printSolution,
     addText = extraText
   }
-    where fillTreeRandomly' atomics tree = fillTreeRandomly atomics tree `suchThat`
-            \t -> all (`elem` collectLeaves t) atomics
 
 
 
@@ -117,6 +107,11 @@ verifyQuiz PickConfig{..}
         refuse $ indent $ translate $ do
           german "Die Anzahl Optionen übersteigt die Anzahl möglicher, unterschiedlicher Formeln."
           english "The amount of options is higher than the amount of possible, distinct formulas."
+
+    | minAmountOfUniqueAtoms syntaxTreeConfig /= fromIntegral (length (availableAtoms syntaxTreeConfig)) =
+        refuse $ indent $ translate $ do
+          german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
+          english "All available atoms must be used for this task."
 
     | otherwise = checkSynTreeConfig syntaxTreeConfig
 

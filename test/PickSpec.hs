@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 module PickSpec where
-import Test.Hspec (Spec, describe, it, xit)
+import Test.Hspec (Spec, describe, it)
 import Control.Monad.Output (LangM)
 import Config (dPickConf, PickConfig (..), PickInst (..))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
@@ -21,7 +21,7 @@ validBoundsPick = do
   amountOfOptions <- choose (2, 5)
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
     amountOfOptions <= 4*2^ length availableAtoms &&
-    minAmountOfUniqueAtoms >= 2
+    minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
 
   pure $ PickConfig {
       syntaxTreeConfig
@@ -40,15 +40,15 @@ spec = do
       forAll validBoundsPick $ \pickConfig ->
         isJust $ runIdentity $ evalLangM (verifyQuiz pickConfig :: LangM Maybe)
   describe "genPickInst" $ do
-    xit "generated formulas should not be semantically equivalent" $
+    it "generated formulas should not be semantically equivalent" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           length (nubBy isSemanticEqual trees) == amountOfOptions
-    xit "generated formulas should only consist of the same atomics" $
+    it "generated formulas should only consist of the same atomics" $
       forAll validBoundsPick $ \pickConfig ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           length (nubOrd (map (nubSort . collectLeaves) trees)) == 1
-    xit "the generated instance should pass verifyStatic" $
+    it "the generated instance should pass verifyStatic" $
       forAll validBoundsPick $ \pickConfig -> do
         forAll (genPickInst pickConfig) $ \pickInst ->
           isJust $ runIdentity $ evalLangM (verifyStatic pickInst :: LangM Maybe)

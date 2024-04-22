@@ -10,7 +10,7 @@ import Formula.Types
 import Formula.Util
 import Data.Map (Map)
 import Control.Monad.Output (Language)
-import Tasks.SynTree.Config (SynTreeConfig, defaultSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (..), defaultSynTreeConfig)
 import qualified Trees.Types as ST (BinOp(..), SynTree(..))
 
 
@@ -220,7 +220,10 @@ data PickConfig = PickConfig {
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
-    { syntaxTreeConfig = defaultSynTreeConfig
+    { syntaxTreeConfig = defaultSynTreeConfig {
+        availableAtoms = "ABC"
+      , minAmountOfUniqueAtoms = 3
+      }
     , amountOfOptions = 3
     , pickCnf = False
     , printSolution = False
