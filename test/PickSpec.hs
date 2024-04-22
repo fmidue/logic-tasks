@@ -8,7 +8,7 @@ import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
-import Test.QuickCheck (Gen, choose, forAll, suchThat)
+import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Data.List (nubBy)
@@ -23,9 +23,14 @@ validBoundsPick = do
     amountOfOptions <= 4*2^ length availableAtoms &&
     minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
 
+  percentTrueEntriesLow' <- choose (1, 90)
+  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+  percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
+
   pure $ PickConfig {
       syntaxTreeConfig
     , amountOfOptions
+    , percentTrueEntries
     , printSolution = False
     , extraText = Nothing
     }
@@ -51,3 +56,7 @@ spec = do
       forAll validBoundsPick $ \pickConfig -> do
         forAll (genPickInst pickConfig) $ \pickInst ->
           isJust $ runIdentity $ evalLangM (verifyStatic pickInst :: LangM Maybe)
+    it "should respect percentTrueEntries" $
+      forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
+        forAll (genPickInst pickConfig) $ \PickInst{..} ->
+          all (withRatio (fromMaybe (0, 100) percentTrueEntries)) trees

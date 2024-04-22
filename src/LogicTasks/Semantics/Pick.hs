@@ -23,18 +23,20 @@ import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, fromMaybe)
 import Data.List (nubBy)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Print (display)
 import Trees.Formula ()
+import Util (withRatio, checkTruthValueRange)
 
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
   trees <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig) `suchThat` \trees ->
-    length (nubBy isSemanticEqual trees) == amountOfOptions
+    length (nubBy isSemanticEqual trees) == amountOfOptions &&
+    all (withRatio (fromMaybe (0, 100) percentTrueEntries)) trees
 
   correct <- elements [1..amountOfOptions]
 
@@ -113,7 +115,12 @@ verifyQuiz PickConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = checkSynTreeConfig syntaxTreeConfig
+    | otherwise = do
+      checkTruthValueRange (low,high)
+      checkSynTreeConfig syntaxTreeConfig
+      pure ()
+  where
+    (low,high) = fromMaybe (0,100) percentTrueEntries
 
 
 
