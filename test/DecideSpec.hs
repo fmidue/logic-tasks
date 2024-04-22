@@ -2,6 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module DecideSpec where
 
+-- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
 import Control.Monad.Output (LangM)
@@ -14,6 +15,7 @@ import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio)
+-- jscpd:ignore-end
 
 validBoundsDecide :: Gen DecideConfig
 validBoundsDecide = do

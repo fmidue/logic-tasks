@@ -2,6 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module FillSpec where
 
+-- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, elements, suchThat)
 import Control.Monad.Output (LangM)
@@ -14,6 +15,7 @@ import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio)
+-- jscpd:ignore-end
 
 validBoundsFill :: Gen FillConfig
 validBoundsFill = do
