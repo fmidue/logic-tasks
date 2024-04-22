@@ -24,8 +24,7 @@ module Trees.Helpers
     numOfUniqueBinOpsInSynTree,
     binOp,
     bothKids,
-    collectUniqueBinOpsInSynTree,
-    fillTreeRandomly
+    collectUniqueBinOpsInSynTree
     ) where
 
 import Control.Monad (void)
@@ -36,7 +35,6 @@ import qualified Data.Foldable as Foldable (toList)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
-import Test.QuickCheck (Gen, elements)
 
 numberAllBinaryNodes :: SynTree o c -> SynTree (o, Integer) c
 numberAllBinaryNodes = flip evalState 1 . go
@@ -172,7 +170,3 @@ collectUniqueBinOpsInSynTree (Binary op l r) = nubOrd $ concat [
   [op],
   collectUniqueBinOpsInSynTree l,
   collectUniqueBinOpsInSynTree r]
-
-fillTreeRandomly :: [b] -> SynTree a () -> Gen (SynTree a b)
-fillTreeRandomly atoms = traverse (\_ -> elements atoms)
-
