@@ -27,10 +27,9 @@ import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
-import Formula.Parsing.Delayed (Delayed (..), withDelayed)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayed, parseDelayedRaw)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
-import Text.Parsec (parse)
 import UniversalParser (tokenSequence)
 import ParsingHelpers (fully)
 
@@ -78,10 +77,10 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade inst (Delayed ans) =
-  case parse (fully $ parser @TreeFormulaAnswer) "(delayed input)" ans of
+partialGrade inst ans =
+  case parseDelayed (fully $ parser @TreeFormulaAnswer) ans of
     Right f -> partialGrade' inst f
-    Left err -> reject $ case parse (fully tokenSequence) "" ans of
+    Left err -> reject $ case parseDelayedRaw (fully tokenSequence) ans of
       Left _ -> do
         german $ show err
         english $ show err
