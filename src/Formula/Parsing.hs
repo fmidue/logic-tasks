@@ -63,6 +63,8 @@ instance Parse ResStep where
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
 notFollowedByElse p f = try ((try p >>= f) <|> pure ())
 
+
+
 class Parse a where
   parser :: Parser a
   default parser :: FromGrammar a => Parser a

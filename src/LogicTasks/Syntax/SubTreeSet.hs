@@ -21,7 +21,7 @@ import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
-import Formula.Parsing ()
+
 
 
 description :: OutputMonad m => SubTreeInst -> LangM m

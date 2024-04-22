@@ -35,7 +35,7 @@ import Data.Foldable.Extra (notNull)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
-import Formula.Parsing ()
+
 
 
 
