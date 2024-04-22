@@ -28,7 +28,7 @@ import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Parsing (Parse(..))
+import Formula.Parsing (Parse(..))
 import Formula.Parsing ()
 
 genPrologInst :: PrologConfig -> Gen PrologInst

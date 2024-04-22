@@ -67,7 +67,6 @@ library
       Formula.Types
       Formula.Resolution
       Formula.Util
-      Parsing
       Util
   other-modules:
       Auxiliary

@@ -26,7 +26,7 @@ import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
 import Trees.Parsing(formulaParse)
 import TestHelpers (deleteBrackets)
 import Trees.Generate (genSynTree)
-import Parsing (Parse(parser))
+import Formula.Parsing (Parse(parser))
 import Control.Monad.Output (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))

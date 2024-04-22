@@ -27,7 +27,7 @@ import LogicTasks.Helpers (formulaKey, example, extra)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio, checkCnfConf)
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Parsing (Parse(..))
+import Formula.Parsing (Parse(..))
 import Formula.Parsing ()
 
 

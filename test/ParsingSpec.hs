@@ -4,8 +4,7 @@ module ParsingSpec (spec) where
 import Data.Either (isLeft, isRight)
 import Test.Hspec ( describe, it, Spec)
 
-import Parsing (Parse(parser))
-import Formula.Parsing ()
+import LogicTasks.Parsing (Parse(parser))
 import LogicTasks.Formula (Cnf, Dnf)
 import Trees.Parsing (formulaParse)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)

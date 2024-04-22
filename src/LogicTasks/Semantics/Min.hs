@@ -26,7 +26,7 @@ import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
 import LogicTasks.Helpers (extra, formulaKey)
 import Util (tryGen, withRatio)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Parsing (Parse(..))
+import Formula.Parsing (Parse(..))
 import Formula.Parsing ()
 
 

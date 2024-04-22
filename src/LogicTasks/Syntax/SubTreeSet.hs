@@ -20,7 +20,7 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Parsing (Parse(..))
+import Formula.Parsing (Parse(..))
 import Formula.Parsing ()
 
 

@@ -19,7 +19,7 @@ import Trees.Helpers
 import Trees.Types
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Parsing (Parse(..))
+import Formula.Parsing (Parse(..))
 import Trees.Parsing()
 
 
