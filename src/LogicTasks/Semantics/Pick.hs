@@ -56,7 +56,7 @@ description PickInst{..} = do
       translate $ do
         german "Betrachten Sie die folgende Formel:"
         english "Consider the following formula:"
-      indent $ code $ availableLetter (literals sTable) : " = " ++ concatMap display trees
+      indent $ code $ availableLetter (literals sTable) : " = " ++ display sTable
       pure ()
     paragraph $ do
       translate $ do
