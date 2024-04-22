@@ -15,6 +15,8 @@ import Data.List (nubBy)
 import Formula.Util (isSemanticEqual)
 import Trees.Helpers (collectLeaves)
 import Data.List.Extra (nubOrd, nubSort)
+import Util (withRatio)
+import Data.Maybe (fromMaybe)
 
 validBoundsPick :: Gen PickConfig
 validBoundsPick = do
