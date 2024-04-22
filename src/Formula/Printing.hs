@@ -1,7 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
-{-# LANGUAGE FlexibleInstances #-}
 
 module Formula.Printing
        ( showIndexedList

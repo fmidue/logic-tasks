@@ -23,7 +23,6 @@ import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
 
 
-
 description :: OutputMonad m => SubTreeInst -> LangM m
 description SubTreeInst{..} = do
     instruct $ do

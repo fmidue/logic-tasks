@@ -30,7 +30,6 @@ import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
 
-
 genPrologInst :: PrologConfig -> Gen PrologInst
 genPrologInst PrologConfig{..} = (do
     (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedLiterals

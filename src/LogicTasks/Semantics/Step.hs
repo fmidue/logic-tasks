@@ -29,7 +29,6 @@ import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
 
 
-
 genStepInst :: StepConfig -> Gen StepInst
 genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
     (clause2, resolveLit, lits1) <- genResStepClause minClauseLength maxClauseLength usedLiterals

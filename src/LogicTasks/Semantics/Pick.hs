@@ -88,7 +88,7 @@ verifyStatic PickInst{..}
           german "Der angegebene Index existiert nicht."
           english "The given index does not exist."
 
-    | otherwise = pure ()
+    | otherwise = pure()
 
 
 

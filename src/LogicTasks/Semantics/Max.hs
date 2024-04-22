@@ -31,7 +31,6 @@ import Formula.Parsing (Parse(..))
 
 
 
-
 genMaxInst :: MinMaxConfig -> Gen MaxInst
 genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
     cnf <- cnfInRange
