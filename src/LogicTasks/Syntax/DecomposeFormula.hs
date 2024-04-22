@@ -21,6 +21,8 @@ import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree, swapKids)
 import Data.Containers.ListUtils (nubOrd)
 import Control.Monad.Cont (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
+import Formula.Parsing (Parse(parser))
+import Formula.Parsing.Delayed (Delayed, withDelayed)
 
 
 
@@ -77,9 +79,11 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 
+partialGrade :: OutputMonad m => DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade :: OutputMonad m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
-partialGrade DecomposeFormulaInst{..} sol = do
+partialGrade' :: OutputMonad m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
+partialGrade' DecomposeFormulaInst{..} sol = do
 
   when (isNothing solTree) $ reject $ do
     english "You did not submit a solution."
@@ -106,9 +110,11 @@ partialGrade DecomposeFormulaInst{..} sol = do
 
 
 
+completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
-completeGrade path DecomposeFormulaInst{..} sol
+completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
+completeGrade' path DecomposeFormulaInst{..} sol
   | solTree /= swappedTree = refuse $ do
     instruct $ do
       english "Your solution is not correct."

@@ -18,7 +18,7 @@ import Control.Monad.Identity (Identity(runIdentity))
 import Control.Monad.Output.Generic (evalLangM)
 import Tasks.ComposeFormula.Quiz (generateComposeFormulaInst)
 import Trees.Types (SynTree(Binary), TreeFormulaAnswer (TreeFormulaAnswer))
-import LogicTasks.Syntax.ComposeFormula (partialGrade)
+import LogicTasks.Syntax.ComposeFormula (partialGrade')
 
 validBoundsComposeFormula :: Gen ComposeFormulaConfig
 validBoundsComposeFormula = do
@@ -49,7 +49,7 @@ spec = do
           let lrTree = Binary operator leftTree rightTree
               rlTree = Binary operator rightTree leftTree
           in isJust $ runIdentity $ evalLangM
-            (partialGrade inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)] :: LangM Maybe)
+            (partialGrade' inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)] :: LangM Maybe)
     it "leftTreeImage and rightTreeImage has the right value" $
       forAll validBoundsComposeFormula $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->

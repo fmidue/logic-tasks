@@ -25,6 +25,8 @@ import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree)
 import Data.Containers.ListUtils (nubOrd)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
+import Formula.Parsing (Parse(parser))
+import Formula.Parsing.Delayed (Delayed, withDelayed)
 
 
 
@@ -105,9 +107,11 @@ start :: [TreeFormulaAnswer]
 start = []
 
 
+partialGrade :: OutputMonad m => ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
-partialGrade ComposeFormulaInst{..} sol
+partialGrade' :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
+partialGrade' ComposeFormulaInst{..} sol
   | length (nubOrd sol) /= 2 =
     reject $ do
       english "Your submission does not contain the right amount of unique formulas. There need to be exactly two unique formulas."
@@ -144,10 +148,13 @@ partialGrade ComposeFormulaInst{..} sol
         collectUniqueBinOpsInSynTree leftTree ++
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
 
-
 completeGrade :: (OutputMonad m, MonadIO m) =>
+  FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
+completeGrade path inst = completeGrade' path inst `withDelayed` parser
+
+completeGrade' :: (OutputMonad m, MonadIO m) =>
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
-completeGrade path ComposeFormulaInst{..} sol
+completeGrade' path ComposeFormulaInst{..} sol
   | lrTree `notElem` parsedSol || rlTree `notElem` parsedSol = refuse $ do
     instruct $ do
       english "Your solution is not correct. The syntax trees for your entered formulas look like this:"
