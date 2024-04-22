@@ -17,7 +17,9 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 validBoundsDecide :: Gen DecideConfig
 validBoundsDecide = do
   -- too large tables lead to too long test runs and are probably not suitable for actual tasks
-  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} -> maxNodes < 30
+  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
+    maxNodes < 30 &&
+    minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
   percentageOfChanged <- choose (1, 100)
 
   pure $ DecideConfig {

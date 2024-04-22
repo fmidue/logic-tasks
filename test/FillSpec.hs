@@ -18,7 +18,9 @@ import Util (withRatio)
 validBoundsFill :: Gen FillConfig
 validBoundsFill = do
   -- too large tables lead to too long test runs and are probably not suitable for actual tasks
-  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} -> maxNodes < 30
+  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
+    maxNodes < 30 &&
+    minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
   percentageOfGaps <- choose (1, 100)
   percentTrueEntriesLow' <- choose (0, 90)
   percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')

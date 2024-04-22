@@ -241,7 +241,10 @@ data FillConfig = FillConfig {
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
-    { syntaxTreeConfig = defaultSynTreeConfig
+    { syntaxTreeConfig = defaultSynTreeConfig {
+        availableAtoms = "ABC"
+      , minAmountOfUniqueAtoms = 3
+      }
     , percentageOfGaps = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False
@@ -278,7 +281,10 @@ data DecideConfig = DecideConfig {
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
-    { syntaxTreeConfig = defaultSynTreeConfig
+    { syntaxTreeConfig = defaultSynTreeConfig {
+        availableAtoms = "ABC"
+      , minAmountOfUniqueAtoms = 3
+      }
     , percentageOfChanged = 40
     , printSolution = False
     , extraText = Nothing

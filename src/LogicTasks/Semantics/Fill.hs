@@ -24,7 +24,7 @@ import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 import Trees.Generate (genSynTree)
-import Tasks.SynTree.Config (checkSynTreeConfig)
+import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig (..))
 import Trees.Print (display)
 import Trees.Formula ()
 
@@ -98,6 +98,11 @@ verifyQuiz FillConfig{..}
         refuse $ indent $ translate$ do
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
           english "The percentile of gaps has to be set between 1 and 100."
+
+    | minAmountOfUniqueAtoms syntaxTreeConfig /= fromIntegral (length (availableAtoms syntaxTreeConfig)) =
+        refuse $ indent $ translate $ do
+          german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
+          english "All available atoms must be used for this task."
 
     | otherwise = do
       checkTruthValueRange (low,high)
