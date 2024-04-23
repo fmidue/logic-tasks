@@ -33,7 +33,7 @@ instance FromGrammar (SynTree BinOp Char) where
       , allowAnd = True
       , allowNegation = Everywhere
       , allowAtomicProps = True
-      , allowImplication = True
+      , allowImplication = Forwards
       , allowBiImplication = True
       , strictParens = True
       , allowSilentNesting = False
@@ -80,7 +80,7 @@ instance FromGrammar (PropFormula Char) where
       , allowAnd = True
       , allowNegation = Everywhere
       , allowAtomicProps = True
-      , allowImplication = True
+      , allowImplication = Forwards
       , allowBiImplication = True
       , strictParens = False
       , allowSilentNesting = False
@@ -95,6 +95,7 @@ instance FromGrammar (PropFormula Char) where
       fromAnds (Ands f g) = Assoc Formula.And <$> fromAnds f <*> fromImpls g
       fromAnds (OfImpl f) = fromImpls f
       fromImpls (Impls f g) = Assoc Formula.Impl <$> fromBiImpls f <*> fromImpls g
+      fromImpls (BackImpls f g) = Assoc Formula.BackImpl <$> fromBiImpls f <*> fromImpls g
       fromImpls (OfBiImpl f) = fromBiImpls f
       fromBiImpls (BiImpls f g) = Assoc Equi <$> fromNeg f <*> fromBiImpls g
       fromBiImpls (OfNeg f) = fromNeg f
