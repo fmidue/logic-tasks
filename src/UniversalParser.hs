@@ -8,7 +8,7 @@ module UniversalParser where
 import Data.Functor (($>), void)
 import Data.Maybe (fromMaybe)
 
-import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, many)
+import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, many, notFollowedBy, string)
 import Text.Parsec.String (Parser)
 
 import ParsingHelpers
@@ -154,7 +154,7 @@ implicationParser :: Parser ()
 implicationParser = tokenSymbol "=>" <?> "Implication"
 
 backImplicationParser :: Parser ()
-backImplicationParser = tokenSymbol "<=" <?> "(Back-)Implication"
+backImplicationParser = token (void (string "<=") <* notFollowedBy (char '>')) <?> "(Back-)Implication"
 
 biImplicationParser :: Parser ()
 biImplicationParser =
@@ -202,8 +202,8 @@ formula LevelSpec{..}
     chooseBinary = choice
       (  [ Or <$ orParser | allowOr ]
       ++ [ And <$ andParser | allowAnd ]
-      ++ [ Impl <$ implicationParser | allowImplication == Forwards ]
-      ++ [ BackImpl <$ backImplicationParser | allowImplication == Backwards ]
+      ++ [ Impl <$ implicationParser | allowImplication == Forwards || allowImplication == Both  ]
+      ++ [ BackImpl <$ backImplicationParser | allowImplication == Backwards || allowImplication == Both ]
       ++ [ BiImpl <$ biImplicationParser | allowBiImplication ]
       )
 
@@ -243,8 +243,8 @@ formula LevelSpec{..}
   impl
     = case allowImplication of
       Forwards -> infixr1 OfBiImpl biImpl (implicationParser $> Impls)
-      Backwards -> infixr1 OfBiImpl biImpl (backImplicationParser $> BackImpls)
-      Both -> infixr1 OfBiImpl biImpl (implicationParser $> Impls <|> backImplicationParser $> BackImpls)
+      Backwards -> infixr1 OfBiImpl biImpl (try backImplicationParser $> BackImpls)
+      Both -> infixr1 OfBiImpl biImpl (implicationParser $> Impls <|> try backImplicationParser $> BackImpls)
       NoImplication -> OfBiImpl <$> biImpl
 
   biImpl :: Parser BiImpls
