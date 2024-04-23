@@ -24,7 +24,7 @@ import ParsingHelpers
   -- with precedence
   Ors ::= Ors ∨ Ands | Ands
   Ands ::= Ands ∧ Impl | Impl
-  Impl ::= BiImpl => Impl | BiImpl
+  Impl ::= BiImpl => Impl | BiImpl <= Impl | BiImpl
   BiImpl ::= Neg <=> BiImpl | Neg
 
   -- 'leaf' formulas
@@ -132,7 +132,7 @@ data LevelSpec = LevelSpec
   , nextLevelSpec :: Maybe LevelSpec
   }
 
-data AllowImplication = NoImplication | Forwards | Backwards deriving Eq
+data AllowImplication = NoImplication | Forwards | Backwards | Both deriving Eq
 data AllowNegation = Nowhere | LiteralsOnly | Everywhere
 
 -- parser for operations
@@ -243,7 +243,8 @@ formula LevelSpec{..}
   impl
     = case allowImplication of
       Forwards -> infixr1 OfBiImpl biImpl (implicationParser $> Impls)
-      Backwards -> infixl1 OfBiImpl biImpl (backImplicationParser $> flip BackImpls)
+      Backwards -> infixr1 OfBiImpl biImpl (backImplicationParser $> BackImpls)
+      Both -> infixr1 OfBiImpl biImpl (implicationParser $> Impls <|> backImplicationParser $> BackImpls)
       NoImplication -> OfBiImpl <$> biImpl
 
   biImpl :: Parser BiImpls

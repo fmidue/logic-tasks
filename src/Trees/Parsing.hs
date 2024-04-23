@@ -33,7 +33,7 @@ instance FromGrammar (SynTree BinOp Char) where
       , allowAnd = True
       , allowNegation = Everywhere
       , allowAtomicProps = True
-      , allowImplication = Forwards
+      , allowImplication = Both
       , allowBiImplication = True
       , strictParens = True
       , allowSilentNesting = False
@@ -80,7 +80,7 @@ instance FromGrammar (PropFormula Char) where
       , allowAnd = True
       , allowNegation = Everywhere
       , allowAtomicProps = True
-      , allowImplication = Forwards
+      , allowImplication = Both
       , allowBiImplication = True
       , strictParens = False
       , allowSilentNesting = False
