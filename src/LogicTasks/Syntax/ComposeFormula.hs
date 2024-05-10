@@ -36,7 +36,7 @@ description path ComposeFormulaInst{..} = do
     instruct $ do
       english $ "Imagine that the two displayed " ++ eTreesOrFormulas ++ " are hung below a root node with operator "
       english $ showOperator operator
-      english $ ". One " ++ eTreeOrFormula ++" on the left and the other " ++ eTreeOrFormula ++" on the right, and once the other way around."
+      english $ ". Once one " ++ eTreeOrFormula ++" on the left and the other " ++ eTreeOrFormula ++" on the right, and once the other way around."
       german $ "Stellen Sie sich vor, die beiden angezeigten " ++ gTreesOrFormulas ++" würden unterhalb eines Wurzelknotens mit Operator "
       german $ showOperator operator
       german $ " gehängt. Einmal " ++ derDie ++" eine " ++ gTreeOrFormula ++" links und " ++ derDie ++" andere " ++ gTreeOrFormula ++" rechts, und einmal genau andersherum."
@@ -60,8 +60,8 @@ description path ComposeFormulaInst{..} = do
       german "(In den Formeln dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
     when addExtraHintsOnAssociativity $ instruct $ do
-        english "Remark: Do not try to use associativity in this task in order to save brackets."
-        german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität einsparen."
+        english "Remark: Do not try to use associativity in order to omit brackets in this task."
+        german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen."
 
     keyHeading
     basicOpKey

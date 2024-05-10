@@ -45,8 +45,8 @@ description DecomposeFormulaInst{..} = do
       german "(In der Formel dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
     when addExtraHintsOnAssociativity $ instruct $ do
-      english "Remark: Do not try to use associativity in this task in order to save brackets."
-      german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität einsparen."
+        english "Remark: Do not try to use associativity in order to omit brackets in this task."
+        german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen."
 
     keyHeading
     basicOpKey

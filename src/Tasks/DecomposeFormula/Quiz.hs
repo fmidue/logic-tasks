@@ -12,7 +12,7 @@ import Test.QuickCheck (Gen, suchThat,)
 import Tasks.DecomposeFormula.Config (DecomposeFormulaConfig(..), DecomposeFormulaInst(..))
 import Trees.Helpers (binOp, bothKids, mirrorTree)
 import Trees.Types (BinOp(Equi, Or, And))
-import Data.Containers.ListUtils (nubOrd)
+import Data.List.Extra (nubOrd)
 
 
 
