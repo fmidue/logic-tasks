@@ -177,7 +177,9 @@ collectUniqueBinOpsInSynTree (Binary op l r) = nubOrd $ concat [
   collectUniqueBinOpsInSynTree l,
   collectUniqueBinOpsInSynTree r]
 
-mirrorTree :: SynTree o c -> SynTree o c
+mirrorTree :: SynTree BinOp c -> SynTree BinOp c
+mirrorTree (Binary Impl l r) = Binary BackImpl r l
+mirrorTree (Binary BackImpl l r) = Binary Impl r l
 mirrorTree (Binary b l r) = Binary b r l
 mirrorTree (Not x) = Not $ mirrorTree x
 mirrorTree x = x
