@@ -154,7 +154,7 @@ numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
 
-numOfUniqueBinOpsInSynTree :: SynTree BinOp c -> Integer
+numOfUniqueBinOpsInSynTree :: (Eq o, Ord o) => SynTree o c -> Integer
 numOfUniqueBinOpsInSynTree = fromIntegral . length . collectUniqueBinOpsInSynTree
 
 binOp :: SynTree BinOp a -> Maybe BinOp
@@ -169,7 +169,7 @@ swapKids :: SynTree o a -> SynTree o a
 swapKids (Binary x l r) = Binary x r l
 swapKids _ = error "impossible to land here"
 
-collectUniqueBinOpsInSynTree :: SynTree BinOp a -> [BinOp]
+collectUniqueBinOpsInSynTree :: (Eq o, Ord o) => SynTree o a -> [o]
 collectUniqueBinOpsInSynTree (Leaf _) = []
 collectUniqueBinOpsInSynTree (Not x) = collectUniqueBinOpsInSynTree x
 collectUniqueBinOpsInSynTree (Binary op l r) = nubOrd $ concat [
