@@ -2,12 +2,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Tasks.ComposeFormula.Config (
-    ComposeFormulaConfig (..),
-    ComposeFormulaInst (..),
-    defaultComposeFormulaConfig,
-    checkComposeFormulaConfig,
-    TreeDisplayMode(..)
+module Tasks.DecomposeFormula.Config (
+    DecomposeFormulaConfig (..),
+    DecomposeFormulaInst (..),
+    defaultDecomposeFormulaConfig,
+    checkDecomposeFormulaConfig
     ) where
 
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
@@ -15,37 +14,33 @@ import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
-import Control.Monad.Output (Language, OutputMonad, LangM, english, german)
+import Control.Monad.Output (Language, OutputMonad, LangM, german, english)
 import LogicTasks.Helpers (reject)
 
-data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bounded)
-
-data ComposeFormulaConfig = ComposeFormulaConfig {
+data DecomposeFormulaConfig = DecomposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
-    , treeDisplayModes :: (TreeDisplayMode, TreeDisplayMode)
     , extraHintsOnAssociativity :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     }
     deriving (Typeable, Generic, Show)
 
-defaultComposeFormulaConfig :: ComposeFormulaConfig
-defaultComposeFormulaConfig = ComposeFormulaConfig
+defaultDecomposeFormulaConfig :: DecomposeFormulaConfig
+defaultDecomposeFormulaConfig = DecomposeFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
-    , treeDisplayModes = (TreeDisplay, TreeDisplay)
     , extraHintsOnAssociativity = True
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     }
 
 
 
-checkComposeFormulaConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
-checkComposeFormulaConfig config@ComposeFormulaConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
+checkDecomposeFormulaConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
+checkDecomposeFormulaConfig config@DecomposeFormulaConfig{..} =
+  checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
-checkAdditionalConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
-checkAdditionalConfig ComposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
+checkAdditionalConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
+checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."
         german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
@@ -54,13 +49,8 @@ checkAdditionalConfig ComposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
         german "Minimale Anzahl an Knoten schränkt die Anzahl der möglichen Teilbäume zu stark ein."
     | otherwise = pure ()
 
-
-data ComposeFormulaInst = ComposeFormulaInst
-               { operator :: BinOp
-               , leftTree :: SynTree BinOp Char
-               , rightTree :: SynTree BinOp Char
-               , leftTreeImage :: Maybe String
-               , rightTreeImage :: Maybe String
+data DecomposeFormulaInst = DecomposeFormulaInst
+               { tree :: SynTree BinOp Char
                , addExtraHintsOnAssociativity :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool

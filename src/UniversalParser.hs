@@ -8,7 +8,7 @@ module UniversalParser where
 import Data.Functor (($>), void)
 import Data.Maybe (fromMaybe)
 
-import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, many)
+import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, many, notFollowedBy, string)
 import Text.Parsec.String (Parser)
 
 import ParsingHelpers
@@ -24,7 +24,7 @@ import ParsingHelpers
   -- with precedence
   Ors ::= Ors ∨ Ands | Ands
   Ands ::= Ands ∧ Impl | Impl
-  Impl ::= BiImpl => Impl | BiImpl
+  Impl ::= BiImpl => Impl | BiImpl <= Impl | BiImpl
   BiImpl ::= Neg <=> BiImpl | Neg
 
   -- 'leaf' formulas
@@ -46,7 +46,7 @@ data NoFixity = NoFixity Basic Op Basic | OfBasic Basic
 data Basic = BasicNested Nested | BasicNeg Neg
   deriving Show
 
-data Op = Or | And | Impl | BiImpl
+data Op = Or | And | Impl | BackImpl | BiImpl
   deriving Show
 
 data Ors = Ors Ors Ands | OfAnds Ands
@@ -55,7 +55,10 @@ data Ors = Ors Ors Ands | OfAnds Ands
 data Ands = Ands Ands Impls | OfImpl Impls
   deriving Show
 
-data Impls = Impls BiImpls Impls | OfBiImpl BiImpls
+data Impls
+  = Impls BiImpls Impls
+  | BackImpls BiImpls Impls
+  | OfBiImpl BiImpls
   deriving Show
 
 data BiImpls = BiImpls Neg BiImpls | OfNeg Neg
@@ -81,6 +84,7 @@ foldlAnds f z (OfImpl x) = f z x
 
 foldrImpl :: (BiImpls -> a -> a) -> a -> Impls -> a
 foldrImpl f z (Impls x y) = f x $ foldrImpl f z y
+foldrImpl f z (BackImpls x y) = f x $ foldrImpl f z y
 foldrImpl f z (OfBiImpl x) = f x z
 
 foldrBiImpl :: (Neg -> a -> a) -> a -> BiImpls -> a
@@ -121,13 +125,14 @@ data LevelSpec = LevelSpec
   , allowAnd :: Bool
   , allowNegation :: AllowNegation
   , allowAtomicProps :: Bool
-  , allowImplication :: Bool
+  , allowImplication :: AllowImplication
   , allowBiImplication :: Bool
   , strictParens :: Bool -- strict parenthesis will trigger excessive nesting and thereby level changes!!!
   , allowSilentNesting :: Bool -- DANGER!!!
   , nextLevelSpec :: Maybe LevelSpec
   }
 
+data AllowImplication = NoImplication | Forwards | Backwards | Both deriving Eq
 data AllowNegation = Nowhere | LiteralsOnly | Everywhere
 
 -- parser for operations
@@ -147,6 +152,9 @@ andParser =
 
 implicationParser :: Parser ()
 implicationParser = tokenSymbol "=>" <?> "Implication"
+
+backImplicationParser :: Parser ()
+backImplicationParser = token (void (string "<=") <* notFollowedBy (char '>')) <?> "(Back-)Implication"
 
 biImplicationParser :: Parser ()
 biImplicationParser =
@@ -169,6 +177,7 @@ tokenSequence = void $ many $
       orParser
   <|> andParser
   <|> implicationParser
+  <|> backImplicationParser
   <|> biImplicationParser
   <|> negationParser
   <|> void atomParser
@@ -193,7 +202,8 @@ formula LevelSpec{..}
     chooseBinary = choice
       (  [ Or <$ orParser | allowOr ]
       ++ [ And <$ andParser | allowAnd ]
-      ++ [ Impl <$ implicationParser | allowImplication ]
+      ++ [ Impl <$ implicationParser | allowImplication == Forwards || allowImplication == Both  ]
+      ++ [ BackImpl <$ backImplicationParser | allowImplication == Backwards || allowImplication == Both ]
       ++ [ BiImpl <$ biImplicationParser | allowBiImplication ]
       )
 
@@ -212,6 +222,7 @@ formula LevelSpec{..}
         Or -> "Disjunction"
         And -> "Conjunction"
         Impl -> "Implication"
+        BackImpl -> "(Back)-Implication"
         BiImpl -> "Bi-Implication")
       <|> pure ()
 
@@ -230,8 +241,11 @@ formula LevelSpec{..}
 
   impl :: Parser Impls
   impl
-    | allowImplication = infixr1 OfBiImpl biImpl (implicationParser $> Impls)
-    | otherwise = OfBiImpl <$> biImpl
+    = case allowImplication of
+      Forwards -> infixr1 OfBiImpl biImpl (implicationParser $> Impls)
+      Backwards -> infixr1 OfBiImpl biImpl (try backImplicationParser $> BackImpls)
+      Both -> infixr1 OfBiImpl biImpl (implicationParser $> Impls <|> try backImplicationParser $> BackImpls)
+      NoImplication -> OfBiImpl <$> biImpl
 
   biImpl :: Parser BiImpls
   biImpl

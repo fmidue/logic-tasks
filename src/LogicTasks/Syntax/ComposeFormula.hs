@@ -25,6 +25,8 @@ import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree)
 import Data.Containers.ListUtils (nubOrd)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
+import Formula.Parsing (Parse(parser))
+import Formula.Parsing.Delayed (Delayed, withDelayed)
 
 
 
@@ -34,7 +36,7 @@ description path ComposeFormulaInst{..} = do
     instruct $ do
       english $ "Imagine that the two displayed " ++ eTreesOrFormulas ++ " are hung below a root node with operator "
       english $ showOperator operator
-      english $ ". One " ++ eTreeOrFormula ++" on the left and the other " ++ eTreeOrFormula ++" on the right, and once the other way around."
+      english $ ". Once one " ++ eTreeOrFormula ++" on the left and the other " ++ eTreeOrFormula ++" on the right, and once the other way around."
       german $ "Stellen Sie sich vor, die beiden angezeigten " ++ gTreesOrFormulas ++" würden unterhalb eines Wurzelknotens mit Operator "
       german $ showOperator operator
       german $ " gehängt. Einmal " ++ derDie ++" eine " ++ gTreeOrFormula ++" links und " ++ derDie ++" andere " ++ gTreeOrFormula ++" rechts, und einmal genau andersherum."
@@ -58,8 +60,8 @@ description path ComposeFormulaInst{..} = do
       german "(In den Formeln dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
     when addExtraHintsOnAssociativity $ instruct $ do
-        english "Remark: Do not try to use associativity in this task in order to save brackets."
-        german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität einsparen."
+        english "Remark: Do not try to use associativity in order to omit brackets in this task."
+        german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen."
 
     keyHeading
     basicOpKey
@@ -105,9 +107,11 @@ start :: [TreeFormulaAnswer]
 start = []
 
 
+partialGrade :: OutputMonad m => ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
+partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
-partialGrade ComposeFormulaInst{..} sol
+partialGrade' :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
+partialGrade' ComposeFormulaInst{..} sol
   | length (nubOrd sol) /= 2 =
     reject $ do
       english "Your submission does not contain the right amount of unique formulas. There need to be exactly two unique formulas."
@@ -144,10 +148,13 @@ partialGrade ComposeFormulaInst{..} sol
         collectUniqueBinOpsInSynTree leftTree ++
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
 
-
 completeGrade :: (OutputMonad m, MonadIO m) =>
+  FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
+completeGrade path inst = completeGrade' path inst `withDelayed` parser
+
+completeGrade' :: (OutputMonad m, MonadIO m) =>
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
-completeGrade path ComposeFormulaInst{..} sol
+completeGrade' path ComposeFormulaInst{..} sol
   | lrTree `notElem` parsedSol || rlTree `notElem` parsedSol = refuse $ do
     instruct $ do
       english "Your solution is not correct. The syntax trees for your entered formulas look like this:"

@@ -32,6 +32,7 @@ library
       LogicTasks.Syntax.SubTreeSet
       LogicTasks.Syntax.TreeToFormula
       LogicTasks.Syntax.ComposeFormula
+      LogicTasks.Syntax.DecomposeFormula
       Tasks.SynTree.Config
       Tasks.SubTree.Config
       Tasks.SubTree.Quiz
@@ -52,6 +53,8 @@ library
       Tasks.LegalCNF.GenerateLegal
       Tasks.ComposeFormula.Config
       Tasks.ComposeFormula.Quiz
+      Tasks.DecomposeFormula.Config
+      Tasks.DecomposeFormula.Quiz
       Trees.Types
       Trees.Parsing
       Trees.Print
@@ -103,7 +106,9 @@ test-suite src-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ComposeFormulaSpec
       DecideSpec
+      DecomposeFormulaSpec
       FillSpec
       FormulaSpec
       LegalCNFSpec

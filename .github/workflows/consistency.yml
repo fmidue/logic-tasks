@@ -11,26 +11,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Save original cabal file
-        run: cp "$(find . -maxdepth 1 -type f -name "*.cabal" -print -quit)" original.txt
+      - name: Save original cabal files
+        run: |
+          # shellcheck disable=SC2156
+          find . -name dist-newstyle -prune -o -type f -name '*.cabal' -exec sh -c \
+            "export i={}; grep -v '^--' \"\$i\" | grep -v '^$' > \"\$i.original\"; rm \"\$i\"" \;
 
       - name: Set up Haskell
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: "latest"
           enable-stack: true
           stack-no-global: true
 
-      - name: Install hpack
-        run: |
-          stack install hpack
-          echo "/root/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Generate .cabal file from package.yaml
-        run: hpack --force
+      - name: Generate .cabal files from package.yaml
+        run: stack build --dry-run --no-install-ghc --stack-yaml=stack.yaml || true
 
       - name: Save generated cabal file
-        run: cp "$(find . -maxdepth 1 -type f -name "*.cabal" -print -quit)" generated.txt
+        run: |
+          # shellcheck disable=SC2156
+          find . -name dist-newstyle -prune -o -type f -name '*.cabal' -exec sh -c \
+            "export i={}; grep -v '^--' \"\$i\" | grep -v '^$' > \"\$i.generated\"" \;
 
       - name: Print differences
-        run: diff -u <(grep -v "^--" "original.txt" | grep -v '^$') <(grep -v "^--" "generated.txt" | grep -v "^$")
+        run: |
+          export CORRECT=true
+          # shellcheck disable=SC2044
+          for i in $(find . -name dist-newstyle -prune -o -type f -name '*.cabal' -print); do \
+            if ! diff -u "$i.original" "$i.generated"; then \
+              CORRECT=false; \
+              continue; \
+            fi \
+          done
+          ${CORRECT}

@@ -25,6 +25,7 @@ Hspec
 https
 HUnit
 Impls
+Leftarrow
 Leftrightarrow
 Leijen
 maxterms

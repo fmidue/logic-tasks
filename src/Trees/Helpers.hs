@@ -24,7 +24,9 @@ module Trees.Helpers
     numOfUniqueBinOpsInSynTree,
     binOp,
     bothKids,
-    collectUniqueBinOpsInSynTree
+    swapKids,
+    collectUniqueBinOpsInSynTree,
+    mirrorTree
     ) where
 
 import Control.Monad (void)
@@ -152,7 +154,7 @@ numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
 
-numOfUniqueBinOpsInSynTree :: SynTree BinOp c -> Integer
+numOfUniqueBinOpsInSynTree :: (Eq o, Ord o) => SynTree o c -> Integer
 numOfUniqueBinOpsInSynTree = fromIntegral . length . collectUniqueBinOpsInSynTree
 
 binOp :: SynTree BinOp a -> Maybe BinOp
@@ -163,10 +165,21 @@ bothKids :: SynTree o a -> (SynTree o a, SynTree o a)
 bothKids (Binary _ l r) = (l, r)
 bothKids _ = error "impossible to land here"
 
-collectUniqueBinOpsInSynTree :: SynTree BinOp a -> [BinOp]
+swapKids :: SynTree o a -> SynTree o a
+swapKids (Binary x l r) = Binary x r l
+swapKids _ = error "impossible to land here"
+
+collectUniqueBinOpsInSynTree :: (Eq o, Ord o) => SynTree o a -> [o]
 collectUniqueBinOpsInSynTree (Leaf _) = []
 collectUniqueBinOpsInSynTree (Not x) = collectUniqueBinOpsInSynTree x
 collectUniqueBinOpsInSynTree (Binary op l r) = nubOrd $ concat [
   [op],
   collectUniqueBinOpsInSynTree l,
   collectUniqueBinOpsInSynTree r]
+
+mirrorTree :: SynTree BinOp c -> SynTree BinOp c
+mirrorTree (Binary Impl l r) = Binary BackImpl (mirrorTree r) (mirrorTree l)
+mirrorTree (Binary BackImpl l r) = Binary Impl (mirrorTree r) (mirrorTree l)
+mirrorTree (Binary b l r) = Binary b (mirrorTree r) (mirrorTree l)
+mirrorTree (Not x) = Not $ mirrorTree x
+mirrorTree x = x
