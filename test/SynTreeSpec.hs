@@ -71,7 +71,7 @@ spec = do
         forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (tail (display tree)) /= Right tree
   describe "numOfUniqueBinOpsInSynTree" $ do
         it "should return 0 if there is only a leaf" $
-            numOfUniqueBinOpsInSynTree (Leaf 'a') == 0
+            numOfUniqueBinOpsInSynTree @BinOp (Leaf 'a') == 0
         it "should return 1 if there is only one operator" $
             numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Leaf 'b')) == 1
         it "should return 1 if there are two operators of same kind" $
