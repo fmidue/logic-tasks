@@ -159,7 +159,7 @@ instance FromGrammar Literal where
     , allowAnd = False
     , allowNegation = LiteralsOnly
     , allowAtomicProps = True
-    , allowImplication = False
+    , allowImplication = NoImplication
     , strictParens = False
     , allowBiImplication = False
     , allowSilentNesting = False
@@ -179,7 +179,7 @@ instance FromGrammar Clause where
     , allowAnd = False
     , allowNegation = LiteralsOnly
     , allowAtomicProps = True
-    , allowImplication = False
+    , allowImplication = NoImplication
     , allowBiImplication = False
     , strictParens = False
     , allowSilentNesting = False
@@ -205,7 +205,7 @@ instance FromGrammar Con where
     , allowAnd = True
     , allowNegation = LiteralsOnly
     , allowAtomicProps = True
-    , allowImplication = False
+    , allowImplication = NoImplication
     , allowBiImplication = False
     , strictParens = False
     , allowSilentNesting = False

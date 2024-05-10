@@ -18,15 +18,17 @@ module Trees.Types
 import GHC.Generics
 import Formula.Types (ToSAT(..))
 import qualified SAT.MiniSat as Sat
+import Data.Tuple (swap)
 
 
-data BinOp = And | Or | Impl | Equi
+data BinOp = And | Or | Impl | BackImpl | Equi
   deriving (Eq, Generic, Ord, Show, Enum, Bounded)
 
 showOperator :: BinOp -> String
 showOperator And = "∧"
 showOperator Or = "∨"
 showOperator Impl = "=>"
+showOperator BackImpl = "<="
 showOperator Equi = "<=>"
 
 allBinaryOperators :: [BinOp]
@@ -54,11 +56,11 @@ instance ToSAT (SynTree BinOp Char) where
   convert (Leaf a) = Sat.Var a
   convert (Not f) = Sat.Not (convert f)
   convert (Binary op l r) = convertBinOp op leftFormula rightFormula
-    where leftFormula = convert l
-          rightFormula = convert r
+    where (leftFormula, rightFormula) = (if op == BackImpl then swap else id) (convert l, convert r)
           convertBinOp And = (Sat.:&&:)
           convertBinOp Or = (Sat.:||:)
           convertBinOp Impl = (Sat.:->:)
+          convertBinOp BackImpl = (Sat.:->:)
           convertBinOp Equi = (Sat.:<->:)
 
 newtype TreeFormulaAnswer = TreeFormulaAnswer {maybeTree :: Maybe (SynTree BinOp Char)} deriving (Ord, Eq, Generic)

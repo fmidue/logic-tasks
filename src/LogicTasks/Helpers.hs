@@ -130,7 +130,7 @@ arrowsKey = do
     translate $ do
       english "Implication:"
       german "Implikation:"
-    code "=>"
+    code "=>, <="
     pure ()
   paragraph $ indent $ do
     translate $ do
