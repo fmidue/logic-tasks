@@ -5,6 +5,7 @@
 module LogicTasks.Syntax.DecomposeFormula where
 
 
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Output (
   LangM,
   OutputMonad, german, english,
@@ -19,7 +20,6 @@ import Control.Monad (when, unless)
 import Data.Maybe (isNothing, fromJust)
 import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree, swapKids)
 import Data.Containers.ListUtils (nubOrd)
-import Control.Monad.Cont (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Formula.Parsing (Parse(parser))
 import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
