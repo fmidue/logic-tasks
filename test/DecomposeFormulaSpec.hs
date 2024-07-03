@@ -11,10 +11,10 @@ import Tasks.DecomposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.Monad.Output (LangM)
+import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust, fromJust)
 import Control.Monad.Identity (Identity(runIdentity))
-import Control.Monad.Output.Generic (evalLangM)
+import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
 import Trees.Helpers (bothKids, binOp)
 import Trees.Types (SynTree(..))

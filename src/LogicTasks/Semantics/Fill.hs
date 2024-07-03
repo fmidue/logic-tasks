@@ -5,10 +5,10 @@
 module LogicTasks.Semantics.Fill where
 
 
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -40,7 +40,7 @@ genFillInst FillConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..
 
 
 
-description :: OutputMonad m => FillInst -> LangM m
+description :: OutputCapable m => FillInst -> LangM m
 description FillInst{..} = do
   paragraph $ do
     translate $ do
@@ -73,7 +73,7 @@ description FillInst{..} = do
   pure ()
 
 
-verifyStatic :: OutputMonad m => FillInst -> LangM m
+verifyStatic :: OutputCapable m => FillInst -> LangM m
 verifyStatic FillInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
         refuse $ indent $ translate $ do
@@ -96,7 +96,7 @@ verifyStatic FillInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => FillConfig -> LangM m
+verifyQuiz :: OutputCapable m => FillConfig -> LangM m
 verifyQuiz FillConfig{..}
     | isOutside 1 100 percentageOfGaps =
         refuse $ indent $ translate$ do
@@ -112,7 +112,7 @@ verifyQuiz FillConfig{..}
 start :: [TruthValue]
 start = []
 
-partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
+partialGrade :: OutputCapable m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
   preventWithHint (solLen /= missingLen)
     (translate $ do
@@ -130,7 +130,7 @@ partialGrade FillInst{..} sol = do
       solLen = length boolSol
       missingLen = length missing
 
-completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
+completeGrade :: OutputCapable m => FillInst -> [TruthValue] -> LangM m
 completeGrade FillInst{..} sol = do
   preventWithHint (notNull diff)
     (translate $ do

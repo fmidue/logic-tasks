@@ -5,7 +5,15 @@
 module LogicTasks.Syntax.SimplestFormula where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, translate, GenericOutputMonad (refuse))
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (refuse),
+  LangM,
+  OutputCapable,
+  english,
+  german,
+  paragraph,
+  translate,
+  )
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 
@@ -25,7 +33,7 @@ import Trees.Parsing()
 
 
 
-description :: OutputMonad m => SuperfluousBracketsInst -> LangM m
+description :: OutputCapable m => SuperfluousBracketsInst -> LangM m
 description SuperfluousBracketsInst{..} = do
     instruct $ do
       english "Consider the following propositional logic formula:"
@@ -63,12 +71,12 @@ description SuperfluousBracketsInst{..} = do
     pure ()
 
 
-verifyInst :: OutputMonad m => SuperfluousBracketsInst -> LangM m
+verifyInst :: OutputCapable m => SuperfluousBracketsInst -> LangM m
 verifyInst _ = pure()
 
 
 
-verifyConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
+verifyConfig :: OutputCapable m => SuperfluousBracketsConfig -> LangM m
 verifyConfig = checkSuperfluousBracketsConfig
 
 
@@ -77,10 +85,10 @@ start :: FormulaAnswer
 start = FormulaAnswer Nothing
 
 
-partialGrade :: OutputMonad m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+partialGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade' :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
+partialGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
 partialGrade' SuperfluousBracketsInst{..} f
     | isNothing $ maybeForm f =
       reject $ do
@@ -115,10 +123,10 @@ partialGrade' SuperfluousBracketsInst{..} f
     correctLits = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
-completeGrade :: OutputMonad m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+completeGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` parser
 
-completeGrade' :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
+completeGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
 completeGrade' inst sol
     | show (fromJust (maybeForm sol)) /= simplestString inst = refuse $ do
       instruct $ do

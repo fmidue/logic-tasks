@@ -15,7 +15,7 @@ import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
-import Control.Monad.Output (Language, OutputMonad, LangM, english, german)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import LogicTasks.Helpers (reject)
 
 data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bounded)
@@ -40,11 +40,11 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
 
 
 
-checkComposeFormulaConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
+checkComposeFormulaConfig :: OutputCapable m => ComposeFormulaConfig -> LangM m
 checkComposeFormulaConfig config@ComposeFormulaConfig {..} =
     checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
-checkAdditionalConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
+checkAdditionalConfig :: OutputCapable m => ComposeFormulaConfig -> LangM m
 checkAdditionalConfig ComposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."

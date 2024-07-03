@@ -14,7 +14,7 @@ import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
-import Control.Monad.Output (Language, OutputMonad, LangM, german, english)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, german, english)
 import LogicTasks.Helpers (reject)
 
 data DecomposeFormulaConfig = DecomposeFormulaConfig {
@@ -35,11 +35,11 @@ defaultDecomposeFormulaConfig = DecomposeFormulaConfig
 
 
 
-checkDecomposeFormulaConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
+checkDecomposeFormulaConfig :: OutputCapable m => DecomposeFormulaConfig -> LangM m
 checkDecomposeFormulaConfig config@DecomposeFormulaConfig{..} =
   checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
-checkAdditionalConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
+checkAdditionalConfig :: OutputCapable m => DecomposeFormulaConfig -> LangM m
 checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."

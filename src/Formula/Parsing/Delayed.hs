@@ -6,7 +6,7 @@ import Text.Parsec.String (Parser)
 import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully)
 
-import Control.Monad.Output (LangM, english, german, OutputMonad, Language)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import Control.Monad.State (State)
 import Data.Map (Map)
 
@@ -23,7 +23,7 @@ parseDelayed = parseDelayedRaw
 parseDelayedRaw :: Parser b -> Delayed a -> Either ParseError b
 parseDelayedRaw p (Delayed str) = parse p "(answer string)" str
 
-withDelayed :: OutputMonad m => (a -> LangM m) -> Parser a -> Delayed a -> LangM m
+withDelayed :: OutputCapable m => (a -> LangM m) -> Parser a -> Delayed a -> LangM m
 withDelayed grade p d =
   case parseDelayed (fully p) d of
     Left err -> reject $ do
@@ -32,7 +32,7 @@ withDelayed grade p d =
     Right x -> grade x
 
 parseDelayedAndThen ::
-  (OutputMonad m, Parse a)
+  (OutputCapable m, Parse a)
   => (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
   -> (a -> LangM m)

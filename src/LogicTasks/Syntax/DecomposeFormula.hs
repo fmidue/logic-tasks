@@ -6,10 +6,16 @@ module LogicTasks.Syntax.DecomposeFormula where
 
 
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Control.Monad.Output (
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (paragraph, indent, translatedCode, refuse, image),
   LangM,
-  OutputMonad, german, english,
-  GenericOutputMonad (paragraph, indent, translatedCode, refuse, image), translate, localise, translations, ($=<<)
+  OutputCapable,
+  ($=<<),
+  english,
+  german,
+  localise,
+  translate,
+  translations,
   )
 
 import LogicTasks.Helpers (extra, example, instruct, keyHeading, basicOpKey, arrowsKey, reject)
@@ -30,7 +36,7 @@ import Data.Functor (void)
 
 
 
-description :: OutputMonad m => DecomposeFormulaInst -> LangM m
+description :: OutputCapable m => DecomposeFormulaInst -> LangM m
 description DecomposeFormulaInst{..} = do
 
     example (display tree) $ do
@@ -68,12 +74,12 @@ description DecomposeFormulaInst{..} = do
     pure ()
 
 
-verifyInst :: OutputMonad m => DecomposeFormulaInst -> LangM m
+verifyInst :: OutputCapable m => DecomposeFormulaInst -> LangM m
 verifyInst _ = pure ()
 
 
 
-verifyConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
+verifyConfig :: OutputCapable m => DecomposeFormulaConfig -> LangM m
 verifyConfig = checkDecomposeFormulaConfig
 
 
@@ -82,10 +88,10 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 
-partialGrade :: OutputMonad m => DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+partialGrade :: OutputCapable m => DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
 partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
 
-partialGrade' :: OutputMonad m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
+partialGrade' :: OutputCapable m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' DecomposeFormulaInst{..} sol = do
 
   when (isNothing solTree) $ reject $ do
@@ -113,10 +119,20 @@ partialGrade' DecomposeFormulaInst{..} sol = do
 
 
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+completeGrade
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> DecomposeFormulaInst
+  -> Delayed TreeFormulaAnswer
+  -> LangM m
 completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
-completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
+completeGrade'
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> DecomposeFormulaInst
+  -> TreeFormulaAnswer
+  -> LangM m
 completeGrade' path DecomposeFormulaInst{..} sol
   | solTree /= swappedTree = refuse $ do
     instruct $ do

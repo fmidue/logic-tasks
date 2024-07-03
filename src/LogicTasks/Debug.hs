@@ -5,8 +5,8 @@
 module LogicTasks.Debug where
 
 import Test.QuickCheck
-import Control.Monad.Output.Generic
-import Control.Monad.Output
+import Control.OutputCapable.Blocks.Generic
+import Control.OutputCapable.Blocks
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import Data.Maybe (isJust)

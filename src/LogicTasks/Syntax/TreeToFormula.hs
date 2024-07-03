@@ -6,10 +6,10 @@ module LogicTasks.Syntax.TreeToFormula where
 
 
 import Control.Monad.IO.Class(MonadIO (liftIO))
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   ($=<<),
   english,
   german,
@@ -34,7 +34,7 @@ import Text.Parsec (many)
 import Data.Functor (void)
 
 
-description :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
+description :: (OutputCapable m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
 description path TreeToFormulaInst{..} = do
     instruct $ do
       english "Consider the following syntax tree:"
@@ -63,12 +63,12 @@ description path TreeToFormulaInst{..} = do
 
 
 
-verifyInst :: OutputMonad m => TreeToFormulaInst -> LangM m
+verifyInst :: OutputCapable m => TreeToFormulaInst -> LangM m
 verifyInst _ = pure ()
 
 
 
-verifyConfig :: OutputMonad m => SynTreeConfig -> LangM m
+verifyConfig :: OutputCapable m => SynTreeConfig -> LangM m
 verifyConfig = checkSynTreeConfig
 
 
@@ -76,20 +76,30 @@ verifyConfig = checkSynTreeConfig
 start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
-partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+partialGrade :: OutputCapable m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
 partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
 
-partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
+partialGrade' :: OutputCapable m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' _ sol
         | isNothing $ maybeTree sol = reject $ do
           english "You did not submit a solution."
           german "Die Abgabe ist leer."
         | otherwise = pure ()
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+completeGrade
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> TreeToFormulaInst
+  -> Delayed TreeFormulaAnswer
+  -> LangM m
 completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
-completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
+completeGrade'
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> TreeToFormulaInst
+  -> TreeFormulaAnswer
+  -> LangM m
 completeGrade' path inst sol
     | treeAnswer /= correctTree = refuse $ do
         instruct $ do

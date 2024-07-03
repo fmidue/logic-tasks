@@ -5,10 +5,10 @@
 module LogicTasks.Semantics.Prolog where
 
 
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -48,7 +48,7 @@ genPrologInst PrologConfig{..} = (do
 
 
 
-description :: OutputMonad m => PrologInst -> LangM m
+description :: OutputCapable m => PrologInst -> LangM m
 description PrologInst{..} = do
   paragraph $ do
     translate $ do
@@ -79,7 +79,7 @@ description PrologInst{..} = do
   pure ()
 
 
-verifyStatic :: OutputMonad m => PrologInst -> LangM m
+verifyStatic :: OutputCapable m => PrologInst -> LangM m
 verifyStatic PrologInst{..}
     | any isEmptyClause [clause1, clause2] =
         refuse $ indent $ translate $ do
@@ -97,7 +97,7 @@ verifyStatic PrologInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => PrologConfig -> LangM m
+verifyQuiz :: OutputCapable m => PrologConfig -> LangM m
 verifyQuiz PrologConfig{..}
     | any (<1) [minClauseLength, maxClauseLength] =
         refuse $ indent $ translate $ do
@@ -131,10 +131,10 @@ verifyQuiz PrologConfig{..}
 start :: (PrologLiteral, PrologClause)
 start = (PrologLiteral True "a" ["x"], mkPrologClause [])
 
-partialGrade :: OutputMonad m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
+partialGrade :: OutputCapable m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade' :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
+partialGrade' :: OutputCapable m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 partialGrade' PrologInst{..} sol = do
   prevent (not (fst sol `member` availLits)) $
     translate $ do
@@ -159,10 +159,10 @@ partialGrade' PrologInst{..} sol = do
      solLits = pLiterals $ snd sol
      extraLiterals = toList $ solLits `difference` availLits
 
-completeGrade :: OutputMonad m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
+completeGrade :: OutputCapable m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` parser
 
-completeGrade' :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
+completeGrade' :: OutputCapable m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade' PrologInst{..} sol =
     case resolveResult of
         Nothing -> refuse $ indent $  do

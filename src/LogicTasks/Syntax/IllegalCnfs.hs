@@ -4,7 +4,13 @@
 module LogicTasks.Syntax.IllegalCnfs where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, GenericOutputMonad (refuse))
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (refuse),
+  LangM,
+  OutputCapable,
+  english,
+  german,
+  )
 import Data.List (nub, sort)
 import Data.Set (toList)
 import LogicTasks.Helpers
@@ -15,7 +21,7 @@ import Control.Monad (when)
 
 
 
-description :: OutputMonad m => LegalCNFInst -> LangM m
+description :: OutputCapable m => LegalCNFInst -> LangM m
 description LegalCNFInst{..} = do
     instruct $ do
       english "Consider the following propositional logic formulas:"
@@ -41,12 +47,12 @@ description LegalCNFInst{..} = do
 
 
 
-verifyInst :: OutputMonad m => LegalCNFInst -> LangM m
+verifyInst :: OutputCapable m => LegalCNFInst -> LangM m
 verifyInst _ = pure()
 
 
 
-verifyConfig :: OutputMonad m => LegalCNFConfig -> LangM m
+verifyConfig :: OutputCapable m => LegalCNFConfig -> LangM m
 verifyConfig = checkLegalCNFConfig
 
 
@@ -56,7 +62,7 @@ start = []
 
 
 
-partialGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
+partialGrade :: OutputCapable m => LegalCNFInst -> [Int] -> LangM m
 partialGrade LegalCNFInst{..} sol
     | invalidIndex = reject $ do
       english "At least one index in the list does not exist."
@@ -69,7 +75,7 @@ partialGrade LegalCNFInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
+completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> LangM m
 completeGrade inst sol
     | wrongSolution = refuse $ do
       instruct $ do

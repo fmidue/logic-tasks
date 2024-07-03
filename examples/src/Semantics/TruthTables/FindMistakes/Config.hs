@@ -5,7 +5,7 @@ import LogicTasks.Config (
   DecideConfig(..),
   CnfConfig(..),
   )
-import Control.Monad.Output ( english, german, translations )
+import Control.OutputCapable.Blocks (english, german, translations)
 import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig

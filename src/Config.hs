@@ -9,7 +9,7 @@ import GHC.Generics
 import Formula.Types
 import Formula.Util
 import Data.Map (Map)
-import Control.Monad.Output (Language)
+import Control.OutputCapable.Blocks (Language)
 
 
 

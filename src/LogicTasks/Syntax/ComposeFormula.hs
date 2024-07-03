@@ -6,10 +6,10 @@ module LogicTasks.Syntax.ComposeFormula where
 
 
 import Control.Monad.IO.Class(MonadIO (liftIO))
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   ($=<<),
   english,
   german, translate, localise, translations,
@@ -35,7 +35,7 @@ import ParsingHelpers (tokenSymbol)
 
 
 
-description :: (OutputMonad m, MonadIO m) => FilePath -> ComposeFormulaInst -> LangM m
+description :: (OutputCapable m, MonadIO m) => FilePath -> ComposeFormulaInst -> LangM m
 description path ComposeFormulaInst{..} = do
     instruct $ do
       english $ "Imagine that the two displayed " ++ eTreesOrFormulas ++ " are hung below a root node with operator "
@@ -97,12 +97,12 @@ description path ComposeFormulaInst{..} = do
         treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
 
 
-verifyInst :: OutputMonad m => ComposeFormulaInst -> LangM m
+verifyInst :: OutputCapable m => ComposeFormulaInst -> LangM m
 verifyInst _ = pure ()
 
 
 
-verifyConfig :: OutputMonad m => ComposeFormulaConfig -> LangM m
+verifyConfig :: OutputCapable m => ComposeFormulaConfig -> LangM m
 verifyConfig = checkComposeFormulaConfig
 
 
@@ -111,11 +111,11 @@ start :: [TreeFormulaAnswer]
 start = []
 
 
-partialGrade :: OutputMonad m => ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
+partialGrade :: OutputCapable m => ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
 partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many (logicToken <|> listToken)) . partialGrade'
   where listToken = tokenSymbol "[" <|> tokenSymbol "," <|> tokenSymbol "]"
 
-partialGrade' :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
+partialGrade' :: OutputCapable m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
 partialGrade' ComposeFormulaInst{..} sol
   | length (nubOrd sol) /= 2 =
     reject $ do
@@ -153,11 +153,11 @@ partialGrade' ComposeFormulaInst{..} sol
         collectUniqueBinOpsInSynTree leftTree ++
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
 
-completeGrade :: (OutputMonad m, MonadIO m) =>
+completeGrade :: (OutputCapable m, MonadIO m) =>
   FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
 completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
-completeGrade' :: (OutputMonad m, MonadIO m) =>
+completeGrade' :: (OutputCapable m, MonadIO m) =>
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
 completeGrade' path ComposeFormulaInst{..} sol
   | lrTree `notElem` parsedSol || rlTree `notElem` parsedSol = refuse $ do

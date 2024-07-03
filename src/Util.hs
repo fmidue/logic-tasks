@@ -5,10 +5,10 @@
 module Util where
 
 
-import Control.Monad.Output (
-  GenericOutputMonad(..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable(..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -24,18 +24,18 @@ import Formula.Types (Formula, getTable, lengthBound)
 import Formula.Table (readEntries)
 
 
-prevent :: OutputMonad m => Bool -> LangM m -> LangM m
+prevent :: OutputCapable m => Bool -> LangM m -> LangM m
 prevent b = assertion $ not b
 
 
 
-preventWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
+preventWithHint :: OutputCapable m => Bool -> LangM m -> LangM m -> LangM m
 preventWithHint b desc hint = do
   yesNo (not b) desc
   when b (refuse $ indent hint)
   pure ()
 
-printWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
+printWithHint :: OutputCapable m => Bool -> LangM m -> LangM m -> LangM m
 printWithHint b desc hint = do
   yesNo (not b) desc
   when b (indent hint)
@@ -94,7 +94,7 @@ tryGen gen n b = evalStateT state 0
 
 
 
-checkTruthValueRange :: OutputMonad m => (Int,Int) -> CnfConfig -> LangM m
+checkTruthValueRange :: OutputCapable m => (Int, Int) -> CnfConfig -> LangM m
 checkTruthValueRange (low,high) cnfConf
     | isOutside 0 100 low || isOutside 0 100 high =
         refuse $ indent $ translate $ do
@@ -110,7 +110,7 @@ checkTruthValueRange (low,high) cnfConf
 
 
 
-checkBaseConf :: OutputMonad m => BaseConfig -> LangM m
+checkBaseConf :: OutputCapable m => BaseConfig -> LangM m
 checkBaseConf BaseConfig{..}
     | any (<1) [minClauseLength, maxClauseLength] =
         refuse $ indent $ translate $ do
@@ -142,7 +142,7 @@ checkBaseConf BaseConfig{..}
 
 
 
-checkCnfConf :: OutputMonad m => CnfConfig -> LangM m
+checkCnfConf :: OutputCapable m => CnfConfig -> LangM m
 checkCnfConf CnfConfig {..}
     | any (<1) [minClauseAmount, maxClauseAmount] =
         refuse $ indent $ translate $ do

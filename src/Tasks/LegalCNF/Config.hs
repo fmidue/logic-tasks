@@ -12,7 +12,7 @@ module Tasks.LegalCNF.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import Data.Char (isLetter)
 import Data.Set (Set)
 import Data.Map (Map)
@@ -63,7 +63,7 @@ defaultLegalCNFConfig =
 
 
 
-checkLegalCNFConfig :: OutputMonad m => LegalCNFConfig -> LangM m
+checkLegalCNFConfig :: OutputCapable m => LegalCNFConfig -> LangM m
 checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals) = reject $ do
         english "Only letters are allowed as literals."

@@ -5,7 +5,14 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, GenericOutputMonad (refuse, code, image), ($=<<))
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (refuse, code, image),
+  LangM,
+  OutputCapable,
+  ($=<<),
+  english,
+  german,
+  )
 import Data.List (nub, sort)
 import Data.Set (toList)
 
@@ -20,7 +27,7 @@ import Data.Foldable (for_)
 
 
 
-description :: OutputMonad m => LegalPropositionInst -> LangM m
+description :: OutputCapable m => LegalPropositionInst -> LangM m
 description LegalPropositionInst{..} = do
     instruct $ do
       english "Consider the following propositional (pseudo) formulas:"
@@ -44,12 +51,12 @@ description LegalPropositionInst{..} = do
     pure ()
 
 
-verifyInst :: OutputMonad m => LegalPropositionInst -> LangM m
+verifyInst :: OutputCapable m => LegalPropositionInst -> LangM m
 verifyInst _ = pure()
 
 
 
-verifyConfig :: OutputMonad m => LegalPropositionConfig -> LangM m
+verifyConfig :: OutputCapable m => LegalPropositionConfig -> LangM m
 verifyConfig = checkLegalPropositionConfig
 
 
@@ -59,7 +66,7 @@ start = []
 
 
 
-partialGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
+partialGrade :: OutputCapable m => LegalPropositionInst -> [Int] -> LangM m
 partialGrade LegalPropositionInst{..} sol
     | invalidIndex = reject $ do
       english "At least one index in the list does not exist."
@@ -72,7 +79,12 @@ partialGrade LegalPropositionInst{..} sol
 
 
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> LegalPropositionInst -> [Int] -> LangM m
+completeGrade
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> LegalPropositionInst
+  -> [Int]
+  -> LangM m
 completeGrade path inst sol = refuseIfWrong $ do
   when wrongSolution $ do
      instruct $ do

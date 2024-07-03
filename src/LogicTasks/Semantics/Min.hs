@@ -7,10 +7,10 @@ module LogicTasks.Semantics.Min where
 
 import qualified LogicTasks.Semantics.Max as Max
 
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -40,7 +40,7 @@ genMinInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} 
 
 
 
-description :: OutputMonad m => MinInst -> LangM m
+description :: OutputCapable m => MinInst -> LangM m
 description MinInst{..} = do
   paragraph $ do
     translate $ do
@@ -67,7 +67,7 @@ description MinInst{..} = do
   pure ()
 
 
-verifyStatic :: OutputMonad m => MinInst -> LangM m
+verifyStatic :: OutputCapable m => MinInst -> LangM m
 verifyStatic MinInst{..}
     | isEmptyDnf dnf || hasEmptyCon dnf =
         refuse $ indent $ translate $ do
@@ -78,7 +78,7 @@ verifyStatic MinInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => MinMaxConfig -> LangM m
+verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz = Max.verifyQuiz
 
 
@@ -86,18 +86,18 @@ verifyQuiz = Max.verifyQuiz
 start :: Dnf
 start = mkDnf [mkCon [Literal 'A']]
 
-partialGrade :: OutputMonad m => MinInst -> Delayed Dnf -> LangM m
+partialGrade :: OutputCapable m => MinInst -> Delayed Dnf -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade' :: OutputMonad m => MinInst -> Dnf -> LangM m
+partialGrade' :: OutputCapable m => MinInst -> Dnf -> LangM m
 partialGrade' MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms False
   where
     corLits = atomics dnf
     allMinTerms = not $ all (\c -> amount c == length corLits) $ getConjunctions sol
 
 
-completeGrade :: OutputMonad m => MinInst -> Delayed Dnf -> LangM m
+completeGrade :: OutputCapable m => MinInst -> Delayed Dnf -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` parser
 
-completeGrade' :: OutputMonad m => MinInst -> Dnf -> LangM m
+completeGrade' :: OutputCapable m => MinInst -> Dnf -> LangM m
 completeGrade' MinInst{..} = Max.completeMinMax showSolution dnf

@@ -35,7 +35,7 @@ library
       base >=4.7 && <5
     , hspec
     , logic-tasks
-    , output-monad
+    , output-blocks >=0.2
   default-language: Haskell2010
 
 test-suite verify-configs
@@ -51,5 +51,5 @@ test-suite verify-configs
     , hspec
     , logic-tasks
     , logic-tasks-examples
-    , output-monad
+    , output-blocks >=0.2
   default-language: Haskell2010

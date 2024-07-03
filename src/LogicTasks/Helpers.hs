@@ -8,11 +8,11 @@ import qualified Data.ByteString as BS (readFile, writeFile)
 
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
   Language,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -29,7 +29,7 @@ import System.Directory (doesFileExist)
 
 
 
-extra :: OutputMonad m => Maybe (Map Language String) -> LangM m
+extra :: OutputCapable m => Maybe (Map Language String) -> LangM m
 extra (Just extraMap) = paragraph $ translate $ put extraMap
 extra _ = pure ()
 
@@ -38,61 +38,61 @@ indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])
 
 
 
-instruct :: OutputMonad m => State (Map Language String) () -> LangM m
+instruct :: OutputCapable m => State (Map Language String) () -> LangM m
 instruct = paragraph . translate
 
 
 
-focus :: OutputMonad m => String -> LangM m
+focus :: OutputCapable m => String -> LangM m
 focus = indent . code
 
 
 
-example :: OutputMonad m => String -> State (Map Language String) () -> LangM m
+example :: OutputCapable m => String -> State (Map Language String) () -> LangM m
 example correct s = indent $ do
     instruct s
     code correct
     pure ()
 
 
-reject :: OutputMonad m => State (Map Language String) () -> LangM m
+reject :: OutputCapable m => State (Map Language String) () -> LangM m
 reject  = refuse . indent . translate
 
 
 
-clauseKey :: OutputMonad m => LangM m
+clauseKey :: OutputCapable m => LangM m
 clauseKey = do
   keyHeading
   negationKey
   orKey
   pure()
 
-cnfKey :: OutputMonad m => LangM m
+cnfKey :: OutputCapable m => LangM m
 cnfKey = do
   clauseKey
   andKey
   pure ()
 
-formulaKey :: OutputMonad m => LangM m
+formulaKey :: OutputCapable m => LangM m
 formulaKey = do
   keyHeading
   basicOpKey
   pure ()
 
-basicOpKey :: OutputMonad m => LangM m
+basicOpKey :: OutputCapable m => LangM m
 basicOpKey = do
   negationKey
   andKey
   orKey
   pure()
 
-keyHeading :: OutputMonad m => LangM m
+keyHeading :: OutputCapable m => LangM m
 keyHeading =
   paragraph $ translate $ do
     german "Beachten Sie dabei die folgenden möglichen Schreibweisen:"
     english "You can use any of the following notations:"
 
-andKey :: OutputMonad m => LangM m
+andKey :: OutputCapable m => LangM m
 andKey =
   paragraph $ indent $ do
     translate $ do
@@ -103,7 +103,7 @@ andKey =
       english "/\\, and"
     pure ()
 
-orKey :: OutputMonad m => LangM m
+orKey :: OutputCapable m => LangM m
 orKey =
   paragraph $ indent $ do
     translate $ do
@@ -115,7 +115,7 @@ orKey =
     pure ()
 
 
-negationKey :: OutputMonad m => LangM m
+negationKey :: OutputCapable m => LangM m
 negationKey =
   paragraph $ indent $ do
     text "Negation:"
@@ -124,7 +124,7 @@ negationKey =
       english "-, ~, not"
     pure ()
 
-arrowsKey :: OutputMonad m => LangM m
+arrowsKey :: OutputCapable m => LangM m
 arrowsKey = do
   paragraph $ indent $ do
     translate $ do

@@ -6,7 +6,7 @@ import Tasks.SuperfluousBrackets.Config (
 import Tasks.SynTree.Config (
   SynTreeConfig(..),
   )
-import Control.Monad.Output (german, translations, english)
+import Control.OutputCapable.Blocks (english, german, translations)
 import Test.Hspec
 import Util.VerifyConfig
 

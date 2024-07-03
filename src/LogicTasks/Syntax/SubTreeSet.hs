@@ -5,7 +5,14 @@
 module LogicTasks.Syntax.SubTreeSet where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, GenericOutputMonad (refuse, indent, code, image), ($=<<))
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (refuse, indent, code, image),
+  LangM,
+  OutputCapable,
+  ($=<<),
+  english,
+  german,
+  )
 import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf, toList)
 import qualified Data.Set (map)
@@ -23,7 +30,7 @@ import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (Parse(..))
 
 
-description :: OutputMonad m => SubTreeInst -> LangM m
+description :: OutputCapable m => SubTreeInst -> LangM m
 description SubTreeInst{..} = do
     instruct $ do
       english "Consider the following propositional logic formula:"
@@ -55,12 +62,12 @@ description SubTreeInst{..} = do
     pure ()
 
 
-verifyInst :: OutputMonad m => SubTreeInst -> LangM m
+verifyInst :: OutputCapable m => SubTreeInst -> LangM m
 verifyInst _ = pure ()
 
 
 
-verifyConfig :: OutputMonad m => SubTreeConfig -> LangM m
+verifyConfig :: OutputCapable m => SubTreeConfig -> LangM m
 verifyConfig = checkSubTreeConfig
 
 
@@ -69,10 +76,10 @@ start :: [FormulaAnswer]
 start = [FormulaAnswer Nothing]
 
 
-partialGrade :: OutputMonad m => SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
+partialGrade :: OutputCapable m => SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade' :: OutputMonad m => SubTreeInst -> [FormulaAnswer] -> LangM m
+partialGrade' :: OutputCapable m => SubTreeInst -> [FormulaAnswer] -> LangM m
 partialGrade' SubTreeInst{..} fs
     | any (isNothing . maybeForm) fs =
       reject $ do
@@ -103,10 +110,20 @@ partialGrade' SubTreeInst{..} fs
     origOpsNum = numOfOps tree
 
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
+completeGrade
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> SubTreeInst
+  -> Delayed [FormulaAnswer]
+  -> LangM m
 completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
-completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> SubTreeInst -> [FormulaAnswer] -> LangM m
+completeGrade'
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> SubTreeInst
+  -> [FormulaAnswer]
+  -> LangM m
 completeGrade' path SubTreeInst{..} sol = refuseIfWrong $ do
   unless partOfSolution $ do
     instruct $ do

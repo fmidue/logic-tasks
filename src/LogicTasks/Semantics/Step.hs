@@ -5,10 +5,10 @@
 module LogicTasks.Semantics.Step where
 
 
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -39,7 +39,7 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
 
 
 
-description :: OutputMonad m => StepInst -> LangM m
+description :: OutputCapable m => StepInst -> LangM m
 description StepInst{..} = do
   paragraph $ do
     translate $ do
@@ -68,7 +68,7 @@ description StepInst{..} = do
   pure ()
 
 
-verifyStatic :: OutputMonad m => StepInst -> LangM m
+verifyStatic :: OutputCapable m => StepInst -> LangM m
 verifyStatic StepInst{..}
     | any isEmptyClause [clause1, clause2] =
         refuse $ indent $ translate $ do
@@ -84,7 +84,7 @@ verifyStatic StepInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => StepConfig -> LangM m
+verifyQuiz :: OutputCapable m => StepConfig -> LangM m
 verifyQuiz StepConfig{..} = checkBaseConf baseConf
 
 
@@ -92,10 +92,10 @@ verifyQuiz StepConfig{..} = checkBaseConf baseConf
 start :: StepAnswer
 start = StepAnswer Nothing
 
-partialGrade :: OutputMonad m => StepInst -> Delayed StepAnswer -> LangM m
+partialGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade' :: OutputMonad m => StepInst -> StepAnswer -> LangM m
+partialGrade' :: OutputCapable m => StepInst -> StepAnswer -> LangM m
 partialGrade' StepInst{..} sol = do
 
   prevent (isNothing $ step sol) $
@@ -127,11 +127,11 @@ partialGrade' StepInst{..} sol = do
      solLits = fromList $ literals $ snd mSol
      extraLiterals = toList (solLits `difference` availLits)
 
-completeGrade :: OutputMonad m => StepInst -> Delayed StepAnswer -> LangM m
+completeGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` parser
 
 
-completeGrade' :: OutputMonad m => StepInst -> StepAnswer -> LangM m
+completeGrade' :: OutputCapable m => StepInst -> StepAnswer -> LangM m
 completeGrade' StepInst{..} sol =
     case resolve clause1 clause2 (fst mSol) of
         Nothing -> refuse $ indent $ do

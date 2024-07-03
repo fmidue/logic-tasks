@@ -11,7 +11,7 @@ module Tasks.LegalProposition.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import Data.Set (Set)
 import GHC.Generics (Generic)
 import Data.Map (Map)
@@ -48,12 +48,12 @@ defaultLegalPropositionConfig =
     , printSolution = False
     }
 
-checkLegalPropositionConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
+checkLegalPropositionConfig :: OutputCapable m => LegalPropositionConfig -> LangM m
 checkLegalPropositionConfig config@LegalPropositionConfig {..} =
     checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
 
-checkAdditionalConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
+checkAdditionalConfig :: OutputCapable m => LegalPropositionConfig -> LangM m
 checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, formulas, illegals, bracketFormulas}
     | minNodes < 3 = reject $ do
         english "form A and ~A is meaningless in this kind of issue"
