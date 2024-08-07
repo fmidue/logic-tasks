@@ -1,29 +1,19 @@
 module Semantics.TruthTables.ChooseForFormula.Config where
 
 import LogicTasks.Config (
-  BaseConfig(..),
   PickConfig(..),
-  CnfConfig(..),
   )
-import LogicTasks.Util (checkCnfConf)
 
 import Test.Hspec
 import Util.VerifyConfig
+import Tasks.SynTree.Config (defaultSynTreeConfig, checkSynTreeConfig)
 
 -- Weight 0.33
 task08 :: PickConfig
 task08 = PickConfig
-  { cnfConf = CnfConfig
-    { baseConf = BaseConfig
-      { minClauseLength = 3
-      , maxClauseLength = 3
-      , usedLiterals = "ABCD"
-      }
-    , minClauseAmount = 2
-    , maxClauseAmount = 2
-    }
+  { syntaxTreeConfig = defaultSynTreeConfig -- TODO: change this to a suiting config
   , amountOfOptions = 3
-  , pickCnf = False
+  , percentTrueEntries = Nothing
   , extraText = Nothing
   , printSolution = True
   }
@@ -31,22 +21,14 @@ task08 = PickConfig
 -- Weight 0.25
 task19 :: PickConfig
 task19 = PickConfig
-  { cnfConf = CnfConfig
-    { baseConf = BaseConfig
-        { minClauseLength = 3
-        , maxClauseLength = 3
-        , usedLiterals = "ABCDE"
-        }
-    , minClauseAmount = 4
-    , maxClauseAmount = 4
-    }
+  { syntaxTreeConfig = defaultSynTreeConfig -- TODO: change this to a suiting config
   , amountOfOptions = 4
-  , pickCnf = False
+  , percentTrueEntries = Nothing
   , extraText = Nothing
   , printSolution = True
   }
 
 spec :: Spec
 spec = do
-  describe "task08" $ verifyConfig (cnfConf task08) checkCnfConf
-  describe "task19" $ verifyConfig (cnfConf task19) checkCnfConf
+  describe "task08" $ verifyConfig (syntaxTreeConfig task08) checkSynTreeConfig
+  describe "task19" $ verifyConfig (syntaxTreeConfig task19) checkSynTreeConfig
