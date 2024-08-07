@@ -7,10 +7,10 @@ module LogicTasks.Semantics.Resolve where
 
 
 import Data.Set (fromList, member, toList, unions)
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -65,7 +65,7 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
 
 
 
-description :: OutputMonad m => ResolutionInst -> LangM m
+description :: OutputCapable m => ResolutionInst -> LangM m
 description ResolutionInst{..} = do
   paragraph $ do
     translate $ do
@@ -121,7 +121,7 @@ description ResolutionInst{..} = do
   pure ()
 
 
-verifyStatic :: OutputMonad m => ResolutionInst -> LangM m
+verifyStatic :: OutputCapable m => ResolutionInst -> LangM m
 verifyStatic ResolutionInst{..}
     | any isEmptyClause clauses =
         refuse $ indent $ translate $ do
@@ -137,7 +137,7 @@ verifyStatic ResolutionInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => ResolutionConfig -> LangM m
+verifyQuiz :: OutputCapable m => ResolutionConfig -> LangM m
 verifyQuiz ResolutionConfig{..}
     | minSteps < 1 =
         refuse $ indent $ translate $ do
@@ -161,7 +161,7 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
-gradeSteps :: OutputMonad m => [(Clause,Clause,Clause)] -> Bool -> LangM m
+gradeSteps :: OutputCapable m => [(Clause,Clause,Clause)] -> Bool -> LangM m
 gradeSteps steps appliedIsNothing = do
     preventWithHint (notNull noResolveSteps)
         (translate $ do
@@ -198,10 +198,10 @@ gradeSteps steps appliedIsNothing = do
             fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
 
-partialGrade :: OutputMonad m => ResolutionInst -> Delayed [ResStep] -> LangM m
+partialGrade :: OutputCapable m => ResolutionInst -> Delayed [ResStep] -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade' :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
+partialGrade' :: OutputCapable m => ResolutionInst -> [ResStep] -> LangM m
 partialGrade' ResolutionInst{..} sol = do
   checkMapping
 
@@ -231,10 +231,10 @@ partialGrade' ResolutionInst{..} sol = do
     applied = applySteps clauses steps
     stepsGraded = gradeSteps steps (isNothing applied)
 
-completeGrade :: (OutputMonad m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
+completeGrade :: (OutputCapable m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` parser
 
-completeGrade' :: (OutputMonad m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
+completeGrade' :: (OutputCapable m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
 completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
     unless printFeedbackImmediately $ do
       recoverFrom stepsGraded
@@ -260,7 +260,7 @@ baseMapping xs = zip [1..] $ sort xs
 
 
 
-correctMapping :: OutputMonad m => [(Int,ResStep)] -> [(Int,Clause)] -> LangM m
+correctMapping :: OutputCapable m => [(Int,ResStep)] -> [(Int,Clause)] -> LangM m
 correctMapping [] _ = pure()
 correctMapping ((j, Res (c1,c2,(c3,i))): rest) mapping = do
   prevent checkIndices $

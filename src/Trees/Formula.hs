@@ -27,6 +27,7 @@ instance Formula (SynTree BinOp Char) where
       And -> (&&)
       Or -> (||)
       Impl -> \x y -> not x || y
+      BackImpl -> \x y -> x || not y
       Equi -> (==)
     ) (evaluate allocation l) (evaluate allocation r)
     where

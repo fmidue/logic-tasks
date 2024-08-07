@@ -12,10 +12,10 @@ import Tasks.ComposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.Monad.Output (LangM)
+import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
-import Control.Monad.Output.Generic (evalLangM)
+import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.ComposeFormula.Quiz (generateComposeFormulaInst)
 import Trees.Types (SynTree(Binary), TreeFormulaAnswer (TreeFormulaAnswer))
 import LogicTasks.Syntax.ComposeFormula (partialGrade')

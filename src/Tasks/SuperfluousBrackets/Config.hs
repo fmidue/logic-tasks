@@ -11,7 +11,7 @@ module Tasks.SuperfluousBrackets.Config (
     )where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import GHC.Generics (Generic)
 import Data.Map (Map)
 
@@ -45,13 +45,13 @@ defaultSuperfluousBracketsConfig =
 
 
 
-checkSuperfluousBracketsConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
+checkSuperfluousBracketsConfig :: OutputCapable m => SuperfluousBracketsConfig -> LangM m
 checkSuperfluousBracketsConfig config@SuperfluousBracketsConfig {..} =
     checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig config
 
 
 
-checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
+checkAdditionalConfig :: OutputCapable m => SuperfluousBracketsConfig -> LangM m
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, superfluousBracketPairs}
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."

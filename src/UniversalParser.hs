@@ -8,13 +8,13 @@ module UniversalParser where
 import Data.Functor (($>), void)
 import Data.Maybe (fromMaybe)
 
-import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, many, notFollowedBy, string)
+import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, notFollowedBy, string)
 import Text.Parsec.String (Parser)
 
 import ParsingHelpers
 
 {-- Universal parser for the following grammar of propositional formulas:
-  Formula ::= NoFixity | Ors
+  Formula ::= NoFixity | BiImpl
 
   -- no implicit parenthesis
   NoFixity ::= Basic Op Basic | Basic
@@ -22,10 +22,10 @@ import ParsingHelpers
   Op ::= ∨ | ∧ | => | <=>
 
   -- with precedence
+  BiImpl ::= Impl <=> BiImpl | Impl
+  Impl ::= Ors => Impl | Ors <= Impl | Ors
   Ors ::= Ors ∨ Ands | Ands
-  Ands ::= Ands ∧ Impl | Impl
-  Impl ::= BiImpl => Impl | BiImpl <= Impl | BiImpl
-  BiImpl ::= Neg <=> BiImpl | Neg
+  Ands ::= Ands ∧ Neg | Neg
 
   -- 'leaf' formulas
   Neg ::= ¬ Atom | Atom | ¬ Neg | Nested
@@ -37,7 +37,7 @@ import ParsingHelpers
 --}
 
 -- types for universal grammar
-data FormulaGrammar = WithPrecedence Ors | OfNoFixity NoFixity
+data FormulaGrammar = WithPrecedence BiImpls | OfNoFixity NoFixity
   deriving Show
 
 data NoFixity = NoFixity Basic Op Basic | OfBasic Basic
@@ -49,19 +49,19 @@ data Basic = BasicNested Nested | BasicNeg Neg
 data Op = Or | And | Impl | BackImpl | BiImpl
   deriving Show
 
-data Ors = Ors Ors Ands | OfAnds Ands
-  deriving Show
-
-data Ands = Ands Ands Impls | OfImpl Impls
+data BiImpls = BiImpls Impls BiImpls | OfImpls Impls
   deriving Show
 
 data Impls
-  = Impls BiImpls Impls
-  | BackImpls BiImpls Impls
-  | OfBiImpl BiImpls
+  = Impls Ors Impls
+  | BackImpls Ors Impls
+  | OfOrs Ors
   deriving Show
 
-data BiImpls = BiImpls Neg BiImpls | OfNeg Neg
+data Ors = Ors Ors Ands | OfAnds Ands
+  deriving Show
+
+data Ands = Ands Ands Neg | OfNeg Neg
   deriving Show
 
 data Neg = NegAtom Atom | OfAtom Atom | Neg Neg | OfNested Nested
@@ -78,18 +78,18 @@ foldlOrs :: (a -> Ands -> a) -> a -> Ors -> a
 foldlOrs f z (Ors x y) = foldlOrs f z x `f` y
 foldlOrs f z (OfAnds x) = f z x
 
-foldlAnds :: (a -> Impls -> a) -> a -> Ands -> a
+foldlAnds :: (a -> Neg -> a) -> a -> Ands -> a
 foldlAnds f z (Ands x y) = foldlAnds f z x `f` y
-foldlAnds f z (OfImpl x) = f z x
+foldlAnds f z (OfNeg x) = f z x
 
-foldrImpl :: (BiImpls -> a -> a) -> a -> Impls -> a
+foldrImpl :: (Ors -> a -> a) -> a -> Impls -> a
 foldrImpl f z (Impls x y) = f x $ foldrImpl f z y
 foldrImpl f z (BackImpls x y) = f x $ foldrImpl f z y
-foldrImpl f z (OfBiImpl x) = f x z
+foldrImpl f z (OfOrs x) = f x z
 
-foldrBiImpl :: (Neg -> a -> a) -> a -> BiImpls -> a
+foldrBiImpl :: (Impls -> a -> a) -> a -> BiImpls -> a
 foldrBiImpl f z (BiImpls x y) = f x $ foldrBiImpl f z y
-foldrBiImpl f z (OfNeg x) = f x z
+foldrBiImpl f z (OfImpls x) = f x z
 
 -- useful pattern synonyms
 {-# COMPLETE Ors, NoOrs #-}
@@ -97,27 +97,29 @@ pattern NoOrs :: Ands -> Ors
 pattern NoOrs x = OfAnds x
 
 {-# COMPLETE Ands, NoAnds #-}
-pattern NoAnds :: Impls -> Ands
-pattern NoAnds x = OfImpl x
+pattern NoAnds :: Neg -> Ands
+pattern NoAnds x = OfNeg x
 
 {-# COMPLETE Impls, NoImpls #-}
-pattern NoImpls :: BiImpls -> Impls
-pattern NoImpls x = OfBiImpl x
+pattern NoImpls :: Ors -> Impls
+pattern NoImpls x = OfOrs x
 
 {-# COMPLETE BiImpls, NoBiImpls #-}
-pattern NoBiImpls :: Neg -> BiImpls
-pattern NoBiImpls x = OfNeg x
+pattern NoBiImpls :: Impls -> BiImpls
+pattern NoBiImpls x = OfImpls x
 
-{-# COMPLETE Impls, NoImplBiImpl, NoArrows #-}
-pattern NoImplBiImpl :: Impls
-pattern NoImplBiImpl <- NoImpls (BiImpls _ _)
+{-# COMPLETE BiImpls, TopLevelImpl, TopLevelBackImpl, NoArrows #-}
+pattern TopLevelImpl :: BiImpls
+pattern TopLevelImpl <- OfImpls Impls{}
 
-pattern NoArrows :: Neg -> Impls
-pattern NoArrows x = NoImpls (NoBiImpls x)
+pattern TopLevelBackImpl :: BiImpls
+pattern TopLevelBackImpl <- OfImpls BackImpls{}
 
-{-# COMPLETE Ors, SkipLevel #-}
-pattern SkipLevel :: FormulaGrammar -> Ors
-pattern SkipLevel x = NoOrs (NoAnds (NoArrows (OfNested (Nested x))))
+pattern NoArrows :: Ors -> BiImpls
+pattern NoArrows x = NoBiImpls (NoImpls x)
+
+pattern SkipLevel :: FormulaGrammar -> BiImpls
+pattern SkipLevel x = NoArrows (NoOrs (NoAnds (OfNested (Nested x))))
 
 -- parser configuration
 data LevelSpec = LevelSpec
@@ -171,9 +173,9 @@ negationParser =
 atomParser :: Parser Char
 atomParser = token (satisfy (`elem` ['A'..'Z'])) <?> "atomic Proposition"
 
--- parser for token sequences
-tokenSequence :: Parser ()
-tokenSequence = void $ many $
+-- parser for individual tokens
+logicToken :: Parser ()
+logicToken =
       orParser
   <|> andParser
   <|> implicationParser
@@ -188,7 +190,7 @@ tokenSequence = void $ many $
 formula :: LevelSpec -> Parser FormulaGrammar
 formula LevelSpec{..}
   | strictParens = OfNoFixity <$> noFixity
-  | otherwise = WithPrecedence <$> ors
+  | otherwise = WithPrecedence <$> biImpl
   where
   noFixity :: Parser NoFixity
   noFixity = do
@@ -229,6 +231,19 @@ formula LevelSpec{..}
   basic :: Parser Basic
   basic = BasicNested <$> nested <|> BasicNeg <$> neg
 
+  impl :: Parser Impls
+  impl
+    = case allowImplication of
+      Forwards -> infixr1 OfOrs ors (implicationParser $> Impls)
+      Backwards -> infixr1 OfOrs ors (try backImplicationParser $> BackImpls)
+      Both -> infixr1 OfOrs ors (implicationParser $> Impls <|> try backImplicationParser $> BackImpls)
+      NoImplication -> OfOrs <$> ors
+
+  biImpl :: Parser BiImpls
+  biImpl
+    | allowBiImplication = infixr1 OfImpls impl (biImplicationParser $> BiImpls)
+    | otherwise = OfImpls <$> impl
+
   ors :: Parser Ors
   ors
     | allowOr = infixl1 OfAnds ands (orParser $> Ors)
@@ -236,20 +251,7 @@ formula LevelSpec{..}
 
   ands :: Parser Ands
   ands
-    | allowAnd = infixl1 OfImpl impl (andParser $> Ands)
-    | otherwise = OfImpl <$> impl
-
-  impl :: Parser Impls
-  impl
-    = case allowImplication of
-      Forwards -> infixr1 OfBiImpl biImpl (implicationParser $> Impls)
-      Backwards -> infixr1 OfBiImpl biImpl (try backImplicationParser $> BackImpls)
-      Both -> infixr1 OfBiImpl biImpl (implicationParser $> Impls <|> try backImplicationParser $> BackImpls)
-      NoImplication -> OfBiImpl <$> biImpl
-
-  biImpl :: Parser BiImpls
-  biImpl
-    | allowBiImplication = infixr1 OfNeg neg (biImplicationParser $> BiImpls)
+    | allowAnd = infixl1 OfNeg neg (andParser $> Ands)
     | otherwise = OfNeg <$> neg
 
   neg :: Parser Neg

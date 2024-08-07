@@ -5,8 +5,8 @@
 module LogicTasks.Debug where
 
 import Test.QuickCheck
-import Control.Monad.Output.Generic
-import Control.Monad.Output
+import Control.OutputCapable.Blocks.Generic
+import Control.OutputCapable.Blocks
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import Data.Maybe (isJust)
@@ -15,11 +15,39 @@ import Formula.Util (isPositive)
 import Data.Set (size, toList)
 import Data.List (partition)
 import Data.List.Extra (nubSort)
+import Formula.Parsing.Delayed (delayed, Delayed)
+import ParsingHelpers (fully)
 
 showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
 showDescription gen f = do
   inst <- generate gen
   run (f inst)
+
+testTaskShow ::
+  (m ~ GenericReportT Language (IO ()) IO) =>
+  ((String, a) -> String) ->
+  Gen inst ->
+  (inst -> LangM m) ->
+  (inst -> a -> LangM m) ->
+  (inst -> a -> LangM m) ->
+  Parser a ->
+  IO ()
+testTaskShow sho gen f partial full p = do
+  inst <- generate gen
+  desc <- run (f inst)
+  print desc
+  str <- getLine
+  case parse p "input" str of
+    Left err -> print err
+    Right value -> do
+      putStrLn "---- Input ----"
+      putStrLn $ sho (str,value)
+      putStrLn "---- Partial ----"
+      partialRes <- run (partial inst value)
+      print partialRes
+      putStrLn "---- Complete ----"
+      completeRes <- run (full inst value)
+      print completeRes
 
 testTask ::
   (m ~ GenericReportT Language (IO ()) IO, Show a) =>
@@ -29,22 +57,16 @@ testTask ::
   (inst -> a -> LangM m) ->
   Parser a ->
   IO ()
-testTask gen f partial full p = do
-  inst <- generate gen
-  desc <- run (f inst)
-  print desc
-  str <- getLine
-  case parse p "input" str of
-    Left err -> print err
-    Right value -> do
-      putStrLn "---- Input ----"
-      print value
-      putStrLn "---- Partial ----"
-      partialRes <- run (partial inst value)
-      print partialRes
-      putStrLn "---- Complete ----"
-      completeRes <- run (full inst value)
-      print completeRes
+testTask = testTaskShow (show . snd)
+
+testTaskDelayed ::
+  (m ~ GenericReportT Language (IO ()) IO) =>
+  Gen inst ->
+  (inst -> LangM m) ->
+  (inst -> Delayed a -> LangM m) ->
+  (inst -> Delayed a -> LangM m) ->
+  IO ()
+testTaskDelayed gen f partial full = testTaskShow fst gen f partial full (delayed <$> fully (many anyChar))
 
 checkConfigWith :: (m ~ GenericReportT Language (IO ()) IO) => config -> (config -> LangM m) -> IO Bool
 checkConfigWith conf check = isJust <$> run (check conf)

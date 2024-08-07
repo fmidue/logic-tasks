@@ -27,10 +27,10 @@ import Trees.Parsing(formulaParse)
 import TestHelpers (deleteBrackets)
 import Trees.Generate (genSynTree)
 import Formula.Parsing (Parse(parser))
-import Control.Monad.Output (LangM)
+import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
-import Control.Monad.Output.Generic (evalLangM)
+import Control.OutputCapable.Blocks.Generic (evalLangM)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do

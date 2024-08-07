@@ -14,7 +14,7 @@ import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
-import Control.Monad.Output (Language, OutputMonad, LangM)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable)
 
 data TreeToFormulaConfig = TreeToFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
@@ -34,7 +34,7 @@ defaultTreeToFormulaConfig = TreeToFormulaConfig
 
 
 
-checkTreeToFormulaConfig :: OutputMonad m => TreeToFormulaConfig -> LangM m
+checkTreeToFormulaConfig :: OutputCapable m => TreeToFormulaConfig -> LangM m
 checkTreeToFormulaConfig TreeToFormulaConfig {..} =
     checkSynTreeConfig syntaxTreeConfig
 

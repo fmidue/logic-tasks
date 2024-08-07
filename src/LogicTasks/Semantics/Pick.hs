@@ -6,10 +6,10 @@
 module LogicTasks.Semantics.Pick where
 
 
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -50,7 +50,7 @@ genPickInst PickConfig{..} = do
 
 
 
-description :: OutputMonad m => PickInst -> LangM m
+description :: OutputCapable m => PickInst -> LangM m
 description PickInst{..} = do
     paragraph $ do
       translate $ do
@@ -76,7 +76,7 @@ description PickInst{..} = do
     sTable = trees !! (correct - 1)
 
 
-verifyStatic :: OutputMonad m => PickInst -> LangM m
+verifyStatic :: OutputCapable m => PickInst -> LangM m
 verifyStatic PickInst{..}
     | null trees =
         refuse $ indent $ translate $ do
@@ -92,7 +92,7 @@ verifyStatic PickInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => PickConfig -> LangM m
+verifyQuiz :: OutputCapable m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
 
     | minAmountOfUniqueAtoms syntaxTreeConfig < 2 =
@@ -124,14 +124,14 @@ verifyQuiz PickConfig{..}
 start :: Number
 start = Number Nothing
 
-partialGrade :: OutputMonad m => PickInst -> Number -> LangM m
+partialGrade :: OutputCapable m => PickInst -> Number -> LangM m
 partialGrade _ (Number Nothing) = refuse $ indent $
         translate $ do
           german "Es wurde kein Index angegeben."
           english "You did not give an index."
 partialGrade _ _ = pure ()
 
-completeGrade :: OutputMonad m => PickInst -> Number -> LangM m
+completeGrade :: OutputCapable m => PickInst -> Number -> LangM m
 completeGrade PickInst{..} (Number index) =
     if fromJust index == correct
         then pure ()

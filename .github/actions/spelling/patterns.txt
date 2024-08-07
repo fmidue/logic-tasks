@@ -25,3 +25,6 @@ True True
 
 # marker to ignore all code on line
 ^.*-- no-spell-check$
+
+# ignore OPTIONS_GHC pragmas
+^\{-# OPTIONS_GHC .* -\}$

@@ -6,10 +6,10 @@
 module LogicTasks.Semantics.Decide where
 
 
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -48,7 +48,7 @@ genDecideInst DecideConfig{..} = do
 
 
 
-description :: OutputMonad m => DecideInst -> LangM m
+description :: OutputCapable m => DecideInst -> LangM m
 description DecideInst{..} = do
   paragraph $ do
     translate $ do
@@ -76,7 +76,7 @@ description DecideInst{..} = do
   pure ()
 
 
-verifyStatic :: OutputMonad m => DecideInst -> LangM m
+verifyStatic :: OutputCapable m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
     | any (> 2^length (atomics tree)) changed || any (<=0) changed =
         refuse $ indent $ translate $ do
@@ -94,7 +94,7 @@ verifyStatic DecideInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => DecideConfig -> LangM m
+verifyQuiz :: OutputCapable m => DecideConfig -> LangM m
 verifyQuiz DecideConfig{..}
     | isOutside 1 100 percentageOfChanged =
         refuse $ indent $ translate $ do
@@ -115,7 +115,7 @@ verifyQuiz DecideConfig{..}
 start :: [Int]
 start = []
 
-preventIfSolutionExceedsTableSize :: OutputMonad m => Int -> Table -> LangM m
+preventIfSolutionExceedsTableSize :: OutputCapable m => Int -> Table -> LangM m
 preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > tableLen)
     (translate $ do
       german "Lösung überschreitet nicht Anzahl der Zeilen?"
@@ -139,7 +139,7 @@ preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > table
       where
         display' = show diff
 
-partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
+partialGrade :: OutputCapable m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
   preventWithHint (null sol)
     (translate $ do
@@ -156,7 +156,7 @@ partialGrade DecideInst{..} sol = do
   pure ()
 
 
-completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
+completeGrade :: OutputCapable m => DecideInst -> [Int] -> LangM m
 completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
   printWithHint (solLen > acLen)
     (translate $ do

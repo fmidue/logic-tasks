@@ -5,10 +5,17 @@
 module LogicTasks.Syntax.DecomposeFormula where
 
 
-import Control.Monad.Output (
+import Control.Monad.IO.Class (MonadIO (liftIO))
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (paragraph, indent, translatedCode, refuse, image),
   LangM,
-  OutputMonad, german, english,
-  GenericOutputMonad (paragraph, indent, translatedCode, refuse, image), translate, localise, translations, ($=<<)
+  OutputCapable,
+  ($=<<),
+  english,
+  german,
+  localise,
+  translate,
+  translations,
   )
 
 import LogicTasks.Helpers (extra, example, instruct, keyHeading, basicOpKey, arrowsKey, reject)
@@ -19,15 +26,17 @@ import Control.Monad (when, unless)
 import Data.Maybe (isNothing, fromJust)
 import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree, swapKids)
 import Data.Containers.ListUtils (nubOrd)
-import Control.Monad.Cont (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Formula.Parsing (Parse(parser))
-import Formula.Parsing.Delayed (Delayed, withDelayed)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
+import UniversalParser (logicToken)
+import Text.Parsec (many)
+import Data.Functor (void)
 
 
 
 
-description :: OutputMonad m => DecomposeFormulaInst -> LangM m
+description :: OutputCapable m => DecomposeFormulaInst -> LangM m
 description DecomposeFormulaInst{..} = do
 
     example (display tree) $ do
@@ -65,12 +74,12 @@ description DecomposeFormulaInst{..} = do
     pure ()
 
 
-verifyInst :: OutputMonad m => DecomposeFormulaInst -> LangM m
+verifyInst :: OutputCapable m => DecomposeFormulaInst -> LangM m
 verifyInst _ = pure ()
 
 
 
-verifyConfig :: OutputMonad m => DecomposeFormulaConfig -> LangM m
+verifyConfig :: OutputCapable m => DecomposeFormulaConfig -> LangM m
 verifyConfig = checkDecomposeFormulaConfig
 
 
@@ -79,10 +88,10 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 
-partialGrade :: OutputMonad m => DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` parser
+partialGrade :: OutputCapable m => DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
 
-partialGrade' :: OutputMonad m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
+partialGrade' :: OutputCapable m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' DecomposeFormulaInst{..} sol = do
 
   when (isNothing solTree) $ reject $ do
@@ -110,10 +119,20 @@ partialGrade' DecomposeFormulaInst{..} sol = do
 
 
 
-completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
+completeGrade
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> DecomposeFormulaInst
+  -> Delayed TreeFormulaAnswer
+  -> LangM m
 completeGrade path inst = completeGrade' path inst `withDelayed` parser
 
-completeGrade' :: (OutputMonad m, MonadIO m) => FilePath -> DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
+completeGrade'
+  :: (OutputCapable m, MonadIO m)
+  => FilePath
+  -> DecomposeFormulaInst
+  -> TreeFormulaAnswer
+  -> LangM m
 completeGrade' path DecomposeFormulaInst{..} sol
   | solTree /= swappedTree = refuse $ do
     instruct $ do
@@ -133,7 +152,7 @@ completeGrade' path DecomposeFormulaInst{..} sol
     image $=<< liftIO $ cacheTree (transferToPicture solTree) path
 
     when showSolution $ do
-      example (show swappedTree) $ do
+      example (display swappedTree) $ do
         english "The solution for this task is:"
         german "Die Lösung für die Aufgabe ist:"
 
@@ -149,4 +168,3 @@ completeGrade' path DecomposeFormulaInst{..} sol
   | otherwise = pure ()
     where solTree = fromJust $ maybeTree sol
           swappedTree = swapKids tree
-

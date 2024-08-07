@@ -11,7 +11,7 @@ module Tasks.SubTree.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
+import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import Data.Set (Set)
 import GHC.Generics (Generic)
 import Data.Map (Map)
@@ -48,13 +48,13 @@ defaultSubTreeConfig =
 
 
 
-checkSubTreeConfig :: OutputMonad m => SubTreeConfig -> LangM m
+checkSubTreeConfig :: OutputCapable m => SubTreeConfig -> LangM m
 checkSubTreeConfig subConfig@SubTreeConfig {..} =
     checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig subConfig
 
 
 
-checkAdditionalConfig :: OutputMonad m => SubTreeConfig -> LangM m
+checkAdditionalConfig :: OutputCapable m => SubTreeConfig -> LangM m
 checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, minSubTrees}
     | minSubTrees < 2 = reject $ do
         english "The task makes no sense if not at least two subtrees are generated."

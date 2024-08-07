@@ -2,10 +2,10 @@
 
 ## Mapping from Autotool to relevant modules in this repository
 
-| in Autotool inventory | Direct | Quiz | Autotool module | `logic-tasks` module(s) |
+| in Autotool inventory (on <https://autotool.fmi.uni-due.de>) | Direct | Quiz | Autotool module (in [`collection/src`](https://git.uni-due.de/fmi/autotool-dev/-/tree/HEAD/collection/src)) | `logic-tasks` module(s) |
 | :-- | :-: | :-: | :-- | :-- |
-| TODO | | | | [`LogicTasks.Syntax.ComposeFormula`](src/LogicTasks/Syntax/ComposeFormula.hs), [`Tasks.ComposeFormula.Quiz`](src/Tasks/ComposeFormula/Quiz.hs) |
-| TODO | | | | [`LogicTasks.Syntax.DecomposeFormula`](src/LogicTasks/Syntax/DecomposeFormula.hs), [`Tasks.DecomposeFormula.Quiz`](src/Tasks/DecomposeFormula/Quiz.hs) |
+| Aussagenlogik/Syntax/LogicComposeFormula | | x | `Logic.Syntax.ComposeFormula` | [`LogicTasks.Syntax.ComposeFormula`](src/LogicTasks/Syntax/ComposeFormula.hs), [`Tasks.ComposeFormula.Quiz`](src/Tasks/ComposeFormula/Quiz.hs) |
+| Aussagenlogik/Syntax/LogicDecomposeFormula | | x | `Logic.Syntax.DecomposeFormula` | [`LogicTasks.Syntax.DecomposeFormula`](src/LogicTasks/Syntax/DecomposeFormula.hs), [`Tasks.DecomposeFormula.Quiz`](src/Tasks/DecomposeFormula/Quiz.hs) |
 | Aussagenlogik/Syntax/LogicInvalidCnfs | | x | `Logic.Syntax.LegalCnf` | [`LogicTasks.Syntax.IllegalCnfs`](src/LogicTasks/Syntax/IllegalCnfs.hs), [`Tasks.LegalCNF.Quiz`](src/Tasks/LegalCNF/Quiz.hs) |
 | Aussagenlogik/Syntax/LogicInvalidFormulas | | x | `Logic.Syntax.LegalFormula` | [`LogicTasks.Syntax.IllegalFormulas`](src/LogicTasks/Syntax/IllegalFormulas.hs), [`Tasks.LegalProposition.Quiz`](src/Tasks/LegalProposition/Quiz.hs) |
 | Aussagenlogik/Syntax/LogicRemoveBrackets | | x | `Logic.Syntax.SimplestFormula` | [`LogicTasks.Syntax.SimplestFormula`](src/LogicTasks/Syntax/SimplestFormula.hs), [`Tasks.SuperfluousBrackets.Quiz`](src/Tasks/SuperfluousBrackets/Quiz.hs) |

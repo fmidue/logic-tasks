@@ -19,10 +19,10 @@ import Trees.Parsing ()
 import Trees.Types (SynTree, BinOp, PropFormula)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Parsing (Parse(parser))
-import Control.Monad.Output (LangM)
+import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
-import Control.Monad.Output.Generic (evalLangM)
+import Control.OutputCapable.Blocks.Generic (evalLangM)
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do

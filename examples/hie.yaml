@@ -1,0 +1,14 @@
+---
+cradle:
+  stack:
+    - path: "../src"
+      component: "logic-tasks:lib"
+
+    - path: "../test"
+      component: "logic-tasks:test:src-test"
+
+    - path: "src"
+      component: "logic-tasks-examples:lib"
+
+    - path: "test"
+      component: "logic-tasks-examples:test:verify-configs"

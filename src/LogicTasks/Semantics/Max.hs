@@ -5,10 +5,10 @@
 module LogicTasks.Semantics.Max where
 
 
-import Control.Monad.Output (
-  GenericOutputMonad (..),
+import Control.OutputCapable.Blocks (
+  GenericOutputCapable (..),
   LangM,
-  OutputMonad,
+  OutputCapable,
   english,
   german,
   translate,
@@ -41,7 +41,7 @@ genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} 
 
 
 
-description :: OutputMonad m => MaxInst -> LangM m
+description :: OutputCapable m => MaxInst -> LangM m
 description MaxInst{..} = do
   paragraph $ do
     translate $ do
@@ -68,7 +68,7 @@ description MaxInst{..} = do
   pure ()
 
 
-verifyStatic :: OutputMonad m => MaxInst -> LangM m
+verifyStatic :: OutputCapable m => MaxInst -> LangM m
 verifyStatic MaxInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
         refuse $ indent $ translate $ do
@@ -79,7 +79,7 @@ verifyStatic MaxInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => MinMaxConfig -> LangM m
+verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..} = do
   checkTruthValueRange (low,high)
   checkCnfConf cnfConf
@@ -94,7 +94,7 @@ start = mkCnf [mkClause [Literal 'A']]
 
 
 
-partialMinMax :: (OutputMonad m, Formula f) => [Literal] -> f -> f -> Bool -> Bool -> LangM m
+partialMinMax :: (OutputCapable m, Formula f) => [Literal] -> f -> f -> Bool -> Bool -> LangM m
 partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
   preventWithHint (not $ null extraLiterals)
     (translate $ do
@@ -172,10 +172,10 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
       then ("Maxterme", "Klauseln", "maxterms", "clauses") -- no-spell-check
       else ("Minterme", "Konjunktionen", "minterms", "conjunctions") -- no-spell-check
 
-partialGrade :: OutputMonad m => MaxInst -> Delayed Cnf -> LangM m
+partialGrade :: OutputCapable m => MaxInst -> Delayed Cnf -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` parser
 
-partialGrade' :: OutputMonad m => MaxInst -> Cnf -> LangM m
+partialGrade' :: OutputCapable m => MaxInst -> Cnf -> LangM m
 partialGrade' MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
   where
     corLits = atomics cnf
@@ -183,7 +183,7 @@ partialGrade' MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
 
 
 
-completeMinMax :: (OutputMonad m, Formula f, Show f) => Bool -> f -> f -> LangM m
+completeMinMax :: (OutputCapable m, Formula f, Show f) => Bool -> f -> f -> LangM m
 completeMinMax showSolution correct solution =
     preventWithHint (not $ null diff)
       (translate $ do
@@ -207,8 +207,8 @@ completeMinMax showSolution correct solution =
     solTable = getTable solution
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable correct) [1..])
 
-completeGrade :: OutputMonad m => MaxInst -> Delayed Cnf -> LangM m
+completeGrade :: OutputCapable m => MaxInst -> Delayed Cnf -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` parser
 
-completeGrade' :: OutputMonad m => MaxInst -> Cnf -> LangM m
+completeGrade' :: OutputCapable m => MaxInst -> Cnf -> LangM m
 completeGrade' MaxInst{..} = completeMinMax showSolution cnf

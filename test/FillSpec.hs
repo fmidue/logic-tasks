@@ -5,12 +5,12 @@ module FillSpec where
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, elements, suchThat)
-import Control.Monad.Output (LangM)
+import Control.OutputCapable.Blocks (LangM)
 import Config (dFillConf, FillConfig (..), FillInst (..))
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
-import Control.Monad.Output.Generic (evalLangM)
+import Control.OutputCapable.Blocks.Generic (evalLangM)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))

@@ -52,7 +52,7 @@ instance Parse ResStep where
 
     indexParse = tokenSymbol "=" >> lexeme parseNum
 
-    resClause = mkClause <$> braces (parser `sepBy` char ',')
+    resClause = mkClause <$> braces (parser `sepBy` tokenSymbol ",")
 
     parseEither x y = lexeme ((Left <$> try x) <|> (Right <$> y))
 
@@ -168,8 +168,8 @@ instance FromGrammar Literal where
     , nextLevelSpec = Nothing
     }
 
-  fromGrammar (WithPrecedence (NoOrs (NoAnds (NoArrows (OfAtom (Atom x)))))) = Just $ Literal x
-  fromGrammar (WithPrecedence (NoOrs (NoAnds (NoArrows (NegAtom (Atom x)))))) = Just $ Not x
+  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (OfAtom (Atom x)))))) = Just $ Literal x
+  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (NegAtom (Atom x)))))) = Just $ Not x
   fromGrammar _ = Nothing
 
 instance Parse Clause where
@@ -189,15 +189,16 @@ instance FromGrammar Clause where
     }
 
   fromGrammar OfNoFixity{} = Nothing
-  fromGrammar (WithPrecedence f) =  mkClause <$> foldlOrs phi (Just []) f
+  fromGrammar (WithPrecedence BiImpls{}) = Nothing
+  fromGrammar (WithPrecedence TopLevelImpl) = Nothing
+  fromGrammar (WithPrecedence TopLevelBackImpl) = Nothing
+  fromGrammar (WithPrecedence (NoArrows f)) =  mkClause <$> foldlOrs phi (Just []) f
     where
       phi :: Maybe [Literal] -> Ands -> Maybe [Literal]
-      phi xs (NoAnds (NoArrows (OfAtom (Atom x)))) = (Literal x :) <$> xs
-      phi xs (NoAnds (NoArrows ((NegAtom (Atom x))))) = (Not x :) <$> xs
-      phi _ (NoAnds (NoArrows (Neg{}))) = Nothing
-      phi _ (NoAnds (NoArrows (OfNested{}))) = Nothing
-      phi _ (NoAnds NoImplBiImpl) = Nothing
-      phi _ (NoAnds Impls{}) = Nothing
+      phi xs (NoAnds (OfAtom (Atom x))) = (Literal x :) <$> xs
+      phi xs (NoAnds ((NegAtom (Atom x)))) = (Not x :) <$> xs
+      phi _ (NoAnds (Neg{})) = Nothing
+      phi _ (NoAnds (OfNested{})) = Nothing
       phi _ Ands{} = Nothing
 
 instance Parse Con
@@ -214,17 +215,16 @@ instance FromGrammar Con where
     , nextLevelSpec = Nothing
     }
 
-  fromGrammar (WithPrecedence Ors{}) = Nothing
+  fromGrammar (WithPrecedence (NoArrows Ors{})) = Nothing
   fromGrammar OfNoFixity{} = Nothing
-  fromGrammar (WithPrecedence (OfAnds f)) = mkCon <$> foldlAnds phi (Just []) f
+  fromGrammar (WithPrecedence (NoArrows (OfAnds f))) = mkCon <$> foldlAnds phi (Just []) f
     where
-      phi :: Maybe [Literal] -> Impls -> Maybe [Literal]
-      phi xs (NoArrows (OfAtom (Atom x))) = (Literal x :) <$> xs
-      phi xs (NoArrows (NegAtom (Atom x))) = (Not x :) <$> xs
-      phi _ (NoArrows Neg{}) = Nothing
-      phi _ (NoArrows OfNested{}) = Nothing
-      phi _ NoImplBiImpl = Nothing
-      phi _ Impls{} = Nothing
+      phi :: Maybe [Literal] -> Neg -> Maybe [Literal]
+      phi xs (OfAtom (Atom x)) = (Literal x :) <$> xs
+      phi xs (NegAtom (Atom x)) = (Not x :) <$> xs
+      phi _ Neg{} = Nothing
+      phi _ OfNested{} = Nothing
+  fromGrammar _ = Nothing
 
 instance Parse Cnf
 instance FromGrammar Cnf where
@@ -232,34 +232,35 @@ instance FromGrammar Cnf where
 
   fromGrammar = (mkCnf <$>) . go
     where
-      go (WithPrecedence (OfAnds f)) = foldlAnds phi (Just []) f
+      go (WithPrecedence (NoArrows (OfAnds f))) = foldlAnds phi (Just []) f
       go (WithPrecedence (SkipLevel f)) = pure <$> fromGrammar @Clause f
-      go (WithPrecedence (Ors{})) = Nothing
+      go (WithPrecedence (NoArrows Ors{})) = Nothing
       go OfNoFixity{} = Nothing
-      phi :: Maybe [Clause] -> Impls -> Maybe [Clause]
-      phi xs (NoArrows (OfNested (Nested f))) = (:) <$> fromGrammar f  <*> xs
-      phi xs (NoArrows (OfAtom (Atom x))) = (mkClause [Literal x] :) <$> xs
-      phi xs (NoArrows (NegAtom (Atom x))) = (mkClause [Not x] :) <$> xs
-      phi _ (NoArrows Neg{}) = Nothing
-      phi _ NoImplBiImpl = Nothing
-      phi _ Impls{} = Nothing
+      go (WithPrecedence BiImpls{}) = Nothing
+      go (WithPrecedence TopLevelImpl) = Nothing
+      go (WithPrecedence TopLevelBackImpl) = Nothing
+      phi :: Maybe [Clause] -> Neg -> Maybe [Clause]
+      phi xs (OfNested (Nested f)) = (:) <$> fromGrammar f  <*> xs
+      phi xs (OfAtom (Atom x)) = (mkClause [Literal x] :) <$> xs
+      phi xs (NegAtom (Atom x)) = (mkClause [Not x] :) <$> xs
+      phi _ Neg{} = Nothing
 
 instance Parse Dnf
 instance FromGrammar Dnf where
   topLevelSpec = (topLevelSpec @Clause) { allowSilentNesting = True, nextLevelSpec = Just $ topLevelSpec @Con }
 
   fromGrammar OfNoFixity{} = Nothing
-  fromGrammar (WithPrecedence f) = mkDnf <$> foldlOrs phi (Just []) f
+  fromGrammar (WithPrecedence BiImpls{}) = Nothing
+  fromGrammar (WithPrecedence TopLevelImpl) = Nothing
+  fromGrammar (WithPrecedence TopLevelBackImpl) = Nothing
+  fromGrammar (WithPrecedence (NoArrows f)) = mkDnf <$> foldlOrs phi (Just []) f
     where
       phi :: Maybe [Con] -> Ands -> Maybe [Con]
-      phi xs (NoAnds (NoArrows (OfNested (Nested x)))) = (:) <$> fromGrammar x <*> xs
-      phi xs (NoAnds (NoArrows (OfAtom (Atom x)))) = (mkCon [Literal x] :) <$> xs
-      phi xs (NoAnds (NoArrows (NegAtom (Atom x)))) = (mkCon [Not x] :) <$> xs
-      phi _ (NoAnds (NoArrows Neg{})) = Nothing
-      phi _ (NoAnds Impls{}) = Nothing
-      phi _ (NoAnds NoImplBiImpl) = Nothing
+      phi xs (NoAnds (OfNested (Nested x))) = (:) <$> fromGrammar x <*> xs
+      phi xs (NoAnds (OfAtom (Atom x))) = (mkCon [Literal x] :) <$> xs
+      phi xs (NoAnds (NegAtom (Atom x))) = (mkCon [Not x] :) <$> xs
+      phi _ (NoAnds Neg{}) = Nothing
       phi _ (Ands{}) = Nothing
-
 
 instance Parse PrologLiteral where
   parser = (lexeme litParse <?> "Literal")

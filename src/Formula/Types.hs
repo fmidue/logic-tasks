@@ -27,11 +27,13 @@ module Formula.Types
        , ToSAT(..)
        , ResStep(..)
        , PrologLiteral(..)
+       , positivePLit, negativePLit
        , PrologClause(..)
        , terms
        , lengthBound
        , ClauseShape(..)
        , HornShape(..)
+       , anyClause, anyHornClause, factClause, procedureClause, queryClause
        ) where
 
 
@@ -65,6 +67,13 @@ class ToSAT f where
 
 data ClauseShape = AnyClause | HornClause HornShape deriving (Show, Eq)
 data HornShape = AnyHornClause | Fact | Procedure | Query deriving (Show, Eq)
+
+anyClause, anyHornClause, factClause, procedureClause, queryClause :: ClauseShape
+anyClause = AnyClause
+anyHornClause = HornClause AnyHornClause
+factClause = HornClause Fact
+procedureClause = HornClause Procedure
+queryClause = HornClause Query
 
 
 ---------------------------------------------------
@@ -518,6 +527,10 @@ data PrologLiteral = PrologLiteral
     , constants :: [String]
     } deriving (Eq,Typeable,Generic)
 
+positivePLit :: String -> [String] -> PrologLiteral
+positivePLit = PrologLiteral True
+negativePLit :: String -> [String] -> PrologLiteral
+negativePLit = PrologLiteral False
 
 instance Ord PrologLiteral where
   compare (PrologLiteral b1 n1 f1) (PrologLiteral b2 n2 f2)

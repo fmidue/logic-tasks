@@ -23,10 +23,10 @@ import Trees.Generate (genSynTree)
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
 import TestHelpers (deleteBrackets, deleteSpaces)
-import Control.Monad.Output (LangM)
+import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
-import Control.Monad.Output.Generic (evalLangM)
+import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.LegalProposition.Helpers (formulaAmount)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig

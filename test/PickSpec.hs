@@ -2,12 +2,12 @@
 {-# LANGUAGE RecordWildCards #-}
 module PickSpec where
 import Test.Hspec (Spec, describe, it)
-import Control.Monad.Output (LangM)
+import Control.OutputCapable.Blocks (LangM)
 import Config (dPickConf, PickConfig (..), PickInst (..))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
-import Control.Monad.Output.Generic (evalLangM)
+import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))

@@ -1,0 +1,23 @@
+#!/bin/bash
+configs=$(find src -path "**/Config.hs")
+
+(
+  echo "{-# LINE 1 \"$1\" #-}"
+  for config in $configs; do
+    no_src_prefix="${config:4}"
+    no_ext="${no_src_prefix//\//.}"
+    module="${no_ext/.hs/}"
+    echo "import qualified $module"
+  done
+  echo import Test.Hspec
+
+  echo "main :: IO ()"
+  echo "main = hspec $ do"
+
+  for config in $configs; do
+    no_src_prefix="${config:4}"
+    no_ext="${no_src_prefix//\//.}"
+    module="${no_ext/.hs/}"
+    echo "  describe \"$module\" $module.spec"
+  done
+) >"$3"

@@ -10,7 +10,7 @@ module Tasks.SynTree.Config (
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
 
@@ -52,7 +52,7 @@ defaultSynTreeConfig =
 
 
 
-checkSynTreeConfig :: OutputMonad m => SynTreeConfig -> LangM m
+checkSynTreeConfig :: OutputCapable m => SynTreeConfig -> LangM m
 checkSynTreeConfig SynTreeConfig {..}
     | not (all isLetter availableAtoms) = reject $ do
         english "Only letters are allowed as literals."

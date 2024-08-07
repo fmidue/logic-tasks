@@ -88,17 +88,17 @@ instance FromGrammar (PropFormula Char) where
       }
 
   fromGrammar OfNoFixity{} = Nothing
-  fromGrammar (WithPrecedence t) = fromOrs t
+  fromGrammar (WithPrecedence t) = fromBiImpls t
     where
       fromOrs (Ors f g) = Assoc Formula.Or <$> fromOrs f <*> fromAnds g
       fromOrs (OfAnds f) = fromAnds f
-      fromAnds (Ands f g) = Assoc Formula.And <$> fromAnds f <*> fromImpls g
-      fromAnds (OfImpl f) = fromImpls f
-      fromImpls (Impls f g) = Assoc Formula.Impl <$> fromBiImpls f <*> fromImpls g
-      fromImpls (BackImpls f g) = Assoc Formula.BackImpl <$> fromBiImpls f <*> fromImpls g
-      fromImpls (OfBiImpl f) = fromBiImpls f
-      fromBiImpls (BiImpls f g) = Assoc Equi <$> fromNeg f <*> fromBiImpls g
-      fromBiImpls (OfNeg f) = fromNeg f
+      fromAnds (Ands f g) = Assoc Formula.And <$> fromAnds f <*> fromNeg g
+      fromAnds (OfNeg f) = fromNeg f
+      fromImpls (Impls f g) = Assoc Formula.Impl <$> fromOrs f <*> fromImpls g
+      fromImpls (BackImpls f g) = Assoc Formula.BackImpl <$> fromOrs f <*> fromImpls g
+      fromImpls (OfOrs f) = fromOrs f
+      fromBiImpls (BiImpls f g) = Assoc Equi <$> fromImpls f <*> fromBiImpls g
+      fromBiImpls (OfImpls f) = fromImpls f
       fromNeg (NegAtom (Atom x)) = Just $ Formula.Neg $ Atomic x
       fromNeg (OfAtom (Atom x)) = Just $ Atomic x
       fromNeg (Parser.Neg f) = Formula.Neg <$> fromNeg f

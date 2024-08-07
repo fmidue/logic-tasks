@@ -14,7 +14,7 @@ dependencies:
   - wl-pprint-text
   - parsec
   - text
-  - output-monad
+  - output-blocks >= 0.2
   - pretty-simple
   - parsec
   - latex-svg-image >= 0.2
