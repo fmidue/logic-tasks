@@ -14,29 +14,31 @@ import Control.OutputCapable.Blocks (
   translate,
   )
 import Data.Maybe (fromMaybe, fromJust)
-import Test.QuickCheck(Gen)
+import Test.QuickCheck(Gen, suchThat)
 
-import Config ( BaseConfig(..), CnfConfig(..), FillConfig(..), FillInst(..))
-import Formula.Util (hasEmptyClause, isEmptyCnf)
+import Config ( FillConfig(..), FillInst(..))
 import Formula.Table (gapsAt, readEntries)
-import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
-import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
+import Formula.Types (TruthValue, availableLetter, atomics, getTable, literals, truth)
+import Util (isOutside, pairwiseCheck, preventWithHint, remove, withRatio, checkTruthValueRangeAndSynTreeConf)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
+import Trees.Generate (genSynTree)
+import Tasks.SynTree.Config (SynTreeConfig (..))
+import Trees.Print (display)
+import Trees.Formula ()
 
 
 genFillInst :: FillConfig -> Gen FillInst
-genFillInst FillConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = do
-    cnf <- cnfInRange
+genFillInst FillConfig{..} = do
+    tree <- genSynTree syntaxTreeConfig `suchThat` \t ->
+      withRatio (fromMaybe (0, 100) percentTrueEntries) t
     let
-      tableLen = length $ readEntries $ getTable cnf
+      tableLen = length $ readEntries $ getTable tree
       gapCount = max (tableLen * percentageOfGaps `div` 100) 1
     gaps <- remove (tableLen - gapCount) [1..tableLen]
-    pure $ FillInst cnf gaps printSolution extraText
-  where
-    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
-    cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
+    pure $ FillInst tree gaps printSolution extraText
+
 
 
 
@@ -46,13 +48,13 @@ description FillInst{..} = do
     translate $ do
       german  "Betrachten Sie die folgende Formel:"
       english "Consider the following formula:"
-    indent $ code $ availableLetter (literals cnf) : " = " ++ show cnf
+    indent $ code $ availableLetter (literals tree) : " = " ++ display tree
     pure ()
   paragraph $ do
     translate $ do
       german "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
       english "Fill all blanks in the corresponding truth table with truth values (True or False)."
-    indent $ code $ show $ gapsAt (getTable cnf) missing
+    indent $ code $ show $ gapsAt (getTable tree) missing
     pure ()
   paragraph $ translate $ do
     german "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
@@ -75,13 +77,7 @@ description FillInst{..} = do
 
 verifyStatic :: OutputCapable m => FillInst -> LangM m
 verifyStatic FillInst{..}
-    | isEmptyCnf cnf || hasEmptyClause cnf =
-        refuse $ indent $ translate $ do
-          german "Geben Sie bitte eine nicht-leere Formel an."
-          english "Please give a non empty formula."
-
-
-    | any (> 2^length (atomics cnf)) missing || any (<=0) missing =
+    | any (> 2^length (atomics tree)) missing || any (<=0) missing =
     refuse $ indent $ translate $ do
       english "At least one of the given indices does not exist."
       german "Mindestens einer der angegebenen Indizes existiert nicht."
@@ -103,9 +99,14 @@ verifyQuiz FillConfig{..}
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
           english "The percentile of gaps has to be set between 1 and 100."
 
-    | otherwise = checkTruthValueRange (low,high) cnfConf
+    | minAmountOfUniqueAtoms syntaxTreeConfig /= fromIntegral (length (availableAtoms syntaxTreeConfig)) =
+        refuse $ indent $ translate $ do
+          german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
+          english "All available atoms must be used for this task."
+
+    | otherwise = checkTruthValueRangeAndSynTreeConf range syntaxTreeConfig
   where
-    (low,high) = fromMaybe (0,100) percentTrueEntries
+    range = fromMaybe (0,100) percentTrueEntries
 
 
 
@@ -149,7 +150,7 @@ completeGrade FillInst{..} sol = do
 
   pure ()
   where
-    table = getTable cnf
+    table = getTable tree
     allEntries = map fromJust $ readEntries table
     correctShort = [allEntries !! i | i <- map (\x -> x-1) missing]
     boolSol = map truth sol

@@ -60,21 +60,22 @@ library
       Trees.Print
       Trees.Helpers
       Trees.Generate
+      Trees.Formula
       Formula.Parsing
       Formula.Parsing.Delayed
       Formula.Helpers
+      Formula.Printing
       ParsingHelpers
       Config
       Formula.Types
       Formula.Resolution
+      Formula.Util
+      Util
   other-modules:
       Auxiliary
-      Formula.Printing
       Formula.Table
-      Formula.Util
       LogicTasks.Helpers
       UniversalParser
-      Util
       Paths_logic_tasks
   hs-source-dirs:
       src
@@ -106,11 +107,14 @@ test-suite src-test
   main-is: Spec.hs
   other-modules:
       ComposeFormulaSpec
+      DecideSpec
       DecomposeFormulaSpec
+      FillSpec
       FormulaSpec
       LegalCNFSpec
       LegalPropositionSpec
       ParsingSpec
+      PickSpec
       PrologSpec
       ResolutionSpec
       SubTreeSpec

@@ -10,6 +10,8 @@ import Formula.Types
 import Formula.Util
 import Data.Map (Map)
 import Control.OutputCapable.Blocks (Language)
+import Tasks.SynTree.Config (SynTreeConfig (..), defaultSynTreeConfig)
+import qualified Trees.Types as ST (BinOp(..), SynTree(..))
 
 
 
@@ -25,16 +27,18 @@ instance Show StepAnswer where
 
 
 data PickInst = PickInst {
-                 cnfs    :: ![Cnf]
+                 trees :: [ST.SynTree ST.BinOp Char]
                , correct :: !Int
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show, Eq)
 
 dPickInst :: PickInst
 dPickInst =  PickInst
-          { cnfs = [mkCnf [mkClause [Literal 'A', Not 'B']], mkCnf [mkClause [Not 'A', Literal 'B']]]
+          { trees = [ST.Binary ST.And
+            (ST.Binary ST.Or (ST.Leaf 'A') (ST.Not (ST.Leaf 'B')))
+            (ST.Binary ST.Or (ST.Not (ST.Leaf 'A')) (ST.Leaf 'B'))]
           , correct = 1
           , showSolution = False
           , addText = Nothing
@@ -76,16 +80,16 @@ dMinInst =  MinInst
 
 
 data FillInst = FillInst {
-                 cnf     :: !Cnf
+                 tree :: ST.SynTree ST.BinOp Char
                , missing :: ![Int]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dFillInst :: FillInst
 dFillInst =  FillInst
-          { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
+          { tree = ST.Binary ST.And (ST.Leaf 'A') (ST.Not (ST.Leaf 'B'))
           , missing = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -94,16 +98,16 @@ dFillInst =  FillInst
 
 
 data DecideInst = DecideInst {
-                 cnf     :: !Cnf
+                 tree :: ST.SynTree ST.BinOp Char
                , changed :: ![Int]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
-          { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
+          { tree = ST.Binary ST.And (ST.Leaf 'A') (ST.Not (ST.Leaf 'B'))
           , changed = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -206,19 +210,22 @@ dCnfConf = CnfConfig
 
 
 data PickConfig = PickConfig {
-       cnfConf :: CnfConfig
+       syntaxTreeConfig :: SynTreeConfig
      , amountOfOptions :: Int
-     , pickCnf :: Bool
+     , percentTrueEntries :: Maybe (Int,Int)
      , printSolution :: Bool
      , extraText :: Maybe (Map Language String)
      }
-     deriving (Typeable, Generic)
+     deriving (Typeable, Generic, Show)
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
-    { cnfConf = dCnfConf
+    { syntaxTreeConfig = defaultSynTreeConfig {
+        availableAtoms = "ABC"
+      , minAmountOfUniqueAtoms = 3
+      }
     , amountOfOptions = 3
-    , pickCnf = False
+    , percentTrueEntries = Just (30,70)
     , printSolution = False
     , extraText = Nothing
     }
@@ -226,17 +233,20 @@ dPickConf = PickConfig
 
 
 data FillConfig = FillConfig {
-      cnfConf :: CnfConfig
+      syntaxTreeConfig :: SynTreeConfig
     , percentageOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
-    { cnfConf = dCnfConf
+    { syntaxTreeConfig = defaultSynTreeConfig {
+        availableAtoms = "ABC"
+      , minAmountOfUniqueAtoms = 3
+      }
     , percentageOfGaps = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False
@@ -264,17 +274,22 @@ dMinMaxConf = MinMaxConfig
 
 
 data DecideConfig = DecideConfig {
-      cnfConf :: CnfConfig
+      syntaxTreeConfig :: SynTreeConfig
     , percentageOfChanged :: Int
+    , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
-    { cnfConf = dCnfConf
+    { syntaxTreeConfig = defaultSynTreeConfig {
+        availableAtoms = "ABC"
+      , minAmountOfUniqueAtoms = 3
+      }
     , percentageOfChanged = 40
+    , percentTrueEntries = Just (30,70)
     , printSolution = False
     , extraText = Nothing
     }

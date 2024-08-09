@@ -11,6 +11,9 @@ import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 
 import Text.Parsec (parse)
 import Formula.Types (ResStep)
+import Config (dPickInst, PickInst)
+import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
+import Formula.Printing ()
 
 spec :: Spec
 spec = do
@@ -46,3 +49,6 @@ spec = do
   describe "parser @ResStep" $ do
     it "can handle extra whitespace in resolved clause" $
       isRight $ parse (parser @ResStep) "" "(1, 2, {   A   ,    nicht    B   } = 5)" {- german -}
+  describe "parser @PickInst" $ do
+    it "correctly parses the pretty representation of a PickInst" $
+      either (const False) (== dPickInst) $ parse (parser @PickInst) "" $ show $ pretty dPickInst

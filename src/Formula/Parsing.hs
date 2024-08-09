@@ -29,6 +29,8 @@ import Text.ParserCombinators.Parsec (
   spaces,
   string,
   try,
+  noneOf,
+  many,
   )
 
 import UniversalParser
@@ -301,13 +303,15 @@ instance Parse PickInst where
     where
       instParse = do
         string "PickInst("
-        cs <- parser
+        tokenSymbol "["
+        trees' <- lexeme (many (noneOf ",]")) `sepBy` char ','
+        tokenSymbol "]"
         tokenSymbol ","
         index <- lexeme $ many1 digit
         printSol <- lexeme text'
         bonusText <- optionMaybe $ lexeme text'
         char ')'
-        pure $ PickInst cs (read index) (read printSol) (fromList . read <$> bonusText)
+        pure $ PickInst (map read trees') (read index) (read printSol) (fromList . read <$> bonusText)
           where
             text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
