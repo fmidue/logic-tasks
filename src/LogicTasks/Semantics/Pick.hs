@@ -34,9 +34,8 @@ import Util (withRatio, checkTruthValueRangeAndSynTreeConf)
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
-  trees <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig) `suchThat` \trees ->
-    length (nubBy isSemanticEqual trees) == amountOfOptions &&
-    all (withRatio (fromMaybe (0, 100) percentTrueEntries)) trees
+  trees <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig `suchThat` withRatio (fromMaybe (0,100) percentTrueEntries))
+    `suchThat` \trees -> length (nubBy isSemanticEqual trees) == amountOfOptions
 
   correct <- elements [1..amountOfOptions]
 
