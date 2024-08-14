@@ -1,8 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 module PickSpec where
-import Test.Hspec (Spec, describe, it)
 import Control.OutputCapable.Blocks (LangM)
+import Test.Hspec (Spec, describe, it)
 import Config (dPickConf, PickConfig (..), PickInst (..))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
 import Data.Maybe (isJust, fromMaybe)
@@ -11,10 +11,9 @@ import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Data.List (nubBy)
 import Formula.Util (isSemanticEqual)
 import Trees.Helpers (collectLeaves)
-import Data.List.Extra (nubOrd, nubSort)
+import Data.List.Extra (nubOrd, nubSort, nubBy)
 import Util (withRatio)
 
 validBoundsPick :: Gen PickConfig
@@ -22,11 +21,16 @@ validBoundsPick = do
   amountOfOptions <- choose (2, 5)
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
     amountOfOptions <= 4*2^ length availableAtoms &&
-    minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+    minAmountOfUniqueAtoms == fromIntegral (length availableAtoms) &&
+    maxNodes <= 100
 
-  percentTrueEntriesLow' <- choose (1, 90)
-  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
-  percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
+  percentTrueEntries' <- (do
+    percentTrueEntriesLow' <- choose (1, 90)
+    percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+    return (percentTrueEntriesLow', percentTrueEntriesHigh')
+    ) `suchThat` \(a,b) -> b - a >= 30
+
+  percentTrueEntries <- elements [Just percentTrueEntries', Nothing]
 
   pure $ PickConfig {
       syntaxTreeConfig
