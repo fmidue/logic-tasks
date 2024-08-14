@@ -8,6 +8,7 @@ import Tasks.SynTree.Config (
   )
 import Test.Hspec
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.33
 task01 :: LegalPropositionConfig
@@ -53,5 +54,5 @@ task17 = LegalPropositionConfig
 
 spec :: Spec
 spec = do
-  describe "task01" $ verifyConfig task01 checkLegalPropositionConfig
-  describe "task17" $ verifyConfig task17 checkLegalPropositionConfig
+  describe "task01" $ verifyConfig German task01 checkLegalPropositionConfig
+  describe "task17" $ verifyConfig German task17 checkLegalPropositionConfig

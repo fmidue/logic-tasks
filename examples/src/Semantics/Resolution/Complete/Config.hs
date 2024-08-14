@@ -7,6 +7,7 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 import LogicTasks.Util (checkBaseConf)
+import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.5
 task15 :: ResolutionConfig
@@ -38,5 +39,5 @@ task16 =  ResolutionConfig
 
 spec :: Spec
 spec = do
-  describe "task15" $ verifyConfig (baseConf task15) checkBaseConf
-  describe "task16" $ verifyConfig (baseConf task16) checkBaseConf
+  describe "task15" $ verifyConfig German (baseConf task15) checkBaseConf
+  describe "task16" $ verifyConfig German (baseConf task16) checkBaseConf

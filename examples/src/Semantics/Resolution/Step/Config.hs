@@ -7,6 +7,7 @@ import LogicTasks.Config (
 import LogicTasks.Util (checkBaseConf)
 import Test.Hspec
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.2
 task12 :: StepConfig
@@ -40,5 +41,5 @@ task14 =
 
 spec :: Spec
 spec = do
-  describe "task12" $ verifyConfig (baseConf task12) checkBaseConf
-  describe "task14" $ verifyConfig (baseConf task14) checkBaseConf
+  describe "task12" $ verifyConfig German (baseConf task12) checkBaseConf
+  describe "task14" $ verifyConfig German (baseConf task14) checkBaseConf

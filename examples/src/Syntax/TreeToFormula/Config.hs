@@ -9,6 +9,7 @@ import Tasks.TreeToFormula.Config (
   TreeToFormulaConfig(..),checkTreeToFormulaConfig,
   )
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.34
 task03 :: TreeToFormulaConfig
@@ -54,5 +55,5 @@ task10 = task04
 
 spec :: Spec
 spec = do
-  describe "task03" $ verifyConfig task03 checkTreeToFormulaConfig
-  describe "task04" $ verifyConfig task04 checkTreeToFormulaConfig
+  describe "task03" $ verifyConfig German task03 checkTreeToFormulaConfig
+  describe "task04" $ verifyConfig German task04 checkTreeToFormulaConfig

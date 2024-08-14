@@ -9,7 +9,6 @@ import Control.OutputCapable.Blocks.Generic
 import Control.OutputCapable.Blocks
 import Text.Parsec
 import Text.Parsec.String (Parser)
-import Data.Maybe (isJust)
 import Formula.Types (Cnf(..), Clause(..), Literal(..), Formula(..))
 import Formula.Util (isPositive)
 import Data.Set (size, toList)
@@ -68,9 +67,6 @@ testTaskDelayed ::
   (inst -> Delayed a -> LangM m) ->
   IO ()
 testTaskDelayed gen f partial full = testTaskShow fst gen f partial full (delayed <$> fully (many anyChar))
-
-checkConfigWith :: (m ~ GenericReportT Language (IO ()) IO) => config -> (config -> LangM m) -> IO Bool
-checkConfigWith conf check = isJust <$> run German (check conf)
 
 
 analyseCnfGenerator :: Gen Cnf -> IO ()

@@ -8,6 +8,7 @@ import LogicTasks.Config (
 import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.34
 task06 :: FillConfig
@@ -47,5 +48,5 @@ task20 = FillConfig
 
 spec :: Spec
 spec = do
-  describe "task06" $ verifyConfig (cnfConf task06) checkCnfConf
-  describe "task20" $ verifyConfig (cnfConf task20) checkCnfConf
+  describe "task06" $ verifyConfig German (cnfConf task06) checkCnfConf
+  describe "task20" $ verifyConfig German (cnfConf task20) checkCnfConf

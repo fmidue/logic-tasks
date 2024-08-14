@@ -5,7 +5,7 @@ import LogicTasks.Config (
   DecideConfig(..),
   CnfConfig(..),
   )
-import Control.OutputCapable.Blocks (english, german, translations)
+import Control.OutputCapable.Blocks (english, german, translations, Language (German))
 import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig
@@ -48,5 +48,5 @@ task11 = DecideConfig
 
 spec :: Spec
 spec = do
-  describe "task09" $ verifyConfig (cnfConf task09) checkCnfConf
-  describe "task11" $ verifyConfig (cnfConf task11) checkCnfConf
+  describe "task09" $ verifyConfig German (cnfConf task09) checkCnfConf
+  describe "task11" $ verifyConfig German (cnfConf task11) checkCnfConf

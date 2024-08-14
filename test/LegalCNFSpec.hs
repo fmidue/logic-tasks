@@ -21,7 +21,6 @@ import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
 
 import FormulaSpec (validBoundsCnf)
-import LogicTasks.Debug (checkConfigWith)
 
 validBoundsLegalCNF :: Gen LegalCNFConfig
 validBoundsLegalCNF = do

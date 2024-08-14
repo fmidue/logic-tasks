@@ -9,6 +9,7 @@ import Tasks.SynTree.Config (
 
 import Test.Hspec
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 
 small :: ComposeFormulaConfig
@@ -51,5 +52,5 @@ medium = ComposeFormulaConfig
 
 spec :: Spec
 spec = do
-  describe "small" $ verifyConfig small checkComposeFormulaConfig
-  describe "medium" $ verifyConfig medium checkComposeFormulaConfig
+  describe "small" $ verifyConfig German small checkComposeFormulaConfig
+  describe "medium" $ verifyConfig German medium checkComposeFormulaConfig
