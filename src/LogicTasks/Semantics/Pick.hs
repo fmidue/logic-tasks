@@ -114,9 +114,14 @@ verifyQuiz PickConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
+    | rangeH - rangeL < 30 =
+        refuse $ indent $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
+          english "The given restriction on true entries should not fall below a range of 30."
+
     | otherwise = checkTruthValueRangeAndSynTreeConf range syntaxTreeConfig
   where
-    range = fromMaybe (0,100) percentTrueEntries
+    range@(rangeL, rangeH) = fromMaybe (0,100) percentTrueEntries
 
 
 
