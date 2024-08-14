@@ -10,7 +10,7 @@ import Control.OutputCapable.Blocks (english, german, translations)
 import Test.Hspec
 import Util.VerifyConfig
 
--- Gewicht 0.33
+-- Weight 0.33
 task02 :: SuperfluousBracketsConfig
 task02 = SuperfluousBracketsConfig
   { syntaxTreeConfig = SynTreeConfig

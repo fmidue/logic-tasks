@@ -112,7 +112,7 @@ description ResolutionInst{..} = do
   paragraph $ indent $ do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A valid solution could look like this: "
+      english "A solution attempt could look like this: "
     translatedCode $ flip localise $ translations $ do
       english "[(1, 2, {A, not B} = 5), (4, 5, { })]"
       german "[(1, 2, {A, nicht B} = 5), (4, 5, { })]"

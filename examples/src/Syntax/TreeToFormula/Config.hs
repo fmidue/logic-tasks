@@ -10,7 +10,7 @@ import Tasks.TreeToFormula.Config (
   )
 import Util.VerifyConfig
 
--- Gewicht 0.34
+-- Weight 0.34
 task03 :: TreeToFormulaConfig
 task03 = TreeToFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
