@@ -17,11 +17,12 @@ import Data.List (partition)
 import Data.List.Extra (nubSort)
 import Formula.Parsing.Delayed (delayed, Delayed)
 import ParsingHelpers (fully)
+import Control.OutputCapable.Blocks.Debug (run)
 
 showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
 showDescription gen f = do
   inst <- generate gen
-  run (f inst)
+  run German (f inst)
 
 testTaskShow ::
   (m ~ GenericReportT Language (IO ()) IO) =>
@@ -34,7 +35,7 @@ testTaskShow ::
   IO ()
 testTaskShow sho gen f partial full p = do
   inst <- generate gen
-  desc <- run (f inst)
+  desc <- run German (f inst)
   print desc
   str <- getLine
   case parse p "input" str of
@@ -43,10 +44,10 @@ testTaskShow sho gen f partial full p = do
       putStrLn "---- Input ----"
       putStrLn $ sho (str,value)
       putStrLn "---- Partial ----"
-      partialRes <- run (partial inst value)
+      partialRes <- run German (partial inst value)
       print partialRes
       putStrLn "---- Complete ----"
-      completeRes <- run (full inst value)
+      completeRes <- run German (full inst value)
       print completeRes
 
 testTask ::
@@ -69,13 +70,8 @@ testTaskDelayed ::
 testTaskDelayed gen f partial full = testTaskShow fst gen f partial full (delayed <$> fully (many anyChar))
 
 checkConfigWith :: (m ~ GenericReportT Language (IO ()) IO) => config -> (config -> LangM m) -> IO Bool
-checkConfigWith conf check = isJust <$> run (check conf)
+checkConfigWith conf check = isJust <$> run German (check conf)
 
-run :: (m ~ GenericReportT Language (IO ()) IO) => LangM m -> IO (Maybe ())
-run thing = do
-  (r,sayThing) <- runLangMReport (pure ()) (>>) thing
-  sayThing German
-  pure r
 
 analyseCnfGenerator :: Gen Cnf -> IO ()
 analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $ \cnf ->
