@@ -18,11 +18,6 @@ import Formula.Parsing.Delayed (delayed, Delayed)
 import ParsingHelpers (fully)
 import Control.OutputCapable.Blocks.Debug (run)
 
-showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
-showDescription gen f = do
-  inst <- generate gen
-  run German (f inst)
-
 testTaskShow ::
   (m ~ GenericReportT Language (IO ()) IO) =>
   ((String, a) -> String) ->
