@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 module Formula.Parsing.Delayed (Delayed, delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn) where
 
-import Text.Parsec (ParseError, parse, anyChar, many)
+import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
 import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully)
@@ -11,18 +11,7 @@ import Control.Monad.State (State)
 import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
-import Text.PrettyPrint.Leijen.Text (Pretty(..))
-
-newtype Delayed a = Delayed String
-
-instance Show a => Show (Delayed a) where
-  show (Delayed a) = show a
-
-instance Parse (Delayed a) where
-  parser = delayed <$> fully (many anyChar)
-
-instance Pretty a => Pretty (Delayed a) where
-  pretty (Delayed a) = pretty a
+import Formula.Parsing.Delayed.Internal (Delayed(..))
 
 delayed :: String -> Delayed a
 delayed = Delayed

@@ -69,6 +69,7 @@ library
       Formula.Resolution
   other-modules:
       Auxiliary
+      Formula.Parsing.Delayed.Internal
       Formula.Printing
       Formula.Table
       Formula.Util

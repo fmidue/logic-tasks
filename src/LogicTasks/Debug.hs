@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module LogicTasks.Debug where
 
 import Test.QuickCheck
@@ -15,6 +16,20 @@ import Data.Set (size, toList)
 import Data.List (partition)
 import Data.List.Extra (nubSort)
 import Control.OutputCapable.Blocks.Debug (testTask, Display)
+import Formula.Parsing.Delayed (delayed)
+import Formula.Parsing.Delayed.Internal (Delayed(..))
+import Formula.Parsing (Parse(..))
+import Text.PrettyPrint.Leijen.Text (Pretty(..))
+import ParsingHelpers (fully)
+
+instance Show (Delayed a) where
+  show (Delayed x) = x
+
+instance Parse (Delayed a) where
+  parser = delayed <$> fully (many anyChar)
+
+instance Pretty (Delayed a) where
+  pretty (Delayed a) = pretty a
 
 testModule ::
   (m ~ GenericReportT Language (IO ()) IO, Show a) =>
@@ -26,8 +41,8 @@ testModule ::
   (inst -> a -> LangM m) ->
   Parser a ->
   IO ()
-testModule pretty lang gen desc partial complete p =
-  testTask pretty lang (generate gen) desc partial complete (either (error . show) id . parse p "Input" <$> getLine)
+testModule prettyCfg lang gen desc partial complete p =
+  testTask prettyCfg lang (generate gen) desc partial complete (either (error . show) id . parse p "Input" <$> getLine)
 
 analyseCnfGenerator :: Gen Cnf -> IO ()
 analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $ \cnf ->
