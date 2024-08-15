@@ -194,4 +194,4 @@ vectorOfUniqueBy 0 _ _ = pure []
 vectorOfUniqueBy amount p gen = do
   xs <- vectorOfUniqueBy (amount - 1) p gen
   x <- gen `suchThat` \x' -> not (any (p x') xs)
-  pure $ xs ++ [x]
+  pure (x:xs)
