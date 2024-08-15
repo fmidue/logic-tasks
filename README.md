@@ -51,7 +51,7 @@ Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= 
 Just ()
 [({-D},{-A,D},{-A})]
 ---- Input ----
-"[({-D},{-A,D},{-A})]"
+[({-D},{-A,D},{-A})]
 ---- Prettified Input ----
 [({-D},{-A,D},{-A})]
 ---- Partial ----
@@ -81,7 +81,7 @@ Nothing
 
 In more detail:
 
-- We passed `Just (AutoLeijen)` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just (AutoHughesPJ)` or `Just (Manual f)` where f is of type `(a -> String) -> Display a`.
+- We passed `Just (AutoLeijen)` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just (AutoHughesPJ)` or `Just (Manual f)` where f is of type `a -> String`.
 - We passed `German` to print the german version of the task. The other option would be `English`.
 - We then passed the generator for creating an instance of the specified module. Must be of type `Gen a`.
 - Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description`.
