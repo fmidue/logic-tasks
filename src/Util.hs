@@ -17,7 +17,7 @@ import Control.OutputCapable.Blocks (
 import Control.Monad.State (put, get, lift, evalStateT)
 import Control.Monad (when)
 import Data.List (delete)
-import Test.QuickCheck(Gen, elements)
+import Test.QuickCheck(Gen, elements, suchThat)
 
 import Config (BaseConfig(..), CnfConfig(..))
 import Formula.Types (Formula, getTable, lengthBound)
@@ -188,3 +188,10 @@ checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
   checkTruthValueRange range
   checkSynTreeConfig synTreeConfig
   pure ()
+
+vectorOfUniqueBy :: Int -> (a -> a -> Bool) -> Gen a -> Gen [a]
+vectorOfUniqueBy 0 _ _ = pure []
+vectorOfUniqueBy amount p gen = do
+  xs <- vectorOfUniqueBy (amount - 1) p gen
+  x <- gen `suchThat` \x' -> all (\y -> not (p x' y)) xs
+  pure $ xs ++ [x]

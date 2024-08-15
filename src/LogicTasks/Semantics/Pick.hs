@@ -15,7 +15,7 @@ import Control.OutputCapable.Blocks (
   translate,
   )
 
-import Test.QuickCheck (Gen, vectorOf, suchThat, elements)
+import Test.QuickCheck (Gen, suchThat, elements)
 
 import Config (Number(..), PickConfig(..), PickInst(..))
 import Formula.Util (isSemanticEqual)
@@ -24,18 +24,19 @@ import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 import Data.Maybe (fromJust, fromMaybe)
-import Data.List (nubBy)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Print (display)
 import Trees.Formula ()
-import Util (withRatio, checkTruthValueRangeAndSynTreeConf)
+import Util (withRatio, checkTruthValueRangeAndSynTreeConf, vectorOfUniqueBy)
 
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
-  trees <- vectorOf amountOfOptions (genSynTree syntaxTreeConfig `suchThat` withRatio (fromMaybe (0,100) percentTrueEntries))
-    `suchThat` \trees -> length (nubBy isSemanticEqual trees) == amountOfOptions
+  trees <- vectorOfUniqueBy
+    amountOfOptions
+    isSemanticEqual
+    (genSynTree syntaxTreeConfig `suchThat` withRatio (fromMaybe (0,100) percentTrueEntries))
 
   correct <- elements [1..amountOfOptions]
 
