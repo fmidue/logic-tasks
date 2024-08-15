@@ -19,7 +19,6 @@ import Control.OutputCapable.Blocks.Debug (testTask, Display)
 import Formula.Parsing.Delayed (delayed)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
 import Formula.Parsing (Parse(..))
-import Text.PrettyPrint.Leijen.Text (Pretty(..))
 import ParsingHelpers (fully)
 
 instance Show (Delayed a) where
