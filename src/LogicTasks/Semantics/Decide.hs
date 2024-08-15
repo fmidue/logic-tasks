@@ -110,8 +110,8 @@ start = []
 preventIfSolutionExceedsTableSize :: OutputCapable m => Int -> Table -> LangM m
 preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > tableLen)
     (translate $ do
-      german "Lösung überschreitet nicht Anzahl der Zeilen?"
-      english "Solution does not exceed count of rows?"
+      german "Lösung enthält nicht mehr Einträge als Anzahl der Zeilen?"
+      english "Solution does not contain more entries than count of rows?"
     )
     (translate $ do
       german $ "Ihre Lösung enthält mehr Werte als es Zeilen gibt. " ++ gerHint
