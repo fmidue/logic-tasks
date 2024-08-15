@@ -26,7 +26,7 @@ You can use the `testModule` function in order to test a module. A sample call l
 
 ```text
 $ stack repl
-ghci> testModule (Just AutoLeijen) German (genResInst dResConf) LogicTasks.Semantics.Resolve.description LogicTasks.Semantics.Resolve.partialGrade LogicTasks.Semantics.Resolve.completeGrade parser
+ghci> testModule (Just (Manual show)) German (genResInst dResConf) LogicTasks.Semantics.Resolve.description LogicTasks.Semantics.Resolve.partialGrade LogicTasks.Semantics.Resolve.completeGrade parser
 ```
 
 This specific call tests the `Resolve` module (found in `src/LogicTasks/Semantics/Resolve.hs`). The output looks like this:
@@ -81,7 +81,7 @@ Nothing
 
 In more detail:
 
-- We passed `Just (AutoLeijen)` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just (AutoHughesPJ)` or `Just (Manual f)` where f is of type `a -> String`.
+- We passed `Just (Manual show)` to format the input with the specified pretty printer (which is the default `show` here since we are testing a `Delayed` task). Other options are: `Nothing`, `Just AutoLeijen` or `Just AutoHughesPJ`.
 - We passed `German` to print the german version of the task. The other option would be `English`.
 - We then passed the generator for creating an instance of the specified module. Must be of type `Gen a`.
 - Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description`.

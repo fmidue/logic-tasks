@@ -28,9 +28,6 @@ instance Show (Delayed a) where
 instance Parse (Delayed a) where
   parser = delayed <$> fully (many anyChar)
 
-instance Pretty (Delayed a) where
-  pretty (Delayed a) = pretty a
-
 testModule ::
   (m ~ GenericReportT Language (IO ()) IO, Show a) =>
   Maybe (Display a) ->
