@@ -193,5 +193,5 @@ vectorOfUniqueBy :: Int -> (a -> a -> Bool) -> Gen a -> Gen [a]
 vectorOfUniqueBy 0 _ _ = pure []
 vectorOfUniqueBy amount p gen = do
   xs <- vectorOfUniqueBy (amount - 1) p gen
-  x <- gen `suchThat` \x' -> all (\y -> not (p x' y)) xs
+  x <- gen `suchThat` \x' -> not (any (p x') xs)
   pure $ xs ++ [x]
