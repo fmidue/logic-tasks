@@ -27,4 +27,7 @@ True True
 ^.*-- no-spell-check$
 
 # ignore OPTIONS_GHC pragmas
-^\{-# OPTIONS_GHC .* -\}$
+^\{-# OPTIONS_GHC .* #?-\}$
+
+# ignore LANGUAGE pragmas
+^\{-# LANGUAGE .* #?-\}$
