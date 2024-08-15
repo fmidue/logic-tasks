@@ -14,55 +14,20 @@ import Formula.Util (isPositive)
 import Data.Set (size, toList)
 import Data.List (partition)
 import Data.List.Extra (nubSort)
-import Formula.Parsing.Delayed (delayed, Delayed)
-import ParsingHelpers (fully)
-import Control.OutputCapable.Blocks.Debug (run)
+import Control.OutputCapable.Blocks.Debug (testTask, Display)
 
-testTaskShow ::
-  (m ~ GenericReportT Language (IO ()) IO) =>
-  ((String, a) -> String) ->
-  Gen inst ->
-  (inst -> LangM m) ->
-  (inst -> a -> LangM m) ->
-  (inst -> a -> LangM m) ->
-  Parser a ->
-  IO ()
-testTaskShow sho gen f partial full p = do
-  inst <- generate gen
-  desc <- run German (f inst)
-  print desc
-  str <- getLine
-  case parse p "input" str of
-    Left err -> print err
-    Right value -> do
-      putStrLn "---- Input ----"
-      putStrLn $ sho (str,value)
-      putStrLn "---- Partial ----"
-      partialRes <- run German (partial inst value)
-      print partialRes
-      putStrLn "---- Complete ----"
-      completeRes <- run German (full inst value)
-      print completeRes
-
-testTask ::
+testModule ::
   (m ~ GenericReportT Language (IO ()) IO, Show a) =>
+  Maybe (Display a) ->
+  Language ->
   Gen inst ->
   (inst -> LangM m) ->
   (inst -> a -> LangM m) ->
   (inst -> a -> LangM m) ->
   Parser a ->
   IO ()
-testTask = testTaskShow (show . snd)
-
-testTaskDelayed ::
-  (m ~ GenericReportT Language (IO ()) IO) =>
-  Gen inst ->
-  (inst -> LangM m) ->
-  (inst -> Delayed a -> LangM m) ->
-  (inst -> Delayed a -> LangM m) ->
-  IO ()
-testTaskDelayed gen f partial full = testTaskShow fst gen f partial full (delayed <$> fully (many anyChar))
-
+testModule pretty lang gen desc partial complete p =
+  testTask pretty lang (generate gen) desc partial complete (either (error . show) id . parse p "Input" <$> getLine)
 
 analyseCnfGenerator :: Gen Cnf -> IO ()
 analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $ \cnf ->
