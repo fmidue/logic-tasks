@@ -19,3 +19,72 @@
 | Aussagenlogik/Semantik/Resolution/LogicResolutionStep | x | x | `Logic.Semantics.ResolutionStep` | [`LogicTasks.Semantics.Step`](src/LogicTasks/Semantics/Step.hs) |
 | Aussagenlogik/Semantik/Resolution/LogicResolutionComplete | x | x | `Logic.Semantics.ResolutionFull` | [`LogicTasks.Semantics.Resolve`](src/LogicTasks/Semantics/Resolve.hs) |
 | Aussagenlogik/Semantik/Resolution/PrologResolutionStep | x | x | `Logic.Semantics.ResolutionStepProlog` | [`LogicTasks.Semantics.Prolog`](src/LogicTasks/Semantics/Prolog.hs) |
+
+## Testing a module
+
+You can use the `testModule` function in order to test a module. A sample call looks like this:
+
+```
+$ stack repl
+ghci> testModule (Just AutoLeijen) German (genResInst dResConf) LogicTasks.Semantics.Resolve.description LogicTasks.Semantics.Resolve.partialGrade LogicTasks.Semantics.Resolve.completeGrade parser
+```
+
+This specific call tests the `Resolve` module (found in `src/LogicTasks/Semantics/Resolve.hs`). The output looks like this:
+
+```
+Betrachten Sie die folgende Formel in KNF:>>>> <¬D ∧ (¬A ∨ D) ∧ (A ∨ D)> <<<<
+
+Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten.
+Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)
+Beachten Sie dabei die folgenden möglichen Schreibweisen:
+>>>>Negation: <-, ~, nicht> <<<<
+
+>>>>Nicht-leere Klausel: <{ ... }> <<<<
+
+>>>>Leere Klausel: <{ }> <<<<
+
+Optional können Sie Klauseln auch durch Nummern ersetzen.
+Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...).
+Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen.
+>>>>Ein Lösungsversuch könnte beispielsweise so aussehen:  <[(1, 2, {A, nicht B} = 5), (4, 5, { })]> <<<<
+
+Just ()
+[({-D},{-A,D},{-A})]
+---- Input ----
+"[({-D},{-A,D},{-A})]"
+---- Prettified Input ----
+[({-D},{-A,D},{-A})]
+---- Partial ----
+1. Schritt verwendet nur existierende Indizes?
+>>>> <Ja.> <<<<
+
+1. Schritt vergibt keinen Index wiederholt?
+>>>> <Ja.> <<<<
+
+Genutzte Literale kommen in Formel vor?
+>>>> <Ja.> <<<<
+
+Alle Schritte sind gültig?
+>>>> <Ja.> <<<<
+
+Letzter Schritt leitet die leere Klausel ab?
+>>>> <Nein.> <<<<
+
+Nothing
+!!! The following would not be printed in Autotool !!!
+---- Complete ----
+Lösung ist korrekt?
+>>>> <Nein.> <<<<
+
+Nothing
+```
+
+In more detail:
+  
+- We passed `Just (AutoLeijen)` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just (AutoHughesPJ)` or `Just (Manual f)` where f is of type `(a -> String) -> Display a`.
+- We passed `German` to print the german version of the task. The other option would be `English`.
+- We then passed the generator for creating an instance of the specified module. Must be of type `Gen a`.
+- Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description`. 
+- Next, we pass the function that checks the input for syntax errors. This is usually `SomeModulePath.partialGrade`.
+- Then, we pass the function that checks the input for semantic errors. This is usually `SomeModulePath.completeGrade`.
+- Lastly, we pass a parser that allows us to parse the users input. This is usually just `parser`. Must be of type `Parser b`, if you define one yourself.
