@@ -1,17 +1,27 @@
 module Semantics.TruthTables.FindMistakes.Config where
 
 import LogicTasks.Config (
+  BaseConfig(..),
   DecideConfig(..),
+  CnfConfig(..),
+  FormulaConfig(..)
   )
 import Control.OutputCapable.Blocks (english, german, translations)
 import Test.Hspec
 import Util.VerifyConfig
-import Tasks.SynTree.Config (defaultSynTreeConfig, checkSynTreeConfig)
 
 -- Weight 0.34
 task09 :: DecideConfig
 task09 = DecideConfig
-  { syntaxTreeConfig = defaultSynTreeConfig -- TODO: change this to a suiting config
+  { formulaConfig = FormulaCnf $ CnfConfig
+    { baseConf = BaseConfig
+      { minClauseLength = 2
+      , maxClauseLength = 2
+      , usedLiterals = "ABCD"
+      }
+    , minClauseAmount = 3
+    , maxClauseAmount = 3
+    }
   , percentageOfChanged = 40
   , percentTrueEntries = Nothing
   , extraText = Nothing
@@ -21,7 +31,15 @@ task09 = DecideConfig
 -- Weight 0.4
 task11 :: DecideConfig
 task11 = DecideConfig
-  { syntaxTreeConfig = defaultSynTreeConfig -- TODO: change this to a suiting config
+  { formulaConfig = FormulaCnf $ CnfConfig
+    { baseConf = BaseConfig
+      { minClauseLength = 2
+      , maxClauseLength = 3
+      , usedLiterals = "ABCD"
+      }
+    , minClauseAmount = 4
+    , maxClauseAmount = 4
+    }
   , percentageOfChanged = 40
   , percentTrueEntries = Nothing
   , extraText = Just $ translations $ do
@@ -32,5 +50,5 @@ task11 = DecideConfig
 
 spec :: Spec
 spec = do
-  describe "task09" $ verifyConfig (syntaxTreeConfig task09) checkSynTreeConfig
-  describe "task11" $ verifyConfig (syntaxTreeConfig task11) checkSynTreeConfig
+  describe "task09" $ verifyFormulaConfig (formulaConfig task09)
+  describe "task11" $ verifyFormulaConfig (formulaConfig task11)

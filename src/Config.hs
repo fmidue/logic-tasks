@@ -128,7 +128,7 @@ dFillInst =  FillInst
 
 
 data DecideInst = DecideInst {
-                 tree :: ST.SynTree ST.BinOp Char
+                 formula :: FormulaInst
                , changed :: ![Int]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
@@ -137,7 +137,7 @@ data DecideInst = DecideInst {
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
-          { tree = ST.Binary ST.And (ST.Leaf 'A') (ST.Not (ST.Leaf 'B'))
+          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
           , changed = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -301,7 +301,7 @@ dMinMaxConf = MinMaxConfig
 
 
 data DecideConfig = DecideConfig {
-      syntaxTreeConfig :: SynTreeConfig
+      formulaConfig :: FormulaConfig
     , percentageOfChanged :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
@@ -311,10 +311,7 @@ data DecideConfig = DecideConfig {
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
-    { syntaxTreeConfig = defaultSynTreeConfig {
-        availableAtoms = "ABC"
-      , minAmountOfUniqueAtoms = 3
-      }
+    { formulaConfig = FormulaCnf dCnfConf
     , percentageOfChanged = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False

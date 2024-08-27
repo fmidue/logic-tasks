@@ -24,10 +24,8 @@ import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 import Trees.Generate (genSynTree)
-import Tasks.SynTree.Config (SynTreeConfig (..))
-import Trees.Print (display)
 import Trees.Formula ()
-import LogicTasks.Util (genCnf', genDnf')
+import LogicTasks.Util (genCnf', genDnf', display', hasEnoughUniqueAtoms)
 
 
 genFillInst :: FillConfig -> Gen FillInst
@@ -82,10 +80,6 @@ description FillInst{..} = do
 
   extra addText
   pure ()
-    where
-      display' (InstCnf c) = show c
-      display' (InstDnf d) = show d
-      display' (InstArbitrary t) = display t
 
 
 verifyStatic :: OutputCapable m => FillInst -> LangM m
@@ -120,9 +114,6 @@ verifyQuiz FillConfig{..}
     | otherwise = checkTruthValueRangeAndFormulaConf range formulaConfig
   where
     range = fromMaybe (0,100) percentTrueEntries
-    hasEnoughUniqueAtoms (FormulaArbitrary syntaxTreeConfig)
-      = minAmountOfUniqueAtoms syntaxTreeConfig /= fromIntegral (length (availableAtoms syntaxTreeConfig))
-    hasEnoughUniqueAtoms _ = True
 
 
 
