@@ -1,7 +1,6 @@
-{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-module Formula.Parsing where
+module Formula.Parsing (module Formula.Parsing.Type) where
 
 import Config
 import Formula.Util
@@ -29,11 +28,12 @@ import Text.ParserCombinators.Parsec (
   spaces,
   string,
   try,
-  noneOf,
-  many,
   )
 
 import UniversalParser
+import Trees.Types (SynTree, BinOp)
+import Formula.Parsing.Type (Parse(..))
+import Trees.Parsing ()
 
 instance Parse ResStep where
   parser = do
@@ -65,10 +65,7 @@ notFollowedByElse p f = try ((try p >>= f) <|> pure ())
 
 
 
-class Parse a where
-  parser :: Parser a
-  default parser :: FromGrammar a => Parser a
-  parser = formulaParser
+
 
 
 instance Parse a => Parse [a] where
@@ -303,18 +300,41 @@ instance Parse PickInst where
     where
       instParse = do
         string "PickInst("
-        tokenSymbol "["
-        formulas' <- lexeme (many (noneOf ",]")) `sepBy` char ','
-        tokenSymbol "]"
+        cs <- parser
+        -- tokenSymbol "["
+        -- formulas' <- lexeme (many (noneOf ",]")) `sepBy` char ','
+        -- tokenSymbol "]"
         tokenSymbol ","
         index <- lexeme $ many1 digit
         printSol <- lexeme text'
         bonusText <- optionMaybe $ lexeme text'
         char ')'
-        pure $ PickInst (map read formulas') (read index) (read printSol) (fromList . read <$> bonusText)
+        pure $ PickInst cs (read index) (read printSol) (fromList . read <$> bonusText)
           where
             text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
               char ','
               spaces
               char '{'
+
+instance Parse FormulaInst where
+  parser = lexeme (parseCNF <|> parseDNF <|> parseSynTree)
+    where
+      parseCNF = do
+        string "CNF"
+        tokenSymbol "{"
+        f <- (parser :: Parser Cnf)
+        tokenSymbol "}"
+        pure $ InstCnf f
+      parseDNF = do
+        string "DNF"
+        tokenSymbol "{"
+        f <- (parser :: Parser Dnf)
+        tokenSymbol "}"
+        pure $ InstDnf f
+      parseSynTree = do
+        string "Tree"
+        tokenSymbol "{"
+        f <- (parser :: Parser (SynTree BinOp Char))
+        tokenSymbol "}"
+        pure $ InstArbitrary f

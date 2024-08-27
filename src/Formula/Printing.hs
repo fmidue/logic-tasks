@@ -143,7 +143,7 @@ instance Pretty PrologClause where
 instance Pretty PickInst where
   pretty  PickInst{..} =
       text "PickInst(" <> vcat
-                           [ nest 2 $ pretty $ map (text . pack . show) formulas
+                           [ nest 2 $ pretty formulas
                            , char ',' <+> pretty correct
                            , myText (", {" ++ show showSolution ++ "}")
                            , maybe empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
@@ -151,6 +151,10 @@ instance Pretty PickInst where
                            ]
 
 
+instance Pretty FormulaInst where
+  pretty (InstCnf cnf) = text "CNF{" <> pretty cnf <> char '}'
+  pretty (InstDnf dnf) = text "DNF{" <> pretty dnf <> char '}'
+  pretty (InstArbitrary tree) = text "TREE{" <> pretty tree <> char '}'
 
 
 

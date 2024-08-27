@@ -79,6 +79,7 @@ library:
     - Trees.Generate
     - Trees.Formula
     - Formula.Parsing
+    - Formula.Parsing.Type
     - Formula.Parsing.Delayed
     - Formula.Helpers
     - Formula.Printing

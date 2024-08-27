@@ -20,7 +20,7 @@ import Trees.Types as Tree
     , TreeFormulaAnswer(..)
     )
 
-import Formula.Parsing (Parse(..))
+import Formula.Parsing.Type (Parse(..))
 
 import ParsingHelpers (fully)
 import UniversalParser as Parser
