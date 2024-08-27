@@ -19,9 +19,10 @@ import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCN
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
 import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
+import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks.Debug(checkConfigWith)
 
 import FormulaSpec (validBoundsCnf)
-import LogicTasks.Debug (checkConfigWith)
 
 validBoundsLegalCNF :: Gen LegalCNFConfig
 validBoundsLegalCNF = do
@@ -107,12 +108,12 @@ spec = do
     describe "validBoundsLegalCNF" $
         it "produces a valid config" $
           withMaxSuccess 1000 $ forAll validBoundsLegalCNF $ \conf ->
-            ioProperty $ conf `checkConfigWith` checkLegalCNFConfig
+            ioProperty $ checkConfigWith German conf checkLegalCNFConfig
 
     describe "invalidBoundsLegalCNF" $
         xit "produces a valid config" $
           forAll invalidBoundsLegalCNF $ \conf ->
-            ioProperty (not <$> conf `checkConfigWith` checkLegalCNFConfig)
+            ioProperty (not <$> checkConfigWith German conf checkLegalCNFConfig)
 
     describe "genIllegalSynTree" $
         it "the syntax Tree are not CNF syntax tree" $

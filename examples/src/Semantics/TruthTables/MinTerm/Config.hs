@@ -8,6 +8,7 @@ import LogicTasks.Config (
 import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.2
 -- Type: Min
@@ -29,4 +30,4 @@ unused03 = MinMaxConfig
 
 spec :: Spec
 spec = do
-  describe "unused03" $ verifyConfig (cnfConf unused03) checkCnfConf
+  describe "unused03" $ verifyConfig German (cnfConf unused03) checkCnfConf

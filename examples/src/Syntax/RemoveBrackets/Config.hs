@@ -6,7 +6,7 @@ import Tasks.SuperfluousBrackets.Config (
 import Tasks.SynTree.Config (
   SynTreeConfig(..),
   )
-import Control.OutputCapable.Blocks (english, german, translations)
+import Control.OutputCapable.Blocks (english, german, translations, Language (German))
 import Test.Hspec
 import Util.VerifyConfig
 
@@ -55,5 +55,5 @@ task05 = SuperfluousBracketsConfig
 
 spec :: Spec
 spec = do
-  describe "task02" $ verifyConfig task02 checkSuperfluousBracketsConfig
-  describe "task05" $ verifyConfig task05 checkSuperfluousBracketsConfig
+  describe "task02" $ verifyConfig German task02 checkSuperfluousBracketsConfig
+  describe "task05" $ verifyConfig German task05 checkSuperfluousBracketsConfig

@@ -74,6 +74,7 @@ library
       Util
   other-modules:
       Auxiliary
+      Formula.Parsing.Delayed.Internal
       Formula.Table
       LogicTasks.Helpers
       UniversalParser

@@ -8,8 +8,9 @@ import Test.QuickCheck
 import LogicTasks.Formula
 import LogicTasks.Config
 import LogicTasks.Util
-import LogicTasks.Debug (checkConfigWith)
 import Formula.Types (lengthBound)
+import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks.Debug (checkConfigWith)
 
 validBoundsClause :: Gen ((Int,Int),[Char])
 validBoundsClause = do
@@ -38,12 +39,12 @@ spec = do
   describe "genValidBoundsClause" $
     it "should generate valid bounds" $
       forAll validBoundsClause $ \((l,u),cs) ->
-        ioProperty $ BaseConfig l u cs `checkConfigWith` checkBaseConf
+        ioProperty $ checkConfigWith German (BaseConfig l u cs) checkBaseConf
 
   describe "genValidBoundsCnf" $
     it "should generate valid bounds" $
       withMaxSuccess 1000 $ forAll validBoundsCnf $ \((l1,u1),(l2,u2),cs) ->
-        ioProperty $ CnfConfig (BaseConfig l2 u2 cs) l1 u1 `checkConfigWith` checkCnfConf
+        ioProperty $ checkConfigWith German (CnfConfig (BaseConfig l2 u2 cs) l1 u1) checkCnfConf
 
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $

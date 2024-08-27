@@ -9,6 +9,7 @@ import Tasks.LegalCNF.Config (
   )
 import Test.Hspec
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.33
 task07 :: LegalCNFConfig
@@ -54,5 +55,5 @@ task18 = LegalCNFConfig
 
 spec :: Spec
 spec = do
-  describe "task07" $ verifyConfig task07 checkLegalCNFConfig
-  describe "task18" $ verifyConfig task18 checkLegalCNFConfig
+  describe "task07" $ verifyConfig German task07 checkLegalCNFConfig
+  describe "task18" $ verifyConfig German task18 checkLegalCNFConfig

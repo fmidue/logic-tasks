@@ -19,3 +19,76 @@
 | Aussagenlogik/Semantik/Resolution/LogicResolutionStep | x | x | `Logic.Semantics.ResolutionStep` | [`LogicTasks.Semantics.Step`](src/LogicTasks/Semantics/Step.hs) |
 | Aussagenlogik/Semantik/Resolution/LogicResolutionComplete | x | x | `Logic.Semantics.ResolutionFull` | [`LogicTasks.Semantics.Resolve`](src/LogicTasks/Semantics/Resolve.hs) |
 | Aussagenlogik/Semantik/Resolution/PrologResolutionStep | x | x | `Logic.Semantics.ResolutionStepProlog` | [`LogicTasks.Semantics.Prolog`](src/LogicTasks/Semantics/Prolog.hs) |
+
+## Testing a module
+
+You can use the `testModule` function in order to test a module. A sample call looks like this:
+
+```text
+$ stack repl
+ghci> testModule (Just AutoLeijen) German (genFillInst dFillConf) LogicTasks.Semantics.Fill.description LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
+```
+
+This specific call tests the `Fill` module (found in `src/LogicTasks/Semantics/Fill.hs`). The output looks like this:
+
+```text
+Betrachten Sie die folgende Formel:>>>> <F = (¬A ∨ ¬B) ∧ (A ∨ B) ∧ (B ∨ ¬C) ∧ (A ∨ B ∨ D)> <<<<
+
+Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch).>>>> <A | B | C | D | F
+--|---|---|---|--
+0 | 0 | 0 | 0 | 0
+0 | 0 | 0 | 1 | -
+0 | 0 | 1 | 0 | 0
+0 | 0 | 1 | 1 | 0
+0 | 1 | 0 | 0 | 1
+0 | 1 | 0 | 1 | -
+0 | 1 | 1 | 0 | 1
+0 | 1 | 1 | 1 | -
+1 | 0 | 0 | 0 | -
+1 | 0 | 0 | 1 | 1
+1 | 0 | 1 | 0 | 0
+1 | 0 | 1 | 1 | -
+1 | 1 | 0 | 0 | 0
+1 | 1 | 0 | 1 | 0
+1 | 1 | 1 | 0 | -
+1 | 1 | 1 | 1 | 0
+
+> <<<<
+
+Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc.
+Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (falsch, wahr) oder als Kurzform (f, w) erfolgen.
+>>>>Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen: <[0,1,1,1]> <<<<
+
+Just ()
+[0,1,1,1,0,1]
+---- Input ----
+[TruthValue {truth = False},TruthValue {truth = True},TruthValue {truth = True},TruthValue {truth = True},TruthValue {truth = False},TruthValue {truth = True}]
+---- Prettified Input ----
+[False
+,True
+,True
+,True
+,False
+,True]
+---- Partial ----
+Lösung hat korrekte Länge?
+>>>> <Ja.> <<<<
+
+Just ()
+---- Complete ----
+Lösung ist korrekt?
+>>>> <Nein.> <<<<
+
+>>>>Die Lösung beinhaltet 1 Fehler.<<<<
+Nothing
+```
+
+In more detail:
+
+- We passed `Just AutoLeijen` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just AutoHughesPJ` or `Manual f` where f is of type `a -> String`. Note that only `Nothing` makes sense for tasks using `Delayed`.
+- We passed `German` to print the german version of the task. The other option would be `English`.
+- We then passed the generator for creating an instance of the specified module. Must be of type `Gen a`.
+- Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description`.
+- Next, we pass the function that checks the input for syntax errors. This is usually `SomeModulePath.partialGrade`.
+- Then, we pass the function that checks the input for semantic errors. This is usually `SomeModulePath.completeGrade`.
+- Lastly, we pass a parser that allows us to parse the users input. This is usually just `parser`. Must be of type `Parser b`, if you define one yourself.

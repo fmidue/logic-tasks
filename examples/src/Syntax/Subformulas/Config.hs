@@ -8,6 +8,7 @@ import Tasks.SynTree.Config (
   SynTreeConfig(..),
   )
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 medium :: SubTreeConfig
 medium = SubTreeConfig
@@ -30,4 +31,4 @@ medium = SubTreeConfig
 
 spec :: Spec
 spec = do
-  describe "medium" $ verifyConfig medium checkSubTreeConfig
+  describe "medium" $ verifyConfig German medium checkSubTreeConfig

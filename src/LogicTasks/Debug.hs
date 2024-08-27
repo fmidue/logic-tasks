@@ -2,6 +2,8 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module LogicTasks.Debug where
 
 import Test.QuickCheck
@@ -9,73 +11,34 @@ import Control.OutputCapable.Blocks.Generic
 import Control.OutputCapable.Blocks
 import Text.Parsec
 import Text.Parsec.String (Parser)
-import Data.Maybe (isJust)
 import Formula.Types (Cnf(..), Clause(..), Literal(..), Formula(..))
 import Formula.Util (isPositive)
 import Data.Set (size, toList)
 import Data.List (partition)
 import Data.List.Extra (nubSort)
-import Formula.Parsing.Delayed (delayed, Delayed)
+import Control.OutputCapable.Blocks.Debug (testTask, Display)
+import Formula.Parsing.Delayed (delayed)
+import Formula.Parsing.Delayed.Internal (Delayed(..))
+import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully)
 
-showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
-showDescription gen f = do
-  inst <- generate gen
-  run (f inst)
+deriving instance Show (Delayed a)
 
-testTaskShow ::
-  (m ~ GenericReportT Language (IO ()) IO) =>
-  ((String, a) -> String) ->
-  Gen inst ->
-  (inst -> LangM m) ->
-  (inst -> a -> LangM m) ->
-  (inst -> a -> LangM m) ->
-  Parser a ->
-  IO ()
-testTaskShow sho gen f partial full p = do
-  inst <- generate gen
-  desc <- run (f inst)
-  print desc
-  str <- getLine
-  case parse p "input" str of
-    Left err -> print err
-    Right value -> do
-      putStrLn "---- Input ----"
-      putStrLn $ sho (str,value)
-      putStrLn "---- Partial ----"
-      partialRes <- run (partial inst value)
-      print partialRes
-      putStrLn "---- Complete ----"
-      completeRes <- run (full inst value)
-      print completeRes
+instance Parse (Delayed a) where
+  parser = delayed <$> fully (many anyChar)
 
-testTask ::
+testModule ::
   (m ~ GenericReportT Language (IO ()) IO, Show a) =>
+  Maybe (Display a) ->
+  Language ->
   Gen inst ->
   (inst -> LangM m) ->
   (inst -> a -> LangM m) ->
   (inst -> a -> LangM m) ->
   Parser a ->
   IO ()
-testTask = testTaskShow (show . snd)
-
-testTaskDelayed ::
-  (m ~ GenericReportT Language (IO ()) IO) =>
-  Gen inst ->
-  (inst -> LangM m) ->
-  (inst -> Delayed a -> LangM m) ->
-  (inst -> Delayed a -> LangM m) ->
-  IO ()
-testTaskDelayed gen f partial full = testTaskShow fst gen f partial full (delayed <$> fully (many anyChar))
-
-checkConfigWith :: (m ~ GenericReportT Language (IO ()) IO) => config -> (config -> LangM m) -> IO Bool
-checkConfigWith conf check = isJust <$> run (check conf)
-
-run :: (m ~ GenericReportT Language (IO ()) IO) => LangM m -> IO (Maybe ())
-run thing = do
-  (r,sayThing) <- runLangMReport (pure ()) (>>) thing
-  sayThing German
-  pure r
+testModule prettyCfg lang gen desc partial complete p =
+  testTask prettyCfg lang (generate gen) desc partial complete (either (error . show) id . parse p "Input" <$> getLine)
 
 analyseCnfGenerator :: Gen Cnf -> IO ()
 analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $ \cnf ->

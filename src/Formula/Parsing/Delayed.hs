@@ -11,8 +11,7 @@ import Control.Monad.State (State)
 import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
-
-newtype Delayed a = Delayed String
+import Formula.Parsing.Delayed.Internal (Delayed(..))
 
 delayed :: String -> Delayed a
 delayed = Delayed

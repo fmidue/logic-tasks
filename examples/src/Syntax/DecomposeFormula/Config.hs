@@ -7,6 +7,7 @@ import Tasks.SynTree.Config (
   )
 import Test.Hspec
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (Language(German))
 
 small :: DecomposeFormulaConfig
 small = DecomposeFormulaConfig
@@ -46,5 +47,5 @@ medium = DecomposeFormulaConfig
 
 spec :: Spec
 spec = do
-  describe "small" $ verifyConfig small checkDecomposeFormulaConfig
-  describe "medium" $ verifyConfig medium checkDecomposeFormulaConfig
+  describe "small" $ verifyConfig German small checkDecomposeFormulaConfig
+  describe "medium" $ verifyConfig German medium checkDecomposeFormulaConfig
