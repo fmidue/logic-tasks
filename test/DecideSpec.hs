@@ -6,7 +6,7 @@ module DecideSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
 import Control.OutputCapable.Blocks (LangM)
-import Config (dDecideConf, DecideConfig (..), DecideInst (..))
+import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
@@ -29,7 +29,7 @@ validBoundsDecide = do
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ DecideConfig {
-      syntaxTreeConfig
+      formulaConfig = FormulaArbitrary syntaxTreeConfig
     , percentageOfChanged
     , percentTrueEntries
     , printSolution = False
@@ -48,7 +48,7 @@ spec = do
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
-          let tableLen = length (getEntries (getTable tree))
+          let tableLen = length (getEntries (getTable formula))
               mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1 in
           length changed == mistakeCount
     it "the generated instance should pass verifyStatic" $
@@ -58,5 +58,5 @@ spec = do
     it "should respect percentTrueEntries" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
-          withRatio (fromMaybe (0, 100) percentTrueEntries) tree
+          withRatio (fromMaybe (0, 100) percentTrueEntries) formula
 

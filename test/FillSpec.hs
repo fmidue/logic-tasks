@@ -6,7 +6,7 @@ module FillSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, elements, suchThat)
 import Control.OutputCapable.Blocks (LangM)
-import Config (dFillConf, FillConfig (..), FillInst (..))
+import Config (dFillConf, FillConfig (..), FillInst (..), FormulaConfig(..))
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
@@ -29,7 +29,7 @@ validBoundsFill = do
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ FillConfig {
-      syntaxTreeConfig
+      formulaConfig = FormulaArbitrary syntaxTreeConfig
     , percentageOfGaps
     , percentTrueEntries
     , printSolution = False
@@ -48,13 +48,13 @@ spec = do
     it "should generate an instance with the right amount of gaps" $
       forAll validBoundsFill $ \fillConfig@FillConfig{..} -> do
         forAll (genFillInst fillConfig) $ \FillInst{..} ->
-          let tableLen = length (getEntries (getTable tree))
+          let tableLen = length (getEntries (getTable formula))
               gapCount = max (tableLen * percentageOfGaps `div` 100) 1 in
           length missing == gapCount
     it "should respect percentTrueEntries" $
       forAll validBoundsFill $ \fillConfig@FillConfig{..} ->
         forAll (genFillInst fillConfig) $ \FillInst{..} ->
-          withRatio (fromMaybe (0, 100) percentTrueEntries) tree
+          withRatio (fromMaybe (0, 100) percentTrueEntries) formula
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsFill $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->

@@ -3,7 +3,7 @@
 module PickSpec where
 import Control.OutputCapable.Blocks (LangM)
 import Test.Hspec (Spec, describe, it)
-import Config (dPickConf, PickConfig (..), PickInst (..))
+import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
@@ -12,9 +12,9 @@ import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Formula.Util (isSemanticEqual)
-import Trees.Helpers (collectLeaves)
 import Data.List.Extra (nubOrd, nubSort, nubBy)
 import Util (withRatio)
+import Formula.Types(atomics)
 
 validBoundsPick :: Gen PickConfig
 validBoundsPick = do
@@ -33,7 +33,7 @@ validBoundsPick = do
   percentTrueEntries <- elements [Just percentTrueEntries', Nothing]
 
   pure $ PickConfig {
-      syntaxTreeConfig
+      formulaConfig = FormulaArbitrary syntaxTreeConfig
     , amountOfOptions
     , percentTrueEntries
     , printSolution = False
@@ -52,11 +52,11 @@ spec = do
     it "generated formulas should not be semantically equivalent" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
-          length (nubBy isSemanticEqual trees) == amountOfOptions
+          length (nubBy isSemanticEqual formulas) == amountOfOptions
     it "generated formulas should only consist of the same atomics" $
       forAll validBoundsPick $ \pickConfig ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
-          length (nubOrd (map (nubSort . collectLeaves) trees)) == 1
+          length (nubOrd (map (nubSort . atomics) formulas)) == 1
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsPick $ \pickConfig -> do
         forAll (genPickInst pickConfig) $ \pickInst ->
@@ -64,4 +64,4 @@ spec = do
     it "should respect percentTrueEntries" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
-          all (withRatio (fromMaybe (0, 100) percentTrueEntries)) trees
+          all (withRatio (fromMaybe (0, 100) percentTrueEntries)) formulas
