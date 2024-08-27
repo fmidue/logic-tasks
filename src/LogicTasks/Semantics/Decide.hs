@@ -26,7 +26,7 @@ import Control.Monad (when, unless)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
 import Data.Maybe (fromMaybe)
-import LogicTasks.Util (genCnf', genDnf', display', hasEnoughUniqueAtoms)
+import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms)
 
 
 
@@ -109,7 +109,7 @@ verifyQuiz DecideConfig{..}
           english "The percentile of mistakes has to be set between 1 and 100."
           german "Der prozentuale Anteil an Fehlern muss zwischen 1 und 100 liegen."
 
-    | hasEnoughUniqueAtoms formulaConfig =
+    | not $ usesAllAtoms formulaConfig =
         refuse $ indent $ translate $ do
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."

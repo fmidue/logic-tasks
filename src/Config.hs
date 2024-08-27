@@ -10,7 +10,7 @@ import Formula.Types
 import Formula.Util
 import Data.Map (Map)
 import Control.OutputCapable.Blocks (Language)
-import Tasks.SynTree.Config (SynTreeConfig (..), defaultSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (..))
 import qualified Trees.Types as ST (BinOp(..), SynTree(..))
 import Trees.Formula ()
 
@@ -25,7 +25,7 @@ data FormulaInst
   = InstCnf Cnf
   | InstDnf Dnf
   | InstArbitrary (ST.SynTree ST.BinOp Char)
-  deriving Show
+  deriving (Show,Eq, Read)
 
 instance Formula FormulaInst where
   literals (InstCnf c) = literals c
@@ -44,6 +44,11 @@ instance Formula FormulaInst where
   evaluate x (InstDnf d) = evaluate x d
   evaluate x (InstArbitrary t) = evaluate x t
 
+instance ToSAT FormulaInst where
+  convert (InstCnf c) = convert c
+  convert (InstDnf d) = convert d
+  convert (InstArbitrary t) = convert t
+
 
 newtype Number = Number {value :: Maybe Int} deriving (Show,Typeable, Generic)
 
@@ -57,7 +62,7 @@ instance Show StepAnswer where
 
 
 data PickInst = PickInst {
-                 trees :: [ST.SynTree ST.BinOp Char]
+                 formulas :: [FormulaInst]
                , correct :: !Int
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
@@ -66,9 +71,7 @@ data PickInst = PickInst {
 
 dPickInst :: PickInst
 dPickInst =  PickInst
-          { trees = [ST.Binary ST.And
-            (ST.Binary ST.Or (ST.Leaf 'A') (ST.Not (ST.Leaf 'B')))
-            (ST.Binary ST.Or (ST.Not (ST.Leaf 'A')) (ST.Leaf 'B'))]
+          { formulas = [InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']], InstCnf $ mkCnf [mkClause [Not 'A', Literal 'B']]]
           , correct = 1
           , showSolution = False
           , addText = Nothing
@@ -240,7 +243,7 @@ dCnfConf = CnfConfig
 
 
 data PickConfig = PickConfig {
-       syntaxTreeConfig :: SynTreeConfig
+       formulaConfig :: FormulaConfig
      , amountOfOptions :: Int
      , percentTrueEntries :: Maybe (Int,Int)
      , printSolution :: Bool
@@ -250,10 +253,7 @@ data PickConfig = PickConfig {
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
-    { syntaxTreeConfig = defaultSynTreeConfig {
-        availableAtoms = "ABC"
-      , minAmountOfUniqueAtoms = 3
-      }
+    { formulaConfig = FormulaCnf dCnfConf
     , amountOfOptions = 3
     , percentTrueEntries = Just (30,70)
     , printSolution = False

@@ -17,7 +17,7 @@ import Control.OutputCapable.Blocks (
 
 import Test.QuickCheck (Gen, suchThat, elements)
 
-import Config (Number(..), PickConfig(..), PickInst(..))
+import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), FormulaInst (..), BaseConfig (..), CnfConfig(..))
 import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)
@@ -26,22 +26,29 @@ import Control.Monad (when)
 import Data.Maybe (fromJust, fromMaybe)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
-import Trees.Print (display)
 import Trees.Formula ()
-import Util (withRatio, checkTruthValueRangeAndSynTreeConf, vectorOfUniqueBy)
+import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf)
+import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms)
 
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
-  trees <- vectorOfUniqueBy
+  let percentTrueEntries' = fromMaybe (0,100) percentTrueEntries
+  formulas <- vectorOfUniqueBy
     amountOfOptions
     isSemanticEqual
-    (genSynTree syntaxTreeConfig `suchThat` withRatio (fromMaybe (0,100) percentTrueEntries))
+    $ case formulaConfig of
+        (FormulaArbitrary syntaxTreeConfig) ->
+          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
+        (FormulaCnf cnfCfg) ->
+          InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+        (FormulaDnf cnfCfg) ->
+          InstDnf <$> genDnf' cnfCfg `suchThat` withRatio percentTrueEntries'
 
   correct <- elements [1..amountOfOptions]
 
   pure $ PickInst {
-    trees,
+    formulas,
     correct,
     showSolution = printSolution,
     addText = extraText
@@ -56,13 +63,13 @@ description PickInst{..} = do
       translate $ do
         german "Betrachten Sie die folgende Formel:"
         english "Consider the following formula:"
-      indent $ code $ availableLetter (literals sTable) : " = " ++ display sTable
+      indent $ code $ availableLetter (literals sTable) : " = " ++ display' sTable
       pure ()
     paragraph $ do
       translate $ do
         german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
         english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
-      indent $ code $ showIndexedList 120 5 $ map getTable trees
+      indent $ code $ showIndexedList 120 5 $ map getTable formulas
       pure ()
     paragraph $ indent $ do
       translate $ do
@@ -73,17 +80,17 @@ description PickInst{..} = do
     extra addText
     pure ()
   where
-    sTable = trees !! (correct - 1)
+    sTable = formulas !! (correct - 1)
 
 
 verifyStatic :: OutputCapable m => PickInst -> LangM m
 verifyStatic PickInst{..}
-    | null trees =
+    | null formulas =
         refuse $ indent $ translate $ do
           german "Die Liste der Formeln ist leer."
           english "The list of formulas is empty."
 
-    | length trees < correct || correct <= 0 =
+    | length formulas < correct || correct <= 0 =
         refuse $ indent $ translate $ do
           german "Der angegebene Index existiert nicht."
           english "The given index does not exist."
@@ -94,23 +101,23 @@ verifyStatic PickInst{..}
 
 verifyQuiz :: OutputCapable m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
-
-    | minAmountOfUniqueAtoms syntaxTreeConfig < 2 =
-        refuse $ indent $ translate $ do
-          german "Es muss mindestens zwei unterschiedliche Atome geben."
-          english "At least two unique atoms are required."
-
     | amountOfOptions < 2 =
         refuse $ indent $ translate $ do
           german "Es muss mindestens zwei Optionen geben."
           english "At least two options need to be given."
 
-    | amountOfOptions > 4*2^ length (availableAtoms syntaxTreeConfig) =
+    | not $ hasMinUniqueAtoms 2 formulaConfig =
+        refuse $ indent $ translate $ do
+          german "Es muss mindestens zwei unterschiedliche Atome geben."
+          english "At least two unique atoms are required."
+
+
+    | doesOvershootOptions formulaConfig =
         refuse $ indent $ translate $ do
           german "Die Anzahl Optionen übersteigt die Anzahl möglicher, unterschiedlicher Formeln."
           english "The amount of options is higher than the amount of possible, distinct formulas."
 
-    | minAmountOfUniqueAtoms syntaxTreeConfig /= fromIntegral (length (availableAtoms syntaxTreeConfig)) =
+    | not $ usesAllAtoms formulaConfig =
         refuse $ indent $ translate $ do
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
@@ -120,9 +127,17 @@ verifyQuiz PickConfig{..}
           german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
           english "The given restriction on true entries should not fall below a range of 30."
 
-    | otherwise = checkTruthValueRangeAndSynTreeConf range syntaxTreeConfig
+    | otherwise = checkTruthValueRangeAndFormulaConf range formulaConfig
   where
     range@(rangeL, rangeH) = fromMaybe (0,100) percentTrueEntries
+    hasMinUniqueAtoms x (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= x
+    hasMinUniqueAtoms _ _ = True
+    doesOvershootOptions (FormulaArbitrary syntaxTreeConfig)
+      = amountOfOptions > 4*2^ length (availableAtoms syntaxTreeConfig)
+    doesOvershootOptions (FormulaCnf cnfCfg)
+      = amountOfOptions > 4*2^ length (usedLiterals (baseConf cnfCfg))
+    doesOvershootOptions (FormulaDnf cnfCfg)
+      = amountOfOptions > 4*2^ length (usedLiterals (baseConf cnfCfg))
 
 
 

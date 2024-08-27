@@ -25,7 +25,7 @@ import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
-import LogicTasks.Util (genCnf', genDnf', display', hasEnoughUniqueAtoms)
+import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms)
 
 
 genFillInst :: FillConfig -> Gen FillInst
@@ -106,7 +106,7 @@ verifyQuiz FillConfig{..}
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
           english "The percentile of gaps has to be set between 1 and 100."
 
-    | hasEnoughUniqueAtoms formulaConfig =
+    | not $ usesAllAtoms formulaConfig =
         refuse $ indent $ translate $ do
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."

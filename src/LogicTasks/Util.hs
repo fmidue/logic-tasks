@@ -4,7 +4,8 @@ module LogicTasks.Util
        , genCnf'
        , genDnf'
        , display'
-       , hasEnoughUniqueAtoms) where
+       , usesAllAtoms
+       ) where
 
 
 import Util
@@ -25,7 +26,7 @@ display' (InstCnf c) = show c
 display' (InstDnf d) = show d
 display' (InstArbitrary t) = display t
 
-hasEnoughUniqueAtoms :: FormulaConfig -> Bool
-hasEnoughUniqueAtoms (FormulaArbitrary syntaxTreeConfig)
-  = minAmountOfUniqueAtoms syntaxTreeConfig /= fromIntegral (length (availableAtoms syntaxTreeConfig))
-hasEnoughUniqueAtoms _ = True
+usesAllAtoms :: FormulaConfig -> Bool
+usesAllAtoms (FormulaArbitrary syntaxTreeConfig)
+  = minAmountOfUniqueAtoms syntaxTreeConfig == fromIntegral (length (availableAtoms syntaxTreeConfig))
+usesAllAtoms _ = True

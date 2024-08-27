@@ -304,14 +304,14 @@ instance Parse PickInst where
       instParse = do
         string "PickInst("
         tokenSymbol "["
-        trees' <- lexeme (many (noneOf ",]")) `sepBy` char ','
+        formulas' <- lexeme (many (noneOf ",]")) `sepBy` char ','
         tokenSymbol "]"
         tokenSymbol ","
         index <- lexeme $ many1 digit
         printSol <- lexeme text'
         bonusText <- optionMaybe $ lexeme text'
         char ')'
-        pure $ PickInst (map read trees') (read index) (read printSol) (fromList . read <$> bonusText)
+        pure $ PickInst (map read formulas') (read index) (read printSol) (fromList . read <$> bonusText)
           where
             text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do

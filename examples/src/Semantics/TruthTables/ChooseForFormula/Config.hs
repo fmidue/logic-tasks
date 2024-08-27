@@ -1,17 +1,27 @@
 module Semantics.TruthTables.ChooseForFormula.Config where
 
 import LogicTasks.Config (
+  BaseConfig(..),
   PickConfig(..),
+  CnfConfig(..),
+  FormulaConfig(..)
   )
 
 import Test.Hspec
 import Util.VerifyConfig
-import Tasks.SynTree.Config (defaultSynTreeConfig, checkSynTreeConfig)
 
 -- Weight 0.33
 task08 :: PickConfig
 task08 = PickConfig
-  { syntaxTreeConfig = defaultSynTreeConfig -- TODO: change this to a suiting config
+  { formulaConfig = FormulaCnf $ CnfConfig
+    { baseConf = BaseConfig
+      { minClauseLength = 3
+      , maxClauseLength = 3
+      , usedLiterals = "ABCD"
+      }
+    , minClauseAmount = 2
+    , maxClauseAmount = 2
+    }
   , amountOfOptions = 3
   , percentTrueEntries = Nothing
   , extraText = Nothing
@@ -21,7 +31,15 @@ task08 = PickConfig
 -- Weight 0.25
 task19 :: PickConfig
 task19 = PickConfig
-  { syntaxTreeConfig = defaultSynTreeConfig -- TODO: change this to a suiting config
+  { formulaConfig = FormulaCnf $ CnfConfig
+    { baseConf = BaseConfig
+        { minClauseLength = 3
+        , maxClauseLength = 3
+        , usedLiterals = "ABCDE"
+        }
+    , minClauseAmount = 4
+    , maxClauseAmount = 4
+    }
   , amountOfOptions = 4
   , percentTrueEntries = Nothing
   , extraText = Nothing
@@ -30,5 +48,5 @@ task19 = PickConfig
 
 spec :: Spec
 spec = do
-  describe "task08" $ verifyConfig (syntaxTreeConfig task08) checkSynTreeConfig
-  describe "task19" $ verifyConfig (syntaxTreeConfig task19) checkSynTreeConfig
+  describe "task08" $ verifyFormulaConfig (formulaConfig task08)
+  describe "task19" $ verifyFormulaConfig (formulaConfig task19)
