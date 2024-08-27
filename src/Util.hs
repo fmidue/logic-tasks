@@ -19,7 +19,7 @@ import Control.Monad (when)
 import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
 
-import Config (BaseConfig(..), CnfConfig(..))
+import Config (BaseConfig(..), CnfConfig(..), FormulaConfig (..))
 import Formula.Types (Formula, getTable, lengthBound)
 import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig, checkSynTreeConfig)
@@ -187,6 +187,15 @@ checkTruthValueRangeAndSynTreeConf :: OutputCapable m => (Int,Int) -> SynTreeCon
 checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
   checkTruthValueRange range
   checkSynTreeConfig synTreeConfig
+  pure ()
+
+checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
+checkTruthValueRangeAndFormulaConf range formulaConf = do
+  checkTruthValueRange range
+  case formulaConf of
+    (FormulaCnf cnfCfg) -> checkCnfConf cnfCfg
+    (FormulaDnf cnfCfg) -> checkCnfConf cnfCfg
+    (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
 
 vectorOfUniqueBy :: Int -> (a -> a -> Bool) -> Gen a -> Gen [a]

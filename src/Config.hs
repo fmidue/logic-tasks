@@ -12,7 +12,37 @@ import Data.Map (Map)
 import Control.OutputCapable.Blocks (Language)
 import Tasks.SynTree.Config (SynTreeConfig (..), defaultSynTreeConfig)
 import qualified Trees.Types as ST (BinOp(..), SynTree(..))
+import Trees.Formula ()
 
+
+data FormulaConfig
+  = FormulaCnf CnfConfig
+  | FormulaDnf CnfConfig
+  | FormulaArbitrary SynTreeConfig
+  deriving Show
+
+data FormulaInst
+  = InstCnf Cnf
+  | InstDnf Dnf
+  | InstArbitrary (ST.SynTree ST.BinOp Char)
+  deriving Show
+
+instance Formula FormulaInst where
+  literals (InstCnf c) = literals c
+  literals (InstDnf d) = literals d
+  literals (InstArbitrary t) = literals t
+
+  atomics (InstCnf c) = atomics c
+  atomics (InstDnf d) = atomics d
+  atomics (InstArbitrary t) = atomics t
+
+  amount (InstCnf c) = amount c
+  amount (InstDnf d) = amount d
+  amount (InstArbitrary t) = amount t
+
+  evaluate x (InstCnf c) = evaluate x c
+  evaluate x (InstDnf d) = evaluate x d
+  evaluate x (InstArbitrary t) = evaluate x t
 
 
 newtype Number = Number {value :: Maybe Int} deriving (Show,Typeable, Generic)
@@ -80,7 +110,7 @@ dMinInst =  MinInst
 
 
 data FillInst = FillInst {
-                 tree :: ST.SynTree ST.BinOp Char
+                 formula :: FormulaInst
                , missing :: ![Int]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
@@ -89,7 +119,7 @@ data FillInst = FillInst {
 
 dFillInst :: FillInst
 dFillInst =  FillInst
-          { tree = ST.Binary ST.And (ST.Leaf 'A') (ST.Not (ST.Leaf 'B'))
+          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -233,7 +263,7 @@ dPickConf = PickConfig
 
 
 data FillConfig = FillConfig {
-      syntaxTreeConfig :: SynTreeConfig
+      formulaConfig :: FormulaConfig
     , percentageOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
@@ -243,10 +273,7 @@ data FillConfig = FillConfig {
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
-    { syntaxTreeConfig = defaultSynTreeConfig {
-        availableAtoms = "ABC"
-      , minAmountOfUniqueAtoms = 3
-      }
+    { formulaConfig = FormulaCnf dCnfConf
     , percentageOfGaps = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False
