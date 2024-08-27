@@ -26,62 +26,66 @@ You can use the `testModule` function in order to test a module. A sample call l
 
 ```text
 $ stack repl
-ghci> testModule (Just (Manual show)) German (genResInst dResConf) LogicTasks.Semantics.Resolve.description LogicTasks.Semantics.Resolve.partialGrade LogicTasks.Semantics.Resolve.completeGrade parser
+ghci> testModule (Just AutoLeijen) German (genFillInst dFillConf) LogicTasks.Semantics.Fill.description LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
 ```
 
-This specific call tests the `Resolve` module (found in `src/LogicTasks/Semantics/Resolve.hs`). The output looks like this:
+This specific call tests the `Fill` module (found in `src/LogicTasks/Semantics/Fill.hs`). The output looks like this:
 
 ```text
-Betrachten Sie die folgende Formel in KNF:>>>> <¬D ∧ (¬A ∨ D) ∧ (A ∨ D)> <<<<
+Betrachten Sie die folgende Formel:>>>> <F = (¬A ∨ ¬B) ∧ (A ∨ B) ∧ (B ∨ ¬C) ∧ (A ∨ B ∨ D)> <<<<
 
-Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten.
-Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)
-Beachten Sie dabei die folgenden möglichen Schreibweisen:
->>>>Negation: <-, ~, nicht> <<<<
+Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch).>>>> <A | B | C | D | F
+--|---|---|---|--
+0 | 0 | 0 | 0 | 0
+0 | 0 | 0 | 1 | -
+0 | 0 | 1 | 0 | 0
+0 | 0 | 1 | 1 | 0
+0 | 1 | 0 | 0 | 1
+0 | 1 | 0 | 1 | -
+0 | 1 | 1 | 0 | 1
+0 | 1 | 1 | 1 | -
+1 | 0 | 0 | 0 | -
+1 | 0 | 0 | 1 | 1
+1 | 0 | 1 | 0 | 0
+1 | 0 | 1 | 1 | -
+1 | 1 | 0 | 0 | 0
+1 | 1 | 0 | 1 | 0
+1 | 1 | 1 | 0 | -
+1 | 1 | 1 | 1 | 0
 
->>>>Nicht-leere Klausel: <{ ... }> <<<<
+> <<<<
 
->>>>Leere Klausel: <{ }> <<<<
-
-Optional können Sie Klauseln auch durch Nummern ersetzen.
-Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...).
-Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen.
->>>>Ein Lösungsversuch könnte beispielsweise so aussehen:  <[(1, 2, {A, nicht B} = 5), (4, 5, { })]> <<<<
+Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc.
+Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (falsch, wahr) oder als Kurzform (f, w) erfolgen.
+>>>>Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen: <[0,1,1,1]> <<<<
 
 Just ()
-[({-D},{-A,D},{-A})]
+[0,1,1,1,0,1]
 ---- Input ----
-[({-D},{-A,D},{-A})]
+[TruthValue {truth = False},TruthValue {truth = True},TruthValue {truth = True},TruthValue {truth = True},TruthValue {truth = False},TruthValue {truth = True}]
 ---- Prettified Input ----
-[({-D},{-A,D},{-A})]
+[False
+,True
+,True
+,True
+,False
+,True]
 ---- Partial ----
-1. Schritt verwendet nur existierende Indizes?
+Lösung hat korrekte Länge?
 >>>> <Ja.> <<<<
 
-1. Schritt vergibt keinen Index wiederholt?
->>>> <Ja.> <<<<
-
-Genutzte Literale kommen in Formel vor?
->>>> <Ja.> <<<<
-
-Alle Schritte sind gültig?
->>>> <Ja.> <<<<
-
-Letzter Schritt leitet die leere Klausel ab?
->>>> <Nein.> <<<<
-
-Nothing
-!!! The following would not be printed in Autotool !!!
+Just ()
 ---- Complete ----
 Lösung ist korrekt?
 >>>> <Nein.> <<<<
 
+>>>>Die Lösung beinhaltet 1 Fehler.<<<<
 Nothing
 ```
 
 In more detail:
 
-- We passed `Just (Manual show)` to format the input with the specified pretty printer (which is the default `show` here since we are testing a `Delayed` task). Other options are: `Nothing`, `Just AutoLeijen` or `Just AutoHughesPJ`.
+- We passed `Just AutoLeijen` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just AutoHughesPJ` or `Manual f` where f is of type `a -> String`. Note that only `Nothing` makes sense for tasks using `Delayed`.
 - We passed `German` to print the german version of the task. The other option would be `English`.
 - We then passed the generator for creating an instance of the specified module. Must be of type `Gen a`.
 - Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description`.
