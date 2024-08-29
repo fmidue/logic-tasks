@@ -1,11 +1,13 @@
 module Semantics.TruthTables.FillGaps.Config where
 
 import LogicTasks.Config (
+  BaseConfig(..),
   FillConfig (..),
+  CnfConfig(..),
+  FormulaConfig(..),
   )
 import Test.Hspec
 import Util.VerifyConfig
-import Config (FormulaConfig(..), CnfConfig(..), BaseConfig(..))
 
 -- Weight 0.34
 task06 :: FillConfig
