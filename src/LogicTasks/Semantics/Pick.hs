@@ -28,7 +28,7 @@ import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Formula ()
 import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf)
-import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms)
+import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms, isEmptyFormula)
 
 
 genPickInst :: PickConfig -> Gen PickInst
@@ -90,6 +90,11 @@ verifyStatic PickInst{..}
           german "Die Liste der Formeln ist leer."
           english "The list of formulas is empty."
 
+    | any isEmptyFormula formulas =
+        refuse $ indent $ translate $ do
+          german "Mindestens eine Formel ist für diese Aufgabe nicht geeignet."
+          english "At least one given formula is not suitable for this task."
+
     | length formulas < correct || correct <= 0 =
         refuse $ indent $ translate $ do
           german "Der angegebene Index existiert nicht."
@@ -101,6 +106,7 @@ verifyStatic PickInst{..}
 
 verifyQuiz :: OutputCapable m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
+
     | amountOfOptions < 2 =
         refuse $ indent $ translate $ do
           german "Es muss mindestens zwei Optionen geben."

@@ -26,7 +26,7 @@ import Control.Monad (when, unless)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
 import Data.Maybe (fromMaybe)
-import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms)
+import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms, isEmptyFormula)
 
 
 
@@ -86,6 +86,11 @@ description DecideInst{..} = do
 
 verifyStatic :: OutputCapable m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
+    | isEmptyFormula formula =
+        refuse $ indent $ translate $ do
+          english "Please give a non empty formula."
+          german "Geben Sie bitte eine nicht-leere Formel an."
+
     | any (> 2^length (atomics formula)) changed || any (<=0) changed =
         refuse $ indent $ translate $ do
           english "At least one of the given indices does not exist."

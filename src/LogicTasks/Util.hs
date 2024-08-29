@@ -5,6 +5,7 @@ module LogicTasks.Util
        , genDnf'
        , display'
        , usesAllAtoms
+       , isEmptyFormula
        ) where
 
 
@@ -14,6 +15,7 @@ import Formula.Types (Cnf, genCnf, genDnf, Dnf)
 import Config (CnfConfig (..), BaseConfig(..), FormulaInst (..), FormulaConfig (..))
 import Trees.Print (display)
 import Tasks.SynTree.Config (SynTreeConfig(minAmountOfUniqueAtoms, availableAtoms))
+import Formula.Util (isEmptyCnf, hasEmptyClause, isEmptyDnf, hasEmptyCon)
 
 genCnf' :: CnfConfig -> Gen Cnf
 genCnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
@@ -32,3 +34,8 @@ usesAllAtoms :: FormulaConfig -> Bool
 usesAllAtoms (FormulaArbitrary syntaxTreeConfig)
   = minAmountOfUniqueAtoms syntaxTreeConfig == fromIntegral (length (availableAtoms syntaxTreeConfig))
 usesAllAtoms _ = True
+
+isEmptyFormula :: FormulaInst -> Bool
+isEmptyFormula (InstCnf cnf) = isEmptyCnf cnf || hasEmptyClause cnf
+isEmptyFormula (InstDnf dnf) = isEmptyDnf dnf || hasEmptyCon dnf
+isEmptyFormula (InstArbitrary _) = False

@@ -25,7 +25,7 @@ import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
-import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms)
+import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms, isEmptyFormula)
 
 
 genFillInst :: FillConfig -> Gen FillInst
@@ -84,6 +84,11 @@ description FillInst{..} = do
 
 verifyStatic :: OutputCapable m => FillInst -> LangM m
 verifyStatic FillInst{..}
+    | isEmptyFormula formula =
+        refuse $ indent $ translate $ do
+          german "Geben Sie bitte eine nicht-leere Formel an."
+          english "Please give a non empty formula."
+
     | any (> 2^length (atomics formula)) missing || any (<=0) missing =
     refuse $ indent $ translate $ do
       english "At least one of the given indices does not exist."
