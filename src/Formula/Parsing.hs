@@ -67,7 +67,6 @@ notFollowedByElse p f = try ((try p >>= f) <|> pure ())
 
 
 
-
 instance Parse a => Parse [a] where
   parser = (lexeme listParse <?> "List")
       <|> fail (
@@ -321,19 +320,19 @@ instance Parse FormulaInst where
   parser = lexeme (parseCNF <|> parseDNF <|> parseSynTree)
     where
       parseCNF = do
-        string "CNF"
+        string "Cnf"
         tokenSymbol "{"
         f <- (parser :: Parser Cnf)
         tokenSymbol "}"
         pure $ InstCnf f
       parseDNF = do
-        string "DNF"
+        string "Dnf"
         tokenSymbol "{"
         f <- (parser :: Parser Dnf)
         tokenSymbol "}"
         pure $ InstDnf f
       parseSynTree = do
-        string "Tree"
+        string "SynTree"
         tokenSymbol "{"
         f <- (parser :: Parser (SynTree BinOp Char))
         tokenSymbol "}"

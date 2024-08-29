@@ -152,9 +152,9 @@ instance Pretty PickInst where
 
 
 instance Pretty FormulaInst where
-  pretty (InstCnf cnf) = text "CNF{" <> pretty cnf <> char '}'
-  pretty (InstDnf dnf) = text "DNF{" <> pretty dnf <> char '}'
-  pretty (InstArbitrary tree) = text "TREE{" <> pretty tree <> char '}'
+  pretty (InstCnf cnf) = text "Cnf{" <> pretty cnf <> char '}'
+  pretty (InstDnf dnf) = text "Dnf{" <> pretty dnf <> char '}'
+  pretty (InstArbitrary tree) = text "SynTree{" <> pretty tree <> char '}'
 
 
 
