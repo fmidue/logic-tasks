@@ -146,7 +146,7 @@ opposite (Not l) = Literal l
 
 -- | A datatype representing a clause
 newtype Clause = Clause { literalSet :: Set Literal}
-    deriving (Eq,Typeable,Generic, Read)
+    deriving (Eq,Typeable,Generic)
 
 
 
@@ -209,7 +209,7 @@ type Allocation = [(Literal, Bool)]
 
 -- | A datatype representing a formula in conjunctive normal form.
 newtype Cnf = Cnf { clauseSet :: Set Clause}
-     deriving (Eq,Typeable,Generic, Read)
+     deriving (Eq,Typeable,Generic)
 
 
 
@@ -295,7 +295,7 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits = do
 
 -- | A datatype representing a conjunction
 newtype Con = Con { literalSet :: Set Literal}
-    deriving (Eq,Typeable,Generic, Read)
+    deriving (Eq,Typeable,Generic)
 
 
 
@@ -355,7 +355,7 @@ genCon (minLength,maxLength) lits = do
 
 -- | A datatype representing a formula in disjunctive normal form.
 newtype Dnf = Dnf { clauseSet :: Set Con}
-     deriving (Eq,Typeable,Generic, Read)
+     deriving (Eq,Typeable,Generic)
 
 
 

@@ -22,7 +22,7 @@ import Data.Tuple (swap)
 
 
 data BinOp = And | Or | Impl | BackImpl | Equi
-  deriving (Eq, Generic, Ord, Show, Enum, Bounded, Read)
+  deriving (Eq, Generic, Ord, Show, Enum, Bounded)
 
 showOperator :: BinOp -> String
 showOperator And = "∧"
@@ -41,7 +41,7 @@ data SynTree o c
     = Binary o (SynTree o c) (SynTree o c)
     | Not (SynTree o c)
     | Leaf c
-  deriving (Eq, Generic, Ord, Show, Functor, Foldable, Traversable, Read)
+  deriving (Eq, Generic, Ord, Show, Functor, Foldable, Traversable)
 
 instance Applicative (SynTree o) where
   pure = Leaf

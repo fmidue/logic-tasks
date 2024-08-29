@@ -25,7 +25,7 @@ data FormulaInst
   = InstCnf Cnf
   | InstDnf Dnf
   | InstArbitrary (ST.SynTree ST.BinOp Char)
-  deriving (Show,Eq, Read)
+  deriving (Show,Eq)
 
 instance Formula FormulaInst where
   literals (InstCnf c) = literals c
