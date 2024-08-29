@@ -15,14 +15,20 @@ import Formula.Util (isSemanticEqual)
 import Data.List.Extra (nubOrd, nubSort, nubBy)
 import Util (withRatio)
 import Formula.Types(atomics)
+import FillSpec (validBoundsCnf)
 
 validBoundsPick :: Gen PickConfig
 validBoundsPick = do
   amountOfOptions <- choose (2, 5)
-  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    amountOfOptions <= 4*2^ length availableAtoms &&
-    minAmountOfUniqueAtoms == fromIntegral (length availableAtoms) &&
-    maxNodes <= 100
+  -- formulaType <- elements ["Cnf", "Dnf", "Arbitrary"]
+  let formulaType = "Arbitrary"
+  formulaConfig <- case formulaType of
+    "Cnf" -> FormulaCnf <$> validBoundsCnf
+    "Dnf" -> FormulaDnf <$> validBoundsCnf
+    _ -> FormulaArbitrary <$> validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
+            amountOfOptions <= 4*2^ length availableAtoms &&
+            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms) &&
+            maxNodes <= 100
 
   percentTrueEntries' <- (do
     percentTrueEntriesLow' <- choose (1, 90)
@@ -33,7 +39,7 @@ validBoundsPick = do
   percentTrueEntries <- elements [Just percentTrueEntries', Nothing]
 
   pure $ PickConfig {
-      formulaConfig = FormulaArbitrary syntaxTreeConfig
+      formulaConfig
     , amountOfOptions
     , percentTrueEntries
     , printSolution = False

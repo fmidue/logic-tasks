@@ -15,21 +15,27 @@ import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio)
+import FillSpec (validBoundsCnf)
 -- jscpd:ignore-end
 
 validBoundsDecide :: Gen DecideConfig
 validBoundsDecide = do
-  -- too large tables lead to too long test runs and are probably not suitable for actual tasks
-  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    maxNodes < 30 &&
-    minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+  -- formulaType <- elements ["Cnf", "Dnf", "Arbitrary"]
+  let formulaType = "Arbitrary"
+  formulaConfig <- case formulaType of
+    "Cnf" -> FormulaCnf <$> validBoundsCnf
+    "Dnf" -> FormulaDnf <$> validBoundsCnf
+    _ -> FormulaArbitrary <$> validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
+            maxNodes < 30 &&
+            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+
   percentageOfChanged <- choose (1, 100)
   percentTrueEntriesLow' <- choose (1, 90)
   percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ DecideConfig {
-      formulaConfig = FormulaArbitrary syntaxTreeConfig
+      formulaConfig
     , percentageOfChanged
     , percentTrueEntries
     , printSolution = False
