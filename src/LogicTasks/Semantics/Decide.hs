@@ -26,7 +26,7 @@ import Control.Monad (when, unless)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
 import Data.Maybe (fromMaybe)
-import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms, isEmptyFormula)
+import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 
 
 
@@ -62,7 +62,7 @@ description DecideInst{..} = do
     translate $ do
       english "Consider the following formula:"
       german "Betrachten Sie die folgende Formel:"
-    indent $ code $ availableLetter (literals formula) : " = " ++ display' formula
+    indent $ code $ availableLetter (literals formula) : " = " ++ displayFormula formula
     pure ()
   paragraph $ do
     translate $ do
@@ -147,10 +147,10 @@ preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > table
       "Please remove at least " ++ engLong ++ " to proceed."
       )
     gerEng diff = if diff == 1
-        then ("muss mindestens " ++ display'' ++ " Wert", display'' ++ " value") -- no-spell-check
-        else ("müssen mindestens " ++ display'' ++ " Werte", display'' ++ " values") -- no-spell-check
+        then ("muss mindestens " ++ display' ++ " Wert", display' ++ " value") -- no-spell-check
+        else ("müssen mindestens " ++ display' ++ " Werte", display' ++ " values") -- no-spell-check
       where
-        display'' = show diff
+        display' = show diff
 
 partialGrade :: OutputCapable m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do

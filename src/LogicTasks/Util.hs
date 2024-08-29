@@ -3,7 +3,7 @@ module LogicTasks.Util
        ( module Util
        , genCnf'
        , genDnf'
-       , display'
+       , displayFormula
        , usesAllAtoms
        , isEmptyFormula
        ) where
@@ -25,15 +25,15 @@ genDnf' :: CnfConfig -> Gen Dnf
 genDnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
   = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
-display' :: FormulaInst -> String
-display' (InstCnf c) = show c
-display' (InstDnf d) = show d
-display' (InstArbitrary t) = display t
+displayFormula :: FormulaInst -> String
+displayFormula (InstCnf c) = show c
+displayFormula (InstDnf d) = show d
+displayFormula (InstArbitrary t) = display t
 
 usesAllAtoms :: FormulaConfig -> Bool
 usesAllAtoms (FormulaArbitrary syntaxTreeConfig)
   = minAmountOfUniqueAtoms syntaxTreeConfig == fromIntegral (length (availableAtoms syntaxTreeConfig))
-usesAllAtoms _ = True
+usesAllAtoms _ = True -- Cnf and Dnf always uses all atoms
 
 isEmptyFormula :: FormulaInst -> Bool
 isEmptyFormula (InstCnf cnf) = isEmptyCnf cnf || hasEmptyClause cnf

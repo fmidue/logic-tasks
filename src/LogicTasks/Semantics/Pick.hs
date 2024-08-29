@@ -28,7 +28,7 @@ import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Formula ()
 import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf)
-import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms, isEmptyFormula)
+import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 
 
 genPickInst :: PickConfig -> Gen PickInst
@@ -63,7 +63,7 @@ description PickInst{..} = do
       translate $ do
         german "Betrachten Sie die folgende Formel:"
         english "Consider the following formula:"
-      indent $ code $ availableLetter (literals sTable) : " = " ++ display' sTable
+      indent $ code $ availableLetter (literals correctFormula) : " = " ++ displayFormula correctFormula
       pure ()
     paragraph $ do
       translate $ do
@@ -80,7 +80,7 @@ description PickInst{..} = do
     extra addText
     pure ()
   where
-    sTable = formulas !! (correct - 1)
+    correctFormula = formulas !! (correct - 1)
 
 
 verifyStatic :: OutputCapable m => PickInst -> LangM m

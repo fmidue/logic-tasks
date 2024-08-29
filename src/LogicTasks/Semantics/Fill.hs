@@ -25,7 +25,7 @@ import LogicTasks.Helpers (example, extra)
 import Data.Foldable.Extra (notNull)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
-import LogicTasks.Util (genCnf', genDnf', display', usesAllAtoms, isEmptyFormula)
+import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 
 
 genFillInst :: FillConfig -> Gen FillInst
@@ -55,7 +55,7 @@ description FillInst{..} = do
     translate $ do
       german  "Betrachten Sie die folgende Formel:"
       english "Consider the following formula:"
-    indent $ code $ availableLetter (literals formula) : " = " ++ display' formula
+    indent $ code $ availableLetter (literals formula) : " = " ++ displayFormula formula
     pure ()
   paragraph $ do
     translate $ do
