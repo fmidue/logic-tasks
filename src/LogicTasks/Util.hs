@@ -16,10 +16,12 @@ import Trees.Print (display)
 import Tasks.SynTree.Config (SynTreeConfig(minAmountOfUniqueAtoms, availableAtoms))
 
 genCnf' :: CnfConfig -> Gen Cnf
-genCnf' (CnfConfig{baseConf = BaseConfig{..}, ..}) = genCnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+genCnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
+  = genCnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
 genDnf' :: CnfConfig -> Gen Dnf
-genDnf' (CnfConfig{baseConf = BaseConfig{..}, ..}) = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+genDnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
+  = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
 display' :: FormulaInst -> String
 display' (InstCnf c) = show c
