@@ -300,9 +300,6 @@ instance Parse PickInst where
       instParse = do
         string "PickInst("
         cs <- parser
-        -- tokenSymbol "["
-        -- formulas' <- lexeme (many (noneOf ",]")) `sepBy` char ','
-        -- tokenSymbol "]"
         tokenSymbol ","
         index <- lexeme $ many1 digit
         printSol <- lexeme text'
