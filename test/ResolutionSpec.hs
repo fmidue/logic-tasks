@@ -7,11 +7,12 @@ import Data.Maybe (isJust, fromJust, isNothing)
 import Formula.Types (Clause(Clause), Literal (Literal,Not))
 import qualified Data.Set
 import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution))
-import Test.QuickCheck (Gen, choose, suchThat, sublistOf, forAll)
+import Test.QuickCheck (Gen, choose, suchThat, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade')
 import Control.OutputCapable.Blocks (LangM)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
+import FillSpec (validBoundsBase)
 
 justA :: Clause
 justA = Clause (Data.Set.fromList [Literal 'A'])
@@ -30,18 +31,6 @@ justB = Clause (Data.Set.fromList [Literal 'B'])
 
 emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
-
--- TODO: reuse validBoundsBase from other pull request
-validBoundsBase :: Gen BaseConfig
-validBoundsBase = do
-  minClauseLength <- choose (1, 5)
-  maxClauseLength <- choose (2, 10) `suchThat` \x -> minClauseLength <= x
-  usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
-  pure $ BaseConfig {
-    minClauseLength
-  , maxClauseLength
-  , usedLiterals
-  }
 
 validBoundsResolution :: Gen ResolutionConfig
 validBoundsResolution = do
