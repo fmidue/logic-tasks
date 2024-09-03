@@ -45,9 +45,17 @@ description path ComposeFormulaInst{..} = do
       german $ showOperator operator
       german $ " gehängt. Einmal " ++ derDie ++" eine " ++ gTreeOrFormula ++" links und " ++ derDie ++" andere " ++ gTreeOrFormula ++" rechts, und einmal genau andersherum."
 
+    instruct $ do
+      english "This is the first tree/formula:"
+      german "Dies ist der/die erste Baum/Formel:"
+
     case leftTreeImage of
       Nothing -> paragraph $ code $ display leftTree
       Just image' -> image $=<< liftIO $ cacheTree image' path
+
+    instruct $ do
+      english "This is the second tree/formula:"
+      german "Dies ist der/die zweite Baum/Formel:"
 
     case rightTreeImage of
       Nothing -> paragraph $ code $ display rightTree
