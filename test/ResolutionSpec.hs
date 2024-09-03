@@ -8,7 +8,7 @@ import Formula.Types (Clause(Clause), Literal (Literal,Not))
 import qualified Data.Set
 import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution))
 import Test.QuickCheck (Gen, choose, suchThat, forAll)
-import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade')
+import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade')
 import Control.OutputCapable.Blocks (LangM)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
@@ -83,6 +83,6 @@ spec = do
     it "should generate the correct solution" $
       forAll validBoundsResolution $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
-          isJust (runIdentity $ evalLangM (completeGrade' resInst (solution resInst) :: LangM Maybe)) &&
+          isJust (runIdentity $ evalLangM (partialGrade' resInst (solution resInst) :: LangM Maybe)) &&
           isJust (runIdentity $ evalLangM (completeGrade' resInst (solution resInst) :: LangM Maybe))
 
