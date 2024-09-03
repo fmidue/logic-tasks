@@ -8,3 +8,4 @@ stack.yaml.lock
 *.synctex.gz
 *.toc
 *~
+.vscode/

@@ -1,7 +1,6 @@
-{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-module Formula.Parsing where
+module Formula.Parsing (module Formula.Parsing.Type) where
 
 import Config
 import Formula.Util
@@ -32,6 +31,9 @@ import Text.ParserCombinators.Parsec (
   )
 
 import UniversalParser
+import Trees.Types (SynTree, BinOp)
+import Formula.Parsing.Type (Parse(..))
+import Trees.Parsing ()
 
 instance Parse ResStep where
   parser = do
@@ -63,10 +65,6 @@ notFollowedByElse p f = try ((try p >>= f) <|> pure ())
 
 
 
-class Parse a where
-  parser :: Parser a
-  default parser :: FromGrammar a => Parser a
-  parser = formulaParser
 
 
 instance Parse a => Parse [a] where
@@ -314,3 +312,25 @@ instance Parse PickInst where
               char ','
               spaces
               char '{'
+
+instance Parse FormulaInst where
+  parser = lexeme (parseCNF <|> parseDNF <|> parseSynTree)
+    where
+      parseCNF = do
+        string "Cnf"
+        tokenSymbol "{"
+        f <- (parser :: Parser Cnf)
+        tokenSymbol "}"
+        pure $ InstCnf f
+      parseDNF = do
+        string "Dnf"
+        tokenSymbol "{"
+        f <- (parser :: Parser Dnf)
+        tokenSymbol "}"
+        pure $ InstDnf f
+      parseSynTree = do
+        string "SynTree"
+        tokenSymbol "{"
+        f <- (parser :: Parser (SynTree BinOp Char))
+        tokenSymbol "}"
+        pure $ InstArbitrary f

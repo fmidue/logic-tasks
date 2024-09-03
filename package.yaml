@@ -77,13 +77,18 @@ library:
     - Trees.Print
     - Trees.Helpers
     - Trees.Generate
+    - Trees.Formula
     - Formula.Parsing
+    - Formula.Parsing.Type
     - Formula.Parsing.Delayed
     - Formula.Helpers
+    - Formula.Printing
     - ParsingHelpers
     - Config
     - Formula.Types
     - Formula.Resolution
+    - Formula.Util
+    - Util
 
   ghc-options:
     - -Wall

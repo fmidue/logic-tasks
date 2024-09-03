@@ -3,17 +3,16 @@ module Semantics.TruthTables.FillGaps.Config where
 import LogicTasks.Config (
   BaseConfig(..),
   FillConfig (..),
-  CnfConfig (..),
+  CnfConfig(..),
+  FormulaConfig(..),
   )
 import Test.Hspec
-import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.34
 task06 :: FillConfig
 task06 = FillConfig
-  { cnfConf = CnfConfig
+  { formulaConfig = FormulaCnf $ CnfConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 2
@@ -31,7 +30,7 @@ task06 = FillConfig
 -- Weight 0.25
 task20 :: FillConfig
 task20 = FillConfig
-  { cnfConf = CnfConfig
+  { formulaConfig = FormulaCnf $ CnfConfig
     { baseConf = BaseConfig
       { minClauseLength = 3
       , maxClauseLength = 3
@@ -48,5 +47,5 @@ task20 = FillConfig
 
 spec :: Spec
 spec = do
-  describe "task06" $ verifyConfig German (cnfConf task06) checkCnfConf
-  describe "task20" $ verifyConfig German (cnfConf task20) checkCnfConf
+  describe "task06" $ verifyFormulaConfig (formulaConfig task06)
+  describe "task20" $ verifyFormulaConfig (formulaConfig task20)

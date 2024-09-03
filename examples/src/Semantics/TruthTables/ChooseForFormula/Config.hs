@@ -4,17 +4,16 @@ import LogicTasks.Config (
   BaseConfig(..),
   PickConfig(..),
   CnfConfig(..),
+  FormulaConfig(..)
   )
-import LogicTasks.Util (checkCnfConf)
 
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.33
 task08 :: PickConfig
 task08 = PickConfig
-  { cnfConf = CnfConfig
+  { formulaConfig = FormulaCnf $ CnfConfig
     { baseConf = BaseConfig
       { minClauseLength = 3
       , maxClauseLength = 3
@@ -24,7 +23,7 @@ task08 = PickConfig
     , maxClauseAmount = 2
     }
   , amountOfOptions = 3
-  , pickCnf = False
+  , percentTrueEntries = Nothing
   , extraText = Nothing
   , printSolution = True
   }
@@ -32,7 +31,7 @@ task08 = PickConfig
 -- Weight 0.25
 task19 :: PickConfig
 task19 = PickConfig
-  { cnfConf = CnfConfig
+  { formulaConfig = FormulaCnf $ CnfConfig
     { baseConf = BaseConfig
         { minClauseLength = 3
         , maxClauseLength = 3
@@ -42,12 +41,12 @@ task19 = PickConfig
     , maxClauseAmount = 4
     }
   , amountOfOptions = 4
-  , pickCnf = False
+  , percentTrueEntries = Nothing
   , extraText = Nothing
   , printSolution = True
   }
 
 spec :: Spec
 spec = do
-  describe "task08" $ verifyConfig German (cnfConf task08) checkCnfConf
-  describe "task19" $ verifyConfig German (cnfConf task19) checkCnfConf
+  describe "task08" $ verifyFormulaConfig (formulaConfig task08)
+  describe "task19" $ verifyFormulaConfig (formulaConfig task19)

@@ -17,6 +17,7 @@ import qualified Data.Set as Set (null)
 import Text.PrettyPrint.Leijen.Text
 import Data.Map (toList)
 import Data.Maybe (isJust, fromJust)
+import Trees.Print ()
 
 
 myText :: String -> Doc
@@ -142,7 +143,7 @@ instance Pretty PrologClause where
 instance Pretty PickInst where
   pretty  PickInst{..} =
       text "PickInst(" <> vcat
-                           [ nest 2 $ pretty cnfs
+                           [ nest 2 $ pretty formulas
                            , char ',' <+> pretty correct
                            , myText (", {" ++ show showSolution ++ "}")
                            , maybe empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
@@ -150,6 +151,10 @@ instance Pretty PickInst where
                            ]
 
 
+instance Pretty FormulaInst where
+  pretty (InstCnf cnf) = text "Cnf{" <> pretty cnf <> char '}'
+  pretty (InstDnf dnf) = text "Dnf{" <> pretty dnf <> char '}'
+  pretty (InstArbitrary tree) = text "SynTree{" <> pretty tree <> char '}'
 
 
 

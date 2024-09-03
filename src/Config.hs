@@ -10,7 +10,44 @@ import Formula.Types
 import Formula.Util
 import Data.Map (Map)
 import Control.OutputCapable.Blocks (Language)
+import Tasks.SynTree.Config (SynTreeConfig (..))
+import qualified Trees.Types as ST (BinOp(..), SynTree(..))
+import Trees.Formula ()
 
+
+data FormulaConfig
+  = FormulaCnf CnfConfig
+  | FormulaDnf CnfConfig
+  | FormulaArbitrary SynTreeConfig
+  deriving Show
+
+data FormulaInst
+  = InstCnf Cnf
+  | InstDnf Dnf
+  | InstArbitrary (ST.SynTree ST.BinOp Char)
+  deriving (Show,Eq)
+
+instance Formula FormulaInst where
+  literals (InstCnf c) = literals c
+  literals (InstDnf d) = literals d
+  literals (InstArbitrary t) = literals t
+
+  atomics (InstCnf c) = atomics c
+  atomics (InstDnf d) = atomics d
+  atomics (InstArbitrary t) = atomics t
+
+  amount (InstCnf c) = amount c
+  amount (InstDnf d) = amount d
+  amount (InstArbitrary t) = amount t
+
+  evaluate x (InstCnf c) = evaluate x c
+  evaluate x (InstDnf d) = evaluate x d
+  evaluate x (InstArbitrary t) = evaluate x t
+
+instance ToSAT FormulaInst where
+  convert (InstCnf c) = convert c
+  convert (InstDnf d) = convert d
+  convert (InstArbitrary t) = convert t
 
 
 newtype Number = Number {value :: Maybe Int} deriving (Show,Typeable, Generic)
@@ -25,16 +62,16 @@ instance Show StepAnswer where
 
 
 data PickInst = PickInst {
-                 cnfs    :: ![Cnf]
+                 formulas :: [FormulaInst]
                , correct :: !Int
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show, Eq)
 
 dPickInst :: PickInst
 dPickInst =  PickInst
-          { cnfs = [mkCnf [mkClause [Literal 'A', Not 'B']], mkCnf [mkClause [Not 'A', Literal 'B']]]
+          { formulas = [InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']], InstCnf $ mkCnf [mkClause [Not 'A', Literal 'B']]]
           , correct = 1
           , showSolution = False
           , addText = Nothing
@@ -76,16 +113,16 @@ dMinInst =  MinInst
 
 
 data FillInst = FillInst {
-                 cnf     :: !Cnf
+                 formula :: FormulaInst
                , missing :: ![Int]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dFillInst :: FillInst
 dFillInst =  FillInst
-          { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
+          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -94,16 +131,16 @@ dFillInst =  FillInst
 
 
 data DecideInst = DecideInst {
-                 cnf     :: !Cnf
+                 formula :: FormulaInst
                , changed :: ![Int]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
-          { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
+          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
           , changed = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -221,19 +258,19 @@ dCnfConf = CnfConfig
 
 
 data PickConfig = PickConfig {
-       cnfConf :: CnfConfig
+       formulaConfig :: FormulaConfig
      , amountOfOptions :: Int
-     , pickCnf :: Bool
+     , percentTrueEntries :: Maybe (Int,Int)
      , printSolution :: Bool
      , extraText :: Maybe (Map Language String)
      }
-     deriving (Typeable, Generic)
+     deriving (Typeable, Generic, Show)
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
-    { cnfConf = dCnfConf
+    { formulaConfig = FormulaCnf dCnfConf
     , amountOfOptions = 3
-    , pickCnf = False
+    , percentTrueEntries = Just (30,70)
     , printSolution = False
     , extraText = Nothing
     }
@@ -241,17 +278,17 @@ dPickConf = PickConfig
 
 
 data FillConfig = FillConfig {
-      cnfConf :: CnfConfig
+      formulaConfig :: FormulaConfig
     , percentageOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
-    { cnfConf = dCnfConf
+    { formulaConfig = FormulaCnf dCnfConf
     , percentageOfGaps = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False
@@ -279,17 +316,19 @@ dMinMaxConf = MinMaxConfig
 
 
 data DecideConfig = DecideConfig {
-      cnfConf :: CnfConfig
+      formulaConfig :: FormulaConfig
     , percentageOfChanged :: Int
+    , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
-    { cnfConf = dCnfConf
+    { formulaConfig = FormulaCnf dCnfConf
     , percentageOfChanged = 40
+    , percentTrueEntries = Just (30,70)
     , printSolution = False
     , extraText = Nothing
     }

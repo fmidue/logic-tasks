@@ -20,9 +20,12 @@ import Control.OutputCapable.Blocks.Debug (testTask, Display)
 import Formula.Parsing.Delayed (delayed)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
 import Formula.Parsing (Parse(..))
-import ParsingHelpers (fully)
+import ParsingHelpers (fully, lexeme)
 
 deriving instance Show (Delayed a)
+
+instance Parse Int where
+  parser = read <$> lexeme (many1 digit) <?> "Int"
 
 instance Parse (Delayed a) where
   parser = delayed <$> fully (many anyChar)

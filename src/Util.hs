@@ -17,11 +17,12 @@ import Control.OutputCapable.Blocks (
 import Control.Monad.State (put, get, lift, evalStateT)
 import Control.Monad (when)
 import Data.List (delete)
-import Test.QuickCheck(Gen, elements)
+import Test.QuickCheck(Gen, elements, suchThat)
 
-import Config (BaseConfig(..), CnfConfig(..))
+import Config (BaseConfig(..), CnfConfig(..), FormulaConfig (..))
 import Formula.Types (Formula, getTable, lengthBound)
 import Formula.Table (readEntries)
+import Tasks.SynTree.Config (SynTreeConfig, checkSynTreeConfig)
 
 
 prevent :: OutputCapable m => Bool -> LangM m -> LangM m
@@ -94,8 +95,8 @@ tryGen gen n b = evalStateT state 0
 
 
 
-checkTruthValueRange :: OutputCapable m => (Int, Int) -> CnfConfig -> LangM m
-checkTruthValueRange (low,high) cnfConf
+checkTruthValueRange :: OutputCapable m => (Int, Int) -> LangM m
+checkTruthValueRange (low,high)
     | isOutside 0 100 low || isOutside 0 100 high =
         refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
@@ -106,7 +107,12 @@ checkTruthValueRange (low,high) cnfConf
           german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
           english "The given restriction on true entries are not a valid range."
 
-    | otherwise = checkCnfConf cnfConf
+    | low == high =
+        refuse $ indent $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge sollte ein gewissen Spielraum zulassen."
+          english "The given restriction on true entries should allow for some flexibility."
+
+    | otherwise = pure ()
 
 
 
@@ -176,3 +182,25 @@ checkCnfConf CnfConfig {..}
           english "Clauses are to short for the desired number of clauses."
 
     | otherwise = checkBaseConf baseConf
+
+checkTruthValueRangeAndSynTreeConf :: OutputCapable m => (Int,Int) -> SynTreeConfig -> LangM m
+checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
+  checkTruthValueRange range
+  checkSynTreeConfig synTreeConfig
+  pure ()
+
+checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
+checkTruthValueRangeAndFormulaConf range formulaConf = do
+  checkTruthValueRange range
+  case formulaConf of
+    (FormulaCnf cnfCfg) -> checkCnfConf cnfCfg
+    (FormulaDnf cnfCfg) -> checkCnfConf cnfCfg
+    (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
+  pure ()
+
+vectorOfUniqueBy :: Int -> (a -> a -> Bool) -> Gen a -> Gen [a]
+vectorOfUniqueBy 0 _ _ = pure []
+vectorOfUniqueBy amount p gen = do
+  xs <- vectorOfUniqueBy (amount - 1) p gen
+  x <- gen `suchThat` \x' -> not (any (p x') xs)
+  pure (x:xs)
