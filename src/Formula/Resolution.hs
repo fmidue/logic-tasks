@@ -85,23 +85,27 @@ applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
 
 
 
-genRes :: (Int,Int) -> Int -> [Char] -> Gen [Clause]
+genRes :: (Int,Int) -> Int -> [Char] -> Gen ([Clause], [ResStep])
 genRes (minLen,maxLen) steps lits = do
-    clauses <- buildClauses lits empty 0
+    (clauses,rSteps) <- buildClauses lits (empty, []) 0
     shuffled <- shuffle (Set.toList clauses)
-    pure (map Clause shuffled)
+    pure (map Clause shuffled, rSteps)
   where
-    buildClauses :: [Char] -> Set (Set Literal) -> Int -> Gen (Set (Set Literal))
-    buildClauses xs ys runs
-        | runs >= 100 = buildClauses xs empty 0
-        | Set.size ys >= steps+1  = pure ys
+    toClause :: Set Literal -> Clause
+    toClause = mkClause . Set.toList
+    buildClauses :: [Char] -> (Set (Set Literal),[ResStep]) -> Int -> Gen (Set (Set Literal), [ResStep])
+    buildClauses xs (ys,rs) runs
+        | runs >= 100 = buildClauses xs (empty,[]) 0
+        | Set.size ys >= steps+1  = pure (ys,rs)
         | otherwise =
             if Set.null ys
               then do
                 chosenChar <- elements xs
                 let
-                  startSet = Set.fromList [Set.singleton (Literal chosenChar),Set.singleton (Not chosenChar)]
-                buildClauses xs startSet 0
+                  pos = Set.singleton $ Literal chosenChar
+                  neg = Set.singleton $ Not chosenChar
+                  startSet = Set.fromList [pos,neg]
+                buildClauses xs (startSet,[Res (Left (toClause pos),Left (toClause neg), (toClause empty,Nothing))]) 0
               else do
                 let
                   underMin = Set.filter (\clause -> Set.size clause < minLen) ys
@@ -111,7 +115,7 @@ genRes (minLen,maxLen) steps lits = do
                   chooseableLits = filter (\lit ->
                     Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
                 if null chooseableLits
-                    then buildClauses xs ys (runs+1)
+                    then buildClauses xs (ys,rs) (runs+1)
                     else do
                       let clauseSize = Set.size chosenClause
                       choice <- if clauseSize == 1 || chosenClause `Set.member` underMin
@@ -122,14 +126,14 @@ genRes (minLen,maxLen) steps lits = do
                                 else choose (1,2)
                       chosenChar <- elements chooseableLits
                       if choice == 1
-                        then checkValidAndInsert (Literal chosenChar) chosenClause clauseSize 0
+                        then checkValidAndInsert (Literal chosenChar) chosenClause rs clauseSize 0
                         else do
                           firstAmount <- choose (1, clauseSize-1)
                           chosenSign <- elements [Literal chosenChar, Not chosenChar]
-                          checkValidAndInsert chosenSign chosenClause firstAmount firstAmount
+                          checkValidAndInsert chosenSign chosenClause rs firstAmount firstAmount
       where
-        checkValidAndInsert :: Literal -> Set Literal -> Int -> Int -> Gen (Set (Set Literal))
-        checkValidAndInsert lit clause get leave = do
+        checkValidAndInsert :: Literal -> Set Literal -> [ResStep] -> Int -> Int -> Gen (Set (Set Literal),[ResStep])
+        checkValidAndInsert lit clause resSteps get leave = do
             shuffledClause <- shuffle (Set.toList clause)
             let
               newClause1 = Set.fromList (lit : take get shuffledClause)
@@ -138,8 +142,10 @@ genRes (minLen,maxLen) steps lits = do
               subSets = Set.delete (Set.map Clause newSet) $ Set.powerSet (Set.map Clause newSet)
               listForm = map Set.toList (Set.toList subSets)
               satForm = map ((Sat.satisfiable . Sat.All) . map convert) listForm
-              (toInsert,newRuns) = if and satForm then (newSet,0) else (ys,runs+1)
-            buildClauses xs toInsert newRuns
+              resultClause = Set.union newClause1 newClause2 `Set.difference` Set.fromList [lit, opposite lit]
+              newResSteps = Res (Left (toClause newClause1), Left (toClause newClause2), (toClause resultClause,Nothing)) : resSteps
+              (toInsert,newRuns,newSteps) = if and satForm then (newSet,0, newResSteps) else (ys,runs+1, resSteps)
+            buildClauses xs (toInsert,newSteps) newRuns
 
 
 
