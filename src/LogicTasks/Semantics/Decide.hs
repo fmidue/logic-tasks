@@ -164,9 +164,22 @@ partialGrade DecideInst{..} sol = do
       english "The solution must contain at least one index."
     )
 
-  preventIfSolutionExceedsTableSize (length sol) (getTable formula)
+  preventWithHint (any (\x -> x < 1 || x > tableLen) sol)
+    (translate $ do
+      german "Lösung enthält nur gültige Indizes?"
+      english "Solution only contains valid indices?"
+    )
+    (translate $ do
+      german "Die Lösung enthält mindestens einen ungültigen Index."
+      english "The solution contains at least one invalid index."
+    )
+
+  preventIfSolutionExceedsTableSize (length sol) table
 
   pure ()
+    where
+      table = getTable formula
+      tableLen = length $ readEntries table
 
 
 completeGrade :: OutputCapable m => DecideInst -> [Int] -> LangM m
