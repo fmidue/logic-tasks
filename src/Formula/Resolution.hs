@@ -1,4 +1,3 @@
-{-# LANGUAGE TupleSections #-}
 module Formula.Resolution
        (
          genRes
