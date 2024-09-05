@@ -19,7 +19,7 @@ import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Table (flipAt, readEntries)
-import Formula.Types (atomics, availableLetter, getTable, literals, Table)
+import Formula.Types (atomics, availableLetter, getTable, literals)
 import Util (isOutside, preventWithHint, remove, printWithHint, withRatio, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when, unless)
@@ -128,30 +128,6 @@ verifyQuiz DecideConfig{..}
 start :: [Int]
 start = []
 
-preventIfSolutionExceedsTableSize :: OutputCapable m => Int -> Table -> LangM m
-preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > tableLen)
-    (translate $ do
-      german "Lösung enthält nicht mehr Einträge als Anzahl der Zeilen?"
-      english "Solution does not contain more entries than count of rows?"
-    )
-    (translate $ do
-      german $ "Ihre Lösung enthält mehr Werte als es Zeilen gibt. " ++ gerHint
-      english $ "Your solution contains more values than there are rows. " ++ engHint
-    )
-  where
-    tableLen = length $ readEntries table
-    diffToTable = abs (solLen - tableLen)
-    (gerLong,engLong) = gerEng diffToTable
-    (gerHint,engHint) = (
-      "Es " ++ gerLong ++" entfernt werden.", {- german -}
-      "Please remove at least " ++ engLong ++ " to proceed."
-      )
-    gerEng diff = if diff == 1
-        then ("muss mindestens " ++ display' ++ " Wert", display' ++ " value") -- no-spell-check
-        else ("müssen mindestens " ++ display' ++ " Werte", display' ++ " values") -- no-spell-check
-      where
-        display' = show diff
-
 partialGrade :: OutputCapable m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
   preventWithHint (null sol)
@@ -173,8 +149,6 @@ partialGrade DecideInst{..} sol = do
       german "Die Lösung enthält mindestens einen ungültigen Index."
       english "The solution contains at least one invalid index."
     )
-
-  preventIfSolutionExceedsTableSize (length sol) table
 
   pure ()
     where
