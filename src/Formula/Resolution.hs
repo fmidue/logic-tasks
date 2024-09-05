@@ -5,7 +5,6 @@ module Formula.Resolution
        , resolvable
        , resolvableWith
        , applySteps
-       , computeResSteps
        ) where
 
 
@@ -13,13 +12,11 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Set (empty,Set)
-import Data.Maybe (isJust, fromJust)
+import Data.Maybe (isJust)
 import Test.QuickCheck (Gen,choose,elements,shuffle)
 
 import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
-import Data.List (find, elemIndex)
-import Data.Containers.ListUtils (nubOrd)
 import Formula.Printing ()
 
 
