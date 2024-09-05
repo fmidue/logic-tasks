@@ -32,6 +32,9 @@ import Trees.Parsing()
 import UniversalParser (logicToken)
 import Text.Parsec (many)
 import Data.Functor (void)
+import Formula.Types (Formula(atomics))
+import Data.List ((\\), intercalate)
+import Data.Foldable.Extra (notNull)
 
 
 description :: (OutputCapable m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -80,11 +83,18 @@ partialGrade :: OutputCapable m => TreeToFormulaInst -> Delayed TreeFormulaAnswe
 partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
 
 partialGrade' :: OutputCapable m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
-partialGrade' _ sol
+partialGrade' inst sol
         | isNothing $ maybeTree sol = reject $ do
           english "You did not submit a solution."
           german "Die Abgabe ist leer."
+        | notNull atomicsDiff = reject $ do
+          english $ "Your solution contains unknown atoms: " ++ diffDisplay
+          german $ "Die Abgabe enthält unbekannte Atome: " ++ diffDisplay
         | otherwise = pure ()
+  where treeAtomics = atomics $ tree inst
+        solTreeAtomics = atomics $ fromJust $ maybeTree sol
+        atomicsDiff = solTreeAtomics \\ treeAtomics
+        diffDisplay = intercalate ", " (map show atomicsDiff)
 
 completeGrade
   :: (OutputCapable m, MonadIO m)
