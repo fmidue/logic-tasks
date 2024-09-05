@@ -114,8 +114,8 @@ description ResolutionInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A solution attempt could look like this: "
     translatedCode $ flip localise $ translations $ do
-      english "[(1, 2, {A, not B} = 5), (4, 5, { })]"
-      german "[(1, 2, {A, nicht B} = 5), (4, 5, { })]"
+      english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
+      german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
     pure ()
   extra addText
   pure ()
