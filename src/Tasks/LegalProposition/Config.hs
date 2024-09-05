@@ -12,7 +12,6 @@ module Tasks.LegalProposition.Config (
 
 
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
-import Data.Set (Set)
 import GHC.Generics (Generic)
 import Data.Map (Map)
 
@@ -84,9 +83,7 @@ checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeC
 data LegalPropositionInst =
     LegalPropositionInst
     {
-      serialsOfWrong :: Set Int
-    , pseudoFormulas :: [String]
+      pseudoFormulas :: [(String, Maybe (SynTree BinOp Char))]
     , showSolution :: Bool
-    , correctTrees :: [SynTree BinOp Char]
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)
