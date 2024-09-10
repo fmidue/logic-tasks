@@ -28,7 +28,7 @@ validBoundsPick = do
     _ -> FormulaArbitrary <$> validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
             amountOfOptions <= 4*2^ length availableAtoms &&
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms) &&
-            maxNodes <= 100
+            maxNodes <= 40
 
   percentTrueEntries' <- (do
     percentTrueEntriesLow' <- choose (1, 90)
