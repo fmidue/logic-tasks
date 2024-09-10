@@ -30,11 +30,11 @@ import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
 import Util (checkBaseConf, prevent, preventWithHint)
-import Control.Monad (unless, when, void)
+import Control.Monad (unless, when)
 import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutWrongNotation)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedWithAndThen, complainAboutWrongNotation)
 import Formula.Parsing (resStepsParser, clauseSetParser, clauseFormulaParser)
 import Formula.Helpers (showCnfAsSet)
 
@@ -218,7 +218,7 @@ gradeSteps steps appliedIsNothing = do
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
 
 partialGrade :: OutputCapable m => ResolutionInst -> Delayed [ResStep] -> LangM m
-partialGrade inst = parseDelayedAndThen complainAboutWrongNotation (void clauseParser) $ partialGrade' inst
+partialGrade inst = parseDelayedWithAndThen (resStepsParser clauseParser) complainAboutWrongNotation (pure ()) $ partialGrade' inst
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 

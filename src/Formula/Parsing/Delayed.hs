@@ -4,6 +4,7 @@ module Formula.Parsing.Delayed (
   delayed,
   withDelayed,
   parseDelayedAndThen,
+  parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
   ) where
@@ -44,11 +45,21 @@ parseDelayedAndThen ::
   -> (a -> LangM m)
   -> Delayed a
   -> LangM m
-parseDelayedAndThen messaging fallBackParser whatToDo delayedAnswer =
+parseDelayedAndThen = parseDelayedWithAndThen parser
+
+parseDelayedWithAndThen ::
+  (OutputCapable m, Parse a)
+  => Parser a
+  -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
+  -> Parser ()
+  -> (a -> LangM m)
+  -> Delayed a
+  -> LangM m
+parseDelayedWithAndThen p messaging fallBackParser whatToDo delayedAnswer =
   either
   (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
   whatToDo
-  (parseDelayed (fully parser) delayedAnswer)
+  (parseDelayed (fully p) delayedAnswer)
 
 complainAboutMissingParenthesesIfNotFailingOn :: Maybe a -> ParseError -> State (Map Language String) ()
 complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =

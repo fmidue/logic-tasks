@@ -24,8 +24,8 @@ import Formula.Types (Clause(Clause, literalSet), Literal(..), genClause, litera
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
-import Control.Monad (when, unless, void)
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutWrongNotation)
+import Control.Monad (when, unless)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedWithAndThen, complainAboutWrongNotation)
 import Formula.Parsing (clauseFormulaParser, stepAnswerParser, clauseSetParser)
 import Formula.Helpers (showClauseAsSet)
 
@@ -119,7 +119,7 @@ start :: StepAnswer
 start = StepAnswer Nothing
 
 partialGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
-partialGrade inst = parseDelayedAndThen complainAboutWrongNotation (void clauseParser) $ partialGrade' inst
+partialGrade inst = parseDelayedWithAndThen (stepAnswerParser clauseParser) complainAboutWrongNotation (pure ()) $ partialGrade' inst
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise            = clauseFormulaParser
 
