@@ -6,7 +6,6 @@ module Tasks.LegalProposition.Quiz (
 
 
 import Data.Char (isLetter)
-import Data.Set (fromList)
 import Test.QuickCheck (Gen, choose, suchThat, vectorOf)
 
 import Auxiliary (listNoDuplicate)
@@ -34,9 +33,7 @@ generateLegalPropositionInst LegalPropositionConfig  {..} = do
       `suchThat` (listNoDuplicate . (++ serialsOfWrong))
     pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` noSimilarFormulas
     return $ LegalPropositionInst
-        { serialsOfWrong = fromList serialsOfWrong
-        , pseudoFormulas = pseudoFormulas
-        , correctTrees = [ tree | (index, tree) <- zip [1..] treeList, index `notElem` serialsOfWrong ]
+        { pseudoFormulas = zipWith (\i t-> (pseudoFormulas !! (i - 1), if i `elem` serialsOfWrong then Nothing else Just t)) [1..] treeList
         , showSolution = printSolution
         , addText = extraText
         }

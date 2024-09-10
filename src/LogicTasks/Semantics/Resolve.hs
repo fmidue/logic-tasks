@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module LogicTasks.Semantics.Resolve where
 
@@ -25,7 +26,7 @@ import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
-import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, computeResSteps)
+import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
 import Util (checkBaseConf, prevent, preventWithHint)
@@ -53,9 +54,10 @@ third3 (_,_,c) = c
 
 genResInst :: ResolutionConfig -> Gen ResolutionInst
 genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
-  clauses <- inst
+  (clauses,solution) <- inst
   pure $ ResolutionInst {
     clauses = clauses,
+    solution,
     printFeedbackImmediately = printFeedbackImmediately,
     showSolution = printSolution,
     addText = extraText
@@ -114,8 +116,8 @@ description ResolutionInst{..} = do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A solution attempt could look like this: "
     translatedCode $ flip localise $ translations $ do
-      english "[(1, 2, {A, not B} = 5), (4, 5, { })]"
-      german "[(1, 2, {A, nicht B} = 5), (4, 5, { })]"
+      english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
+      german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
     pure ()
   extra addText
   pure ()
@@ -244,7 +246,7 @@ completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
       english "Solution is correct?"
 
     when (showSolution && not isCorrect) $
-      example (show . pretty $ computeResSteps clauses) $ do
+      example (show (pretty solution)) $ do
         english "A possible solution for this task is:"
         german "Eine mögliche Lösung für die Aufgabe ist:"
 

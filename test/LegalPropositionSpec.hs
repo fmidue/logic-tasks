@@ -2,7 +2,6 @@
 
 module LegalPropositionSpec (spec) where
 
-import Data.Set (toList)
 import Data.Either (isLeft, isRight)
 import Data.List ((\\))
 import Data.Char (isLetter)
@@ -24,7 +23,7 @@ import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
 import TestHelpers (deleteBrackets, deleteSpaces)
 import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust,isNothing)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.LegalProposition.Helpers (formulaAmount)
@@ -89,10 +88,12 @@ spec = do
         it "the generateLegalPropositionInst should generate expected illegal number" $
             within timeout $ forAll validBoundsLegalProposition $ \config ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  all (\x -> isLeft (formulaParse (pseudoFormulas !! (x - 1)))) (toList serialsOfWrong)
+                  let serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) (zip [1..] pseudoFormulas) in
+                    all (\x -> isLeft (formulaParse (fst (pseudoFormulas !! (x - 1))))) serialsOfWrong
         it "the generateLegalPropositionInst should generate expected legal number" $
             within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  all
-                  (\x -> isRight (formulaParse (pseudoFormulas !! (x - 1))))
-                  ([1 .. fromIntegral formulas] \\ toList serialsOfWrong)
+                  let serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) (zip [1..] pseudoFormulas) in
+                    all
+                    (\x -> isRight (formulaParse (fst (pseudoFormulas !! (x - 1)))))
+                    ([1 .. fromIntegral formulas] \\ serialsOfWrong)

@@ -81,7 +81,7 @@ spec = do
            sizes = map (length . literals) (getClauses cnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
-    it "should generate a random cnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $
+    it "should generate a random cnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf' ->
           all (\c -> Literal c `elem` atomics cnf') chars
@@ -103,7 +103,7 @@ spec = do
            sizes = map (length . literals) (getConjunctions dnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
-    it "should generate a random dnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $
+    it "should generate a random dnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \dnf' ->
           all (\c -> Literal c `elem` atomics dnf') chars

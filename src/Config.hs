@@ -168,24 +168,39 @@ dStepInst =  StepInst
 
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
+               , solution :: [ResStep]
                , printFeedbackImmediately :: Bool
                , showSolution :: Bool
                , addText    :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic)
+               deriving (Typeable, Generic, Show)
 
 dResInst :: ResolutionInst
-dResInst =  ResolutionInst
-          { clauses =
-              [ mkClause [Not 'A', Not 'C', Literal 'B']
-              , mkClause [Literal 'A', Not 'C']
-              , mkClause [Literal 'C']
-              , mkClause [Not 'B']
-              ]
-          , printFeedbackImmediately = True
-          , showSolution = False
-          , addText = Nothing
-          }
+dResInst = let
+            nAnCpB = mkClause [Not 'A', Not 'C', Literal 'B']
+            pAnC = mkClause [Literal 'A', Not 'C']
+            pC = mkClause [Literal 'C']
+            nB = mkClause [Not 'B']
+            pA = mkClause [Literal 'A']
+            nC = mkClause [Not 'C']
+            nCpB = mkClause [Not 'C', Literal 'B']
+              in ResolutionInst
+                { clauses =
+                    [ nAnCpB
+                    , pAnC
+                    , pC
+                    , nB
+                    ]
+                , solution =
+                    [ Res (Left pAnC  , Left pC, (pA, Nothing))
+                    , Res (Left nAnCpB, Left pA, (nCpB, Nothing))
+                    , Res (Left nCpB  , Left nB, (nC, Nothing))
+                    , Res (Left nC    , Left pC, (mkClause [], Nothing))
+                    ]
+                , printFeedbackImmediately = True
+                , showSolution = False
+                , addText = Nothing
+                }
 
 
 
@@ -366,7 +381,7 @@ data ResolutionConfig = ResolutionConfig {
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic)
+    deriving (Typeable, Generic, Show)
 
 dResConf :: ResolutionConfig
 dResConf = ResolutionConfig

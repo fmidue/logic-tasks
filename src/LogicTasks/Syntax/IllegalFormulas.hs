@@ -14,15 +14,15 @@ import Control.OutputCapable.Blocks (
   german,
   )
 import Data.List (nub, sort)
-import Data.Set (toList)
 
 import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
-import Trees.Print (display, transferToPicture)
+import Trees.Print (transferToPicture)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
+import Data.Maybe (isNothing, isJust, fromJust)
 
 
 
@@ -33,7 +33,7 @@ description LegalPropositionInst{..} = do
       english "Consider the following propositional (pseudo) formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
 
-    focus $ unlines $ indexed pseudoFormulas
+    focus $ unlines $ indexed $ map fst pseudoFormulas
 
     instruct $ do
       english "Some of these are syntactically incorrect. Which of these formulas have an invalid format?"
@@ -93,7 +93,7 @@ completeGrade path inst sol = refuseIfWrong $ do
 
   when (showSolution inst) $ do
     when wrongSolution $
-      example (show (toList (serialsOfWrong inst))) $ do
+      example (show serialsOfWrong) $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
 
@@ -101,14 +101,17 @@ completeGrade path inst sol = refuseIfWrong $ do
         english "The following syntax trees represent the well-formed formulas:"
         german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
-    for_ (correctTrees inst) $ \x -> do
-      code (display x)
-      image $=<< liftIO $ cacheTree (transferToPicture x) path
+    for_ correctTrees $ \(i,pf,t) -> do
+      code $ show i ++ ". " ++ pf
+      image $=<< liftIO $ cacheTree (transferToPicture t) path
       pure ()
 
     pure ()
 
   pure ()
   where
-    wrongSolution = sort (nub sol) /= sort (toList $ serialsOfWrong inst)
+    wrongSolution = sort (nub sol) /= sort serialsOfWrong
     refuseIfWrong = if wrongSolution then refuse else id
+    pseudoIndexed = zip [1..] (pseudoFormulas inst)
+    serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) pseudoIndexed
+    correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
