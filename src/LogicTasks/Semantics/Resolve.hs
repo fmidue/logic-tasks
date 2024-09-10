@@ -28,7 +28,7 @@ import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
+import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
 import Control.Applicative (Alternative)
@@ -88,8 +88,9 @@ description ResolutionInst{..} = do
 
   keyHeading
   negationKey
+  unless usesSetNotation orKey
 
-  paragraph $ indent $ do
+  when usesSetNotation $ paragraph $ indent $ do
     translate $ do
       german "Nicht-leere Klausel:"
       english "Non-empty clause:"

@@ -22,7 +22,7 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause(Clause, literalSet), Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (clauseKey, example, extra)
+import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when, unless)
 import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedWithAndThen, complainAboutWrongNotation)
@@ -65,7 +65,16 @@ description StepInst{..} = do
     german "Geben Sie das in dem Resolutionsschritt genutzte Literal (in positiver oder negativer Form) und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
     english "Provide the literal (in positive or negative form) used for the step and the resolvent in the following tuple form: (literal, resolvent)."
 
-  clauseKey
+  keyHeading
+  negationKey
+  unless usesSetNotation orKey
+
+  when usesSetNotation $ paragraph $ indent $ do
+    translate $ do
+      german "Nicht-leere Klausel:"
+      english "Non-empty clause:"
+    code "{ ... }"
+    pure ()
 
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do
