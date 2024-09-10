@@ -201,7 +201,7 @@ dResInst = let
                     , Res (Left nC    , Left pC, (mkClause [], Nothing))
                     ]
                 , printFeedbackImmediately = True
-                , usesSetNotation = False
+                , usesSetNotation = True
                 , showSolution = False
                 , addText = Nothing
                 }
@@ -395,7 +395,7 @@ dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
     , printFeedbackImmediately = True
-    , useSetNotation = False
+    , useSetNotation = True
     , printSolution = False
     , extraText = Nothing
     }
