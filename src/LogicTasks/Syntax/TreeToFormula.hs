@@ -88,8 +88,8 @@ partialGrade' inst sol
           english "You did not submit a solution."
           german "Die Abgabe ist leer."
         | notNull atomicsDiff = reject $ do
-          english $ "Your solution contains unknown atoms: " ++ diffDisplay
-          german $ "Die Abgabe enthält unbekannte Atome: " ++ diffDisplay
+          english $ "Your solution contains unknown atomic formulas: " ++ diffDisplay
+          german $ "Die Abgabe enthält unbekannte atomare Formeln: " ++ diffDisplay
         | otherwise = pure ()
   where treeAtomics = atomics $ tree inst
         solTreeAtomics = atomics $ fromJust $ maybeTree sol
