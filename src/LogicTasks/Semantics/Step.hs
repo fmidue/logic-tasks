@@ -11,7 +11,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   english,
   german,
-  translate,
+  translate, localise, translations,
   )
 import Data.Maybe (fromJust, isNothing)
 import Data.List (delete)
@@ -24,7 +24,7 @@ import Formula.Types (Clause(Clause, literalSet), Literal(..), genClause, litera
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
-import Control.Monad (when)
+import Control.Monad (when, unless)
 import Formula.Parsing.Delayed (Delayed, withDelayed)
 import Formula.Parsing (clauseFormulaParser, stepAnswerParser, clauseSetParser)
 import Formula.Helpers (showClauseAsSet)
@@ -67,12 +67,25 @@ description StepInst{..} = do
 
   clauseKey
 
-  paragraph $ indent $ do
+  when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A valid solution could look like this: "
-    code "(A, not B or C)"
+      german "Nutzen Sie zur Angabe der Resolvente die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the resolvent using set notation! A valid solution could look like this: "
+    translatedCode $ flip localise $ translations $ do
+      german "(A, {nicht B, C})"
+      english "(A, {not B, C})"
     pure ()
+
+  unless usesSetNotation $ paragraph $ indent $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Resolvente eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the resolvent using a formula! A valid solution could look like this: "
+    translatedCode $ flip localise $ translations $ do
+      german "(A, nicht B oder C)"
+      english "(A, not B or C)"
+    pure ()
+
+
   extra addText
   pure ()
     where

@@ -114,14 +114,24 @@ description ResolutionInst{..} = do
     german "Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
     english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
 
-  paragraph $ indent $ do
+  when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A solution attempt could look like this: "
+      german "Nutzen Sie zur Angabe der Klauseln die Mengennotation!. Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the clauses using set notation! A solution attempt could look like this: "
     translatedCode $ flip localise $ translations $ do
       english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
       german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
     pure ()
+
+  unless usesSetNotation $ paragraph $ indent $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Klauseln eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the clauses using a formula! A solution attempt could look like this: "
+    translatedCode $ flip localise $ translations $ do
+      english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
+      german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+    pure ()
+
   extra addText
   pure ()
     where
