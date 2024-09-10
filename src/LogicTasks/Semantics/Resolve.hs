@@ -35,7 +35,7 @@ import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Formula.Parsing (Parse(..))
+import Formula.Parsing (resStepsParser, clauseSetParser, clauseFormulaParser)
 import Formula.Helpers (showCnfAsSet)
 
 
@@ -208,7 +208,9 @@ gradeSteps steps appliedIsNothing = do
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
 
 partialGrade :: OutputCapable m => ResolutionInst -> Delayed [ResStep] -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` parser
+partialGrade inst = partialGrade' inst `withDelayed` resStepsParser clauseParser
+  where clauseParser | showAsSet inst = clauseSetParser
+                     | otherwise      = clauseFormulaParser
 
 partialGrade' :: OutputCapable m => ResolutionInst -> [ResStep] -> LangM m
 partialGrade' ResolutionInst{..} sol = do
@@ -241,7 +243,9 @@ partialGrade' ResolutionInst{..} sol = do
     stepsGraded = gradeSteps steps (isNothing applied)
 
 completeGrade :: (OutputCapable m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` parser
+completeGrade inst = completeGrade' inst `withDelayed` resStepsParser clauseParser
+  where clauseParser | showAsSet inst = clauseSetParser
+                     | otherwise      = clauseFormulaParser
 
 completeGrade' :: (OutputCapable m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
 completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
