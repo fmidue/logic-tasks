@@ -1,6 +1,13 @@
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-module Formula.Parsing (module Formula.Parsing.Type) where
+module Formula.Parsing (
+  module Formula.Parsing.Type,
+  clauseSetParser,
+  clauseFormulaParser,
+  resStepsParser,
+  resStepParser,
+  stepAnswerParser
+  ) where
 
 import Config
 import Formula.Util
@@ -35,24 +42,27 @@ import Trees.Types (SynTree, BinOp)
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
 
-instance Parse ResStep where
-  parser = do
+resStepsParser :: Parser Clause -> Parser [ResStep]
+resStepsParser parseClause = (lexeme (listParse (resStepParser parseClause)) <?> "List")
+      <|> fail (
+        "Could not parse a list of values: " ++
+        "The elements of a list are enclosed by square brackets '[ ]' and separated by commas."
+        )
+
+resStepParser :: Parser Clause -> Parser ResStep
+resStepParser parseClause = do
     tokenSymbol "("
-    cl1 <- parseEither resClause parseNum
+    cl1 <- parseEither parseClause parseNum
     tokenSymbol ","
-    cl2 <- parseEither resClause parseNum
+    cl2 <- parseEither parseClause parseNum
     tokenSymbol ","
-    cl3 <- resClause
+    cl3 <- parseClause
     index <- optionMaybe indexParse
     tokenSymbol ")"
     pure $ Res (cl1,cl2,(cl3,index))
 
    where
-    braces = between (tokenSymbol "{") (tokenSymbol "}")
-
     indexParse = tokenSymbol "=" >> lexeme parseNum
-
-    resClause = mkClause <$> braces (parser `sepBy` tokenSymbol ",")
 
     parseEither x y = lexeme ((Left <$> try x) <|> (Right <$> y))
 
@@ -60,25 +70,28 @@ instance Parse ResStep where
       i <- many1 digit
       pure (read i)
 
+instance Parse ResStep where
+  parser = resStepParser clauseSetParser
+
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
 notFollowedByElse p f = try ((try p >>= f) <|> pure ())
 
 
 
-
+listParse :: Parser a -> Parser [a]
+listParse p = do
+  tokenSymbol "[" <|> fail "could not parse an opening '['"
+  xs <- p `sepBy` (tokenSymbol "," <|> fail "parsed a wrong separator: Lists are comma-separated.")
+  tokenSymbol "]" <|> fail "could not parse an enclosing ']'"
+  pure xs
 
 instance Parse a => Parse [a] where
-  parser = (lexeme listParse <?> "List")
+  parser = (lexeme (listParse parser) <?> "List")
       <|> fail (
         "Could not parse a list of values: " ++
         "The elements of a list are enclosed by square brackets '[ ]' and separated by commas."
         )
-    where
-      listParse = do
-        tokenSymbol "[" <|> fail "could not parse an opening '['"
-        xs <- parser `sepBy` (tokenSymbol "," <|> fail "parsed a wrong separator: Lists are comma-separated.")
-        tokenSymbol "]" <|> fail "could not parse an enclosing ']'"
-        pure xs
+
 
 instance (Parse a, Parse b) => Parse (a,b) where
   parser = between (tokenSymbol "(") (tokenSymbol ")") $ do
@@ -94,8 +107,8 @@ instance Parse Number where
             pure $ Number $ fmap read result
 
 
-instance Parse StepAnswer where
-  parser = (lexeme stepParse <?> "Resolution Step") <|> fail "Could not parse a tuple"
+stepAnswerParser :: Parser Clause -> Parser StepAnswer
+stepAnswerParser parseClause = (lexeme stepParse <?> "Resolution Step") <|> fail "Could not parse a tuple"
     where stepParse = do
             result <- optionMaybe parseTuple
             pure $ StepAnswer result
@@ -103,9 +116,12 @@ instance Parse StepAnswer where
             void $ lexeme $ char '('
             lit <- parser
             void $ lexeme $ char ','
-            resolvent <- parser
+            resolvent <- parseClause
             void $ lexeme $ char ')'
             pure (lit, resolvent)
+
+instance Parse StepAnswer where
+  parser = stepAnswerParser clauseFormulaParser
 
 
 
@@ -168,8 +184,16 @@ instance FromGrammar Literal where
   fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (NegAtom (Atom x)))))) = Just $ Not x
   fromGrammar _ = Nothing
 
+clauseSetParser :: Parser Clause
+clauseSetParser = mkClause <$> braces (parser `sepBy` tokenSymbol ",")
+  where
+    braces = between (tokenSymbol "{") (tokenSymbol "}")
+
+clauseFormulaParser :: Parser Clause
+clauseFormulaParser = mkClause [] <$ tokenSymbol "{}" <|> formulaParser
+
 instance Parse Clause where
-  parser = mkClause [] <$ tokenSymbol "{}" <|> formulaParser
+  parser = clauseFormulaParser
 
 instance FromGrammar Clause where
   topLevelSpec = LevelSpec

@@ -151,6 +151,7 @@ dDecideInst =  DecideInst
 data StepInst = StepInst {
                  clause1 :: !Clause
                , clause2 :: !Clause
+               , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -160,6 +161,7 @@ dStepInst :: StepInst
 dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
+          , usesSetNotation = False
           , showSolution = False
           , addText = Nothing
           }
@@ -170,6 +172,7 @@ data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
                , solution :: [ResStep]
                , printFeedbackImmediately :: Bool
+               , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText    :: Maybe (Map Language String)
                }
@@ -198,6 +201,7 @@ dResInst = let
                     , Res (Left nC    , Left pC, (mkClause [], Nothing))
                     ]
                 , printFeedbackImmediately = True
+                , usesSetNotation = True
                 , showSolution = False
                 , addText = Nothing
                 }
@@ -337,6 +341,7 @@ dDecideConf = DecideConfig
 
 data StepConfig = StepConfig {
       baseConf :: BaseConfig
+    , useSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -345,6 +350,7 @@ data StepConfig = StepConfig {
 dStepConf :: StepConfig
 dStepConf = StepConfig
     { baseConf = dBaseConf
+    , useSetNotation = False
     , printSolution = False
     , extraText = Nothing
     }
@@ -378,6 +384,7 @@ data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
     , printFeedbackImmediately :: Bool
+    , useSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -388,6 +395,7 @@ dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
     , printFeedbackImmediately = True
+    , useSetNotation = True
     , printSolution = False
     , extraText = Nothing
     }

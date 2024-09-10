@@ -19,6 +19,7 @@ task15 = ResolutionConfig
       }
     , minSteps = 3
     , printFeedbackImmediately = True
+    , useSetNotation = False
     , printSolution = True
     , extraText = Nothing
     }
@@ -33,6 +34,7 @@ task16 =  ResolutionConfig
       }
   , minSteps = 4
   , printFeedbackImmediately = True
+  , useSetNotation = False
   , printSolution = True
   , extraText = Nothing
   }

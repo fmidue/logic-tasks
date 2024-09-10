@@ -28,14 +28,16 @@ import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
+import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
 import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
-import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Formula.Parsing (Parse(..))
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedWithAndThen, complainAboutWrongNotation)
+import Formula.Parsing (resStepsParser, clauseSetParser, clauseFormulaParser)
+import Formula.Helpers (showCnfAsSet)
+
 
 
 
@@ -59,6 +61,7 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
     clauses = clauses,
     solution,
     printFeedbackImmediately = printFeedbackImmediately,
+    usesSetNotation = useSetNotation,
     showSolution = printSolution,
     addText = extraText
   }
@@ -73,7 +76,7 @@ description ResolutionInst{..} = do
     translate $ do
       german "Betrachten Sie die folgende Formel in KNF:"
       english "Consider the following formula in cnf:"
-    indent $ code $ show $ mkCnf clauses
+    indent $ code $ show' clauses
     pure ()
   paragraph $ translate $ do
     german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
@@ -85,8 +88,9 @@ description ResolutionInst{..} = do
 
   keyHeading
   negationKey
+  unless usesSetNotation orKey
 
-  paragraph $ indent $ do
+  when usesSetNotation $ paragraph $ indent $ do
     translate $ do
       german "Nicht-leere Klausel:"
       english "Non-empty clause:"
@@ -111,16 +115,30 @@ description ResolutionInst{..} = do
     german "Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
     english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
 
-  paragraph $ indent $ do
+  when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A solution attempt could look like this: "
+      german "Nutzen Sie zur Angabe der Klauseln die Mengennotation!. Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the clauses using set notation! A solution attempt could look like this: "
     translatedCode $ flip localise $ translations $ do
       english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
       german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
     pure ()
+
+  unless usesSetNotation $ paragraph $ indent $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Klauseln eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the clauses using a formula! A solution attempt could look like this: "
+    translatedCode $ flip localise $ translations $ do
+      english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
+      german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+    pure ()
+
   extra addText
   pure ()
+    where
+      show' = if usesSetNotation
+        then showCnfAsSet . mkCnf
+        else show . mkCnf
 
 
 verifyStatic :: OutputCapable m => ResolutionInst -> LangM m
@@ -201,7 +219,9 @@ gradeSteps steps appliedIsNothing = do
       checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
 
 partialGrade :: OutputCapable m => ResolutionInst -> Delayed [ResStep] -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` parser
+partialGrade inst = parseDelayedWithAndThen (resStepsParser clauseParser) complainAboutWrongNotation (pure ()) $ partialGrade' inst
+  where clauseParser | usesSetNotation inst = clauseSetParser
+                     | otherwise      = clauseFormulaParser
 
 partialGrade' :: OutputCapable m => ResolutionInst -> [ResStep] -> LangM m
 partialGrade' ResolutionInst{..} sol = do
@@ -234,7 +254,9 @@ partialGrade' ResolutionInst{..} sol = do
     stepsGraded = gradeSteps steps (isNothing applied)
 
 completeGrade :: (OutputCapable m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` parser
+completeGrade inst = completeGrade' inst `withDelayed` resStepsParser clauseParser
+  where clauseParser | usesSetNotation inst = clauseSetParser
+                     | otherwise      = clauseFormulaParser
 
 completeGrade' :: (OutputCapable m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m
 completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do

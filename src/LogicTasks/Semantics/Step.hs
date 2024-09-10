@@ -11,7 +11,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   english,
   german,
-  translate,
+  translate, localise, translations,
   )
 import Data.Maybe (fromJust, isNothing)
 import Data.List (delete)
@@ -22,11 +22,14 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause(Clause, literalSet), Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (clauseKey, example, extra)
+import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
-import Control.Monad (when)
-import Formula.Parsing.Delayed (Delayed, withDelayed)
-import Formula.Parsing (Parse(..))
+import Control.Monad (when, unless)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedWithAndThen, complainAboutWrongNotation)
+import Formula.Parsing (clauseFormulaParser, stepAnswerParser, clauseSetParser)
+import Formula.Helpers (showClauseAsSet)
+
+
 
 
 genStepInst :: StepConfig -> Gen StepInst
@@ -35,7 +38,13 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
     let
       litAddedClause1 = mkClause $ resolveLit : lits1
       litAddedClause2 = mkClause $ opposite resolveLit : literals clause2
-    pure $ StepInst litAddedClause1 litAddedClause2 printSolution extraText
+    pure $ StepInst {
+      clause1 = litAddedClause1,
+      clause2 = litAddedClause2,
+      usesSetNotation = useSetNotation,
+      showSolution = printSolution,
+      addText = extraText
+    }
 
 
 
@@ -45,8 +54,8 @@ description StepInst{..} = do
     translate $ do
       german "Betrachten Sie die zwei folgenden Klauseln:"
       english "Consider the two following clauses:"
-    indent $ code $ show clause1
-    indent $ code $ show clause2
+    indent $ code $ show' clause1
+    indent $ code $ show' clause2
     pure ()
   paragraph $ translate $ do
     german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
@@ -56,16 +65,42 @@ description StepInst{..} = do
     german "Geben Sie das in dem Resolutionsschritt genutzte Literal (in positiver oder negativer Form) und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
     english "Provide the literal (in positive or negative form) used for the step and the resolvent in the following tuple form: (literal, resolvent)."
 
-  clauseKey
+  keyHeading
+  negationKey
+  unless usesSetNotation orKey
 
-  paragraph $ indent $ do
+  when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A valid solution could look like this: "
-    code "(A, not B or C)"
+      german "Nicht-leere Klausel:"
+      english "Non-empty clause:"
+    code "{ ... }"
     pure ()
+
+  when usesSetNotation $ paragraph $ indent $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Resolvente die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the resolvent using set notation! A valid solution could look like this: "
+    translatedCode $ flip localise $ translations $ do
+      german "(A, {nicht B, C})"
+      english "(A, {not B, C})"
+    pure ()
+
+  unless usesSetNotation $ paragraph $ indent $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Resolvente eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the resolvent using a formula! A valid solution could look like this: "
+    translatedCode $ flip localise $ translations $ do
+      german "(A, nicht B oder C)"
+      english "(A, not B or C)"
+    pure ()
+
+
   extra addText
   pure ()
+    where
+      show' clause = if usesSetNotation
+        then showClauseAsSet clause
+        else show clause
 
 
 verifyStatic :: OutputCapable m => StepInst -> LangM m
@@ -93,7 +128,9 @@ start :: StepAnswer
 start = StepAnswer Nothing
 
 partialGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
-partialGrade inst = partialGrade' inst `withDelayed` parser
+partialGrade inst = parseDelayedWithAndThen (stepAnswerParser clauseParser) complainAboutWrongNotation (pure ()) $ partialGrade' inst
+  where clauseParser | usesSetNotation inst = clauseSetParser
+                     | otherwise            = clauseFormulaParser
 
 partialGrade' :: OutputCapable m => StepInst -> StepAnswer -> LangM m
 partialGrade' StepInst{..} sol = do
@@ -128,7 +165,9 @@ partialGrade' StepInst{..} sol = do
      extraLiterals = toList (solLits `difference` availLits)
 
 completeGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` parser
+completeGrade inst = completeGrade' inst `withDelayed` stepAnswerParser clauseParser
+  where clauseParser | usesSetNotation inst = clauseSetParser
+                     | otherwise      = clauseFormulaParser
 
 
 completeGrade' :: OutputCapable m => StepInst -> StepAnswer -> LangM m
