@@ -41,6 +41,7 @@ validBoundsResolution = do
     baseConf
   , minSteps
   , printFeedbackImmediately = False
+  , useSetNotation = True
   , printSolution = False
   , extraText = Nothing
   }
