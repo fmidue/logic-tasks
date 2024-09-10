@@ -61,7 +61,7 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
     clauses = clauses,
     solution,
     printFeedbackImmediately = printFeedbackImmediately,
-    showAsSet = displayUsingSetNotation,
+    usesSetNotation = useSetNotation,
     showSolution = printSolution,
     addText = extraText
   }
@@ -125,7 +125,7 @@ description ResolutionInst{..} = do
   extra addText
   pure ()
     where
-      show' = if showAsSet
+      show' = if usesSetNotation
         then showCnfAsSet . mkCnf
         else show . mkCnf
 
@@ -209,7 +209,7 @@ gradeSteps steps appliedIsNothing = do
 
 partialGrade :: OutputCapable m => ResolutionInst -> Delayed [ResStep] -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` resStepsParser clauseParser
-  where clauseParser | showAsSet inst = clauseSetParser
+  where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 
 partialGrade' :: OutputCapable m => ResolutionInst -> [ResStep] -> LangM m
@@ -244,7 +244,7 @@ partialGrade' ResolutionInst{..} sol = do
 
 completeGrade :: (OutputCapable m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` resStepsParser clauseParser
-  where clauseParser | showAsSet inst = clauseSetParser
+  where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 
 completeGrade' :: (OutputCapable m, Alternative m) => ResolutionInst -> [ResStep] -> LangM m

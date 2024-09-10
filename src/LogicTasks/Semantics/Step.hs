@@ -41,7 +41,7 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
     pure $ StepInst {
       clause1 = litAddedClause1,
       clause2 = litAddedClause2,
-      showAsSet = displayUsingSetNotation,
+      usesSetNotation = useSetNotation,
       showSolution = printSolution,
       addText = extraText
     }
@@ -76,7 +76,7 @@ description StepInst{..} = do
   extra addText
   pure ()
     where
-      show' clause = if showAsSet
+      show' clause = if usesSetNotation
         then showClauseAsSet clause
         else show clause
 
@@ -107,7 +107,7 @@ start = StepAnswer Nothing
 
 partialGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
 partialGrade inst = partialGrade' inst `withDelayed` stepAnswerParser clauseParser
-  where clauseParser | showAsSet inst = clauseSetParser
+  where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 
 partialGrade' :: OutputCapable m => StepInst -> StepAnswer -> LangM m
@@ -144,7 +144,7 @@ partialGrade' StepInst{..} sol = do
 
 completeGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
 completeGrade inst = completeGrade' inst `withDelayed` stepAnswerParser clauseParser
-  where clauseParser | showAsSet inst = clauseSetParser
+  where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 
 

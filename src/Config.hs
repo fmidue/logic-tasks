@@ -151,7 +151,7 @@ dDecideInst =  DecideInst
 data StepInst = StepInst {
                  clause1 :: !Clause
                , clause2 :: !Clause
-               , showAsSet :: Bool
+               , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -161,7 +161,7 @@ dStepInst :: StepInst
 dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
-          , showAsSet = False
+          , usesSetNotation = False
           , showSolution = False
           , addText = Nothing
           }
@@ -172,7 +172,7 @@ data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
                , solution :: [ResStep]
                , printFeedbackImmediately :: Bool
-               , showAsSet :: Bool
+               , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText    :: Maybe (Map Language String)
                }
@@ -201,7 +201,7 @@ dResInst = let
                     , Res (Left nC    , Left pC, (mkClause [], Nothing))
                     ]
                 , printFeedbackImmediately = True
-                , showAsSet = False
+                , usesSetNotation = False
                 , showSolution = False
                 , addText = Nothing
                 }
@@ -341,7 +341,7 @@ dDecideConf = DecideConfig
 
 data StepConfig = StepConfig {
       baseConf :: BaseConfig
-    , displayUsingSetNotation :: Bool
+    , useSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -350,7 +350,7 @@ data StepConfig = StepConfig {
 dStepConf :: StepConfig
 dStepConf = StepConfig
     { baseConf = dBaseConf
-    , displayUsingSetNotation = False
+    , useSetNotation = False
     , printSolution = False
     , extraText = Nothing
     }
@@ -384,7 +384,7 @@ data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
     , printFeedbackImmediately :: Bool
-    , displayUsingSetNotation :: Bool
+    , useSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -395,7 +395,7 @@ dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
     , printFeedbackImmediately = True
-    , displayUsingSetNotation = False
+    , useSetNotation = False
     , printSolution = False
     , extraText = Nothing
     }
