@@ -196,7 +196,7 @@ completeGrade' StepInst{..} sol =
             pure ()
   where
     mSol = fromJust $ step sol
-    displaySolution = when showSolution $ example ("(" ++ show (fst solution) ++ ", " ++ show (snd solution) ++ ")") $ do
+    displaySolution = when showSolution $ example (show solution) $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
 

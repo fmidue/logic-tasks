@@ -198,7 +198,7 @@ completeGrade' PrologInst{..} sol =
     transSol2 = transformProlog (snd sol) mapping
     resolveResult = resolve clause1 clause2 transSol1
     displaySolution = when showSolution $ do
-          example ("(" ++ show (fst solution) ++ ", " ++ show (snd solution) ++ ")") $ do
+          example (show solution) $ do
             english "A possible solution for this task is:"
             german "Eine mögliche Lösung für die Aufgabe ist:"
           pure ()
