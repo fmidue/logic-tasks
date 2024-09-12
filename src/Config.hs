@@ -214,6 +214,7 @@ dResInst = let
 data PrologInst = PrologInst {
                  literals1 :: !PrologClause
                , literals2 :: !PrologClause
+               , solution :: (PrologLiteral, PrologClause)
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -224,6 +225,7 @@ dPrologInst :: PrologInst
 dPrologInst =  PrologInst
           { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
+          , solution = (PrologLiteral True "pred" ["fact"], mkPrologClause [])
           , showSolution = False
           , addText = Nothing
           }
