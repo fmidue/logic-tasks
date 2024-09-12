@@ -22,7 +22,7 @@ import Trees.Print (transferToPicture)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
-import Data.Maybe (isNothing, isJust, fromJust)
+import Data.Maybe (isJust, fromJust)
 
 
 
@@ -36,16 +36,16 @@ description LegalPropositionInst{..} = do
     focus $ unlines $ indexed $ map fst pseudoFormulas
 
     instruct $ do
-      english "Some of these are syntactically incorrect. Which of these formulas have an invalid format?"
-      german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt geformt sind."
+      english "Some of these are syntactically incorrect. Which of these formulas have a valid format?"
+      german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln korrekt geformt sind."
 
     instruct $ do
-      english "Enter a list containing the indices of the invalid formulas to submit your answer."
-      german "Geben Sie eine Liste der Indizes aller syntaktisch falschen Formeln als Ihre Lösung an."
+      english "Enter a list containing the indices of the valid formulas to submit your answer."
+      german "Geben Sie eine Liste der Indizes aller syntaktisch korrekten Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
-      english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
-      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
+      english "For example, if only choices 2 and 3 are correct, then the solution is:"
+      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 richtig geformt, dann ist diese Lösung korrekt:"
 
     extra addText
     pure ()
@@ -91,9 +91,9 @@ completeGrade path inst sol = refuseIfWrong $ do
         english "Your solution is incorrect."
         german "Ihre Lösung ist falsch."
 
-  when (showSolution inst) $ do
+  when True $ do
     when wrongSolution $
-      example (show serialsOfWrong) $ do
+      example (show serialsOfRight) $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
 
@@ -110,8 +110,8 @@ completeGrade path inst sol = refuseIfWrong $ do
 
   pure ()
   where
-    wrongSolution = sort (nub sol) /= sort serialsOfWrong
+    wrongSolution = sort (nub sol) /= sort serialsOfRight
     refuseIfWrong = if wrongSolution then refuse else id
-    pseudoIndexed = zip [1..] (pseudoFormulas inst)
-    serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) pseudoIndexed
+    pseudoIndexed = zip ([1..] :: [Int]) (pseudoFormulas inst)
+    serialsOfRight = map fst $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
     correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
