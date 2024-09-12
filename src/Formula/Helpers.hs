@@ -9,7 +9,7 @@ import Formula.Types (
   Cnf(..),
   terms
   )
-import Data.Foldable (Foldable(toList))
+import Data.Set (toList)
 import Data.List (intercalate)
 
 hasTheClauseShape :: ClauseShape -> PrologClause -> Bool

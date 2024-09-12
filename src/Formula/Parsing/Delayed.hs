@@ -3,7 +3,8 @@ module Formula.Parsing.Delayed (
   Delayed,
   delayed,
   withDelayed,
-  parseDelayedAndThen,
+  displayParseError,
+  withDelayedSucceeding,
   parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
@@ -11,7 +12,6 @@ module Formula.Parsing.Delayed (
 
 import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
-import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully)
 
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
@@ -30,25 +30,25 @@ parseDelayed = parseDelayedRaw
 parseDelayedRaw :: Parser b -> Delayed a -> Either ParseError b
 parseDelayedRaw p (Delayed str) = parse p "(answer string)" str
 
-withDelayed :: OutputCapable m => (a -> LangM m) -> Parser a -> Delayed a -> LangM m
-withDelayed whatToDo p delayedAnswer =
-  case parseDelayed (fully p) delayedAnswer of
-    Left err -> reject $ do
-      english $ show err
-      german $ show err
-    Right x -> whatToDo x
-
-parseDelayedAndThen ::
-  (OutputCapable m, Parse a)
-  => (Maybe ParseError -> ParseError -> State (Map Language String) ())
-  -> Parser ()
-  -> (a -> LangM m)
+withDelayed ::
+  OutputCapable m
+  => (a -> LangM m)
+  -> Parser a
+  -> (ParseError -> State (Map Language String) ())
   -> Delayed a
   -> LangM m
-parseDelayedAndThen = parseDelayedWithAndThen parser
+withDelayed whatToDo p displayError delayedAnswer =
+  case parseDelayed (fully p) delayedAnswer of
+    Left err -> reject (displayError err)
+    Right x -> whatToDo x
+
+displayParseError :: ParseError -> State (Map Language String) ()
+displayParseError err = do
+  english $ show err
+  german $ show err
 
 parseDelayedWithAndThen ::
-  (OutputCapable m, Parse a)
+  OutputCapable m
   => Parser a
   -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
@@ -56,10 +56,21 @@ parseDelayedWithAndThen ::
   -> Delayed a
   -> LangM m
 parseDelayedWithAndThen p messaging fallBackParser whatToDo delayedAnswer =
-  either
-  (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
-  whatToDo
-  (parseDelayed (fully p) delayedAnswer)
+  (whatToDo `withDelayed` p)
+  (messaging (either Just (const Nothing) $
+              parseDelayedRaw (fully fallBackParser) delayedAnswer))
+  delayedAnswer
+
+withDelayedSucceeding ::
+  OutputCapable m
+  => (a -> LangM m)
+  -> Parser a
+  -> Delayed a
+  -> LangM m
+withDelayedSucceeding whatToDo p delayedAnswer =
+  case parseDelayed (fully p) delayedAnswer of
+    Left err -> error $ "It should be impossible here, and yet the following ParseError was encountered: " ++ show err
+    Right x -> whatToDo x
 
 complainAboutMissingParenthesesIfNotFailingOn :: Maybe a -> ParseError -> State (Map Language String) ()
 complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
@@ -79,9 +90,9 @@ complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
           , "In particular, you should use enough parentheses."
           ]
 
-complainAboutWrongNotation :: Maybe a -> ParseError -> State (Map Language String) ()
-complainAboutWrongNotation _ _ = do
-  german $  unlines
+complainAboutWrongNotation :: State (Map Language String) ()
+complainAboutWrongNotation = do
+  german $ unlines
     [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
     , "Bitte stellen Sie sicher, dass Sie die geforderte Notation verwenden." {- german -}
     ]
@@ -89,4 +100,3 @@ complainAboutWrongNotation _ _ = do
     [ "Unable to read submission."
     , "Please make sure to use the required notation."
     ]
-

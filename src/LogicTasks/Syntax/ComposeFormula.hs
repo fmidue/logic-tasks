@@ -26,7 +26,7 @@ import Data.Containers.ListUtils (nubOrd)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Formula.Parsing (Parse(parser))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
+import Formula.Parsing.Delayed (Delayed, withDelayedSucceeding, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn)
 import UniversalParser (logicToken)
 import Text.Parsec (many, (<|>))
 import Data.Functor (void)
@@ -120,7 +120,7 @@ start = []
 
 
 partialGrade :: OutputCapable m => ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
-partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many (logicToken <|> listToken)) . partialGrade'
+partialGrade = parseDelayedWithAndThen parser complainAboutMissingParenthesesIfNotFailingOn (void $ many (logicToken <|> listToken)) . partialGrade'
   where listToken = tokenSymbol "[" <|> tokenSymbol "," <|> tokenSymbol "]"
 
 partialGrade' :: OutputCapable m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
@@ -163,7 +163,7 @@ partialGrade' ComposeFormulaInst{..} sol
 
 completeGrade :: (OutputCapable m, MonadIO m) =>
   FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
-completeGrade path inst = completeGrade' path inst `withDelayed` parser
+completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade' :: (OutputCapable m, MonadIO m) =>
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m

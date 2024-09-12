@@ -25,7 +25,7 @@ import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when, unless)
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedWithAndThen, complainAboutWrongNotation)
+import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
 import Formula.Parsing (clauseFormulaParser, stepAnswerParser, clauseSetParser)
 import Formula.Helpers (showClauseAsSet)
 
@@ -128,7 +128,7 @@ start :: StepAnswer
 start = StepAnswer Nothing
 
 partialGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
-partialGrade inst = parseDelayedWithAndThen (stepAnswerParser clauseParser) complainAboutWrongNotation (pure ()) $ partialGrade' inst
+partialGrade inst = (partialGrade' inst `withDelayed` stepAnswerParser clauseParser) (const complainAboutWrongNotation)
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise            = clauseFormulaParser
 
@@ -165,7 +165,7 @@ partialGrade' StepInst{..} sol = do
      extraLiterals = toList (solLits `difference` availLits)
 
 completeGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
-completeGrade inst = completeGrade' inst `withDelayed` stepAnswerParser clauseParser
+completeGrade inst = completeGrade' inst `withDelayedSucceeding` stepAnswerParser clauseParser
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 
