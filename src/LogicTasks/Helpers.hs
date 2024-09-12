@@ -60,30 +60,30 @@ reject  = refuse . indent . translate
 
 
 
-clauseKey :: OutputCapable m => LangM m
-clauseKey = do
+clauseKey :: OutputCapable m => Bool -> LangM m
+clauseKey allowUnicode = do
   keyHeading
-  negationKey
-  orKey
+  negationKey allowUnicode
+  orKey allowUnicode
   pure()
 
-cnfKey :: OutputCapable m => LangM m
-cnfKey = do
-  clauseKey
-  andKey
+cnfKey :: OutputCapable m => Bool -> LangM m
+cnfKey allowUnicode = do
+  clauseKey allowUnicode
+  andKey allowUnicode
   pure ()
 
-formulaKey :: OutputCapable m => LangM m
-formulaKey = do
+formulaKey :: OutputCapable m => Bool -> LangM m
+formulaKey allowUnicode = do
   keyHeading
-  basicOpKey
+  basicOpKey allowUnicode
   pure ()
 
-basicOpKey :: OutputCapable m => LangM m
-basicOpKey = do
-  negationKey
-  andKey
-  orKey
+basicOpKey :: OutputCapable m => Bool -> LangM m
+basicOpKey allowUnicode = do
+  negationKey allowUnicode
+  andKey allowUnicode
+  orKey allowUnicode
   pure()
 
 keyHeading :: OutputCapable m => LangM m
@@ -92,36 +92,36 @@ keyHeading =
     german "Beachten Sie dabei die folgenden möglichen Schreibweisen:"
     english "You can use any of the following notations:"
 
-andKey :: OutputCapable m => LangM m
-andKey =
+andKey :: OutputCapable m => Bool -> LangM m
+andKey allowUnicode =
   paragraph $ indent $ do
     translate $ do
       german "Und:"
       english "And:"
     translatedCode $ flip localise $ translations $ do
-      german "/\\, und"
-      english "/\\, and"
+      german $ (if allowUnicode then "∧, " else "") ++ "/\\, und"
+      english $ (if allowUnicode then "∧, " else "") ++ "/\\, and"
     pure ()
 
-orKey :: OutputCapable m => LangM m
-orKey =
+orKey :: OutputCapable m => Bool -> LangM m
+orKey allowUnicode =
   paragraph $ indent $ do
     translate $ do
       german "Oder:"
       english "Or:"
     translatedCode $ flip localise $ translations $ do
-      german "\\/, oder"
-      english "\\/, or"
+      german $ (if allowUnicode then "∨, " else "") ++ "\\/, oder"
+      english $ (if allowUnicode then "∨, " else "") ++ "\\/, or"
     pure ()
 
 
-negationKey :: OutputCapable m => LangM m
-negationKey =
+negationKey :: OutputCapable m => Bool -> LangM m
+negationKey allowUnicode =
   paragraph $ indent $ do
     text "Negation:"
     translatedCode $ flip localise $ translations $ do
-      german "-, ~, nicht"
-      english "-, ~, not"
+      german $ (if allowUnicode then "¬, " else "") ++ "-, ~, nicht"
+      english $ (if allowUnicode then "¬, " else "") ++ "-, ~, not"
     pure ()
 
 arrowsKey :: OutputCapable m => LangM m
