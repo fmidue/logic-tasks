@@ -83,6 +83,7 @@ data MaxInst = MaxInst {
                  cnf     :: !Cnf
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
+               , unicodeAllowed :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -91,6 +92,7 @@ dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , showSolution = False
           , addText = Nothing
+          , unicodeAllowed = False
           }
 
 
@@ -100,6 +102,7 @@ data MinInst = MinInst {
                  dnf :: !Dnf
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
+               , unicodeAllowed :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -108,6 +111,7 @@ dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
           , showSolution = False
           , addText = Nothing
+          , unicodeAllowed = False
           }
 
 
@@ -154,6 +158,7 @@ data StepInst = StepInst {
                , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
+               , unicodeAllowed :: Bool
                }
                deriving (Typeable, Generic)
 
@@ -164,6 +169,7 @@ dStepInst =  StepInst
           , usesSetNotation = False
           , showSolution = False
           , addText = Nothing
+          , unicodeAllowed = False
           }
 
 
@@ -175,6 +181,7 @@ data ResolutionInst = ResolutionInst {
                , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText    :: Maybe (Map Language String)
+               , unicodeAllowed :: Bool
                }
                deriving (Typeable, Generic, Show)
 
@@ -204,6 +211,7 @@ dResInst = let
                 , usesSetNotation = True
                 , showSolution = False
                 , addText = Nothing
+                , unicodeAllowed = False
                 }
 
 
@@ -306,6 +314,7 @@ data MinMaxConfig = MinMaxConfig {
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
+    , offerUnicodeInput :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -315,6 +324,7 @@ dMinMaxConf = MinMaxConfig
     , percentTrueEntries = Just (50,70)
     , printSolution = False
     , extraText = Nothing
+    , offerUnicodeInput = False
     }
 
 
@@ -344,6 +354,7 @@ data StepConfig = StepConfig {
     , useSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
+    , offerUnicodeInput :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -353,6 +364,7 @@ dStepConf = StepConfig
     , useSetNotation = False
     , printSolution = False
     , extraText = Nothing
+    , offerUnicodeInput = False
     }
 
 
@@ -387,6 +399,7 @@ data ResolutionConfig = ResolutionConfig {
     , useSetNotation :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
+    , offerUnicodeInput :: Bool
     }
     deriving (Typeable, Generic, Show)
 
@@ -398,4 +411,5 @@ dResConf = ResolutionConfig
     , useSetNotation = True
     , printSolution = False
     , extraText = Nothing
+    , offerUnicodeInput = False
     }

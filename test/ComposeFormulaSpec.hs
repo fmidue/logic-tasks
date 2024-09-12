@@ -31,7 +31,8 @@ validBoundsComposeFormula = do
     treeDisplayModes = (displayModeL, displayModeR),
     extraHintsOnAssociativity = False,
     extraText = Nothing,
-    printSolution = False
+    printSolution = False,
+    offerUnicodeInput = False
   }
 
 spec :: Spec

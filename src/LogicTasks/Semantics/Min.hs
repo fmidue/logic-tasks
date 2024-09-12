@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module LogicTasks.Semantics.Min where
 
@@ -33,7 +34,12 @@ import Formula.Parsing (Parse(..))
 genMinInst :: MinMaxConfig -> Gen MinInst
 genMinInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
     dnf <- dnfInRange
-    pure $ MinInst dnf printSolution extraText
+    pure $ MinInst {
+      dnf
+    , showSolution = printSolution
+    , addText = extraText
+    , unicodeAllowed = offerUnicodeInput
+    }
    where
      getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
      dnfInRange = tryGen getDnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -52,7 +58,7 @@ description MinInst{..} = do
     german "Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
     english "Provide a formula in disjunctive normal form, that corresponds to the table. Use minterms to do this."
 
-  formulaKey
+  formulaKey unicodeAllowed
 
   paragraph $ indent $ do
     translate $ do

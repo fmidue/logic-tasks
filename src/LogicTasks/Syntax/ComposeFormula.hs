@@ -76,7 +76,7 @@ description path ComposeFormulaInst{..} = do
         german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen."
 
     keyHeading
-    basicOpKey
+    basicOpKey unicodeAllowed
     arrowsKey
 
     paragraph $ indent $ do

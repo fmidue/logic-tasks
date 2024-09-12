@@ -29,6 +29,7 @@ small = ComposeFormulaConfig
   , extraHintsOnAssociativity = True
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 medium :: ComposeFormulaConfig
@@ -48,6 +49,7 @@ medium = ComposeFormulaConfig
   , extraHintsOnAssociativity = True
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 spec :: Spec

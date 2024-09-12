@@ -55,7 +55,7 @@ description SubTreeInst{..} = do
       german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformeln gesucht, dann ist die folgende Lösung korrekt:"
 
     keyHeading
-    basicOpKey
+    basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
 
     extra addText

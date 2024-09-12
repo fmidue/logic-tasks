@@ -63,7 +63,8 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
     printFeedbackImmediately = printFeedbackImmediately,
     usesSetNotation = useSetNotation,
     showSolution = printSolution,
-    addText = extraText
+    addText = extraText,
+    unicodeAllowed = offerUnicodeInput
   }
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
@@ -87,8 +88,8 @@ description ResolutionInst{..} = do
     english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
 
   keyHeading
-  negationKey
-  unless usesSetNotation orKey
+  negationKey unicodeAllowed
+  unless usesSetNotation (orKey unicodeAllowed)
 
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do

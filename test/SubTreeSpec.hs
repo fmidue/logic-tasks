@@ -36,6 +36,7 @@ validBoundsSubTree = do
       , minSubTrees
       , extraText = Nothing
       , printSolution = False
+      , offerUnicodeInput = False
       }
 
 spec :: Spec

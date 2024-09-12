@@ -64,7 +64,7 @@ description SuperfluousBracketsInst{..} = do
     paragraph $ translate $ do
       german "Sie können dafür die Ausgangsformel in die Abgabe kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
       english "You can copy the original formula into the solution box and remove unnecessary brackets or use the following syntax:"
-    basicOpKey
+    basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
 
     extra addText

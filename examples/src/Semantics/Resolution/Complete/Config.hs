@@ -22,6 +22,7 @@ task15 = ResolutionConfig
     , useSetNotation = False
     , printSolution = True
     , extraText = Nothing
+    , offerUnicodeInput = False
     }
 
 -- Weight 0.5
@@ -37,6 +38,7 @@ task16 =  ResolutionConfig
   , useSetNotation = False
   , printSolution = True
   , extraText = Nothing
+  , offerUnicodeInput = False
   }
 
 spec :: Spec

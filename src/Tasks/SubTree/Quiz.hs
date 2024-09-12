@@ -29,4 +29,5 @@ generateSubTreeInst SubTreeConfig {..} = do
       , showArrowOperators = allowArrowOperators syntaxTreeConfig
       , showSolution = printSolution
       , addText = extraText
+      , unicodeAllowed = offerUnicodeInput
       }

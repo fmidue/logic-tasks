@@ -42,6 +42,7 @@ validBoundsSuperfluousBrackets = do
         , superfluousBracketPairs
         , extraText = Nothing
         , printSolution = False
+        , offerUnicodeInput = False
         }
 
 spec :: Spec

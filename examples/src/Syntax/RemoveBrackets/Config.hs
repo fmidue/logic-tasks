@@ -29,6 +29,7 @@ task02 = SuperfluousBracketsConfig
       german "Hinweis: Es sollen ALLE nicht nötigen Klammern entfernt werden. Nicht nur die wegen Assoziativität überflüssigen!"
       english "Hint: You need to remove ALL unnecessary pairs of brackets. Not just the ones that are not needed due to associativity."
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 
@@ -51,6 +52,7 @@ task05 = SuperfluousBracketsConfig
       german "Hinweis: Es sollen ALLE nicht nötigen Klammern entfernt werden. Nicht nur die wegen Assoziativität überflüssigen!"
       english "Hint: You need to remove ALL unnecessary pairs of brackets. Not just the ones that are not needed due to associativity."
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 spec :: Spec

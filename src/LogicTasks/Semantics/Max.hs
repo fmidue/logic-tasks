@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module LogicTasks.Semantics.Max where
 
@@ -34,7 +35,12 @@ import Formula.Parsing (Parse(..))
 genMaxInst :: MinMaxConfig -> Gen MaxInst
 genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
     cnf <- cnfInRange
-    pure $ MaxInst cnf printSolution extraText
+    pure $ MaxInst {
+      cnf
+    , showSolution = printSolution
+    , addText = extraText
+    , unicodeAllowed = offerUnicodeInput
+    }
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -53,7 +59,7 @@ description MaxInst{..} = do
     german "Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
     english "Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
 
-  formulaKey
+  formulaKey unicodeAllowed
 
   paragraph $ indent $ do
     translate $ do

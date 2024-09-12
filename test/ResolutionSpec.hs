@@ -44,6 +44,7 @@ validBoundsResolution = do
   , useSetNotation = True
   , printSolution = False
   , extraText = Nothing
+  , offerUnicodeInput = False
   }
 
 

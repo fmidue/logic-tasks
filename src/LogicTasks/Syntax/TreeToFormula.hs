@@ -58,7 +58,7 @@ description path TreeToFormulaInst{..} = do
       german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
-    basicOpKey
+    basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
 
     extra addText

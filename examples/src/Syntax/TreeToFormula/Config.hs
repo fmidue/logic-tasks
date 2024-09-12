@@ -28,6 +28,7 @@ task03 = TreeToFormulaConfig
   , extraHintsOnSemanticEquivalence = True
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 -- Weight 0.33
@@ -47,6 +48,7 @@ task04 =  TreeToFormulaConfig
   , extraHintsOnSemanticEquivalence = True
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 -- Weight 0.4

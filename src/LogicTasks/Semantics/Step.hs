@@ -43,7 +43,8 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
       clause2 = litAddedClause2,
       usesSetNotation = useSetNotation,
       showSolution = printSolution,
-      addText = extraText
+      addText = extraText,
+      unicodeAllowed = offerUnicodeInput
     }
 
 
@@ -66,8 +67,8 @@ description StepInst{..} = do
     english "Provide the literal (in positive or negative form) used for the step and the resolvent in the following tuple form: (literal, resolvent)."
 
   keyHeading
-  negationKey
-  unless usesSetNotation orKey
+  negationKey unicodeAllowed
+  unless usesSetNotation (orKey unicodeAllowed)
 
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do

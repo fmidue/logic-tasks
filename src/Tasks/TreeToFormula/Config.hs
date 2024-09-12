@@ -21,6 +21,7 @@ data TreeToFormulaConfig = TreeToFormulaConfig {
     , extraHintsOnSemanticEquivalence :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
+    , offerUnicodeInput :: Bool
     }
     deriving (Typeable, Generic)
 
@@ -30,6 +31,7 @@ defaultTreeToFormulaConfig = TreeToFormulaConfig
     , extraHintsOnSemanticEquivalence = True
     , extraText = Nothing
     , printSolution = False
+    , offerUnicodeInput = False
     }
 
 
@@ -47,6 +49,7 @@ data TreeToFormulaInst = TreeToFormulaInst {
                , showArrowOperators :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
+               , unicodeAllowed :: Bool
                }
                deriving (Show, Typeable, Generic)
 

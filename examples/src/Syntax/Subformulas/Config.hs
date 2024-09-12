@@ -27,6 +27,7 @@ medium = SubTreeConfig
   , minSubTrees = 3
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 spec :: Spec

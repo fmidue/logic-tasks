@@ -26,6 +26,7 @@ unused03 = MinMaxConfig
   , percentTrueEntries = Just (55, 70)
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 spec :: Spec
