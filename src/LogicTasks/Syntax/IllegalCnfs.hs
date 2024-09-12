@@ -30,16 +30,16 @@ description LegalCNFInst{..} = do
     focus $ unlines $ indexed formulaStrings
 
     instruct $ do
-      english "Which of these formulas are not given in conjunctive normal form (cnf)?"
-      german "Welche dieser Formeln sind nicht in konjunktiver Normalform (KNF) angegeben?"
+      english "Which of these formulas are given in conjunctive normal form (cnf)?"
+      german "Welche dieser Formeln sind in konjunktiver Normalform (KNF) angegeben?"
 
     instruct $ do
-      english "Enter a list containing the indices of the non-cnf formulas to submit your answer."
-      german "Geben Sie eine Liste der Indizes aller nicht in KNF vorliegenden Formeln als Ihre Lösung an."
+      english "Enter a list containing the indices of the cnf formulas to submit your answer."
+      german "Geben Sie eine Liste der Indizes aller in KNF vorliegenden Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
-      english "For example, if only choices 2 and 3 are non-cnf formulas, then the solution is:"
-      german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 nicht in KNF vor, dann ist diese Lösung korrekt:"
+      english "For example, if only choices 2 and 3 are cnf formulas, then the solution is:"
+      german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 in KNF vor, dann ist diese Lösung korrekt:"
 
     extra addText
 
@@ -82,8 +82,8 @@ completeGrade inst sol
         english "Your solution is incorrect."
         german "Ihre Lösung ist falsch."
 
-      when (showSolution inst) $ do
-        example (show (toList (serialsOfWrong inst))) $ do
+      when True $ do
+        example (show serialsOfRight) $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
 
@@ -91,4 +91,5 @@ completeGrade inst sol
 
     | otherwise = pure()
   where
-    wrongSolution = sort (nub sol) /= sort (toList $ serialsOfWrong inst)
+    wrongSolution = sort (nub sol) /= sort serialsOfRight
+    serialsOfRight = filter (`notElem` toList (serialsOfWrong inst)) [1..length (formulaStrings inst)]
