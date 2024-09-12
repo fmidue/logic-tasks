@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module LogicTasks.Semantics.Fill where
 
@@ -13,7 +14,7 @@ import Control.OutputCapable.Blocks (
   german,
   translate,
   )
-import Data.Maybe (fromMaybe, fromJust)
+import Data.Maybe (fromMaybe)
 import Test.QuickCheck(Gen, suchThat)
 
 import Config ( FillConfig(..), FillInst(..), FormulaInst (..), FormulaConfig (..))
@@ -41,10 +42,18 @@ genFillInst FillConfig{..} = do
         tryGen (InstDnf <$> genDnf' cnfCfg) 100 $ withRatio percentTrueEntries'
 
     let
-      tableLen = length $ readEntries $ getTable formula
+      entries = readEntries $ getTable formula
+      tableLen = length entries
       gapCount = max (tableLen * percentageOfGaps `div` 100) 1
     gaps <- remove (tableLen - gapCount) [1..tableLen]
-    pure $ FillInst formula gaps printSolution extraText
+    let missingValues = [ b | (i, Just b) <- zip ([1..] :: [Int]) entries, i `elem` gaps]
+    pure $ FillInst {
+      formula
+    , missing = gaps
+    , missingValues
+    , showSolution = printSolution
+    , addText = extraText
+    }
 
 
 
@@ -154,7 +163,7 @@ completeGrade FillInst{..} sol = do
       translate $ do
         german $ "Die Lösung beinhaltet " ++ displayMistake ++ " Fehler."
         english $ "Your solution contains " ++ displayMistake ++ " mistakes."
-      when showSolution $ example (show correctShort) $ do
+      when showSolution $ example (show missingValues) $ do
         english "The solution for this task is:"
         german "Die Lösung für die Aufgabe ist:"
       pure ()
@@ -162,10 +171,7 @@ completeGrade FillInst{..} sol = do
 
   pure ()
   where
-    table = getTable formula
-    allEntries = map fromJust $ readEntries table
-    correctShort = [allEntries !! i | i <- map (\x -> x-1) missing]
     boolSol = map truth sol
-    zippedShort = zip3 boolSol correctShort [1..]
+    zippedShort = zip3 boolSol missingValues [1..]
     (_,diff) = pairwiseCheck zippedShort
     displayMistake = show $ length diff

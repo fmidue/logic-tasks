@@ -115,6 +115,7 @@ dMinInst =  MinInst
 data FillInst = FillInst {
                  formula :: FormulaInst
                , missing :: ![Int]
+               , missingValues :: [Bool]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -124,6 +125,7 @@ dFillInst :: FillInst
 dFillInst =  FillInst
           { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
+          , missingValues = [True, True]
           , showSolution = False
           , addText = Nothing
           }

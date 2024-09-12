@@ -7,12 +7,12 @@ import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, elements, suchThat, sublistOf)
 import Control.OutputCapable.Blocks (LangM)
 import Config (dFillConf, FillConfig (..), FillInst (..), FormulaConfig(..), BaseConfig(..), dBaseConf, CnfConfig(..), dCnfConf)
-import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic)
+import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
 import SynTreeSpec (validBoundsSynTree)
-import Formula.Types (Table(getEntries), getTable, lengthBound)
+import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkCnfConf)
 -- jscpd:ignore-end
@@ -101,4 +101,9 @@ spec = do
       forAll validBoundsFill $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->
           isJust $ runIdentity $ evalLangM (verifyStatic fillInst :: LangM Maybe)
+    it "the generated solution should pass grading" $
+      forAll validBoundsFill $ \fillConfig -> do
+        forAll (genFillInst fillConfig) $ \fillInst ->
+          isJust (runIdentity (evalLangM (partialGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe))) &&
+          isJust (runIdentity (evalLangM (completeGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe)))
 
