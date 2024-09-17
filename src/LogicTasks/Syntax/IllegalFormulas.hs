@@ -91,7 +91,7 @@ completeGrade path inst sol = refuseIfWrong $ do
         english "Your solution is incorrect."
         german "Ihre Lösung ist falsch."
 
-  when True $ do
+  when (showSolution inst) $ do
     when wrongSolution $
       example (show serialsOfRight) $ do
           english "A possible solution for this task is:"

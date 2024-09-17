@@ -82,7 +82,7 @@ completeGrade inst sol
         english "Your solution is incorrect."
         german "Ihre Lösung ist falsch."
 
-      when True $ do
+      when (showSolution inst) $ do
         example (show serialsOfRight) $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
