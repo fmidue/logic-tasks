@@ -36,7 +36,7 @@ validBoundsResolution :: Gen ResolutionConfig
 validBoundsResolution = do
   baseConf <- validBoundsBase
   minSteps <- choose (1,10) `suchThat` \ms ->
-    maxClauseLength baseConf > 1 || ms == 1 && ms <= 2 * length (usedLiterals baseConf)
+    (maxClauseLength baseConf > 1 || ms == 1) && ms <= 2 * length (usedLiterals baseConf)
   pure $ ResolutionConfig {
     baseConf
   , minSteps
