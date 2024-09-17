@@ -16,6 +16,7 @@ foldr
 fst
 gdw
 GHC
+ghci
 github
 Graphviz
 hcat
