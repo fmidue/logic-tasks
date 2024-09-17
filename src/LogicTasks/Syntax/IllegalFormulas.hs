@@ -6,15 +6,14 @@ module LogicTasks.Syntax.IllegalFormulas where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse, code, image),
+  GenericOutputCapable (code, image),
   LangM,
   OutputCapable,
   ($=<<),
   english,
-  german,
+  german, Rated, multipleChoice, ArticleToUse (IndefiniteArticle), translations,
   )
 import Data.List (nub, sort)
-
 import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
@@ -23,6 +22,7 @@ import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Data.Maybe (isNothing, isJust, fromJust)
+import qualified Data.Map as Map (fromAscList)
 
 
 
@@ -52,7 +52,7 @@ description LegalPropositionInst{..} = do
 
 
 verifyInst :: OutputCapable m => LegalPropositionInst -> LangM m
-verifyInst _ = pure()
+verifyInst _ = pure ()
 
 
 
@@ -72,7 +72,7 @@ partialGrade LegalPropositionInst{..} sol
       english "At least one index in the list does not exist."
       german "Mindestens einer der Indizes existiert nicht."
 
-    | otherwise = pure()
+    | otherwise = pure ()
   where
     nubSol = nub sol
     invalidIndex = any (`notElem` [1..length pseudoFormulas]) nubSol
@@ -84,19 +84,11 @@ completeGrade
   => FilePath
   -> LegalPropositionInst
   -> [Int]
-  -> LangM m
-completeGrade path inst sol = refuseIfWrong $ do
-  when wrongSolution $ do
-     instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
+  -> Rated m
+completeGrade path LegalPropositionInst{..} sol = do
+  x <- multipleChoice IndefiniteArticle what solutionDisplay solution sol
 
-  when (showSolution inst) $ do
-    when wrongSolution $
-      example (show serialsOfWrong) $ do
-          english "A possible solution for this task is:"
-          german "Eine mögliche Lösung für die Aufgabe ist:"
-
+  when (showSolution && wrongSolution) $ do
     instruct $ do
         english "The following syntax trees represent the well-formed formulas:"
         german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
@@ -108,10 +100,15 @@ completeGrade path inst sol = refuseIfWrong $ do
 
     pure ()
 
-  pure ()
-  where
-    wrongSolution = sort (nub sol) /= sort serialsOfWrong
-    refuseIfWrong = if wrongSolution then refuse else id
-    pseudoIndexed = zip [1..] (pseudoFormulas inst)
-    serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) pseudoIndexed
-    correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+  pure x
+    where
+      wrongSolution = sort (nub sol) /= sort serialsOfWrong
+      pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas
+      serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) pseudoIndexed
+      correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+      what = translations $ do
+        german "Indizes"
+        english "indices"
+      solutionDisplay | showSolution = Just $ show serialsOfWrong
+                      | otherwise = Nothing
+      solution = Map.fromAscList $ map (\(i,(_,mt)) -> (i, isNothing mt)) pseudoIndexed
