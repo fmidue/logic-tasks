@@ -35,13 +35,13 @@ instance Parse (Delayed a) where
   parser = delayed <$> fully (many anyChar)
 
 testModule ::
-  (m ~ GenericReportT Language (IO ()) IO, Show a) =>
+  (m ~ GenericReportT Language (IO ()) IO, Show a, Show c) =>
   Maybe (Display a) ->
   Language ->
   Gen inst ->
   (inst -> LangM m) ->
   (inst -> a -> LangM m) ->
-  (inst -> a -> LangM m) ->
+  (inst -> a -> LangM' m c) ->
   Parser a ->
   IO ()
 testModule prettyCfg lang gen desc partial complete p =
