@@ -5,17 +5,20 @@ module LogicTasks.Syntax.IllegalCnfs where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse),
   LangM,
   OutputCapable,
   english,
   german,
+  Rated,
+  multipleChoice,
+  ArticleToUse (IndefiniteArticle),
+  translations,
   )
-import Data.List (nub, sort)
+import Data.List (nub)
 import Data.Set (toList)
+import Data.Map as Map (fromAscList)
 import LogicTasks.Helpers
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
-import Control.Monad (when)
 
 
 
@@ -48,7 +51,7 @@ description LegalCNFInst{..} = do
 
 
 verifyInst :: OutputCapable m => LegalCNFInst -> LangM m
-verifyInst _ = pure()
+verifyInst _ = pure ()
 
 
 
@@ -68,27 +71,18 @@ partialGrade LegalCNFInst{..} sol
       english "At least one index in the list does not exist."
       german "Mindestens einer der Indizes existiert nicht."
 
-    | otherwise = pure()
+    | otherwise = pure ()
   where
     nubSol = nub sol
     invalidIndex = any (`notElem` [1..length formulaStrings]) nubSol
 
 
-
-completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> LangM m
-completeGrade inst sol
-    | wrongSolution = refuse $ do
-      instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
-
-      when (showSolution inst) $ do
-        example (show (toList (serialsOfWrong inst))) $ do
-          english "A possible solution for this task is:"
-          german "Eine mögliche Lösung für die Aufgabe ist:"
-
-      pure ()
-
-    | otherwise = pure()
+completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
+completeGrade LegalCNFInst{..} = multipleChoice IndefiniteArticle what solutionDisplay solution
   where
-    wrongSolution = sort (nub sol) /= sort (toList $ serialsOfWrong inst)
+    what = translations $ do
+      german "Indizes"
+      english "indices"
+    solutionDisplay | showSolution = Just $ show (toList serialsOfWrong)
+                    | otherwise = Nothing
+    solution = Map.fromAscList $ map (\i -> (i, i `elem` toList serialsOfWrong)) [1 .. length formulaStrings]
