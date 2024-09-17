@@ -4,7 +4,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-module LogicTasks.Debug where
+module LogicTasks.Debug (
+  testModule, analyseCnfGenerator, isTrivial,
+  -- re-exports for (ghci) calls to testModule
+  Display(..), Language (..),
+  ) where
 
 import Test.QuickCheck
 import Control.OutputCapable.Blocks.Generic
@@ -16,7 +20,7 @@ import Formula.Util (isPositive)
 import Data.Set (size, toList)
 import Data.List (partition)
 import Data.List.Extra (nubSort)
-import Control.OutputCapable.Blocks.Debug (testTask, Display)
+import Control.OutputCapable.Blocks.Debug (testTask, Display(..))
 import Formula.Parsing.Delayed (delayed)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
 import Formula.Parsing (Parse(..))

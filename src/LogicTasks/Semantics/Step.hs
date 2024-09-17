@@ -20,7 +20,7 @@ import Test.QuickCheck (Gen, elements)
 
 import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
-import Formula.Types (Clause(Clause, literalSet), Literal(..), genClause, literals, opposite)
+import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
@@ -38,9 +38,11 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
     let
       litAddedClause1 = mkClause $ resolveLit : lits1
       litAddedClause2 = mkClause $ opposite resolveLit : literals clause2
+      resolutionClause = mkClause $ lits1 ++ filter (`notElem` lits1) (literals clause2)
     pure $ StepInst {
       clause1 = litAddedClause1,
       clause2 = litAddedClause2,
+      solution = (resolveLit, resolutionClause),
       usesSetNotation = useSetNotation,
       showSolution = printSolution,
       addText = extraText,
@@ -195,9 +197,7 @@ completeGrade' StepInst{..} sol =
             pure ()
   where
     mSol = fromJust $ step sol
-    correctLiteral = head [ x | x <- toList (literalSet clause1), opposite x `elem` toList (literalSet clause2) ]
-    correctResolvent = (literalSet clause1 `union` literalSet clause2) `difference` fromList [correctLiteral, opposite correctLiteral]
-    displaySolution = when showSolution $ example ("(" ++ show correctLiteral ++ ", " ++ show (Clause correctResolvent) ++ ")") $ do
+    displaySolution = when showSolution $ example (show solution) $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
 

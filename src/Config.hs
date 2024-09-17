@@ -119,6 +119,7 @@ dMinInst =  MinInst
 data FillInst = FillInst {
                  formula :: FormulaInst
                , missing :: ![Int]
+               , missingValues :: [Bool]
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -128,6 +129,7 @@ dFillInst :: FillInst
 dFillInst =  FillInst
           { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
+          , missingValues = [True, True]
           , showSolution = False
           , addText = Nothing
           }
@@ -155,6 +157,7 @@ dDecideInst =  DecideInst
 data StepInst = StepInst {
                  clause1 :: !Clause
                , clause2 :: !Clause
+               , solution :: (Literal, Clause)
                , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
@@ -166,6 +169,7 @@ dStepInst :: StepInst
 dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
+          , solution = (Literal 'A', mkClause [Not 'C', Literal 'B'])
           , usesSetNotation = False
           , showSolution = False
           , addText = Nothing
@@ -220,6 +224,7 @@ dResInst = let
 data PrologInst = PrologInst {
                  literals1 :: !PrologClause
                , literals2 :: !PrologClause
+               , solution :: (PrologLiteral, PrologClause)
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -230,6 +235,7 @@ dPrologInst :: PrologInst
 dPrologInst =  PrologInst
           { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
+          , solution = (PrologLiteral True "pred" ["fact"], mkPrologClause [])
           , showSolution = False
           , addText = Nothing
           }
