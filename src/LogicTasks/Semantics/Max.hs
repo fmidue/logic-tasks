@@ -61,14 +61,16 @@ description MaxInst{..} = do
 
   formulaKey unicodeAllowed
 
+  -- jscpd:ignore-start
   paragraph $ indent $ do
     translate $ do
       let formulaStr = show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
     translatedCode $ flip localise $ translations exampleCode
-
     pure ()
+  -- jscpd:ignore-end
+
   extra addText
   pure ()
     where
