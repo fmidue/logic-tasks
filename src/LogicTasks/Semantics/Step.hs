@@ -92,9 +92,7 @@ description StepInst{..} = do
     translate $ do
       german "Nutzen Sie zur Angabe der Resolvente eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the resolvent using a formula! A valid solution could look like this: "
-    translatedCode $ flip localise $ translations $ do
-      german "(A, nicht B oder C)"
-      english "(A, not B or C)"
+    translatedCode $ flip localise $ translations exampleCode
     pure ()
 
 
@@ -104,6 +102,12 @@ description StepInst{..} = do
       show' clause = if usesSetNotation
         then showClauseAsSet clause
         else show clause
+      exampleCode | unicodeAllowed = do
+                      german "(A, ¬B ∨ C)"
+                      english "(A, ¬B ∨ C)"
+                  | otherwise      = do
+                      german "(A, nicht B oder C)"
+                      english "(A, not B or C)"
 
 
 verifyStatic :: OutputCapable m => StepInst -> LangM m

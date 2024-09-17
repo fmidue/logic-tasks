@@ -66,12 +66,18 @@ description MaxInst{..} = do
       let formulaStr = show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
-    translatedCode $ flip localise $ translations $ do
-      german "(A oder nicht B) und (nicht C oder nicht D)"
-      english "(A or not B) and (not C or not D)"
+    translatedCode $ flip localise $ translations exampleCode
+
     pure ()
   extra addText
   pure ()
+    where
+      exampleCode | unicodeAllowed = do
+                      german "(A ∨ ¬B) und (nicht C oder nicht D)"
+                      english "(A ∨ ¬B) and (not C or not D)"
+                  | otherwise      = do
+                      german "(A oder nicht B) und (nicht C oder nicht D)"
+                      english "(A or not B) and (not C or not D)"
 
 
 verifyStatic :: OutputCapable m => MaxInst -> LangM m

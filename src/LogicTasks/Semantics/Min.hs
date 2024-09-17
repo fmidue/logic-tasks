@@ -65,12 +65,18 @@ description MinInst{..} = do
       let formulaStr = show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
-    translatedCode $ flip localise $ translations $ do
-      german "(A und nicht B) oder (nicht C und nicht D)"
-      english "(A and not B) or (not C and not D)"
+    translatedCode $ flip localise $ translations exampleCode
+
     pure ()
   extra addText
   pure ()
+    where
+      exampleCode | unicodeAllowed = do
+                      german "(A ∧ ¬B) oder (nicht C und nicht D)"
+                      english "(A ∧ ¬B) or (not C and not D)"
+                  | otherwise      = do
+                      german "(A und nicht B) oder (nicht C und nicht D)"
+                      english "(A and not B) or (not C and not D)"
 
 
 verifyStatic :: OutputCapable m => MinInst -> LangM m

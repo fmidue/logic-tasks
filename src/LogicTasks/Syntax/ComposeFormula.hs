@@ -83,9 +83,7 @@ description path ComposeFormulaInst{..} = do
       translate $ do
         english "A solution attempt could look like this: "
         german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      translatedCode $ flip localise $ translations $ do
-        english "[(A or not B) and C, C and (A or not B)]"
-        german "[(A oder nicht B) und C, C und (A oder nicht B)]"
+      translatedCode $ flip localise $ translations exampleCode
       pure ()
 
     extra addText
@@ -103,6 +101,12 @@ description path ComposeFormulaInst{..} = do
         treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
         treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
         treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
+        exampleCode | unicodeAllowed = do
+                      english "[(A ∨ ¬B) and C, C and (A or not B)]"
+                      german "[(A ∨ ¬B) und C, C und (A oder nicht B)]"
+                    | otherwise      = do
+                      english "[(A or not B) and C, C and (A or not B)]"
+                      german "[(A oder nicht B) und C, C und (A oder nicht B)]"
 
 
 verifyInst :: OutputCapable m => ComposeFormulaInst -> LangM m
