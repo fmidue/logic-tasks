@@ -11,7 +11,11 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   ($=<<),
   english,
-  german, Rated, multipleChoice, ArticleToUse (IndefiniteArticle), translations,
+  german,
+  Rated,
+  multipleChoice,
+  ArticleToUse (IndefiniteArticle),
+  translations,
   )
 import Data.List (nub, sort)
 import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
