@@ -18,7 +18,7 @@ import Control.OutputCapable.Blocks (
   translations,
   )
 import Data.List (nub, sort)
-import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
+import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject, reRefuse)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
@@ -27,6 +27,8 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Data.Maybe (isNothing, isJust, fromJust)
 import qualified Data.Map as Map (fromAscList)
+import GHC.Real ((%))
+import Control.Applicative (Alternative)
 
 
 
@@ -84,27 +86,32 @@ partialGrade LegalPropositionInst{..} sol
 
 
 completeGrade
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadIO m, Alternative m)
   => FilePath
   -> LegalPropositionInst
   -> [Int]
   -> Rated m
-completeGrade path LegalPropositionInst{..} sol = do
-  x <- multipleChoice IndefiniteArticle what solutionDisplay solution sol
+completeGrade path LegalPropositionInst{..} sol
+  | null sol && null serialsOfWrong = do
+    reject $ do
+      english "Your solution is incorrect."
+      german "Ihre Lösung ist falsch."
+    pure (0 % 1)
+  | otherwise = reRefuse
+    (multipleChoice IndefiniteArticle what solutionDisplay solution sol)
+    $ when (showSolution && wrongSolution) $ do
+      instruct $ do
+          english "The following syntax trees represent the well-formed formulas:"
+          german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
-  when (showSolution && wrongSolution) $ do
-    instruct $ do
-        english "The following syntax trees represent the well-formed formulas:"
-        german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
+      for_ correctTrees $ \(i,pf,t) -> do
+        code $ show i ++ ". " ++ pf
+        image $=<< liftIO $ cacheTree (transferToPicture t) path
+        pure ()
 
-    for_ correctTrees $ \(i,pf,t) -> do
-      code $ show i ++ ". " ++ pf
-      image $=<< liftIO $ cacheTree (transferToPicture t) path
       pure ()
 
-    pure ()
 
-  pure x
     where
       wrongSolution = sort (nub sol) /= sort serialsOfWrong
       pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas

@@ -13,19 +13,23 @@ import Control.OutputCapable.Blocks (
   LangM,
   Language,
   OutputCapable,
+  Rated,
   english,
   german,
   translate,
   translations,
   translatedCode,
   localise,
+  recoverWith,
   )
+import Control.OutputCapable.Blocks.Generic (($>>),($>>=))
 import Control.Monad.State (State, put)
 import Data.Map (Map)
 import Data.ByteString.Lazy (fromStrict)
 import Data.ByteString.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha256, showDigest)
 import System.Directory (doesFileExist)
+import Control.Applicative (Alternative)
 
 
 
@@ -169,3 +173,17 @@ cacheIO path ext name what how = (file <$) . cache $ how file what
     whatId = path ++ name ++ showDigest (sha256 $ fromStrict what')
     whatFile = whatId ++ ".hs"
     file = whatId ++ ext
+
+{-
+Append some remarks after some rating function.
+But re-reject afterwards (if it was rejected by the rating function).
+-}
+reRefuse
+  :: (Alternative m, Monad m, OutputCapable m)
+  => Rated m
+  -> LangM m
+  -> Rated m
+reRefuse xs ys =
+  recoverWith (pure 0) xs
+    $>>= \x -> ys
+    $>> either (refuse (pure ()) *>) pure x
