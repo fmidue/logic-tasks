@@ -13,6 +13,10 @@ import Control.OutputCapable.Blocks (
   english,
   german,
   translate,
+  Rated,
+  multipleChoice,
+  translations,
+  ArticleToUse (DefiniteArticle),
   )
 import Data.List.Extra (nubOrd)
 import Test.QuickCheck (Gen, suchThat)
@@ -21,12 +25,14 @@ import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable, literals)
 import Util (isOutside, preventWithHint, remove, printWithHint, withRatio, checkTruthValueRangeAndFormulaConf)
-import LogicTasks.Helpers (example, extra)
+import LogicTasks.Helpers (extra, reRefuse)
 import Control.Monad (when, unless)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
 import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
+import qualified Data.Map as Map (fromAscList)
+import Control.Applicative (Alternative)
 
 
 
@@ -156,8 +162,8 @@ partialGrade DecideInst{..} sol = do
       tableLen = length $ readEntries table
 
 
-completeGrade :: OutputCapable m => DecideInst -> [Int] -> LangM m
-completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
+completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> [Int] -> Rated m
+completeGrade DecideInst{..} sol = do
   printWithHint (solLen > acLen)
     (translate $ do
       german "Lösung enthält nicht zu viele unterschiedliche Indizes?"
@@ -179,28 +185,25 @@ completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
         english "Solution does not contain enough unique indices."
       )
 
-  printWithHint (diff /= 0)
-    (translate $ do
-      german "Indizes in der Lösung sind korrekt?"
-      english "Indices in the solution are correct?"
-    )
-    (translate $ do
+  x <- reRefuse
+    (multipleChoice DefiniteArticle what solutionDisplay solution nubSol)
+    $ when (diff /= 0) $ translate $ do
       german $ "In der Menge der unterschiedlichen Indizes " ++ ger ++ " falsch."
       english $ "The set of unique indices contains " ++ eng
-    )
 
-
-  when (incorrect && showSolution) $ example (show changed) $ do
-      english "A possible solution for this task is:"
-      german "Eine mögliche Lösung für die Aufgabe ist:"
-
-  pure ()
+  pure x
   where
     nubSol = nubOrd sol
     diff = length $ filter (`notElem` changed) nubSol
     acLen = length $ nubOrd changed
     solLen = length nubSol
-    incorrect = solLen > acLen || acLen > solLen || diff /= 0
     (ger, eng) = if diff == 1
       then ("ist 1 Index", "1 wrong index")
       else ("sind " ++ show diff ++ " Indizes", show diff ++ " wrong indices") -- no-spell-check
+    what = translations $ do
+      german "Indizes"
+      english "indices"
+    solutionDisplay | showSolution = Just $ show changed
+                    | otherwise = Nothing
+    tableLen = length $ readEntries $ getTable formula
+    solution = Map.fromAscList $ map (\i -> (i, i `elem` changed)) [1..tableLen]
