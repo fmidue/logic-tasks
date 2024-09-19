@@ -54,3 +54,4 @@ xit
 xor
 XOR
 PLit
+unicode

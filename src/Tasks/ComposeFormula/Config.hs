@@ -26,6 +26,7 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
     , extraHintsOnAssociativity :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
+    , offerUnicodeInput :: Bool
     }
     deriving (Typeable, Generic, Show)
 
@@ -36,6 +37,7 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
     , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = False
+    , offerUnicodeInput = False
     }
 
 
@@ -64,6 +66,7 @@ data ComposeFormulaInst = ComposeFormulaInst
                , addExtraHintsOnAssociativity :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
+               , unicodeAllowed :: Bool
                }
                deriving (Show, Typeable, Generic)
 

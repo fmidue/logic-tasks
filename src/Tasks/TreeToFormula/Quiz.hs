@@ -26,4 +26,5 @@ generateTreeToFormulaInst TreeToFormulaConfig {..} = do
       , showArrowOperators = allowArrowOperators syntaxTreeConfig
       , addText = extraText
       , showSolution = printSolution
+      , unicodeAllowed = offerUnicodeInput
       }

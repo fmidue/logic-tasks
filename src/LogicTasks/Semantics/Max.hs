@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module LogicTasks.Semantics.Max where
 
@@ -34,7 +35,12 @@ import Formula.Parsing (Parse(..))
 genMaxInst :: MinMaxConfig -> Gen MaxInst
 genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
     cnf <- cnfInRange
-    pure $ MaxInst cnf printSolution extraText
+    pure $ MaxInst {
+      cnf
+    , showSolution = printSolution
+    , addText = extraText
+    , unicodeAllowed = offerUnicodeInput
+    }
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -53,19 +59,27 @@ description MaxInst{..} = do
     german "Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
     english "Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
 
-  formulaKey
+  formulaKey unicodeAllowed
 
+  -- jscpd:ignore-start
   paragraph $ indent $ do
     translate $ do
       let formulaStr = show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
-    translatedCode $ flip localise $ translations $ do
-      german "(A oder nicht B) und (nicht C oder nicht D)"
-      english "(A or not B) and (not C or not D)"
+    translatedCode $ flip localise $ translations exampleCode
     pure ()
+  -- jscpd:ignore-end
+
   extra addText
   pure ()
+    where
+      exampleCode | unicodeAllowed = do
+                      german "(A ∨ ¬B) und (nicht C oder nicht D)"
+                      english "(A ∨ ¬B) and (not C or not D)"
+                  | otherwise      = do
+                      german "(A oder nicht B) und (nicht C oder nicht D)"
+                      english "(A or not B) and (not C or not D)"
 
 
 verifyStatic :: OutputCapable m => MaxInst -> LangM m

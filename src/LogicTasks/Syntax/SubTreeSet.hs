@@ -6,18 +6,21 @@ module LogicTasks.Syntax.SubTreeSet where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse, indent, code, image),
+  GenericOutputCapable (..),
   LangM,
   OutputCapable,
   ($=<<),
   english,
   german,
+  translate,
+  localise,
+  translations,
   )
 import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf, toList)
 import qualified Data.Set (map)
 import Data.Maybe (isNothing, fromJust)
-import LogicTasks.Helpers (example, extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey)
+import LogicTasks.Helpers (extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
@@ -50,16 +53,26 @@ description SubTreeInst{..} = do
       english "Remove bracket pairs which only serve to enclose an entire subformula you provide, and do not add any additional brackets."
       german "Entfernen Sie dabei Klammerpaare, die eine angegebene Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
-    example "[ A or (B and C), B and C ]" $ do
-      english "For example, if ¬(A ∨ (B ∧ C)) is the given formula and two subformulas are required, then a correct solution is:"
-      german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformeln gesucht, dann ist die folgende Lösung korrekt:"
+    paragraph $ indent $ do
+      translate $ do
+        english "For example, if ¬(A ∨ (B ∧ C)) is the given formula and two subformulas are required, then a correct solution is:"
+        german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformeln gesucht, dann ist die folgende Lösung korrekt:"
+      translatedCode $ flip localise $ translations exampleCode
+      pure ()
 
     keyHeading
-    basicOpKey
+    basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
 
     extra addText
     pure ()
+      where
+        exampleCode | unicodeAllowed = do
+                      german "[ A ∨ (B ∧ C), B und C ]"
+                      english "[ A ∨ (B ∧ C), B and C ]"
+                    | otherwise      = do
+                      german "[ A oder (B und C), B und C ]"
+                      english "[ A or (B and C), B and C ]"
 
 
 verifyInst :: OutputCapable m => SubTreeInst -> LangM m

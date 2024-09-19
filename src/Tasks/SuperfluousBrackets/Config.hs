@@ -29,6 +29,7 @@ data SuperfluousBracketsConfig =
     , superfluousBracketPairs :: Integer
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
+    , offerUnicodeInput :: Bool
     } deriving (Show,Generic)
 
 
@@ -41,6 +42,7 @@ defaultSuperfluousBracketsConfig =
     , superfluousBracketPairs = 2
     , extraText = Nothing
     , printSolution = False
+    , offerUnicodeInput = False
     }
 
 
@@ -78,4 +80,5 @@ data SuperfluousBracketsInst =
     , showArrowOperators :: Bool
     , showSolution :: Bool
     , addText :: Maybe (Map Language String)
+    , unicodeAllowed :: Bool
     } deriving (Show,Generic)

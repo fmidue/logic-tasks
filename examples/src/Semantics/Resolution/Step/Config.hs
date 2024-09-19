@@ -21,6 +21,7 @@ task12 =
     , useSetNotation = False
     , extraText = Nothing
     , printSolution = True
+    , offerUnicodeInput = False
     }
 
 -- Weight 0.25
@@ -39,6 +40,7 @@ task14 =
     , useSetNotation = False
     , extraText = Nothing
     , printSolution = True
+    , offerUnicodeInput = False
     }
 
 spec :: Spec

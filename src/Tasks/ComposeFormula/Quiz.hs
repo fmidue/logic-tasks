@@ -33,4 +33,5 @@ generateComposeFormulaInst ComposeFormulaConfig {..} = do
       , addExtraHintsOnAssociativity = extraHintsOnAssociativity
       , addText = extraText
       , showSolution = printSolution
+      , unicodeAllowed = offerUnicodeInput
       }

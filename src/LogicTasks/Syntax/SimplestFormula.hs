@@ -6,13 +6,15 @@ module LogicTasks.Syntax.SimplestFormula where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse),
+  GenericOutputCapable (refuse, indent, translatedCode),
   LangM,
   OutputCapable,
   english,
   german,
   paragraph,
   translate,
+  localise,
+  translations,
   )
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
@@ -57,18 +59,28 @@ description SuperfluousBracketsInst{..} = do
       english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
       german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
 
-    example "A ∨ B" $ do
-      english "For example, if (A ∨ B) is the given formula, then the solution is:"
-      german "Ist z.B. (A ∨ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
+    paragraph $ indent $ do
+      translate $ do
+        english "For example, if (A ∨ B) is the given formula, then the solution is:"
+        german "Ist z.B. (A ∨ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
+      translatedCode $ flip localise $ translations exampleCode
+      pure ()
 
     paragraph $ translate $ do
       german "Sie können dafür die Ausgangsformel in die Abgabe kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
       english "You can copy the original formula into the solution box and remove unnecessary brackets or use the following syntax:"
-    basicOpKey
+    basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
 
     extra addText
     pure ()
+      where
+        exampleCode | unicodeAllowed = do
+                      german "A ∨ B"
+                      english "A ∨ B"
+                    | otherwise      = do
+                      german "A oder B"
+                      english "A or B"
 
 
 verifyInst :: OutputCapable m => SuperfluousBracketsInst -> LangM m

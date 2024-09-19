@@ -25,6 +25,7 @@ small = DecomposeFormulaConfig
   , extraHintsOnAssociativity = True
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 medium :: DecomposeFormulaConfig
@@ -43,6 +44,7 @@ medium = DecomposeFormulaConfig
   , extraHintsOnAssociativity = True
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 spec :: Spec

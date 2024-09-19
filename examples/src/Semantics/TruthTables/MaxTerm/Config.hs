@@ -26,6 +26,7 @@ unused01 = MinMaxConfig
   , percentTrueEntries = Just (50, 70)
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 -- Weight 0.34
@@ -44,6 +45,7 @@ unused02 = MinMaxConfig
   , percentTrueEntries = Just (50, 70)
   , extraText = Nothing
   , printSolution = True
+  , offerUnicodeInput = False
   }
 
 spec :: Spec

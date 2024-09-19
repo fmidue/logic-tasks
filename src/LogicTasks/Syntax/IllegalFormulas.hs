@@ -25,10 +25,11 @@ import Trees.Print (transferToPicture)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
-import Data.Maybe (isNothing, isJust, fromJust)
+import Data.Maybe (isJust, fromJust)
 import qualified Data.Map as Map (fromAscList)
 import GHC.Real ((%))
 import Control.Applicative (Alternative)
+import Data.List.Extra (notNull)
 
 
 
@@ -42,16 +43,16 @@ description LegalPropositionInst{..} = do
     focus $ unlines $ indexed $ map fst pseudoFormulas
 
     instruct $ do
-      english "Some of these are syntactically incorrect. Which of these formulas have an invalid format?"
-      german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt geformt sind."
+      english "Some of these are syntactically wrong. Which of these formulas are correctly formed?"
+      german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln korrekt geformt sind."
 
     instruct $ do
-      english "Enter a list containing the indices of the invalid formulas to submit your answer."
-      german "Geben Sie eine Liste der Indizes aller syntaktisch falschen Formeln als Ihre Lösung an."
+      english "Enter a list containing the indices of the syntactically correct formulas to submit your answer."
+      german "Geben Sie eine Liste der Indizes aller syntaktisch korrekten Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
-      english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
-      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
+      english "For example, if only choices 2 and 3 are correctly formed, then the solution is:"
+      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 richtig geformt, dann ist diese Lösung korrekt:"
 
     extra addText
     pure ()
@@ -92,7 +93,7 @@ completeGrade
   -> [Int]
   -> Rated m
 completeGrade path LegalPropositionInst{..} sol
-  | null sol && null serialsOfWrong = do
+  | null sol && notNull serialsOfRight = do
     reject $ do
       english "Your solution is incorrect."
       german "Ihre Lösung ist falsch."
@@ -113,13 +114,15 @@ completeGrade path LegalPropositionInst{..} sol
 
 
     where
-      wrongSolution = sort (nub sol) /= sort serialsOfWrong
+      wrongSolution = sort (nub sol) /= sort serialsOfRight
       pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas
-      serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) pseudoIndexed
-      correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+      correctEntries = filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+      serialsOfRight = map fst correctEntries
+      correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) correctEntries
       what = translations $ do
         german "Indizes"
         english "indices"
-      solutionDisplay | showSolution = Just $ show serialsOfWrong
+      solutionDisplay | showSolution = Just $ show serialsOfRight
                       | otherwise = Nothing
-      solution = Map.fromAscList $ map (\(i,(_,mt)) -> (i, isNothing mt)) pseudoIndexed
+      solution = Map.fromAscList $ map (\(i,(_,mt)) -> (i, isJust mt)) pseudoIndexed
+

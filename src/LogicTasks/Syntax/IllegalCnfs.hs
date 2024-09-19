@@ -20,6 +20,7 @@ import Data.Map as Map (fromAscList)
 import LogicTasks.Helpers
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 import GHC.Real ((%))
+import Data.List.Extra (notNull)
 
 
 
@@ -33,16 +34,16 @@ description LegalCNFInst{..} = do
     focus $ unlines $ indexed formulaStrings
 
     instruct $ do
-      english "Which of these formulas are not given in conjunctive normal form (cnf)?"
-      german "Welche dieser Formeln sind nicht in konjunktiver Normalform (KNF) angegeben?"
+      english "Which of these formulas are given in conjunctive normal form (cnf)?"
+      german "Welche dieser Formeln sind in konjunktiver Normalform (KNF) angegeben?"
 
     instruct $ do
-      english "Enter a list containing the indices of the non-cnf formulas to submit your answer."
-      german "Geben Sie eine Liste der Indizes aller nicht in KNF vorliegenden Formeln als Ihre Lösung an."
+      english "Enter a list containing the indices of the cnf formulas to submit your answer."
+      german "Geben Sie eine Liste der Indizes aller in KNF vorliegenden Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
-      english "For example, if only choices 2 and 3 are non-cnf formulas, then the solution is:"
-      german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 nicht in KNF vor, dann ist diese Lösung korrekt:"
+      english "For example, if only choices 2 and 3 are cnf formulas, then the solution is:"
+      german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 in KNF vor, dann ist diese Lösung korrekt:"
 
     extra addText
 
@@ -79,7 +80,7 @@ partialGrade LegalCNFInst{..} sol
 
 completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
 completeGrade LegalCNFInst{..}  sol
-  | null sol && null serialsOfWrong = do
+  | null sol && notNull serialsOfRight = do
     reject $ do
       english "Your solution is incorrect."
       german "Ihre Lösung ist falsch."
@@ -89,6 +90,8 @@ completeGrade LegalCNFInst{..}  sol
     what = translations $ do
       german "Indizes"
       english "indices"
-    solutionDisplay | showSolution = Just $ show (toList serialsOfWrong)
+    indices = [1..length formulaStrings]
+    serialsOfRight = filter (`notElem` toList serialsOfWrong) indices
+    solutionDisplay | showSolution = Just $ show serialsOfRight
                     | otherwise = Nothing
-    solution = Map.fromAscList $ map (\i -> (i, i `elem` toList serialsOfWrong)) [1 .. length formulaStrings]
+    solution = Map.fromAscList $ map (\i -> (i, i `elem` serialsOfRight)) indices

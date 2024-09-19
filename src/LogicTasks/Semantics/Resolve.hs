@@ -63,7 +63,8 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
     printFeedbackImmediately = printFeedbackImmediately,
     usesSetNotation = useSetNotation,
     showSolution = printSolution,
-    addText = extraText
+    addText = extraText,
+    unicodeAllowed = offerUnicodeInput
   }
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
@@ -87,8 +88,8 @@ description ResolutionInst{..} = do
     english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
 
   keyHeading
-  negationKey
-  unless usesSetNotation orKey
+  negationKey unicodeAllowed
+  unless usesSetNotation (orKey unicodeAllowed)
 
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do
@@ -128,9 +129,7 @@ description ResolutionInst{..} = do
     translate $ do
       german "Nutzen Sie zur Angabe der Klauseln eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the clauses using a formula! A solution attempt could look like this: "
-    translatedCode $ flip localise $ translations $ do
-      english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
-      german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+    translatedCode $ flip localise $ translations exampleCode
     pure ()
 
   extra addText
@@ -139,6 +138,12 @@ description ResolutionInst{..} = do
       show' = if usesSetNotation
         then showCnfAsSet . mkCnf
         else show . mkCnf
+      exampleCode | unicodeAllowed = do
+                      english "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, not A), (A, not A, {})]"
+                      german "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+                  | otherwise      = do
+                      english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
+                      german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
 
 
 verifyStatic :: OutputCapable m => ResolutionInst -> LangM m

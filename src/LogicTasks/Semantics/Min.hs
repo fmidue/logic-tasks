@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module LogicTasks.Semantics.Min where
 
@@ -33,7 +34,12 @@ import Formula.Parsing (Parse(..))
 genMinInst :: MinMaxConfig -> Gen MinInst
 genMinInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
     dnf <- dnfInRange
-    pure $ MinInst dnf printSolution extraText
+    pure $ MinInst {
+      dnf
+    , showSolution = printSolution
+    , addText = extraText
+    , unicodeAllowed = offerUnicodeInput
+    }
    where
      getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
      dnfInRange = tryGen getDnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
@@ -52,19 +58,25 @@ description MinInst{..} = do
     german "Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
     english "Provide a formula in disjunctive normal form, that corresponds to the table. Use minterms to do this."
 
-  formulaKey
+  formulaKey unicodeAllowed
 
   paragraph $ indent $ do
     translate $ do
       let formulaStr = show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
-    translatedCode $ flip localise $ translations $ do
-      german "(A und nicht B) oder (nicht C und nicht D)"
-      english "(A and not B) or (not C and not D)"
+    translatedCode $ flip localise $ translations exampleCode
+
     pure ()
   extra addText
   pure ()
+    where
+      exampleCode | unicodeAllowed = do
+                      german "(A ∧ ¬B) oder (nicht C und nicht D)"
+                      english "(A ∧ ¬B) or (not C and not D)"
+                  | otherwise      = do
+                      german "(A und nicht B) oder (nicht C und nicht D)"
+                      english "(A and not B) or (not C and not D)"
 
 
 verifyStatic :: OutputCapable m => MinInst -> LangM m

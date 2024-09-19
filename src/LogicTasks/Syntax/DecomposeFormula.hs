@@ -58,20 +58,25 @@ description DecomposeFormulaInst{..} = do
         german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen."
 
     keyHeading
-    basicOpKey
+    basicOpKey unicodeAllowed
     arrowsKey
 
     paragraph $ indent $ do
       translate $ do
         english "A solution attempt could look like this: "
         german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      translatedCode $ flip localise $ translations $ do
-        english "(A or not B) and C"
-        german "(A oder nicht B) und C"
+      translatedCode $ flip localise $ translations exampleCode
       pure ()
 
     extra addText
     pure ()
+      where
+        exampleCode | unicodeAllowed = do
+                      english "(A ∨ ¬B) and C"
+                      german "(A ∨ ¬B) und C"
+                    | otherwise      = do
+                      english "(A or not B) and C"
+                      german "(A oder nicht B) und C"
 
 
 verifyInst :: OutputCapable m => DecomposeFormulaInst -> LangM m

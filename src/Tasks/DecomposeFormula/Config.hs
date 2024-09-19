@@ -22,6 +22,7 @@ data DecomposeFormulaConfig = DecomposeFormulaConfig {
     , extraHintsOnAssociativity :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
+    , offerUnicodeInput :: Bool
     }
     deriving (Typeable, Generic, Show)
 
@@ -31,6 +32,7 @@ defaultDecomposeFormulaConfig = DecomposeFormulaConfig
     , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = True
+    , offerUnicodeInput = False
     }
 
 
@@ -54,6 +56,7 @@ data DecomposeFormulaInst = DecomposeFormulaInst
                , addExtraHintsOnAssociativity :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
+               , unicodeAllowed :: Bool
                }
                deriving (Show, Typeable, Generic)
 

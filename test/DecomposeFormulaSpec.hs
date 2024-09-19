@@ -28,7 +28,8 @@ validBoundsDecomposeFormula = do
     syntaxTreeConfig,
     extraHintsOnAssociativity = False,
     extraText = Nothing,
-    printSolution = False
+    printSolution = False,
+    offerUnicodeInput = False
   }
 
 spec :: Spec
