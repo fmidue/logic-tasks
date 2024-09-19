@@ -19,8 +19,6 @@ import Data.Set (toList)
 import Data.Map as Map (fromAscList)
 import LogicTasks.Helpers
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
-import GHC.Real ((%))
-import Data.List.Extra (notNull)
 
 
 
@@ -79,13 +77,7 @@ partialGrade LegalCNFInst{..} sol
 
 
 completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
-completeGrade LegalCNFInst{..}  sol
-  | null sol && notNull serialsOfRight = do
-    reject $ do
-      english "Your solution is incorrect."
-      german "Ihre Lösung ist falsch."
-    pure (0 % 1)
-  | otherwise = multipleChoice IndefiniteArticle what solutionDisplay solution sol
+completeGrade LegalCNFInst{..} = multipleChoice IndefiniteArticle what solutionDisplay solution
   where
     what = translations $ do
       german "Indizes"

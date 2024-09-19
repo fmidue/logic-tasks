@@ -27,9 +27,7 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Data.Maybe (isJust, fromJust)
 import qualified Data.Map as Map (fromAscList)
-import GHC.Real ((%))
 import Control.Applicative (Alternative)
-import Data.List.Extra (notNull)
 
 
 
@@ -92,13 +90,7 @@ completeGrade
   -> LegalPropositionInst
   -> [Int]
   -> Rated m
-completeGrade path LegalPropositionInst{..} sol
-  | null sol && notNull serialsOfRight = do
-    reject $ do
-      english "Your solution is incorrect."
-      german "Ihre Lösung ist falsch."
-    pure (0 % 1)
-  | otherwise = reRefuse
+completeGrade path LegalPropositionInst{..} sol = reRefuse
     (multipleChoice IndefiniteArticle what solutionDisplay solution sol)
     $ when (showSolution && wrongSolution) $ do
       instruct $ do
