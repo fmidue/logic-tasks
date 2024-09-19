@@ -14,7 +14,7 @@ import Control.OutputCapable.Blocks (
   german,
   Rated,
   multipleChoice,
-  ArticleToUse (IndefiniteArticle),
+  ArticleToUse (DefiniteArticle),
   translations,
   )
 import Data.List (nub, sort)
@@ -91,7 +91,7 @@ completeGrade
   -> [Int]
   -> Rated m
 completeGrade path LegalPropositionInst{..} sol = reRefuse
-    (multipleChoice IndefiniteArticle what solutionDisplay solution sol)
+    (multipleChoice DefiniteArticle what solutionDisplay solution sol)
     $ when (showSolution && wrongSolution) $ do
       instruct $ do
           english "The following syntax trees represent the well-formed formulas:"

@@ -11,7 +11,7 @@ import Control.OutputCapable.Blocks (
   german,
   Rated,
   multipleChoice,
-  ArticleToUse (IndefiniteArticle),
+  ArticleToUse (DefiniteArticle),
   translations,
   )
 import Data.List (nub)
@@ -77,7 +77,7 @@ partialGrade LegalCNFInst{..} sol
 
 
 completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
-completeGrade LegalCNFInst{..} = multipleChoice IndefiniteArticle what solutionDisplay solution
+completeGrade LegalCNFInst{..} = multipleChoice DefiniteArticle what solutionDisplay solution
   where
     what = translations $ do
       german "Indizes"
