@@ -4,10 +4,11 @@ module Trees.Generate (
  syntaxShape,
 ) where
 
-import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
+import Prelude hiding (and, or)
+import Test.QuickCheck (choose, Gen, shuffle, suchThat, elements, frequency)
 import Test.QuickCheck.Gen (vectorOf)
 
-import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
+import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (
   collectLeaves,
   relabelShape,
@@ -15,12 +16,9 @@ import Trees.Helpers (
   consecutiveNegations,
   numOfUniqueBinOpsInSynTree,
   treeDepth)
-import Tasks.SynTree.Config (SynTreeConfig(..))
+import Tasks.SynTree.Config (SynTreeConfig(..), OperatorFrequencies(..))
+import Data.Bifunctor (Bifunctor(second))
 
-chooseList :: Bool -> [BinOp]
-chooseList allowArrowOperators = if allowArrowOperators
-        then allBinaryOperators
-        else [And, Or]
 
 randomList :: [c] -> [c] -> Integer -> Gen [c]
 randomList availableLetters atLeastOccurring listLength = let
@@ -33,7 +31,7 @@ genSynTree :: SynTreeConfig -> Gen (SynTree BinOp Char)
 genSynTree SynTreeConfig{..} = do
     sample <-
       (do nodes <- choose (minNodes, maxNodes) `suchThat` if hasNegations then const True else odd
-          syntaxShape nodes maxDepth allowArrowOperators hasNegations
+          syntaxShape nodes maxDepth operatorFrequencies hasNegations
             `suchThat` \synTree ->
               checkMinAmountOfUniqueAtoms synTree &&
               checkMinUniqueOps synTree &&
@@ -47,43 +45,50 @@ genSynTree SynTreeConfig{..} = do
           fromIntegral (length (collectLeaves synTree)) >= minAmountOfUniqueAtoms
         checkMinUniqueOps synTree = numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
 
-syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())
-syntaxShape nodes maxDepth allowArrowOperators allowNegation
+syntaxShape :: Integer -> Integer -> OperatorFrequencies -> Bool -> Gen (SynTree BinOp ())
+syntaxShape nodes maxDepth operatorFrequencies allowNegation
     | nodes == 1 = positiveLiteral
     | nodes == 2 = negativeLiteral
-    | not allowNegation = oneof mapBinaryOperator
-    | maxNodesForDepth (maxDepth - 1) < nodes - 1 = oneof mapBinaryOperator
-    | otherwise = oneof $ negativeForm : mapBinaryOperator
+    | not allowNegation = frequency mapBinaryOperator
+    | maxNodesForDepth (maxDepth - 1) < nodes - 1 = frequency mapBinaryOperator
+    | otherwise = frequency $ (neg operatorFrequencies,negativeForm) : mapBinaryOperator
     where
-        mapBinaryOperator = map (binaryOperator nodes maxDepth allowArrowOperators allowNegation . Binary) $
-          chooseList allowArrowOperators
-        negativeForm = negativeFormula nodes maxDepth allowArrowOperators
+        binOpFrequencies =
+          [ (and operatorFrequencies, And)
+          , (or operatorFrequencies, Or)
+          , (impl operatorFrequencies, Impl)
+          , (backImpl operatorFrequencies, BackImpl)
+          , (equi operatorFrequencies, Equi)
+          ]
+        mapBinaryOperator = map (second (binaryOperator nodes maxDepth operatorFrequencies allowNegation . Binary)) binOpFrequencies
+        negativeForm = negativeFormula nodes maxDepth operatorFrequencies
 
 binaryOperator
     :: Integer
     -> Integer
-    -> Bool -> Bool
+    -> OperatorFrequencies
+    -> Bool
     -> (SynTree BinOp ()
     -> SynTree BinOp ()
     -> SynTree BinOp ())
     -> Gen (SynTree BinOp ())
-binaryOperator nodes maxDepth allowArrowOperators allowNegation operator =
+binaryOperator nodes maxDepth operatorFrequencies allowNegation operator =
     let minNodesPerSide = max 1 (restNodes - maxNodesForDepth newMaxDepth)
         restNodes = nodes - 1
         newMaxDepth = maxDepth - 1
     in  do
         leftNodes <- choose (minNodesPerSide , restNodes - minNodesPerSide)
           `suchThat` \leftNodes -> allowNegation || odd leftNodes
-        leftTree <- syntaxShape leftNodes newMaxDepth allowArrowOperators allowNegation
-        rightTree <- syntaxShape (restNodes - leftNodes ) newMaxDepth allowArrowOperators allowNegation
+        leftTree <- syntaxShape leftNodes newMaxDepth operatorFrequencies allowNegation
+        rightTree <- syntaxShape (restNodes - leftNodes ) newMaxDepth operatorFrequencies allowNegation
         return (operator leftTree rightTree)
 
-negativeFormula :: Integer -> Integer -> Bool -> Gen (SynTree BinOp ())
-negativeFormula nodes maxDepth allowArrowOperators =
+negativeFormula :: Integer -> Integer -> OperatorFrequencies -> Gen (SynTree BinOp ())
+negativeFormula nodes maxDepth operatorFrequencies =
     let restNodes = nodes - 1
         newMaxDepth = maxDepth - 1
     in  do
-        e <- syntaxShape restNodes newMaxDepth allowArrowOperators True
+        e <- syntaxShape restNodes newMaxDepth operatorFrequencies True
         return (Not e)
 
 negativeLiteral ::  Gen (SynTree o ())

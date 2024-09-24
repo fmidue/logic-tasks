@@ -17,7 +17,7 @@ import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxLeavesForNodes)
-import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
+import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig, arrowOperatorsAllowed)
 import Trees.Types (SynTree, BinOp)
 import Tasks.LegalProposition.Helpers (formulaAmount)
 
@@ -53,7 +53,7 @@ checkLegalPropositionConfig config@LegalPropositionConfig {..} =
 
 
 checkAdditionalConfig :: OutputCapable m => LegalPropositionConfig -> LangM m
-checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, formulas, illegals, bracketFormulas}
+checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = treeCfg@SynTreeConfig {..}, formulas, illegals, bracketFormulas}
     | minNodes < 3 = reject $ do
         english "form A and ~A is meaningless in this kind of issue"
         german "Minimale Anzahl an Blättern unter 3 kann nur triviale Aufgaben erzeugen."
@@ -69,7 +69,7 @@ checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeC
     | formulas < illegals + bracketFormulas = reject $ do
         english "The number of formulas cannot be less than the sum of bracket Formulas and illegal ones."
         german "Die Anzahl der Formeln kann nicht niedriger als die Summe von falschen und richtigen Formeln."
-    | let leaves = maxLeavesForNodes maxNodes, (if allowArrowOperators then 4 else 2) ^ (maxNodes - leaves) < formulas
+    | let leaves = maxLeavesForNodes maxNodes, (if arrowOperatorsAllowed treeCfg then 4 else 2) ^ (maxNodes - leaves) < formulas
       = reject $ do
         english "Settings may result in extremely large formulas."
         german "Einstellungen führen zu extrem großen Formeln."

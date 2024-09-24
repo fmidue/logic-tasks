@@ -10,7 +10,7 @@ import Trees.Generate (genSynTree)
 import Test.QuickCheck (Gen, suchThat)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
-import Tasks.SynTree.Config (SynTreeConfig(..))
+import Tasks.SynTree.Config (arrowOperatorsAllowed)
 import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
 
 
@@ -26,7 +26,7 @@ generateSubTreeInst SubTreeConfig {..} = do
       { tree
       , minInputTrees = minSubTrees
       , correctTrees = correctTrees
-      , showArrowOperators = allowArrowOperators syntaxTreeConfig
+      , showArrowOperators = arrowOperatorsAllowed syntaxTreeConfig
       , showSolution = printSolution
       , addText = extraText
       , unicodeAllowed = offerUnicodeInput

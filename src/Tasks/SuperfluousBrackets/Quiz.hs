@@ -9,7 +9,7 @@ import Test.QuickCheck (Gen, suchThat)
 
 import Tasks.SuperfluousBrackets.Config (SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay)
-import Tasks.SynTree.Config (SynTreeConfig(..))
+import Tasks.SynTree.Config (arrowOperatorsAllowed)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
 import Trees.Print (simplestDisplay)
@@ -26,7 +26,7 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {..} = do
       { tree
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
-      , showArrowOperators = allowArrowOperators syntaxTreeConfig
+      , showArrowOperators = arrowOperatorsAllowed syntaxTreeConfig
       , showSolution = printSolution
       , addText = extraText
       , unicodeAllowed = offerUnicodeInput

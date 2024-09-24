@@ -9,7 +9,7 @@ import Trees.Generate (genSynTree)
 import Test.QuickCheck (Gen,)
 
 import Tasks.TreeToFormula.Config (TreeToFormulaConfig(..), TreeToFormulaInst(..))
-import Tasks.SynTree.Config (SynTreeConfig(..))
+import Tasks.SynTree.Config (arrowOperatorsAllowed)
 import Trees.Print (transferToPicture, display)
 
 
@@ -23,7 +23,7 @@ generateTreeToFormulaInst TreeToFormulaConfig {..} = do
       , latexImage = transferToPicture tree
       , correct = display tree
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
-      , showArrowOperators = allowArrowOperators syntaxTreeConfig
+      , showArrowOperators = arrowOperatorsAllowed syntaxTreeConfig
       , addText = extraText
       , showSolution = printSolution
       , unicodeAllowed = offerUnicodeInput

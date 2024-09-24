@@ -183,3 +183,4 @@ mirrorTree (Binary BackImpl l r) = Binary Impl (mirrorTree r) (mirrorTree l)
 mirrorTree (Binary b l r) = Binary b (mirrorTree r) (mirrorTree l)
 mirrorTree (Not x) = Not $ mirrorTree x
 mirrorTree x = x
+

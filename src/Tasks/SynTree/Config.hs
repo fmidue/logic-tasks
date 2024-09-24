@@ -2,24 +2,36 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Tasks.SynTree.Config (
+    OperatorFrequencies(..),
     SynTreeConfig(..),
     checkSynTreeConfig,
     defaultSynTreeConfig,
+    arrowOperatorsAllowed
     ) where
 
-
+import Prelude hiding (and, or)
 import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth, maxDepthForNodes)
-import Trees.Types (BinOp)
+import Trees.Types (BinOp(..))
 
 import Data.List.Extra (nubOrd)
 
+data OperatorFrequencies =
+  OperatorFrequencies
+  { and :: Int
+  , or :: Int
+  , impl :: Int
+  , backImpl :: Int
+  , equi :: Int
+  , neg :: Int
+  } deriving (Show, Generic)
 
 data SynTreeConfig =
   SynTreeConfig
@@ -29,7 +41,7 @@ data SynTreeConfig =
   , maxDepth :: Integer
   , availableAtoms :: String
   , minAmountOfUniqueAtoms :: Integer
-  , allowArrowOperators :: Bool
+  , operatorFrequencies :: OperatorFrequencies
   , maxConsecutiveNegations :: Integer
   , minUniqueBinOperators :: Integer
   } deriving (Show,Generic)
@@ -45,7 +57,14 @@ defaultSynTreeConfig =
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 3
-    , allowArrowOperators = False
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 0
+      , backImpl = 0
+      , equi = 0
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 1
     }
@@ -53,7 +72,7 @@ defaultSynTreeConfig =
 
 
 checkSynTreeConfig :: OutputCapable m => SynTreeConfig -> LangM m
-checkSynTreeConfig SynTreeConfig {..}
+checkSynTreeConfig SynTreeConfig {operatorFrequencies = OperatorFrequencies{..},..}
     | not (all isLetter availableAtoms) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben dürfen Literale sein."
@@ -110,7 +129,15 @@ checkSynTreeConfig SynTreeConfig {..}
     | minUniqueBinOperators > fromIntegral (length [minBound .. maxBound :: BinOp]) = reject $ do
         english "The number of unique operators cannot exceed the maximum number of operators."
         german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
-    | not allowArrowOperators && minUniqueBinOperators > 2 = reject $ do
-        english "This number of unique operators cannot be reached with allowArrowOperators = False ."
-        german "Die angegebene Anzahl der unterschiedlichen Operatoren kann mit allowArrowOperators = False nicht erreicht werden."
+    | any (< 0) operatorFrequencies = reject $ do
+        english "The operator frequencies must be non-negative."
+        german "Die Frequenzen für die Operatoren müssen nicht-negativ sein."
+    | all (== 0) operatorFrequencies = reject $ do
+        english "At least one operator must have a positive frequency."
+        german "Mindestens ein Operator muss eine positive Frequenz haben."
     | otherwise = pure()
+      where operatorFrequencies = [and, or, impl, backImpl, equi, neg]
+
+arrowOperatorsAllowed :: SynTreeConfig -> Bool
+arrowOperatorsAllowed SynTreeConfig{operatorFrequencies=OperatorFrequencies{impl,backImpl,equi}} =
+  any (> 0) [impl, backImpl, equi]

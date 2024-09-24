@@ -1,9 +1,11 @@
 module Syntax.DecomposeFormula.Config where
+import Prelude hiding (and, or)
 import Tasks.DecomposeFormula.Config (
   DecomposeFormulaConfig(..), checkDecomposeFormulaConfig,
   )
 import Tasks.SynTree.Config (
   SynTreeConfig(..),
+  OperatorFrequencies(..)
   )
 import Test.Hspec
 import Util.VerifyConfig
@@ -18,7 +20,14 @@ small = DecomposeFormulaConfig
     , maxDepth = 4
     , availableAtoms = "ABCD"
     , minAmountOfUniqueAtoms = 4
-    , allowArrowOperators = False
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 0
+      , backImpl = 0
+      , equi = 0
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
@@ -37,7 +46,14 @@ medium = DecomposeFormulaConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , allowArrowOperators = True
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 1
+      , backImpl = 1
+      , equi = 1
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 3
     }

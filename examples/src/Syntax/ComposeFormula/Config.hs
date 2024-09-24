@@ -1,10 +1,12 @@
 module Syntax.ComposeFormula.Config where
 
+import Prelude hiding (and, or)
 import Tasks.ComposeFormula.Config (
   ComposeFormulaConfig(..), checkComposeFormulaConfig, TreeDisplayMode (TreeDisplay),
   )
 import Tasks.SynTree.Config (
   SynTreeConfig(..),
+  OperatorFrequencies(..)
   )
 
 import Test.Hspec
@@ -21,7 +23,14 @@ small = ComposeFormulaConfig
     , maxDepth = 4
     , availableAtoms = "ABCD"
     , minAmountOfUniqueAtoms = 4
-    , allowArrowOperators = False
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 0
+      , backImpl = 0
+      , equi = 0
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
@@ -41,7 +50,14 @@ medium = ComposeFormulaConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , allowArrowOperators = True
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 1
+      , backImpl = 1
+      , equi = 1
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }

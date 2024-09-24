@@ -10,7 +10,7 @@ module Tasks.ComposeFormula.Config (
     TreeDisplayMode(..)
     ) where
 
-import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig, OperatorFrequencies (..))
 import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
@@ -32,7 +32,16 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
 
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
-    { syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
+    { syntaxTreeConfig = defaultSynTreeConfig
+      { operatorFrequencies = OperatorFrequencies
+        { and = 1
+        , or = 1
+        , impl = 1
+        , backImpl = 1
+        , equi = 1
+        , neg = 1
+        }
+      }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
     , extraHintsOnAssociativity = True
     , extraText = Nothing

@@ -1,10 +1,12 @@
 module Syntax.InvalidFormulas.Config where
 
+import Prelude hiding (and, or)
 import Tasks.LegalProposition.Config (
   LegalPropositionConfig(..), checkLegalPropositionConfig,
   )
 import Tasks.SynTree.Config (
   SynTreeConfig(..),
+  OperatorFrequencies(..)
   )
 import Test.Hspec
 import Util.VerifyConfig
@@ -20,7 +22,14 @@ task01 = LegalPropositionConfig
     , maxDepth = 5
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , allowArrowOperators = False
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 0
+      , backImpl = 0
+      , equi = 0
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
@@ -41,7 +50,14 @@ task17 = LegalPropositionConfig
     , maxDepth = 6
     , availableAtoms = "ABCDEF"
     , minAmountOfUniqueAtoms = 6
-    , allowArrowOperators = True
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 1
+      , backImpl = 1
+      , equi = 1
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 3
     }

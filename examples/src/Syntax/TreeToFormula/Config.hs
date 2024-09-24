@@ -1,9 +1,11 @@
 module Syntax.TreeToFormula.Config where
 
+import Prelude hiding (and, or)
 import Test.Hspec
 
 import Tasks.SynTree.Config (
   SynTreeConfig(..),
+  OperatorFrequencies(..)
   )
 import Tasks.TreeToFormula.Config (
   TreeToFormulaConfig(..),checkTreeToFormulaConfig,
@@ -21,7 +23,14 @@ task03 = TreeToFormulaConfig
     , maxDepth = 5
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , allowArrowOperators = False
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 0
+      , backImpl = 0
+      , equi = 0
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
@@ -41,7 +50,14 @@ task04 =  TreeToFormulaConfig
     , maxDepth = 9
     , availableAtoms = "ABCDEFG"
     , minAmountOfUniqueAtoms = 7
-    , allowArrowOperators = True
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 0
+      , backImpl = 0
+      , equi = 0
+      , neg = 1
+      }
     , maxConsecutiveNegations = 3
     , minUniqueBinOperators = 2
     }

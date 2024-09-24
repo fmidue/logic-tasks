@@ -1,11 +1,13 @@
 module Syntax.Subformulas.Config where
 
+import Prelude hiding (and, or)
 import Test.Hspec
 import Tasks.SubTree.Config (
   SubTreeConfig(..), checkSubTreeConfig,
   )
 import Tasks.SynTree.Config (
   SynTreeConfig(..),
+  OperatorFrequencies(..)
   )
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
@@ -19,7 +21,14 @@ medium = SubTreeConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , allowArrowOperators = True
+    , operatorFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 1
+      , backImpl = 1
+      , equi = 1
+      , neg = 1
+      }
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
