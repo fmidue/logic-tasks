@@ -31,7 +31,7 @@ data OperatorFrequencies =
   , backImpl :: Int
   , equi :: Int
   , neg :: Int
-  } deriving (Show, Generic)
+  } deriving (Show, Generic, Eq)
 
 data SynTreeConfig =
   SynTreeConfig
