@@ -66,6 +66,7 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {op
         english "Both implication operators are currently not implemented for this task."
         german "Beide Operatoren für Implikation sind derzeit für diese Aufgabe nicht implementiert."
     | otherwise = pure ()
+
 data DecomposeFormulaInst = DecomposeFormulaInst
                { tree :: SynTree BinOp Char
                , addExtraHintsOnAssociativity :: Bool
