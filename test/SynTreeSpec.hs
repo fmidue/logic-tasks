@@ -11,7 +11,12 @@ import Data.List.Extra (nubOrd, isInfixOf)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
-import Tasks.SynTree.Config (SynTreeConfig (..), OperatorFrequencies(..), checkSynTreeConfig, defaultSynTreeConfig, binOperatorFrequenciesValues)
+import Tasks.SynTree.Config (
+  SynTreeConfig (..),
+  OperatorFrequencies(..),
+  checkSynTreeConfig,
+  defaultSynTreeConfig,
+  binOperatorFrequenciesValues)
 import Trees.Helpers (
   collectLeaves,
   treeDepth,
@@ -130,7 +135,7 @@ spec = do
         \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
             treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
     it "should respect operator frequencies" $
-       forAll (validBoundsSynTree `suchThat` ((== opFrequenciesNoArrows) . operatorFrequencies)) $ \synTreeConfig@SynTreeConfig {..} ->
+       forAll (validBoundsSynTree `suchThat` ((== opFrequenciesNoArrows) . operatorFrequencies)) $ \synTreeConfig ->
         forAll (genSynTree synTreeConfig) $ \tree ->
           any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
 
