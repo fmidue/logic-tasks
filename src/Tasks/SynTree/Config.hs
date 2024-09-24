@@ -9,7 +9,8 @@ module Tasks.SynTree.Config (
     SynTreeConfig(..),
     checkSynTreeConfig,
     defaultSynTreeConfig,
-    arrowOperatorsAllowed
+    arrowOperatorsAllowed,
+    binOperatorFrequenciesValues
     ) where
 
 import Prelude hiding (and, or)
@@ -144,3 +145,6 @@ checkSynTreeConfig SynTreeConfig {operatorFrequencies = OperatorFrequencies{..},
 arrowOperatorsAllowed :: SynTreeConfig -> Bool
 arrowOperatorsAllowed SynTreeConfig{operatorFrequencies=OperatorFrequencies{impl,backImpl,equi}} =
   any (> 0) [impl, backImpl, equi]
+
+binOperatorFrequenciesValues :: OperatorFrequencies -> [Int]
+binOperatorFrequenciesValues OperatorFrequencies {..} = [and, or, impl, backImpl, equi]

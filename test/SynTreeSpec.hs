@@ -11,7 +11,7 @@ import Data.List.Extra (nubOrd, isInfixOf)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
-import Tasks.SynTree.Config (SynTreeConfig (..), OperatorFrequencies(..), checkSynTreeConfig, defaultSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (..), OperatorFrequencies(..), checkSynTreeConfig, defaultSynTreeConfig, binOperatorFrequenciesValues)
 import Trees.Helpers (
   collectLeaves,
   treeDepth,
@@ -63,7 +63,7 @@ validBoundsSynTree = do
   maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat`
     \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes')
       && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
-  let availableBinOpsCount = if operatorFrequencies == opFrequencies then fromIntegral $ length [minBound .. maxBound :: BinOp] else 2
+  let availableBinOpsCount = fromIntegral $ length $ filter (>0) (binOperatorFrequenciesValues operatorFrequencies)
   minUniqueBinOperators <- choose (1, min availableBinOpsCount ((minNodes - 1) `div` 2))
   return $ SynTreeConfig {
     maxNodes,
