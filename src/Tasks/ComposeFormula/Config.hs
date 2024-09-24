@@ -10,6 +10,7 @@ module Tasks.ComposeFormula.Config (
     TreeDisplayMode(..)
     ) where
 
+-- jscpd:ignore-start
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig, OperatorFrequencies (..))
 import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
@@ -17,6 +18,7 @@ import Data.Typeable
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import LogicTasks.Helpers (reject)
+-- jscpd:ignore-end
 
 data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bounded)
 
