@@ -17,6 +17,7 @@ small = PrologConfig
     , printSolution = True
     , firstClauseShape = queryClause
     , secondClauseShape = procedureClause
+    , useSetNotation = False
     }
 
 medium :: PrologConfig
@@ -28,6 +29,7 @@ medium = PrologConfig
     , printSolution = True
     , firstClauseShape = queryClause
     , secondClauseShape = procedureClause
+    , useSetNotation = False
     }
 
 spec :: Spec
