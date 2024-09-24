@@ -5,7 +5,7 @@
   ],
   "ignore": [
     "**/__snapshots__/**",
-    "examples/**"
+    "**/examples/**"
   ],
   "minLines": 5,
   "max-lines": 1000,
