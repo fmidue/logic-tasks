@@ -8,6 +8,7 @@ dnf
 Dnf
 DNFs
 DSL
+equi
 fmap
 fmidue
 fno
