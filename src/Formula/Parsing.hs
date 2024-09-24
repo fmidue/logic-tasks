@@ -6,7 +6,9 @@ module Formula.Parsing (
   clauseFormulaParser,
   resStepsParser,
   resStepParser,
-  stepAnswerParser
+  stepAnswerParser,
+  prologClauseFormulaParser,
+  prologClauseSetParser
   ) where
 
 import Config
@@ -307,8 +309,26 @@ instance Parse PrologLiteral where
         where
           strParse = many1 $ satisfy $ flip elem ['A'..'z']
 
-instance Parse PrologClause where
- parser = (lexeme (emptyParse <|> clauseParse) <?> "Clause")
+emptyClauseParser :: Parser PrologClause
+emptyClauseParser = do
+  char '{'
+  spaces
+  char '}'
+  pure $ mkPrologClause []
+
+prologClauseSetParser :: Parser PrologClause
+prologClauseSetParser = (lexeme (try emptyClauseParser <|> clauseParse) <?> "Clause")
+          <|> fail "Could not parse a clause: Clauses are a set of literals separated by a comma."
+   where
+     clauseParse = do
+       braces <- lexeme $ optionMaybe $ char '('
+       ts <- between (tokenSymbol "{") (tokenSymbol "}") $ sepBy parser (tokenSymbol ",")
+       case braces of Nothing -> pure ' '
+                      Just _ -> char ')'
+       pure $ mkPrologClause ts
+
+prologClauseFormulaParser :: Parser PrologClause
+prologClauseFormulaParser = (lexeme (emptyClauseParser <|> clauseParse) <?> "Clause")
           <|> fail "Could not parse a clause: Clauses are composed out of terms and the 'or operator' (\\/)."
    where
      clauseParse = do
@@ -317,12 +337,9 @@ instance Parse PrologClause where
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkPrologClause ts
-     emptyParse = do
-       char '{'
-       spaces
-       char '}'
-       pure $ mkPrologClause []
 
+instance Parse PrologClause where
+ parser = prologClauseFormulaParser
 
 instance Parse PickInst where
   parser = lexeme instParse

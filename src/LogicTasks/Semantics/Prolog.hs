@@ -12,6 +12,8 @@ import Control.OutputCapable.Blocks (
   english,
   german,
   translate,
+  localise,
+  translations,
   )
 import Data.Maybe (fromJust)
 import Data.Set (difference, member, toList, union)
@@ -19,16 +21,19 @@ import Data.Tuple (swap)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite, ClauseShape (HornClause), HornShape (Fact, Query))
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite, ClauseShape (HornClause), HornShape (Fact, Query), terms)
 import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
-import Control.Monad (when)
+import Control.Monad (when, unless)
 import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
-import Formula.Parsing (Parse(..))
+import Formula.Parsing.Delayed (Delayed, withDelayed, withDelayedSucceeding, complainAboutWrongNotation)
+import Formula.Parsing (Parse(..), prologClauseSetParser, prologClauseFormulaParser)
+import Data.List (intercalate)
+import ParsingHelpers (tokenSymbol)
+import Text.ParserCombinators.Parsec (Parser)
 
 genPrologInst :: PrologConfig -> Gen PrologInst
 genPrologInst PrologConfig{..} = (do
@@ -42,10 +47,11 @@ genPrologInst PrologConfig{..} = (do
       literals1 = termAddedClause1
     , literals2 = termAddedClause2
     , solution = (remap resolveLit, mkPrologClause (map remap resultClause))
+    , usesSetNotation = useSetNotation
     , showSolution = printSolution
     , addText = extraText
     })
-  `suchThat` \(PrologInst clause1 clause2 _ _ _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
+  `suchThat` \(PrologInst clause1 clause2 _ _ _ _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
   where
     mapping = zip usedPredicates ['A'..'Z']
     usedLiterals = map snd mapping
@@ -54,7 +60,11 @@ genPrologInst PrologConfig{..} = (do
       where
         predicate = fromJust (lookup (letter l) reverseMapping)
 
-
+showPrologClauseAsSet :: PrologClause -> String
+showPrologClauseAsSet pc
+  | null lits = "{ }"
+  | otherwise = "{" ++ intercalate "," (map show lits) ++ "}"
+  where lits = terms pc
 
 description :: OutputCapable m => PrologInst -> LangM m
 description PrologInst{..} = do
@@ -62,8 +72,8 @@ description PrologInst{..} = do
     translate $ do
       german "Betrachten Sie die zwei folgenden Klauseln:"
       english "Consider the two following clauses:"
-    indent $ code $ show literals1
-    indent $ code $ show literals2
+    indent $ code $ displayClause literals1
+    indent $ code $ displayClause literals2
     pure ()
   paragraph $ translate $ do
     german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
@@ -77,15 +87,26 @@ description PrologInst{..} = do
     german "Die leere Klausel kann durch geschweifte Klammern '{ }' dargestellt werden."
     english "The empty clause can be denoted by curly braces '{ }'."
 
-  paragraph $ indent $ do
+  when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch mit den Klauseln a(x) und not(a(x)) könnte beispielsweise so aussehen:"
-      english "A valid solution with the clauses a(x) and not(a(x)) could look like this:"
-    code "(a(x), { })"
+      german "Nutzen Sie zur Angabe der Klauseln die Mengennotation. Ein Lösungsversuch mit den Klauseln {a(x), b(x)} und {-a(x), b(x), c(x)} könnte beispielsweise so aussehen:"
+      english "Specify the clauses using set notation. A valid solution with the clauses {a(x), b(x)} and {-a(x), b(x), c(x)} could look like this:"
+    code "(a(x), { b(x), c(x) })"
     pure ()
+
+  unless usesSetNotation $ paragraph $ indent $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Klauseln eine Formel. Ein Lösungsversuch mit den Klauseln 'a(x) oder b(x)' und '-a(x) oder b(x) oder c(x)' könnte beispielsweise so aussehen:"
+      english "Specify the clauses using a formula. A valid solution with the clauses 'a(x) or b(x)' and '-a(x) or b(x) or c(x)' could look like this:"
+    translatedCode $ flip localise $ translations $ do
+      english "(a(x), b(x) or c(x))"
+      german "(a(x), b(x) oder c(x))"
+    pure ()
+
+
   extra addText
   pure ()
-
+  where displayClause = if usesSetNotation then showPrologClauseAsSet else show
 
 verifyStatic :: OutputCapable m => PrologInst -> LangM m
 verifyStatic PrologInst{..}
@@ -139,8 +160,20 @@ verifyQuiz PrologConfig{..}
 start :: (PrologLiteral, PrologClause)
 start = (PrologLiteral True "a" ["x"], mkPrologClause [])
 
+parser' :: Parser PrologClause -> Parser (PrologLiteral, PrologClause)
+parser' clauseParser = do
+  tokenSymbol "("
+  lit <- parser
+  tokenSymbol ","
+  clause <- clauseParser
+  tokenSymbol ")"
+  pure (lit, clause)
+
 partialGrade :: OutputCapable m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
-partialGrade inst = (partialGrade' inst `withDelayed` parser) displayParseError
+partialGrade inst = (partialGrade' inst `withDelayed` parser' clauseParser) (const complainAboutWrongNotation)
+  where clauseParser | usesSetNotation inst = prologClauseSetParser
+                     | otherwise            = prologClauseFormulaParser
+
 
 partialGrade' :: OutputCapable m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 partialGrade' PrologInst{..} sol = do
@@ -168,7 +201,9 @@ partialGrade' PrologInst{..} sol = do
      extraLiterals = toList $ solLits `difference` availLits
 
 completeGrade :: OutputCapable m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
-completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
+completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser' clauseParser
+  where clauseParser | usesSetNotation inst = prologClauseSetParser
+                     | otherwise            = prologClauseFormulaParser
 
 completeGrade' :: OutputCapable m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade' PrologInst{..} sol =
@@ -197,8 +232,9 @@ completeGrade' PrologInst{..} sol =
     transSol1 = fromJust $ lookup (fst sol) mapping
     transSol2 = transformProlog (snd sol) mapping
     resolveResult = resolve clause1 clause2 transSol1
+    displayClause = if usesSetNotation then showPrologClauseAsSet else show
     displaySolution = when showSolution $ do
-          example (show solution) $ do
+          example ("(" ++ show (fst solution) ++ ", " ++ displayClause (snd solution) ++ ")") $ do
             english "A possible solution for this task is:"
             german "Eine mögliche Lösung für die Aufgabe ist:"
           pure ()

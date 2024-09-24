@@ -225,6 +225,7 @@ data PrologInst = PrologInst {
                  literals1 :: !PrologClause
                , literals2 :: !PrologClause
                , solution :: (PrologLiteral, PrologClause)
+               , usesSetNotation :: Bool
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
@@ -236,6 +237,7 @@ dPrologInst =  PrologInst
           { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
           , solution = (PrologLiteral True "pred" ["fact"], mkPrologClause [])
+          , usesSetNotation = False
           , showSolution = False
           , addText = Nothing
           }
@@ -383,6 +385,7 @@ data PrologConfig = PrologConfig {
     , printSolution :: Bool
     , firstClauseShape :: ClauseShape
     , secondClauseShape :: ClauseShape
+    , useSetNotation :: Bool
     }
     deriving (Show, Typeable, Generic)
 
@@ -395,6 +398,7 @@ dPrologConf = PrologConfig
     , printSolution = False
     , firstClauseShape = HornClause Query
     , secondClauseShape = HornClause Procedure
+    , useSetNotation = False
     }
 
 
