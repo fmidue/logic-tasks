@@ -1,4 +1,3 @@
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 module DecomposeFormulaSpec where
 
@@ -10,7 +9,7 @@ import Tasks.DecomposeFormula.Config (
   DecomposeFormulaInst(..))
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
-import Tasks.SynTree.Config (SynTreeConfig(..))
+import Tasks.SynTree.Config (SynTreeConfig(..), OperatorFrequencies(impl, backImpl))
 import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust, fromJust)
 import Control.Monad.Identity (Identity(runIdentity))
@@ -23,9 +22,14 @@ import Trees.Print (display)
 validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormula = do
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    minUniqueBinOperators >= 1 && minNodes > 6
+    minUniqueBinOperators >= 1 && minUniqueBinOperators < 4 && minNodes > 6
   return DecomposeFormulaConfig {
-    syntaxTreeConfig,
+    syntaxTreeConfig = syntaxTreeConfig {
+      operatorFrequencies = (operatorFrequencies syntaxTreeConfig) {
+        impl = 0,
+        backImpl = 0
+      }
+    },
     extraHintsOnAssociativity = False,
     extraText = Nothing,
     printSolution = False,

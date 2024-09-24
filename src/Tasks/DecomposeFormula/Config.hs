@@ -33,8 +33,8 @@ defaultDecomposeFormulaConfig = DecomposeFormulaConfig
       { operatorFrequencies = OperatorFrequencies
         { and = 1
         , or = 1
-        , impl = 1
-        , backImpl = 1
+        , impl = 0
+        , backImpl = 0
         , equi = 1
         , neg = 1
         }
