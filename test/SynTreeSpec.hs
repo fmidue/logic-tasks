@@ -11,14 +11,15 @@ import Data.List.Extra (nubOrd, isInfixOf)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
-import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (..), OperatorFrequencies(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Trees.Helpers (
   collectLeaves,
   treeDepth,
   treeNodes,
   maxNodesForDepth,
   numOfUniqueBinOpsInSynTree,
-  maxDepthForNodes)
+  maxDepthForNodes,
+  collectUniqueBinOpsInSynTree)
 import SAT.MiniSat hiding (Formula(Not))
 import qualified SAT.MiniSat as Sat (Formula(Not))
 import Trees.Types (SynTree(..), BinOp(..))
@@ -29,9 +30,29 @@ import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
 
+opFrequencies :: OperatorFrequencies
+opFrequencies = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 1
+      , backImpl = 1
+      , equi = 1
+      , neg = 1
+      }
+
+opFrequenciesNoArrows :: OperatorFrequencies
+opFrequenciesNoArrows = OperatorFrequencies
+      { and = 1
+      , or = 1
+      , impl = 0
+      , backImpl = 0
+      , equi = 0
+      , neg = 1
+      }
+
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
-  allowArrowOperators <- elements [True, False]
+  operatorFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
   maxConsecutiveNegations <- choose (0, 3)
   availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minAmountOfUniqueAtoms <- choose (1, fromIntegral $ length availableAtoms)
@@ -42,7 +63,7 @@ validBoundsSynTree = do
   maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat`
     \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes')
       && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
-  let availableBinOpsCount = if allowArrowOperators then fromIntegral $ length [minBound .. maxBound :: BinOp] else 2
+  let availableBinOpsCount = if operatorFrequencies == opFrequencies then fromIntegral $ length [minBound .. maxBound :: BinOp] else 2
   minUniqueBinOperators <- choose (1, min availableBinOpsCount ((minNodes - 1) `div` 2))
   return $ SynTreeConfig {
     maxNodes,
@@ -51,7 +72,7 @@ validBoundsSynTree = do
     maxDepth,
     availableAtoms,
     minAmountOfUniqueAtoms,
-    allowArrowOperators,
+    operatorFrequencies,
     maxConsecutiveNegations,
     minUniqueBinOperators
   }
@@ -108,6 +129,11 @@ spec = do
       forAll (validBoundsSynTree `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
         \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
             treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
+    it "should respect operator frequencies" $
+       forAll (validBoundsSynTree `suchThat` ((== opFrequenciesNoArrows) . operatorFrequencies)) $ \synTreeConfig@SynTreeConfig {..} ->
+        forAll (genSynTree synTreeConfig) $ \tree ->
+          any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
+
   describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $
       convert @(SynTree BinOp Char) (Leaf 'A') == Var 'A'
