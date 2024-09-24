@@ -135,6 +135,9 @@ checkSynTreeConfig SynTreeConfig {operatorFrequencies = OperatorFrequencies{..},
     | all (== 0) operatorFrequencies = reject $ do
         english "At least one operator must have a positive frequency."
         german "Mindestens ein Operator muss eine positive Frequenz haben."
+    | minUniqueBinOperators > fromIntegral (length (filter (> 0) [and, or, impl, backImpl, equi])) = reject $ do
+        english "The minimum number of different operators exceeds the maximum number of available operators."
+        german "Die minimale Anzahl unterschiedlicher Operatoren überschreitet die maximale Anzahl an verfügbaren Operatoren."
     | otherwise = pure()
       where operatorFrequencies = [and, or, impl, backImpl, equi, neg]
 
