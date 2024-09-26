@@ -16,9 +16,9 @@ import GHC.Generics (Generic)
 import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
-import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig, OperatorFrequencies (..))
-import Trees.Types (BinOp, SynTree)
-
+import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
+import Trees.Types (BinOp(..), SynTree)
+import qualified Data.Map as Map (fromList)
 
 
 
@@ -39,14 +39,13 @@ defaultSuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
       syntaxTreeConfig = defaultSynTreeConfig
-      { operatorFrequencies = OperatorFrequencies
-        { and = 1
-        , or = 1
-        , impl = 1
-        , backImpl = 1
-        , equi = 1
-        , neg = 1
-        }
+      { binOpFrequencies = Map.fromList
+        [ (And, 1)
+        , (Or, 1)
+        , (Impl, 1)
+        , (BackImpl, 1)
+        , (Equi, 1)
+        ]
       , minUniqueBinOperators = 2
       }
     , superfluousBracketPairs = 2

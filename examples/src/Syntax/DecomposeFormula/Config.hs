@@ -1,15 +1,15 @@
 module Syntax.DecomposeFormula.Config where
-import Prelude hiding (and, or)
 import Tasks.DecomposeFormula.Config (
   DecomposeFormulaConfig(..), checkDecomposeFormulaConfig,
   )
 import Tasks.SynTree.Config (
-  SynTreeConfig(..),
-  OperatorFrequencies(..)
+  SynTreeConfig(..)
   )
+import Trees.Types (BinOp(..))
 import Test.Hspec
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
+import qualified Data.Map as Map (fromList)
 
 small :: DecomposeFormulaConfig
 small = DecomposeFormulaConfig
@@ -20,14 +20,14 @@ small = DecomposeFormulaConfig
     , maxDepth = 4
     , availableAtoms = "ABCD"
     , minAmountOfUniqueAtoms = 4
-    , operatorFrequencies = OperatorFrequencies
-      { and = 1
-      , or = 1
-      , impl = 0
-      , backImpl = 0
-      , equi = 0
-      , neg = 1
-      }
+    , binOpFrequencies = Map.fromList
+      [ (And, 1)
+      , (Or, 1)
+      , (Impl, 0)
+      , (BackImpl, 0)
+      , (Equi, 0)
+      ]
+    , negOpFrequency = 1
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
@@ -46,14 +46,14 @@ medium = DecomposeFormulaConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , operatorFrequencies = OperatorFrequencies
-      { and = 1
-      , or = 1
-      , impl = 0
-      , backImpl = 0
-      , equi = 1
-      , neg = 1
-      }
+    , binOpFrequencies = Map.fromList
+      [ (And, 1)
+      , (Or, 1)
+      , (Impl, 0)
+      , (BackImpl, 0)
+      , (Equi, 1)
+      ]
+    , negOpFrequency = 1
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 3
     }

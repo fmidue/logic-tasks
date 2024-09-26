@@ -1,16 +1,16 @@
 module Syntax.Subformulas.Config where
 
-import Prelude hiding (and, or)
 import Test.Hspec
 import Tasks.SubTree.Config (
   SubTreeConfig(..), checkSubTreeConfig,
   )
 import Tasks.SynTree.Config (
-  SynTreeConfig(..),
-  OperatorFrequencies(..)
+  SynTreeConfig(..)
   )
+import Trees.Types (BinOp(..))
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
+import qualified Data.Map as Map (fromList)
 
 medium :: SubTreeConfig
 medium = SubTreeConfig
@@ -21,14 +21,14 @@ medium = SubTreeConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , operatorFrequencies = OperatorFrequencies
-      { and = 1
-      , or = 1
-      , impl = 1
-      , backImpl = 1
-      , equi = 1
-      , neg = 1
-      }
+    , binOpFrequencies = Map.fromList
+      [ (And, 1)
+      , (Or, 1)
+      , (Impl, 1)
+      , (BackImpl, 1)
+      , (Equi, 1)
+      ]
+    , negOpFrequency = 1
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }

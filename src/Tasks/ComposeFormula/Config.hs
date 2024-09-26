@@ -11,8 +11,9 @@ module Tasks.ComposeFormula.Config (
     ) where
 
 -- jscpd:ignore-start
-import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig, OperatorFrequencies (..))
+import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
 import Data.Map (Map)
+import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
@@ -35,14 +36,13 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
-      { operatorFrequencies = OperatorFrequencies
-        { and = 1
-        , or = 1
-        , impl = 1
-        , backImpl = 1
-        , equi = 1
-        , neg = 1
-        }
+      { binOpFrequencies = Map.fromList
+        [ (And, 1)
+        , (Or, 1)
+        , (Impl, 1)
+        , (BackImpl, 1)
+        , (Equi, 1)
+        ]
       }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
     , extraHintsOnAssociativity = True

@@ -9,15 +9,16 @@ import Tasks.DecomposeFormula.Config (
   DecomposeFormulaInst(..))
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
-import Tasks.SynTree.Config (SynTreeConfig(..), OperatorFrequencies(impl, backImpl))
+import Tasks.SynTree.Config (SynTreeConfig(..))
 import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust, fromJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
 import Trees.Helpers (bothKids, binOp)
-import Trees.Types (SynTree(..))
+import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Print (display)
+import qualified Data.Map as Map (fromList)
 
 validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormula = do
@@ -25,10 +26,13 @@ validBoundsDecomposeFormula = do
     minUniqueBinOperators >= 1 && minUniqueBinOperators < 4 && minNodes > 6
   return DecomposeFormulaConfig {
     syntaxTreeConfig = syntaxTreeConfig {
-      operatorFrequencies = (operatorFrequencies syntaxTreeConfig) {
-        impl = 0,
-        backImpl = 0
-      }
+      binOpFrequencies = Map.fromList
+        [ (And, 1)
+        , (Or, 1)
+        , (Impl, 0)
+        , (BackImpl, 0)
+        , (Equi, 1)
+        ]
     },
     extraHintsOnAssociativity = False,
     extraText = Nothing,
