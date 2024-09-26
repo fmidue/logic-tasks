@@ -87,21 +87,21 @@ description PrologInst{..} = do
     german "Die leere Klausel kann durch geschweifte Klammern '{ }' dargestellt werden."
     english "The empty clause can be denoted by curly braces '{ }'."
 
-  when usesSetNotation $ paragraph $ indent $ do
-    translate $ do
-      german "Nutzen Sie zur Angabe der Klauseln die Mengennotation. Ein Lösungsversuch mit den Klauseln {a(x), b(x)} und {-a(x), b(x), c(x)} könnte beispielsweise so aussehen:"
-      english "Specify the clauses using set notation. A valid solution with the clauses {a(x), b(x)} and {-a(x), b(x), c(x)} could look like this:"
-    code "(a(x), { b(x), c(x) })"
-    pure ()
-
-  unless usesSetNotation $ paragraph $ indent $ do
-    translate $ do
-      german "Nutzen Sie zur Angabe der Klauseln eine Formel. Ein Lösungsversuch mit den Klauseln 'a(x) oder b(x)' und '-a(x) oder b(x) oder c(x)' könnte beispielsweise so aussehen:"
-      english "Specify the clauses using a formula. A valid solution with the clauses 'a(x) or b(x)' and '-a(x) or b(x) or c(x)' could look like this:"
-    translatedCode $ flip localise $ translations $ do
-      english "(a(x), b(x) or c(x))"
-      german "(a(x), b(x) oder c(x))"
-    pure ()
+  paragraph $ indent $ if usesSetNotation
+    then do
+      translate $ do
+        german "Nutzen Sie zur Angabe der Klauseln die Mengennotation. Ein Lösungsversuch mit den Klauseln {a(x), b(x)} und {-a(x), b(x), c(x)} könnte beispielsweise so aussehen:"
+        english "Specify the clauses using set notation. A valid solution with the clauses {a(x), b(x)} and {-a(x), b(x), c(x)} could look like this:"
+      code "(a(x), { b(x), c(x) })"
+      pure ()
+    else do
+      translate $ do
+        german "Nutzen Sie zur Angabe der Klauseln eine Formel. Ein Lösungsversuch mit den Klauseln 'a(x) oder b(x)' und '-a(x) oder b(x) oder c(x)' könnte beispielsweise so aussehen:"
+        english "Specify the clauses using a formula. A valid solution with the clauses 'a(x) or b(x)' and '-a(x) or b(x) or c(x)' could look like this:"
+      translatedCode $ flip localise $ translations $ do
+        english "(a(x), b(x) or c(x))"
+        german "(a(x), b(x) oder c(x))"
+      pure ()
 
 
   extra addText
