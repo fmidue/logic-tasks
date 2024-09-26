@@ -6,20 +6,20 @@
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
     checkSynTreeConfig,
-    defaultSynTreeConfig,
+    defaultSynTreeConfig
     ) where
-
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
+import Data.Map (Map)
+import qualified Data.Map as Map (fromList, filter, keys)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth, maxDepthForNodes)
-import Trees.Types (BinOp)
+import Trees.Types (BinOp(..))
 
 import Data.List.Extra (nubOrd)
-
 
 data SynTreeConfig =
   SynTreeConfig
@@ -29,7 +29,8 @@ data SynTreeConfig =
   , maxDepth :: Integer
   , availableAtoms :: String
   , minAmountOfUniqueAtoms :: Integer
-  , allowArrowOperators :: Bool
+  , binOpFrequencies :: Map BinOp Int
+  , negOpFrequency :: Int
   , maxConsecutiveNegations :: Integer
   , minUniqueBinOperators :: Integer
   } deriving (Show,Generic)
@@ -45,7 +46,14 @@ defaultSynTreeConfig =
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 3
-    , allowArrowOperators = False
+    , binOpFrequencies = Map.fromList
+      [ (And, 1)
+      , (Or, 1)
+      , (Impl, 0)
+      , (BackImpl, 0)
+      , (Equi, 0)
+      ]
+    , negOpFrequency = 1
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 1
     }
@@ -107,10 +115,22 @@ checkSynTreeConfig SynTreeConfig {..}
     | minUniqueBinOperators < 0 = reject $ do
         english "There should be a non-negative number of unique operators."
         german "Es sollte eine nicht-negative Anzahl an unterschiedlichen Operatoren geben."
-    | minUniqueBinOperators > fromIntegral (length [minBound .. maxBound :: BinOp]) = reject $ do
-        english "The number of unique operators cannot exceed the maximum number of operators."
-        german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
-    | not allowArrowOperators && minUniqueBinOperators > 2 = reject $ do
-        english "This number of unique operators cannot be reached with allowArrowOperators = False ."
-        german "Die angegebene Anzahl der unterschiedlichen Operatoren kann mit allowArrowOperators = False nicht erreicht werden."
+    | length (Map.keys binOpFrequencies) /= length [minBound .. (maxBound :: BinOp)] = reject $ do
+        english "A frequency must be set for all operators."
+        german "Es muss für alle Operatoren eine Frequenz festgelegt sein."
+    | any (< 0) binOpFrequencies = reject $ do
+        english "The operator frequencies must be non-negative."
+        german "Die Frequenzen für die Operatoren müssen nicht-negativ sein."
+    | all (== 0) binOpFrequencies = reject $ do
+        english "At least one operator must have a positive frequency."
+        german "Mindestens ein Operator muss eine positive Frequenz haben."
+    | minUniqueBinOperators > fromIntegral (length (Map.filter (> 0) binOpFrequencies)) = reject $ do
+        english "The minimum number of different operators exceeds the maximum number of available operators."
+        german "Die minimale Anzahl unterschiedlicher Operatoren überschreitet die maximale Anzahl an verfügbaren Operatoren."
+    | negOpFrequency < 0 = reject $ do
+        english "The operator frequency for negations must be non-negative."
+        german "Die Frequenz für den Negationsoperator muss nicht-negativ sein."
+    | negOpFrequency == 0 && maxConsecutiveNegations /= 0 || maxConsecutiveNegations == 0 && negOpFrequency /= 0 = reject $ do
+        english "The maximum number of consecutive negations does not comply with the frequency of the negation operator."
+        german "Maximale Anzahl an aufeinanderfolgenden Negationen passt nicht zur Frequenz des Negationsoperators."
     | otherwise = pure()

@@ -1,9 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 module Tasks.LegalProposition.Helpers where
 import Tasks.SynTree.Config (SynTreeConfig (..))
-import Trees.Types (BinOp)
+import qualified Data.Map as Map (filter)
 
 formulaAmount :: SynTreeConfig -> Integer
 formulaAmount SynTreeConfig{..} =
-  (if allowArrowOperators then fromIntegral (length [minBound..maxBound :: BinOp]) else 2)
-    ^ ((maxNodes + 1) `div` 2 - minUniqueBinOperators)
+  let availableOperators = Map.filter (> 0) binOpFrequencies
+    in fromIntegral (length availableOperators) ^ ((maxNodes + 1) `div` 2 - minUniqueBinOperators)

@@ -4,7 +4,8 @@
     "consoleFull"
   ],
   "ignore": [
-    "**/__snapshots__/**"
+    "**/__snapshots__/**",
+    "**/examples/**"
   ],
   "minLines": 5,
   "max-lines": 1000,

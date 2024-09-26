@@ -14,6 +14,7 @@ module Tasks.LegalProposition.Config (
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import GHC.Generics (Generic)
 import Data.Map (Map)
+import qualified Data.Map as Map (filter)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxLeavesForNodes)
@@ -69,7 +70,7 @@ checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeC
     | formulas < illegals + bracketFormulas = reject $ do
         english "The number of formulas cannot be less than the sum of bracket Formulas and illegal ones."
         german "Die Anzahl der Formeln kann nicht niedriger als die Summe von falschen und richtigen Formeln."
-    | let leaves = maxLeavesForNodes maxNodes, (if allowArrowOperators then 4 else 2) ^ (maxNodes - leaves) < formulas
+    | let leaves = maxLeavesForNodes maxNodes, fromIntegral (length availableOperators) ^ (maxNodes - leaves) < formulas
       = reject $ do
         english "Settings may result in extremely large formulas."
         german "Einstellungen führen zu extrem großen Formeln."
@@ -77,6 +78,7 @@ checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeC
       english "Settings cannot ensure provided amount of formulas."
       german "Einstellungen können nicht die Anzahl der geforderten Formeln erfüllen."
     | otherwise = pure()
+    where availableOperators = Map.filter (> 0) binOpFrequencies
 
 
 

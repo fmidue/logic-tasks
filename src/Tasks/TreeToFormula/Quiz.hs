@@ -9,8 +9,10 @@ import Trees.Generate (genSynTree)
 import Test.QuickCheck (Gen,)
 
 import Tasks.TreeToFormula.Config (TreeToFormulaConfig(..), TreeToFormulaInst(..))
-import Tasks.SynTree.Config (SynTreeConfig(..))
+import Tasks.SynTree.Config (SynTreeConfig(binOpFrequencies))
 import Trees.Print (transferToPicture, display)
+import Trees.Types (BinOp(..))
+import qualified Data.Map as Map (keys)
 
 
 
@@ -23,7 +25,7 @@ generateTreeToFormulaInst TreeToFormulaConfig {..} = do
       , latexImage = transferToPicture tree
       , correct = display tree
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
-      , showArrowOperators = allowArrowOperators syntaxTreeConfig
+      , showArrowOperators = any (`elem` Map.keys (binOpFrequencies syntaxTreeConfig)) [Impl, BackImpl, Equi]
       , addText = extraText
       , showSolution = printSolution
       , unicodeAllowed = offerUnicodeInput

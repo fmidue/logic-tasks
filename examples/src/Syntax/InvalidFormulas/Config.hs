@@ -4,11 +4,13 @@ import Tasks.LegalProposition.Config (
   LegalPropositionConfig(..), checkLegalPropositionConfig,
   )
 import Tasks.SynTree.Config (
-  SynTreeConfig(..),
+  SynTreeConfig(..)
   )
+import Trees.Types (BinOp(..))
 import Test.Hspec
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
+import qualified Data.Map as Map (fromList)
 
 -- Weight 0.33
 task01 :: LegalPropositionConfig
@@ -20,7 +22,14 @@ task01 = LegalPropositionConfig
     , maxDepth = 5
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , allowArrowOperators = False
+    , binOpFrequencies = Map.fromList
+      [ (And, 1)
+      , (Or, 1)
+      , (Impl, 0)
+      , (BackImpl, 0)
+      , (Equi, 0)
+      ]
+    , negOpFrequency = 1
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
@@ -41,7 +50,14 @@ task17 = LegalPropositionConfig
     , maxDepth = 6
     , availableAtoms = "ABCDEF"
     , minAmountOfUniqueAtoms = 6
-    , allowArrowOperators = True
+    , binOpFrequencies = Map.fromList
+      [ (And, 1)
+      , (Or, 1)
+      , (Impl, 1)
+      , (BackImpl, 0)
+      , (Equi, 1)
+      ]
+    , negOpFrequency = 1
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 3
     }

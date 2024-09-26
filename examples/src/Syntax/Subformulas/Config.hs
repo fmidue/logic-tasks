@@ -5,10 +5,12 @@ import Tasks.SubTree.Config (
   SubTreeConfig(..), checkSubTreeConfig,
   )
 import Tasks.SynTree.Config (
-  SynTreeConfig(..),
+  SynTreeConfig(..)
   )
+import Trees.Types (BinOp(..))
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
+import qualified Data.Map as Map (fromList)
 
 medium :: SubTreeConfig
 medium = SubTreeConfig
@@ -19,7 +21,14 @@ medium = SubTreeConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , allowArrowOperators = True
+    , binOpFrequencies = Map.fromList
+      [ (And, 1)
+      , (Or, 1)
+      , (Impl, 1)
+      , (BackImpl, 1)
+      , (Equi, 1)
+      ]
+    , negOpFrequency = 1
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }

@@ -10,13 +10,16 @@ module Tasks.ComposeFormula.Config (
     TreeDisplayMode(..)
     ) where
 
+-- jscpd:ignore-start
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
 import Data.Map (Map)
+import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
 import Data.Typeable
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import LogicTasks.Helpers (reject)
+-- jscpd:ignore-end
 
 data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bounded)
 
@@ -32,7 +35,15 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
 
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
-    { syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
+    { syntaxTreeConfig = defaultSynTreeConfig
+      { binOpFrequencies = Map.fromList
+        [ (And, 1)
+        , (Or, 1)
+        , (Impl, 1)
+        , (BackImpl, 1)
+        , (Equi, 1)
+        ]
+      }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
     , extraHintsOnAssociativity = True
     , extraText = Nothing

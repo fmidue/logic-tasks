@@ -1,4 +1,3 @@
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 module DecomposeFormulaSpec where
 
@@ -17,15 +16,24 @@ import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
 import Trees.Helpers (bothKids, binOp)
-import Trees.Types (SynTree(..))
+import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Print (display)
+import qualified Data.Map as Map (fromList)
 
 validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormula = do
   syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
-    minUniqueBinOperators >= 1 && minNodes > 6
+    minUniqueBinOperators >= 1 && minUniqueBinOperators < 4 && minNodes > 6
   return DecomposeFormulaConfig {
-    syntaxTreeConfig,
+    syntaxTreeConfig = syntaxTreeConfig {
+      binOpFrequencies = Map.fromList
+        [ (And, 1)
+        , (Or, 1)
+        , (Impl, 0)
+        , (BackImpl, 0)
+        , (Equi, 1)
+        ]
+    },
     extraHintsOnAssociativity = False,
     extraText = Nothing,
     printSolution = False,

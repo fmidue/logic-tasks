@@ -17,8 +17,8 @@ import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
-import Trees.Types (BinOp, SynTree)
-
+import Trees.Types (BinOp(..), SynTree)
+import qualified Data.Map as Map (fromList)
 
 
 
@@ -38,7 +38,16 @@ defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
 defaultSuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
-      syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True, minUniqueBinOperators = 2 }
+      syntaxTreeConfig = defaultSynTreeConfig
+      { binOpFrequencies = Map.fromList
+        [ (And, 1)
+        , (Or, 1)
+        , (Impl, 1)
+        , (BackImpl, 1)
+        , (Equi, 1)
+        ]
+      , minUniqueBinOperators = 2
+      }
     , superfluousBracketPairs = 2
     , extraText = Nothing
     , printSolution = False
