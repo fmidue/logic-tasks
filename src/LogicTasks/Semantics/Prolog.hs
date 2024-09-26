@@ -30,7 +30,7 @@ import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Delayed (Delayed, withDelayed, withDelayedSucceeding, complainAboutWrongNotation)
-import Formula.Parsing (Parse(..), prologClauseSetParser, prologClauseFormulaParser)
+import Formula.Parsing (Parse(..), prologClauseSetParser)
 import Data.List (intercalate)
 import ParsingHelpers (tokenSymbol)
 import Text.ParserCombinators.Parsec (Parser)
@@ -172,7 +172,7 @@ parser' clauseParser = do
 partialGrade :: OutputCapable m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
 partialGrade inst = (partialGrade' inst `withDelayed` parser' clauseParser) (const complainAboutWrongNotation)
   where clauseParser | usesSetNotation inst = prologClauseSetParser
-                     | otherwise            = prologClauseFormulaParser
+                     | otherwise            = parser
 
 
 partialGrade' :: OutputCapable m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
@@ -203,7 +203,7 @@ partialGrade' PrologInst{..} sol = do
 completeGrade :: OutputCapable m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser' clauseParser
   where clauseParser | usesSetNotation inst = prologClauseSetParser
-                     | otherwise            = prologClauseFormulaParser
+                     | otherwise            = parser
 
 completeGrade' :: OutputCapable m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade' PrologInst{..} sol =
