@@ -26,7 +26,7 @@ import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transfo
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
-import Control.Monad (when, unless)
+import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Delayed (Delayed, withDelayed, withDelayedSucceeding, complainAboutWrongNotation)
