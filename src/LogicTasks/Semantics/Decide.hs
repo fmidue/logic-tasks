@@ -17,6 +17,7 @@ import Control.OutputCapable.Blocks (
   multipleChoice,
   translations,
   ArticleToUse (DefiniteArticle),
+  reRefuse,
   )
 import Data.List.Extra (nubOrd)
 import Test.QuickCheck (Gen, suchThat)
@@ -25,7 +26,7 @@ import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable, literals)
 import Util (isOutside, preventWithHint, remove, printWithHint, withRatio, checkTruthValueRangeAndFormulaConf)
-import LogicTasks.Helpers (extra, reRefuse)
+import LogicTasks.Helpers (extra)
 import Control.Monad (when, unless)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()

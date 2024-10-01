@@ -16,10 +16,11 @@ import Control.OutputCapable.Blocks (
   multipleChoice,
   ArticleToUse (DefiniteArticle),
   translations,
+  reRefuse,
   )
 import Data.List.Extra (nubSort)
 import Data.Bifunctor (second)
-import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject, reRefuse)
+import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
