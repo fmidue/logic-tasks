@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   multipleChoice,
   ArticleToUse (DefiniteArticle),
   translations,
+  multipleChoiceSyntax,
   )
 import Data.Map as Map (fromAscList)
 import LogicTasks.Helpers
@@ -63,14 +64,7 @@ start = []
 
 
 partialGrade :: OutputCapable m => LegalCNFInst -> [Int] -> LangM m
-partialGrade LegalCNFInst{..} sol
-    | invalidIndex = reject $ do
-      english "At least one index in the list does not exist."
-      german "Mindestens einer der Indizes existiert nicht."
-
-    | otherwise = pure ()
-  where
-    invalidIndex = any (`notElem` [1..length formulaStrings]) sol
+partialGrade LegalCNFInst{..} = multipleChoiceSyntax False [1..length formulaStrings]
 
 
 completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
