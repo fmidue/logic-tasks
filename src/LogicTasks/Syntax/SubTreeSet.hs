@@ -25,7 +25,8 @@ import Control.OutputCapable.Blocks (
   )
 import Data.List (nub, sort)
 import Data.Set (toList)
-import qualified Data.Map as Map (fromList)
+import qualified Data.Set (map)
+import qualified Data.Map as Map (fromSet)
 import Data.Maybe (isNothing, fromJust)
 import LogicTasks.Helpers (extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
@@ -170,4 +171,4 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
       what = translations $ do
         german "Teilformeln"
         english "subformulas"
-      solution = Map.fromList $ map (\t -> (display t, True)) $ Data.Set.toList correctTrees
+      solution = Map.fromSet (const True) $ Data.Set.map display correctTrees
