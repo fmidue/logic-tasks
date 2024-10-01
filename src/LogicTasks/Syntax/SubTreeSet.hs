@@ -38,7 +38,6 @@ import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
-import GHC.Real ((%))
 import Control.Applicative (Alternative)
 
 
@@ -148,7 +147,7 @@ completeGrade'
   -> Rated m
 completeGrade' path SubTreeInst{..} sol = reRefuse
   (extendedMultipleChoice
-    (MinimumThreshold (1 % 2))
+    (MinimumThreshold 0)
     (Punishment 0)
     (TargetedCorrect (fromIntegral minInputTrees))
     IndefiniteArticle
