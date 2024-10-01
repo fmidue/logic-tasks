@@ -13,6 +13,11 @@ import Control.OutputCapable.Blocks (
   english,
   german,
   translate,
+  singleChoiceSyntax,
+  singleChoice,
+  ArticleToUse (DefiniteArticle),
+  Rated,
+  translations,
   )
 
 import Test.QuickCheck (Gen, suchThat, elements)
@@ -21,9 +26,8 @@ import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), For
 import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)
-import LogicTasks.Helpers (example, extra)
-import Control.Monad (when)
-import Data.Maybe (fromJust, fromMaybe)
+import LogicTasks.Helpers (extra)
+import Data.Maybe (fromMaybe)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Formula ()
@@ -155,20 +159,18 @@ partialGrade _ (Number Nothing) = refuse $ indent $
         translate $ do
           german "Es wurde kein Index angegeben."
           english "You did not give an index."
-partialGrade _ _ = pure ()
+partialGrade PickInst{formulas} (Number (Just index)) = singleChoiceSyntax True [1..length formulas] index
 
-completeGrade :: OutputCapable m => PickInst -> Number -> LangM m
-completeGrade PickInst{..} (Number index) =
-    if fromJust index == correct
-        then pure ()
-        else refuse $ indent $ do
-          translate $ do
-            german "Der gewählte Index ist falsch."
-            english "You submitted the wrong index."
-
-          displaySolution
-
-          pure ()
-  where displaySolution = when showSolution $ example (show correct) $ do
-          english "The solution for this task is:"
-          german "Die Lösung für die Aufgabe ist:"
+completeGrade :: OutputCapable m => PickInst -> Number -> Rated m
+completeGrade PickInst{..} (Number index) = singleChoice
+  DefiniteArticle
+  what
+  displaySolution
+  correct
+  (fromMaybe 0 index)
+    where
+      what = translations $ do
+        german "Index"
+        english "index"
+      displaySolution | showSolution = Just $ show correct
+                      | otherwise = Nothing
