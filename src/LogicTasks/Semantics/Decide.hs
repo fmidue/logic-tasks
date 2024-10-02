@@ -14,10 +14,13 @@ import Control.OutputCapable.Blocks (
   german,
   translate,
   Rated,
-  multipleChoice,
   translations,
   ArticleToUse (DefiniteArticle),
   reRefuse,
+  extendedMultipleChoice,
+  MinimumThreshold (MinimumThreshold),
+  Punishment (Punishment),
+  TargetedCorrect (TargetedCorrect),
   )
 import Data.List.Extra (nubOrd)
 import Test.QuickCheck (Gen, suchThat)
@@ -25,16 +28,16 @@ import Test.QuickCheck (Gen, suchThat)
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable, literals)
-import Util (isOutside, preventWithHint, remove, printWithHint, withRatio, checkTruthValueRangeAndFormulaConf)
+import Util (isOutside, preventWithHint, remove, withRatio, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Helpers (extra)
-import Control.Monad (when, unless)
+import Control.Monad (when)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
 import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 import qualified Data.Map as Map (fromAscList)
 import Control.Applicative (Alternative)
-
+import GHC.Real ((%))
 
 
 
@@ -164,40 +167,22 @@ partialGrade DecideInst{..} sol = do
 
 
 completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> [Int] -> Rated m
-completeGrade DecideInst{..} sol = do
-  printWithHint (solLen > acLen)
-    (translate $ do
-      german "Lösung enthält nicht zu viele unterschiedliche Indizes?"
-      english "Solution does not contain too many unique indices?"
-    )
-    (translate $ do
-      german "Lösung enthält zu viele unterschiedliche Indizes."
-      english "Solution contains too many unique indices."
-    )
-
-  unless (solLen > acLen) $
-    printWithHint (acLen > solLen)
-      (translate $ do
-        german "Lösung enthält genügend unterschiedliche Indizes?"
-        english "Solution contains enough unique indices?"
-      )
-      (translate $ do
-        german "Lösung enthält zu wenige unterschiedliche Indizes."
-        english "Solution does not contain enough unique indices."
-      )
-
-  x <- reRefuse
-    (multipleChoice DefiniteArticle what solutionDisplay solution nubSol)
-    $ when (diff /= 0) $ translate $ do
-      german $ "In der Menge der unterschiedlichen Indizes " ++ ger ++ " falsch."
-      english $ "The set of unique indices contains " ++ eng
-
-  pure x
+completeGrade DecideInst{..} sol = reRefuse
+  (extendedMultipleChoice
+    (MinimumThreshold (1 % 3))
+    (Punishment (1 % fromIntegral tableLen))
+    (TargetedCorrect (length changed))
+    DefiniteArticle
+    what
+    solutionDisplay
+    solution
+    nubSol)
+  $ when (diff /= 0) $ translate $ do
+    german $ "In der Menge der unterschiedlichen Indizes " ++ ger ++ " falsch."
+    english $ "The set of unique indices contains " ++ eng
   where
     nubSol = nubOrd sol
     diff = length $ filter (`notElem` changed) nubSol
-    acLen = length $ nubOrd changed
-    solLen = length nubSol
     (ger, eng) = if diff == 1
       then ("ist 1 Index", "1 wrong index")
       else ("sind " ++ show diff ++ " Indizes", show diff ++ " wrong indices") -- no-spell-check
