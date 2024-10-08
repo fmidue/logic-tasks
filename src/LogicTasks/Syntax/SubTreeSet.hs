@@ -26,7 +26,7 @@ import Control.OutputCapable.Blocks (
 import Data.List (nub, sort)
 import Data.Set (toList)
 import qualified Data.Set (map)
-import qualified Data.Map as Map (fromSet)
+import qualified Data.Map as Map (fromSet, insert, filter)
 import Data.Maybe (isNothing, fromJust)
 import LogicTasks.Helpers (extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
@@ -161,7 +161,7 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
     what
     Nothing
     solution
-    (map show sol))
+    submission)
   $ when showSolution $ indent $ do
     instruct $ do
       english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulas:")
@@ -178,3 +178,4 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
         german "Teilformeln"
         english "subformulas"
       solution = Map.fromSet (const True) $ Data.Set.map display correctTrees
+      submission = foldr ((`Map.insert` True) . show) (Map.filter not solution) sol
