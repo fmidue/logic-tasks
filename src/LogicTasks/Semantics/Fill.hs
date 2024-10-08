@@ -95,8 +95,8 @@ verifyStatic :: OutputCapable m => FillInst -> LangM m
 verifyStatic FillInst{..}
     | isEmptyFormula formula =
         refuse $ indent $ translate $ do
-          german "Geben Sie bitte eine nicht-leere Formel an."
-          english "Please give a non empty formula."
+          german "Geben Sie bitte eine nicht-triviale Formel an."
+          english "Please give a non-trivial formula."
 
     | any (> 2^length (atomics formula)) missing || any (<=0) missing =
     refuse $ indent $ translate $ do
@@ -106,7 +106,7 @@ verifyStatic FillInst{..}
 
     | null missing =
         refuse $ indent $ translate $ do
-          german "Es muss mindestens eine Lücke geben."
+          german "Es muss mindestens eine zu findende Lücke geben."
           english "At least one blank has to be specified."
 
     | otherwise = pure()

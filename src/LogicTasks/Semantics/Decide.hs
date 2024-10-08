@@ -95,8 +95,8 @@ verifyStatic :: OutputCapable m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
     | isEmptyFormula formula =
         refuse $ indent $ translate $ do
-          english "Please give a non empty formula."
-          german "Geben Sie bitte eine nicht-leere Formel an."
+          english "Please give a non-trivial formula."
+          german "Geben Sie bitte eine nicht-triviale Formel an."
 
     | any (> 2^length (atomics formula)) changed || any (<=0) changed =
         refuse $ indent $ translate $ do
@@ -108,7 +108,7 @@ verifyStatic DecideInst{..}
     | null changed =
         refuse $ indent $ translate $ do
           english "At least one mistake has to be specified."
-          german "Es muss mindestens eine Änderung geben."
+          german "Es muss mindestens einen zu findenden Fehler geben."
 
     | otherwise = pure ()
 
