@@ -5,7 +5,7 @@ module FillSpec where
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, elements, suchThat, sublistOf)
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dFillConf, FillConfig (..), FillInst (..), FormulaConfig(..), BaseConfig(..), dBaseConf, CnfConfig(..), dCnfConf)
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade)
 import Data.Maybe (isJust, fromMaybe)
@@ -105,5 +105,5 @@ spec = do
       forAll validBoundsFill $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->
           isJust (runIdentity (evalLangM (partialGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe))) &&
-          isJust (runIdentity (evalLangM (completeGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe)))
+          isJust (runIdentity (evalLangM (completeGrade fillInst (map TruthValue (missingValues fillInst))  :: Rated Maybe)))
 
