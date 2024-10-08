@@ -14,7 +14,7 @@ import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
 import ParsingHelpers (fully)
 
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
+import Control.OutputCapable.Blocks (LangM, LangM', Language, OutputCapable, english, german)
 import Control.Monad.State (State)
 import Data.Map (Map)
 
@@ -63,10 +63,10 @@ parseDelayedWithAndThen p messaging fallBackParser whatToDo delayedAnswer =
 
 withDelayedSucceeding ::
   OutputCapable m
-  => (a -> LangM m)
+  => (a -> LangM' m b)
   -> Parser a
   -> Delayed a
-  -> LangM m
+  -> LangM' m b
 withDelayedSucceeding whatToDo p delayedAnswer =
   case parseDelayed (fully p) delayedAnswer of
     Left err -> error $ "It should be impossible here, and yet the following ParseError was encountered: " ++ show err

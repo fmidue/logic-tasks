@@ -15,22 +15,32 @@ import Control.OutputCapable.Blocks (
   translate,
   localise,
   translations,
+  Rated,
+  extendedMultipleChoice,
+  MinimumThreshold (MinimumThreshold),
+  Punishment (Punishment),
+  TargetedCorrect (TargetedCorrect),
+  ArticleToUse (IndefiniteArticle),
+  reRefuse,
   )
 import Data.List (nub, sort)
-import Data.Set (fromList, isSubsetOf, toList)
+import Data.Set (toList)
 import qualified Data.Set (map)
+import qualified Data.Map as Map (fromSet, insert, filter)
 import Data.Maybe (isNothing, fromJust)
 import LogicTasks.Helpers (extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey)
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
 import Trees.Helpers
-import Control.Monad (when, unless)
+import Control.Monad (when)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
+import Control.Applicative (Alternative)
+import GHC.Real ((%))
 
 
 description :: OutputCapable m => SubTreeInst -> LangM m
@@ -114,6 +124,11 @@ partialGrade' SubTreeInst{..} fs
         english $ "Your solution does not contain enough subformulas. Add " ++ show (minInputTrees - amount) ++ "."
         german $ "Ihre Abgabe beinhaltet nicht genügend Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
 
+    | amount > minInputTrees =
+      reject $ do
+        english "Your solution contains too many formulas."
+        german "Ihre Abgabe enthält zu viele Formeln."
+
     | otherwise = pure ()
   where
     amount = fromIntegral $ length $ nub fs
@@ -124,26 +139,30 @@ partialGrade' SubTreeInst{..} fs
 
 
 completeGrade
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadIO m, Alternative m)
   => FilePath
   -> SubTreeInst
   -> Delayed [FormulaAnswer]
-  -> LangM m
+  -> Rated m
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadIO m, Alternative m)
   => FilePath
   -> SubTreeInst
   -> [FormulaAnswer]
-  -> LangM m
-completeGrade' path SubTreeInst{..} sol = refuseIfWrong $ do
-  unless partOfSolution $ do
-    instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
-
-  when showSolution $ indent $ do
+  -> Rated m
+completeGrade' path SubTreeInst{..} sol = reRefuse
+  (extendedMultipleChoice
+    (MinimumThreshold (1 % minInputTrees))
+    (Punishment 0)
+    (TargetedCorrect (fromIntegral minInputTrees))
+    IndefiniteArticle
+    what
+    Nothing
+    solution
+    submission)
+  $ when showSolution $ indent $ do
     instruct $ do
       english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulas:")
       german ("Eine mögliche Lösung für die Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
@@ -154,7 +173,9 @@ completeGrade' path SubTreeInst{..} sol = refuseIfWrong $ do
       pure ()
 
     pure ()
-  pure ()
-  where
-    partOfSolution = fromList (map show sol) `isSubsetOf` Data.Set.map display correctTrees
-    refuseIfWrong = if not partOfSolution then refuse else id
+    where
+      what = translations $ do
+        german "Teilformeln"
+        english "subformulas"
+      solution = Map.fromSet (const True) $ Data.Set.map display correctTrees
+      submission = foldr ((`Map.insert` True) . show) (Map.filter not solution) sol
