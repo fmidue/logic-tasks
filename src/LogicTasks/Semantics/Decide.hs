@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
 
 module LogicTasks.Semantics.Decide where
 
@@ -22,7 +23,7 @@ import Control.OutputCapable.Blocks (
   Punishment (Punishment),
   TargetedCorrect (TargetedCorrect),
   )
-import Data.List.Extra (nubOrd)
+import Data.List.Extra (nubSort)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
@@ -169,19 +170,19 @@ partialGrade DecideInst{..} sol = do
 completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> [Int] -> Rated m
 completeGrade DecideInst{..} sol = reRefuse
   (extendedMultipleChoice
-    (MinimumThreshold (1 % 3))
-    (Punishment (1 % fromIntegral tableLen))
+    (MinimumThreshold (1 % 2))
+    (Punishment (1 % 16))
     (TargetedCorrect (length changed))
     DefiniteArticle
     what
     solutionDisplay
     solution
-    nubSol)
+    submission)
   $ when (diff /= 0) $ translate $ do
     german $ "In der Menge der unterschiedlichen Indizes " ++ ger ++ " falsch."
     english $ "The set of unique indices contains " ++ eng
   where
-    nubSol = nubOrd sol
+    nubSol = nubSort sol
     diff = length $ filter (`notElem` changed) nubSol
     (ger, eng) = if diff == 1
       then ("ist 1 Index", "1 wrong index")
@@ -191,5 +192,5 @@ completeGrade DecideInst{..} sol = reRefuse
       english "indices"
     solutionDisplay | showSolution = Just $ show changed
                     | otherwise = Nothing
-    tableLen = length $ readEntries $ getTable formula
-    solution = Map.fromAscList $ map (\i -> (i, i `elem` changed)) [1..tableLen]
+    solution = Map.fromAscList $ map (,True) changed
+    submission = Map.fromAscList $ map (,True) nubSol
