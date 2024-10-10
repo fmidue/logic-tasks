@@ -83,8 +83,8 @@ verifyStatic :: OutputCapable m => MinInst -> LangM m
 verifyStatic MinInst{..}
     | isEmptyDnf dnf || hasEmptyCon dnf =
         refuse $ indent $ translate $ do
-          german "Geben Sie bitte eine nicht-leere Formel an."
-          english "Please give a non empty formula."
+          german "Geben Sie bitte eine nicht-triviale Formel an."
+          english "Please give a non-trivial formula."
 
     | otherwise = pure ()
 

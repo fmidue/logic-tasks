@@ -86,8 +86,8 @@ verifyStatic :: OutputCapable m => MaxInst -> LangM m
 verifyStatic MaxInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
         refuse $ indent $ translate $ do
-          german "Geben Sie bitte eine nicht-leere Formel an."
-          english "Please give a non empty formula."
+          german "Geben Sie bitte eine nicht-triviale Formel an."
+          english "Please give a non-trivial formula."
 
     | otherwise = pure()
 
