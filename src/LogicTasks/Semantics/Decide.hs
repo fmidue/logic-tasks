@@ -171,7 +171,7 @@ completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> [Int]
 completeGrade DecideInst{..} sol = reRefuse
   (extendedMultipleChoice
     (MinimumThreshold (1 % 2))
-    (Punishment (1 % 16))
+    (Punishment (1 % fromIntegral tableLen))
     (TargetedCorrect (length changed))
     DefiniteArticle
     what
@@ -192,5 +192,6 @@ completeGrade DecideInst{..} sol = reRefuse
       english "indices"
     solutionDisplay | showSolution = Just $ show changed
                     | otherwise = Nothing
+    tableLen = length $ readEntries $ getTable formula
     solution = Map.fromAscList $ map (,True) changed
     submission = Map.fromAscList $ map (,True) nubSol
