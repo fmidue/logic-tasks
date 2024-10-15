@@ -172,7 +172,7 @@ completeGrade FillInst{..} sol = reRefuse
     solutionDisplay
     solution
     submission)
-  $ unless (null diff) $ translate $ do
+  $ unless (null diff && showSolution) $ translate $ do
     german $ "Ihre Abgabe beinhaltet " ++ displayMistake ++ " Fehler."
     english $ "Your submission contains " ++ displayMistake ++ " mistakes."
 
