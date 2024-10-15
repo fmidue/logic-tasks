@@ -173,8 +173,8 @@ completeGrade FillInst{..} sol = reRefuse
     solution
     submission)
   $ unless (null diff) $ translate $ do
-    german $ "Die Lösung beinhaltet " ++ displayMistake ++ " Fehler."
-    english $ "Your solution contains " ++ displayMistake ++ " mistakes."
+    german $ "Ihre Abgabe beinhaltet " ++ displayMistake ++ " Fehler."
+    english $ "Your submission contains " ++ displayMistake ++ " mistakes."
 
   where
     boolSol = map truth sol
