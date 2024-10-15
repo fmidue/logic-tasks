@@ -35,6 +35,7 @@ import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyF
 import qualified Data.Map as Map (fromAscList)
 import GHC.Real ((%))
 import Control.Applicative (Alternative)
+import Control.Monad (unless)
 
 
 genFillInst :: FillConfig -> Gen FillInst
@@ -171,7 +172,7 @@ completeGrade FillInst{..} sol = reRefuse
     solutionDisplay
     solution
     submission)
-  $ translate $ do
+  $ unless (null diff) $ translate $ do
     german $ "Die Lösung beinhaltet " ++ displayMistake ++ " Fehler."
     english $ "Your solution contains " ++ displayMistake ++ " mistakes."
 
