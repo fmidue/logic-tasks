@@ -14,16 +14,18 @@ import Control.OutputCapable.Blocks (
   ArticleToUse (DefiniteArticle),
   translations,
   multipleChoiceSyntax,
+  Language (..),
+  localise,
   )
-import Data.Map as Map (fromAscList)
+import Data.Map as Map (Map,fromAscList)
 import LogicTasks.Helpers
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 
 
 
 
-description :: OutputCapable m => LegalCNFInst -> LangM m
-description LegalCNFInst{..} = do
+descriptionTemplate :: OutputCapable m => Map Language String -> LegalCNFInst -> LangM m
+descriptionTemplate what LegalCNFInst{..} = do
     instruct $ do
       english "Consider the following propositional logic formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
@@ -31,21 +33,25 @@ description LegalCNFInst{..} = do
     focus $ unlines $ indexed formulaStrings
 
     instruct $ do
-      english "Which of these formulas are given in conjunctive normal form (cnf)?"
-      german "Welche dieser Formeln sind in konjunktiver Normalform (KNF) angegeben?"
+      english $ "Which of these formulas are given in " ++ localise English what ++ "?"
+      german $ "Welche dieser Formeln sind in " ++ localise German what ++ " angegeben?"
 
     instruct $ do
-      english "Enter a list containing the indices of the cnf formulas to submit your answer."
-      german "Geben Sie eine Liste der Indizes aller in KNF vorliegenden Formeln als Ihre Lösung an."
+      english $  "Enter a list containing the indices of the formulas in " ++ localise English what ++ " to submit your answer."
+      german $ "Geben Sie eine Liste der Indizes aller in " ++ localise German what ++ " vorliegender Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
-      english "For example, if only choices 2 and 3 are cnf formulas, then the solution is:"
-      german "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 in KNF vor, dann ist diese Lösung korrekt:"
+      english $ "For example, if only choices 2 and 3 are given in " ++ localise English what ++ ", then the solution is:"
+      german $ "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 in " ++ localise German what ++ " vor, dann ist diese Lösung korrekt:"
 
     extra addText
 
     pure ()
 
+description :: OutputCapable m => LegalCNFInst -> LangM m
+description = descriptionTemplate $ translations $ do
+  german "konjunktiver Normalform (KNF)"
+  english "conjunctive normal form (cnf)"
 
 
 verifyInst :: OutputCapable m => LegalCNFInst -> LangM m

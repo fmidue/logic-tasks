@@ -27,6 +27,7 @@ library
       LogicTasks.Util
       LogicTasks.Debug
       LogicTasks.Syntax.IllegalCnfs
+      LogicTasks.Syntax.IllegalDnfs
       LogicTasks.Syntax.IllegalFormulas
       LogicTasks.Syntax.SimplestFormula
       LogicTasks.Syntax.SubTreeSet
