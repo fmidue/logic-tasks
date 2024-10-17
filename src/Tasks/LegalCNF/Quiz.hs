@@ -85,7 +85,7 @@ genSynTreeWithSerial
           allowArrowOperators
     | serial `elem` serialsOfExternal =
         cnfToSynTree <$>
-        Formula.Types.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+        Formula.Types.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
     | serial `elem` serialsOfJustOneClause =
         cnfToSynTree <$>
         Tasks.LegalCNF.GenerateLegal.genCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals

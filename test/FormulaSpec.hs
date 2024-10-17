@@ -66,24 +66,24 @@ spec = do
 
   describe "genCnf" $ do
     it "should return the empty conjunction when called with the empty list" $
-      property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 []) isEmptyCnf
+      property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 [] True) isEmptyCnf
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
-        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf' ->
+        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
           let
             num = length (getClauses cnf')
           in
             num >= lowerNum && num <= upperNum
     it "should generate a random cnf formula with the correct clause length if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
-        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf' ->
+        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
          let
            sizes = map (length . literals) (getClauses cnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random cnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
-        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf' ->
+        forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
           all (\c -> Literal c `elem` atomics cnf') chars
 
   describe "genDnf" $ do
