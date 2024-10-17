@@ -5,8 +5,7 @@ module Tasks.LegalCNF.Quiz (
     ) where
 
 
-import qualified Formula.Types (genCnf)
-import qualified Tasks.LegalCNF.GenerateLegal (genCnf)
+import Formula.Types (genCnf)
 
 import Data.List ((\\))
 import Data.Set (fromList)
@@ -85,19 +84,20 @@ genSynTreeWithSerial
           allowArrowOperators
     | serial `elem` serialsOfExternal =
         cnfToSynTree <$>
-        Formula.Types.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
+        genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
     | serial `elem` serialsOfJustOneClause =
         cnfToSynTree <$>
-        Tasks.LegalCNF.GenerateLegal.genCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals
+       genCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals False
     | serial `elem` serialsOfJustOneLiteralPerClause =
         cnfToSynTree <$>
-        Tasks.LegalCNF.GenerateLegal.genCnf (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals
+       genCnf (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals False
     | otherwise =
         cnfToSynTree <$>
-        Tasks.LegalCNF.GenerateLegal.genCnf
+       genCnf
           (minClauseAmount, maxClauseAmount)
           (minClauseLength, maxClauseLength)
           usedLiterals
+          False
 
 
 

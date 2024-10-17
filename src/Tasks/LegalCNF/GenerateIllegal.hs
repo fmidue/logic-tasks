@@ -12,8 +12,7 @@ import Data.Set (size, toList)
 import Test.QuickCheck (Gen, choose, elements, frequency)
 import Test.QuickCheck.Gen (oneof)
 
-import Formula.Types (Clause(Clause))
-import Tasks.LegalCNF.GenerateLegal (genClause, genCnf)
+import Formula.Types (Clause(Clause), genCnf, genClause)
 import Trees.Helpers (clauseToSynTree, collectLeaves, literalToSynTree, relabelShape)
 import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators)
 
@@ -35,7 +34,7 @@ genIllegalSynTree
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
             firstSyntaxShape <- genIllegalCNFShape allowArrowOperators (clauses - 1)
             clauseList <- toList . SetFormula.clauseSet
-              <$> genCnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
+              <$> genCnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals False
             return (genIllegalCNF firstSyntaxShape clauseList)
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
@@ -46,7 +45,7 @@ genIllegalSynTree
 genCNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Bool -> Gen (SynTree BinOp Char)
 genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands allowArrowOperators = do
         clauseList <- toList . SetFormula.clauseSet <$>
-          genCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
+          genCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals False
         illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
         let illLength = length (collectLeaves illegalTree)
             (first, second) = span (\(Clause clause) -> illLength >= size clause) clauseList

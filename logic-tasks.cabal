@@ -50,7 +50,6 @@ library
       Tasks.LegalCNF.Config
       Tasks.LegalCNF.Quiz
       Tasks.LegalCNF.GenerateIllegal
-      Tasks.LegalCNF.GenerateLegal
       Tasks.ComposeFormula.Config
       Tasks.ComposeFormula.Quiz
       Tasks.DecomposeFormula.Config

@@ -9,7 +9,7 @@ import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioPr
 import Data.List((\\))
 
 import ParsingHelpers (fully)
-import Formula.Types (Cnf)
+import Formula.Types (Cnf, genCnf)
 import Formula.Parsing (parser)
 import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (CnfConfig(..), BaseConfig(..))
@@ -17,7 +17,6 @@ import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree)
 import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
-import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
 import Control.OutputCapable.Blocks (Language(German))
 import Control.OutputCapable.Blocks.Debug(checkConfigWith)
@@ -129,7 +128,7 @@ spec = do
         it "is reasonably implemented" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
-                  (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
+                  (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
                   (judgeCnfSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $ do
         it "all of the formulas in the wrong serial should not be Cnf" $
