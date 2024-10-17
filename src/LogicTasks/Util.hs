@@ -23,7 +23,7 @@ genCnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
 
 genDnf' :: CnfConfig -> Gen Dnf
 genDnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
-  = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+  = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
 
 displayFormula :: FormulaInst -> String
 displayFormula (InstCnf c) = show c

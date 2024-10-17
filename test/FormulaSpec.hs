@@ -88,22 +88,22 @@ spec = do
 
   describe "genDnf" $ do
     it "should return the empty disjunction when called with the empty list" $
-      property $ \bounds1 bounds2 -> forAll (genDnf bounds1 bounds2 []) isEmptyDnf
+      property $ \bounds1 bounds2 -> forAll (genDnf bounds1 bounds2 [] True) isEmptyDnf
     it "should generate a random dnf formula with a correct amount of cons if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
-        forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \dnf' ->
+        forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
           let
             num = length (getConjunctions dnf')
           in
             num >= lowerNum && num <= upperNum
     it "should generate a random dnf formula with the correct con length if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
-        forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \dnf' ->
+        forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
          let
            sizes = map (length . literals) (getConjunctions dnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random dnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
-        forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \dnf' ->
+        forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
           all (\c -> Literal c `elem` atomics dnf') chars
