@@ -31,7 +31,6 @@ data LegalCNFConfig =
   {
       cnfConfig :: CnfConfig
     , formulas :: Int
-    , externalGenFormulas :: Int
     , illegals :: Int
     , includeFormWithJustOneClause :: Bool
     , includeFormWithJustOneLiteralPerClause :: Bool
@@ -50,7 +49,6 @@ defaultLegalCNFConfig =
   {
     cnfConfig = dCnfConf
   , formulas = 4
-  , externalGenFormulas = 1
   , illegals = 2
   , includeFormWithJustOneClause = False
   , includeFormWithJustOneLiteralPerClause = True
@@ -71,13 +69,13 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
     | negArgs = reject $ do
         english "These parameters need to be greater than zero: minClauseAmount, minClauseLength, minStringSize, formulas."
         german "Diese Parameter müssen größer als null sein: minClauseAmount, minClauseLength, minStringSize, formulas."
-    | zeroArgs = reject $ do
-        english "The following parameters need to be zero or greater: illegals, externalGenFormulas."
-        german "Diese Parameter müssen null oder größer sein: illegals, externalGenFormulas."
+    | illegals < 0  = reject $ do
+        english "The following parameter needs to be zero or greater: illegals."
+        german "Dieser Parameter muss null oder größer sein: illegals."
     | boundsError = reject $ do
         english "At least one upper bound is smaller than its corresponding lower bound."
         german "Mindestens eine Obergrenze ist niedriger als die zugehörige Untergrenze."
-    | (maxClauseLength > 2 * length usedLiterals) || (externalGenFormulas > 0 && maxClauseLength > length usedLiterals)
+    | maxClauseLength > length usedLiterals
       = reject $ do
         english "The used literals cannot generate a clause with maxClauseLength."
         german "Die angegebenen Literale können die maximale Klauselgröße nicht generieren."
@@ -90,15 +88,14 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
     | maxClauseLength == 1 && maxClauseAmount == 1 = reject $ do
         english "Atomic propositions have no illegal forms"
         german "Atomare Aussagen können nicht syntaktisch falsch sein."
-    | formulas - illegals - externalGenFormulas <
+    | formulas - illegals <
         (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
       = reject $ do
         english "The formulas used to generate special formula are not sufficient."
         german "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
-    | externalGenFormulas > 0
-        && minClauseAmount > lengthBound (length usedLiterals) maxClauseLength
+    | minClauseAmount > lengthBound (length usedLiterals) maxClauseLength
       = reject $ do
-        english "minClauseAmount is too large. The external generator cannot generate a CNF."
+        english "minClauseAmount is too large. The generator cannot generate a CNF."
         german "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 4 + 1) = reject $ do
         english "Cannot generate string with given minStringSize."
@@ -109,7 +106,6 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
     | otherwise = checkCnfConf cnfConf
   where
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
-    zeroArgs = any (<0) [illegals, externalGenFormulas]
     boundsError = any (\(a,b) -> b < a)
       [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
 

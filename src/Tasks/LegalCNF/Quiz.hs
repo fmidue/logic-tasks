@@ -26,16 +26,13 @@ generateLegalCNFInst :: LegalCNFConfig -> Gen LegalCNFInst
 generateLegalCNFInst config@LegalCNFConfig {..} = do
     serialsOfWrong <- vectorOf illegals (choose (1, formulas) )`suchThat` listNoDuplicate
     let serial1 = [1.. formulas] \\ serialsOfWrong
-    serialsOfExternal <- vectorOf externalGenFormulas (elements serial1 ) `suchThat` listNoDuplicate
-    let serial2 = serial1 \\ serialsOfExternal
-    serialsOfJustOneClause <- vectorOf (if includeFormWithJustOneClause then 1 else 0) (elements serial2)
-    let serial3 = serial2 \\ serialsOfJustOneClause
+    serialsOfJustOneClause <- vectorOf (if includeFormWithJustOneClause then 1 else 0) (elements serial1)
+    let serial2 = serial1 \\ serialsOfJustOneClause
     serialsOfJustOneLiteralPerClause <- vectorOf
         (if includeFormWithJustOneLiteralPerClause then 1 else 0)
-        (elements serial3)
+        (elements serial2)
     treeList <- genSynTreeList
         serialsOfWrong
-        serialsOfExternal
         serialsOfJustOneClause
         serialsOfJustOneLiteralPerClause
         [1 .. formulas]
@@ -48,10 +45,9 @@ generateLegalCNFInst config@LegalCNFConfig {..} = do
 
 
 
-genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]
+genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]
 genSynTreeList
   serialsOfWrong
-  serialsOfExternal
   serialsOfJustOneClause
   serialsOfJustOneLiteralPerClause
   formulasList
@@ -59,7 +55,6 @@ genSynTreeList
     mapM (\serial ->
       genSynTreeWithSerial
         serialsOfWrong
-        serialsOfExternal
         serialsOfJustOneClause
         serialsOfJustOneLiteralPerClause
         config
@@ -68,10 +63,9 @@ genSynTreeList
 
 
 
-genSynTreeWithSerial :: [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Int -> Gen (SynTree BinOp Char)
+genSynTreeWithSerial :: [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Int -> Gen (SynTree BinOp Char)
 genSynTreeWithSerial
   serialsOfWrong
-  serialsOfExternal
   serialsOfJustOneClause
   serialsOfJustOneLiteralPerClause
   LegalCNFConfig {cnfConfig = CnfConfig {baseConf = BaseConfig{..},..},..}
@@ -82,9 +76,6 @@ genSynTreeWithSerial
           (minClauseLength, maxClauseLength)
           usedLiterals
           allowArrowOperators
-    | serial `elem` serialsOfExternal =
-        cnfToSynTree <$>
-        genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
     | serial `elem` serialsOfJustOneClause =
         cnfToSynTree <$>
        genCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals False

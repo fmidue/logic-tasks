@@ -36,9 +36,8 @@ validBoundsLegalCNF = do
     formulas <- choose
       (1, formulaUpperBound)
     illegals <- choose (0, formulas)
-    externalGenFormulas <- choose (0, formulas - illegals)
-    let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals - externalGenFormulas > 0
-        includeFormWithJustOneLiteralPerClause = minClauseLength == 1 && formulas - illegals - externalGenFormulas > 1
+    let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals > 0
+        includeFormWithJustOneLiteralPerClause = minClauseLength == 1 && formulas - illegals > 1
     allowArrowOperators <- elements [True, False]
     return $ LegalCNFConfig
         {
@@ -55,7 +54,6 @@ validBoundsLegalCNF = do
           illegals,
           includeFormWithJustOneClause,
           includeFormWithJustOneLiteralPerClause,
-          externalGenFormulas,
           maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
           minStringSize = minClauseAmount * ((minClauseLength - 1) * 4 + 1),
           allowArrowOperators,
@@ -73,7 +71,6 @@ invalidBoundsLegalCNF = do
     minClauseAmount <- choose (1, maxClauseAmount + 20)
     formulas <- choose (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
     illegals <- choose (-5, -1)
-    externalGenFormulas <- choose (-10, 100)
     minStringSize <- choose (minClauseLength * (2 + minClauseAmount), 300)
     maxStringSize <- choose (1, minStringSize)
     return $ LegalCNFConfig
@@ -91,7 +88,6 @@ invalidBoundsLegalCNF = do
           illegals,
           includeFormWithJustOneClause = True,
           includeFormWithJustOneLiteralPerClause = False,
-          externalGenFormulas,
           maxStringSize,
           minStringSize,
           allowArrowOperators = False,
