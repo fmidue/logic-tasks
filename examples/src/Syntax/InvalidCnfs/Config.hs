@@ -21,7 +21,6 @@ task07 = LegalCNFConfig
     , maxClauseAmount = 4
     }
   , formulas = 8
-  , externalGenFormulas = 2
   , illegals = 2
   , includeFormWithJustOneClause = True
   , includeFormWithJustOneLiteralPerClause = False
@@ -42,7 +41,6 @@ task18 = LegalCNFConfig
     , maxClauseAmount = 5
     }
   , formulas = 8
-  , externalGenFormulas = 2
   , illegals = 2
   , includeFormWithJustOneClause = True
   , includeFormWithJustOneLiteralPerClause = True

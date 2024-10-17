@@ -258,13 +258,13 @@ instance Arbitrary Cnf where
     arbitrary = sized cnf
       where
         cnf :: Int -> Gen Cnf
-        cnf 0 = genCnf (0,0) (0,0) []
+        cnf 0 = genCnf (0,0) (0,0) [] True
         cnf n = do
             minLen <- chooseInt (1,n)
             let
               lits = take n ['A'..'Z']
               maxLen = length lits
-            genCnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits
+            genCnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits True
 
 
 
@@ -272,12 +272,11 @@ instance Arbitrary Cnf where
 -- | Generates a random cnf satisfying the given bounds
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
---   Every char from the list will occur at least once in the formula.
-genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) lits = do
+genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
+genCnf (minNum,maxNum) (minLen,maxLen) lits useAllLiterals = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
     cnf <- generateClauses nLits empty num
-      `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+      `suchThat` \xs -> not useAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -405,13 +404,13 @@ instance Arbitrary Dnf where
     arbitrary = sized dnf
       where
         dnf :: Int -> Gen Dnf
-        dnf 0 = genDnf (0,0) (0,0) []
+        dnf 0 = genDnf (0,0) (0,0) [] True
         dnf n = do
             minLen <- chooseInt (1,n)
             let
               lits = take n ['A'..'Z']
               maxLen = length lits
-            genDnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits
+            genDnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits True
 
 
 
@@ -419,12 +418,11 @@ instance Arbitrary Dnf where
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
---   Every char from the list will occur at least once in the formula.
-genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Dnf
-genDnf (minNum,maxNum) (minLen,maxLen) lits = do
+genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnf (minNum,maxNum) (minLen,maxLen) lits useAllLiterals = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
     dnf <- generateCons nLits empty num
-      `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+      `suchThat` \xs -> not useAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
