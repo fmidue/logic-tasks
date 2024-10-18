@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 
@@ -18,11 +19,12 @@ module Trees.Types
 import GHC.Generics
 import Formula.Types (ToSAT(..))
 import qualified SAT.MiniSat as Sat
+import Data.Data (Data)
 import Data.Tuple (swap)
 
 
 data BinOp = And | Or | Impl | BackImpl | Equi
-  deriving (Eq, Generic, Ord, Show, Enum, Bounded)
+  deriving (Eq, Data, Generic, Ord, Show, Enum, Bounded)
 
 showOperator :: BinOp -> String
 showOperator And = "∧"
@@ -77,7 +79,7 @@ data PropFormula c
     | Neg (PropFormula c)
     | Brackets (PropFormula c)
     | Assoc BinOp (PropFormula c) (PropFormula c)
-  deriving (Eq, Foldable)
+  deriving (Data, Eq, Foldable)
 
 
 
@@ -88,6 +90,14 @@ instance Show (PropFormula Char) where
   show (Brackets f) = '(' : show f ++ ")"
   show (Assoc o f1 f2) = show f1 ++ " " ++ showOperator o ++ " " ++ show f2
 
+
+instance ToSAT (PropFormula Char) where
+  convert = convert . toTree
+    where
+      toTree (Atomic c) = Leaf c
+      toTree (Neg p) = Not $ toTree p
+      toTree (Brackets p) = toTree p
+      toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
 
 
 newtype FormulaAnswer = FormulaAnswer {maybeForm :: Maybe (PropFormula Char)} deriving (Eq, Generic)
