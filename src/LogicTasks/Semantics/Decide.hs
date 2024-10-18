@@ -22,14 +22,15 @@ import Control.OutputCapable.Blocks (
   MinimumThreshold (MinimumThreshold),
   Punishment (Punishment),
   TargetedCorrect (TargetedCorrect),
+  multipleChoiceSyntax,
   )
-import Data.List.Extra (nubSort)
+import Data.List.Extra (nubSort, nubOrd)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable, literals)
-import Util (isOutside, preventWithHint, remove, withRatio, checkTruthValueRangeAndFormulaConf)
+import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Helpers (extra)
 import Control.Monad (when)
 import Trees.Generate (genSynTree)
@@ -140,28 +141,7 @@ start :: [Int]
 start = []
 
 partialGrade :: OutputCapable m =>  DecideInst -> [Int] -> LangM m
-partialGrade DecideInst{..} sol = do
-  preventWithHint (null sol)
-    (translate $ do
-      german "Lösung enthält Indizes?"
-      english "Solution contains indices?"
-    )
-    (translate $ do
-      german "Die Lösung muss mindestens einen Index enthalten."
-      english "The solution must contain at least one index."
-    )
-
-  preventWithHint (any (\x -> x < 1 || x > tableLen) sol)
-    (translate $ do
-      german "Lösung enthält nur gültige Indizes?"
-      english "Solution only contains valid indices?"
-    )
-    (translate $ do
-      german "Die Lösung enthält mindestens einen ungültigen Index."
-      english "The solution contains at least one invalid index."
-    )
-
-  pure ()
+partialGrade DecideInst{..} sol = multipleChoiceSyntax False [1..tableLen] $ nubOrd sol
     where
       table = getTable formula
       tableLen = length $ readEntries table
