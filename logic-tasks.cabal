@@ -113,7 +113,7 @@ test-suite src-test
       DecomposeFormulaSpec
       FillSpec
       FormulaSpec
-      LegalCNFSpec
+      LegalNormalFormSpec
       LegalPropositionSpec
       ParsingSpec
       PickSpec
