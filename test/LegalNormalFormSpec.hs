@@ -112,7 +112,8 @@ spec = do
 
     describe "genIllegalCnfSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
                 forAll
                   (genIllegalCnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
@@ -122,7 +123,8 @@ spec = do
                   (not . judgeCnfSynTree)
     describe "genIllegalDnfSynTree" $
         it "the syntax Tree are not DNF syntax tree" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
                 forAll
                   (genIllegalDnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
@@ -132,13 +134,15 @@ spec = do
                   (not . judgeDnfSynTree)
     describe "judgeCnfSynTree" $
         it "is reasonably implemented" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
                   (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
                   (judgeCnfSynTree . cnfToSynTree)
     describe "judgeDnfSynTree" $
         it "is reasonably implemented" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
                   (genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
                   (judgeDnfSynTree . dnfToSynTree)

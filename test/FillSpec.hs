@@ -6,7 +6,16 @@ module FillSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, elements, suchThat, sublistOf)
 import Control.OutputCapable.Blocks (LangM, Rated)
-import Config (dFillConf, FillConfig (..), FillInst (..), FormulaConfig(..), BaseConfig(..), dBaseConf, NormalFormConfig(..), dNormalFormConf)
+import Config (
+  dFillConf,
+  FillConfig (..),
+  FillInst (..),
+  FormulaConfig(..),
+  BaseConfig(..),
+  dBaseConf,
+  NormalFormConfig(..),
+  dNormalFormConf
+ )
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
