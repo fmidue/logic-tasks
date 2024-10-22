@@ -65,9 +65,9 @@ library:
     - Tasks.SuperfluousBrackets.Quiz
     - Tasks.TreeToFormula.Config
     - Tasks.TreeToFormula.Quiz
-    - Tasks.LegalCNF.Config
-    - Tasks.LegalCNF.Quiz
-    - Tasks.LegalCNF.GenerateIllegal
+    - Tasks.LegalNormalForm.Config
+    - Tasks.LegalNormalForm.Quiz
+    - Tasks.LegalNormalForm.GenerateIllegal
     - Tasks.ComposeFormula.Config
     - Tasks.ComposeFormula.Quiz
     - Tasks.DecomposeFormula.Config

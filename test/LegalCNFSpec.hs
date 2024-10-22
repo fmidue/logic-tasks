@@ -15,15 +15,15 @@ import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (CnfConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree)
-import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
-import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
-import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
+import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalCNFConfig)
+import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, )
+import Tasks.LegalNormalForm.Quiz (generateLegalCNFInst)
 import Control.OutputCapable.Blocks (Language(German))
 import Control.OutputCapable.Blocks.Debug(checkConfigWith)
 
 import FormulaSpec (validBoundsCnf)
 
-validBoundsLegalCNF :: Gen LegalCNFConfig
+validBoundsLegalCNF :: Gen LegalNormalFormConfig
 validBoundsLegalCNF = do
     ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedLiterals) <- validBoundsCnf
 
@@ -39,7 +39,7 @@ validBoundsLegalCNF = do
     let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals > 0
         includeFormWithJustOneLiteralPerClause = minClauseLength == 1 && formulas - illegals > 1
     allowArrowOperators <- elements [True, False]
-    return $ LegalCNFConfig
+    return $ LegalNormalFormConfig
         {
           cnfConfig = CnfConfig{
             minClauseAmount,
@@ -61,7 +61,7 @@ validBoundsLegalCNF = do
           extraText = Nothing
         }
 
-invalidBoundsLegalCNF :: Gen LegalCNFConfig
+invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
 invalidBoundsLegalCNF = do
     usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` \literals -> not (null literals) && (10>=length literals)
     maxClauseLength <- choose (1, 2 * length usedLiterals)
@@ -73,7 +73,7 @@ invalidBoundsLegalCNF = do
     illegals <- choose (-5, -1)
     minStringSize <- choose (minClauseLength * (2 + minClauseAmount), 300)
     maxStringSize <- choose (1, minStringSize)
-    return $ LegalCNFConfig
+    return $ LegalNormalFormConfig
         {
           cnfConfig = CnfConfig{
             minClauseAmount,
@@ -110,11 +110,11 @@ spec = do
           forAll invalidBoundsLegalCNF $ \conf ->
             ioProperty (not <$> checkConfigWith German conf checkLegalCNFConfig)
 
-    describe "genIllegalSynTree" $
+    describe "genIllegalCnfSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
-            forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+            forAll validBoundsLegalCNF $ \LegalNormalFormConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
                 forAll
-                  (genIllegalSynTree
+                  (genIllegalCnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
                      allowArrowOperators
@@ -122,18 +122,18 @@ spec = do
                   (not . judgeCnfSynTree)
     describe "judgeCnfSynTree" $
         it "is reasonably implemented" $
-            forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
+            forAll validBoundsLegalCNF $ \LegalNormalFormConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
                   (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
                   (judgeCnfSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $ do
         it "all of the formulas in the wrong serial should not be Cnf" $
             within timeout $ forAll validBoundsLegalCNF $ \config ->
-                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
+                forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
                   all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) (toList serialsOfWrong)
         it "all of the formulas not in the wrong serial should be Cnf" $
-            within timeout $ forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
-                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
+            within timeout $ forAll validBoundsLegalCNF $ \config@LegalNormalFormConfig{..} ->
+                forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
                   all (\x -> isRight (cnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool

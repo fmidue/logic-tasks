@@ -19,13 +19,13 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Map as Map (Map,fromAscList)
 import LogicTasks.Helpers
-import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
+import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalCNFConfig)
 
 
 
 
-descriptionTemplate :: OutputCapable m => Map Language String -> LegalCNFInst -> LangM m
-descriptionTemplate what LegalCNFInst{..} = do
+descriptionTemplate :: OutputCapable m => Map Language String -> LegalNormalFormInst -> LangM m
+descriptionTemplate what LegalNormalFormInst{..} = do
     instruct $ do
       english "Consider the following propositional logic formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
@@ -48,18 +48,18 @@ descriptionTemplate what LegalCNFInst{..} = do
 
     pure ()
 
-description :: OutputCapable m => LegalCNFInst -> LangM m
+description :: OutputCapable m => LegalNormalFormInst -> LangM m
 description = descriptionTemplate $ translations $ do
   german "konjunktiver Normalform (KNF)"
   english "conjunctive normal form (cnf)"
 
 
-verifyInst :: OutputCapable m => LegalCNFInst -> LangM m
+verifyInst :: OutputCapable m => LegalNormalFormInst -> LangM m
 verifyInst _ = pure ()
 
 
 
-verifyConfig :: OutputCapable m => LegalCNFConfig -> LangM m
+verifyConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
 verifyConfig = checkLegalCNFConfig
 
 
@@ -69,12 +69,12 @@ start = []
 
 
 
-partialGrade :: OutputCapable m => LegalCNFInst -> [Int] -> LangM m
-partialGrade LegalCNFInst{..} = multipleChoiceSyntax False [1..length formulaStrings]
+partialGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> LangM m
+partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length formulaStrings]
 
 
-completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
-completeGrade LegalCNFInst{..} = multipleChoice DefiniteArticle what solutionDisplay (Map.fromAscList solution)
+completeGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> Rated m
+completeGrade LegalNormalFormInst{..} = multipleChoice DefiniteArticle what solutionDisplay (Map.fromAscList solution)
   where
     what = translations $ do
       german "Indizes"

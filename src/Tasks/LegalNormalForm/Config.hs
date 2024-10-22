@@ -4,11 +4,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Tasks.LegalCNF.Config (
-    LegalCNFConfig(..),
-    LegalCNFInst(..),
+module Tasks.LegalNormalForm.Config (
+    LegalNormalFormConfig(..),
+    LegalNormalFormInst(..),
     checkLegalCNFConfig,
-    defaultLegalCNFConfig
+    defaultLegalNormalFormConfig,
     ) where
 
 
@@ -26,8 +26,8 @@ import Util (checkCnfConf)
 
 
 
-data LegalCNFConfig =
-  LegalCNFConfig
+data LegalNormalFormConfig =
+  LegalNormalFormConfig
   {
       cnfConfig :: CnfConfig
     , formulas :: Int
@@ -43,9 +43,9 @@ data LegalCNFConfig =
 
 
 
-defaultLegalCNFConfig :: LegalCNFConfig
-defaultLegalCNFConfig =
-  LegalCNFConfig
+defaultLegalNormalFormConfig :: LegalNormalFormConfig
+defaultLegalNormalFormConfig =
+  LegalNormalFormConfig
   {
     cnfConfig = dCnfConf
   , formulas = 4
@@ -60,9 +60,8 @@ defaultLegalCNFConfig =
   }
 
 
-
-checkLegalCNFConfig :: OutputCapable m => LegalCNFConfig -> LangM m
-checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
+checkLegalCNFConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
+checkLegalCNFConfig LegalNormalFormConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben können Literale sein."
@@ -109,10 +108,8 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
     boundsError = any (\(a,b) -> b < a)
       [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
 
-
-
-data LegalCNFInst =
-    LegalCNFInst
+data LegalNormalFormInst =
+    LegalNormalFormInst
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]

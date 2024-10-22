@@ -4,16 +4,16 @@ import LogicTasks.Config (
   BaseConfig(..),
   CnfConfig(..),
   )
-import Tasks.LegalCNF.Config (
-  LegalCNFConfig(..), checkLegalCNFConfig,
+import Tasks.LegalNormalForm.Config (
+  LegalNormalFormConfig(..), checkLegalCNFConfig,
   )
 import Test.Hspec
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 
 -- Weight 0.33
-task07 :: LegalCNFConfig
-task07 = LegalCNFConfig
+task07 :: LegalNormalFormConfig
+task07 = LegalNormalFormConfig
   { cnfConfig = CnfConfig
     { baseConf = BaseConfig
       { minClauseLength = 2, maxClauseLength = 4, usedLiterals = "ABCD" }
@@ -32,8 +32,8 @@ task07 = LegalCNFConfig
   }
 
 -- Weight 0.25
-task18 :: LegalCNFConfig
-task18 = LegalCNFConfig
+task18 :: LegalNormalFormConfig
+task18 = LegalNormalFormConfig
   { cnfConfig = CnfConfig
     { baseConf = BaseConfig
       { minClauseLength = 2, maxClauseLength = 4, usedLiterals = "ABCD" }

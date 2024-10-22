@@ -17,7 +17,9 @@ module Trees.Helpers
     similarExist,
     consecutiveNegations,
     cnfToSynTree,
+    dnfToSynTree,
     clauseToSynTree,
+    conToSynTree,
     literalToSynTree,
     numOfOps,
     numOfOpsInFormula,
@@ -35,6 +37,7 @@ import Data.Set(fromList, Set, toList)
 import Data.List.Extra (nubBy, nubOrd)
 import qualified Data.Foldable as Foldable (toList)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
+import qualified Formula.Types as SetFormulaDnf (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
 
@@ -134,8 +137,14 @@ continueNot _ = 0
 cnfToSynTree :: SetFormula.Cnf -> SynTree BinOp Char
 cnfToSynTree = foldr1 (Binary And) . map clauseToSynTree . toList . SetFormula.clauseSet
 
+dnfToSynTree :: SetFormulaDnf.Dnf -> SynTree BinOp Char
+dnfToSynTree = foldr1 (Binary Or) . map conToSynTree . toList . SetFormulaDnf.clauseSet
+
 clauseToSynTree :: SetFormula.Clause -> SynTree BinOp Char
 clauseToSynTree = foldr1 (Binary Or) . map literalToSynTree . toList . SetFormula.literalSet
+
+conToSynTree :: SetFormulaDnf.Con -> SynTree BinOp Char
+conToSynTree = foldr1 (Binary And) . map literalToSynTree . toList . SetFormulaDnf.literalSet
 
 literalToSynTree :: SetFormula.Literal -> SynTree o Char
 literalToSynTree (SetFormula.Literal a) = Leaf a

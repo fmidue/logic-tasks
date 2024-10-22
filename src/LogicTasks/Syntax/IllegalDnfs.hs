@@ -1,6 +1,5 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards #-}
 module LogicTasks.Syntax.IllegalDnfs where
 
 
@@ -10,44 +9,39 @@ import Control.OutputCapable.Blocks (
   english,
   german,
   Rated,
-  multipleChoice,
-  ArticleToUse (DefiniteArticle),
   translations,
-  multipleChoiceSyntax,
   )
-import Data.Map as Map (fromAscList)
-import LogicTasks.Helpers
-import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
-import qualified LogicTasks.Syntax.IllegalCnfs
+import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..))
+import qualified LogicTasks.Syntax.IllegalCnfs as IllegalCnfs
 
 
 
 
-description :: OutputCapable m => LegalCNFInst -> LangM m
-description = LogicTasks.Syntax.IllegalCnfs.descriptionTemplate $ translations $ do
+description :: OutputCapable m => LegalNormalFormInst -> LangM m
+description = IllegalCnfs.descriptionTemplate $ translations $ do
   german "disjunktiver Normalform (DNF)"
   english "disjunctive normal form (dnf)"
 
 
 
-verifyInst :: OutputCapable m => LegalCNFInst -> LangM m
-verifyInst = LogicTasks.Syntax.IllegalCnfs.verifyInst
+verifyInst :: OutputCapable m => LegalNormalFormInst -> LangM m
+verifyInst = IllegalCnfs.verifyInst
 
 
 
-verifyConfig :: OutputCapable m => LegalCNFConfig -> LangM m
-verifyConfig = LogicTasks.Syntax.IllegalCnfs.verifyConfig
+verifyConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
+verifyConfig = IllegalCnfs.verifyConfig
 
 
 
 start :: [Int]
-start = []
+start = IllegalCnfs.start
 
 
 
-partialGrade :: OutputCapable m => LegalCNFInst -> [Int] -> LangM m
-partialGrade = LogicTasks.Syntax.IllegalCnfs.partialGrade
+partialGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> LangM m
+partialGrade = IllegalCnfs.partialGrade
 
 
-completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
-completeGrade = LogicTasks.Syntax.IllegalCnfs.completeGrade
+completeGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> Rated m
+completeGrade = IllegalCnfs.completeGrade
