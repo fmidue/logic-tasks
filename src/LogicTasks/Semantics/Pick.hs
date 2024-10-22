@@ -22,7 +22,7 @@ import Control.OutputCapable.Blocks (
 
 import Test.QuickCheck (Gen, suchThat, elements)
 
-import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), FormulaInst (..), BaseConfig (..), CnfConfig(..))
+import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), FormulaInst (..), BaseConfig (..), NormalFormConfig(..))
 import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)

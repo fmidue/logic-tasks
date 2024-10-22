@@ -21,7 +21,7 @@ import Control.OutputCapable.Blocks (
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
-import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
+import Config (BaseConfig(..), NormalFormConfig(..), MinMaxConfig(..), MinInst(..))
 import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
 import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
 import LogicTasks.Helpers (extra, formulaKey)
@@ -32,7 +32,7 @@ import Formula.Parsing (Parse(..))
 
 
 genMinInst :: MinMaxConfig -> Gen MinInst
-genMinInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
+genMinInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
     dnf <- dnfInRange
     pure $ MinInst {
       dnf

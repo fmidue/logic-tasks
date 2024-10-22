@@ -6,7 +6,7 @@ module FillSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, elements, suchThat, sublistOf)
 import Control.OutputCapable.Blocks (LangM, Rated)
-import Config (dFillConf, FillConfig (..), FillInst (..), FormulaConfig(..), BaseConfig(..), dBaseConf, CnfConfig(..), dCnfConf)
+import Config (dFillConf, FillConfig (..), FillInst (..), FormulaConfig(..), BaseConfig(..), dBaseConf, NormalFormConfig(..), dNormalFormConf)
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
@@ -28,7 +28,7 @@ validBoundsBase = do
   , usedLiterals
   }
 
-validBoundsCnf :: Gen CnfConfig
+validBoundsCnf :: Gen NormalFormConfig
 validBoundsCnf = do
   minClauseAmount <- choose (1, 5)
   maxClauseAmount <- choose (2, 10) `suchThat` \x -> minClauseAmount <= x
@@ -36,7 +36,7 @@ validBoundsCnf = do
     minClauseAmount * minClauseLength bc >= length (usedLiterals bc) &&
     minClauseAmount <= 2 ^ length (usedLiterals bc) &&
     minClauseAmount <= lengthBound (length (usedLiterals bc)) (maxClauseLength bc)
-  pure $ CnfConfig {
+  pure $ NormalFormConfig {
     baseConf
   , minClauseAmount
   , maxClauseAmount
@@ -74,12 +74,12 @@ spec = do
     it "validBoundsBase should generate a valid config" $
       forAll validBoundsBase $ \baseConfig ->
         isJust $ runIdentity $ evalLangM (checkBaseConf baseConfig :: LangM Maybe)
-  describe "CnfConfig" $ do
+  describe "NormalFormConfig" $ do
     it "default cnf config should pass config check" $
-      isJust $ runIdentity $ evalLangM (checkCnfConf dCnfConf :: LangM Maybe)
+      isJust $ runIdentity $ evalLangM (checkCnfConf dNormalFormConf :: LangM Maybe)
     it "validBoundsCnf should generate a valid config" $
-      forAll validBoundsCnf $ \cnfConfig ->
-        isJust $ runIdentity $ evalLangM (checkCnfConf cnfConfig :: LangM Maybe)
+      forAll validBoundsCnf $ \normalFormConfig ->
+        isJust $ runIdentity $ evalLangM (checkCnfConf normalFormConfig :: LangM Maybe)
   describe "config" $ do
     it "default config should pass config check" $
       isJust $ runIdentity $ evalLangM (verifyQuiz dFillConf :: LangM Maybe)

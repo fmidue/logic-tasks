@@ -44,7 +44,7 @@ spec = do
   describe "genValidBoundsCnf" $
     it "should generate valid bounds" $
       withMaxSuccess 1000 $ forAll validBoundsCnf $ \((l1,u1),(l2,u2),cs) ->
-        ioProperty $ checkConfigWith German (CnfConfig (BaseConfig l2 u2 cs) l1 u1) checkCnfConf
+        ioProperty $ checkConfigWith German (NormalFormConfig (BaseConfig l2 u2 cs) l1 u1) checkCnfConf
 
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $

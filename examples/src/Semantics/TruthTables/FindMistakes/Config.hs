@@ -3,7 +3,7 @@ module Semantics.TruthTables.FindMistakes.Config where
 import LogicTasks.Config (
   BaseConfig(..),
   DecideConfig(..),
-  CnfConfig(..),
+  NormalFormConfig(..),
   FormulaConfig(..)
   )
 import Control.OutputCapable.Blocks (english, german, translations)
@@ -13,7 +13,7 @@ import Util.VerifyConfig
 -- Weight 0.34
 task09 :: DecideConfig
 task09 = DecideConfig
-  { formulaConfig = FormulaCnf $ CnfConfig
+  { formulaConfig = FormulaCnf $ NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 2
@@ -31,7 +31,7 @@ task09 = DecideConfig
 -- Weight 0.4
 task11 :: DecideConfig
 task11 = DecideConfig
-  { formulaConfig = FormulaCnf $ CnfConfig
+  { formulaConfig = FormulaCnf $ NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 3

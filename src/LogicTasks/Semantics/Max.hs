@@ -20,7 +20,7 @@ import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
-import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
+import Config (BaseConfig(..), NormalFormConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
@@ -33,7 +33,7 @@ import Formula.Parsing (Parse(..))
 
 
 genMaxInst :: MinMaxConfig -> Gen MaxInst
-genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
+genMaxInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
     cnf <- cnfInRange
     pure $ MaxInst {
       cnf

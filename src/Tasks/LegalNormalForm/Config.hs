@@ -18,7 +18,7 @@ import Data.Set (Set)
 import Data.Map (Map)
 import GHC.Generics (Generic)
 
-import Config (BaseConfig(..), CnfConfig(..), dCnfConf)
+import Config (BaseConfig(..), NormalFormConfig(..), dNormalFormConf)
 import Formula.Types (lengthBound)
 import LogicTasks.Helpers (reject)
 import Util (checkCnfConf)
@@ -29,7 +29,7 @@ import Util (checkCnfConf)
 data LegalNormalFormConfig =
   LegalNormalFormConfig
   {
-      cnfConfig :: CnfConfig
+      normalFormConfig :: NormalFormConfig
     , formulas :: Int
     , illegals :: Int
     , includeFormWithJustOneClause :: Bool
@@ -47,7 +47,7 @@ defaultLegalNormalFormConfig :: LegalNormalFormConfig
 defaultLegalNormalFormConfig =
   LegalNormalFormConfig
   {
-    cnfConfig = dCnfConf
+    normalFormConfig = dNormalFormConf
   , formulas = 4
   , illegals = 2
   , includeFormWithJustOneClause = False
@@ -61,7 +61,7 @@ defaultLegalNormalFormConfig =
 
 
 checkLegalNormalFormConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
-checkLegalNormalFormConfig LegalNormalFormConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
+checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@NormalFormConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben können Literale sein."

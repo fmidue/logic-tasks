@@ -2,7 +2,7 @@ module Syntax.InvalidCnfs.Config where
 
 import LogicTasks.Config (
   BaseConfig(..),
-  CnfConfig(..),
+  NormalFormConfig(..),
   )
 import Tasks.LegalNormalForm.Config (
   LegalNormalFormConfig(..), checkLegalNormalFormConfig,
@@ -14,7 +14,7 @@ import Control.OutputCapable.Blocks (Language(German))
 -- Weight 0.33
 task07 :: LegalNormalFormConfig
 task07 = LegalNormalFormConfig
-  { cnfConfig = CnfConfig
+  { normalFormConfig = NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2, maxClauseLength = 4, usedLiterals = "ABCD" }
     , minClauseAmount = 2
@@ -34,7 +34,7 @@ task07 = LegalNormalFormConfig
 -- Weight 0.25
 task18 :: LegalNormalFormConfig
 task18 = LegalNormalFormConfig
-  { cnfConfig = CnfConfig
+  { normalFormConfig = NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2, maxClauseLength = 4, usedLiterals = "ABCD" }
     , minClauseAmount = 2

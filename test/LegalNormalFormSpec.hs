@@ -12,7 +12,7 @@ import ParsingHelpers (fully)
 import Formula.Types (Cnf, genCnf, genDnf, Dnf)
 import Formula.Parsing (parser)
 import Text.ParserCombinators.Parsec (ParseError, parse)
-import Config (CnfConfig(..), BaseConfig(..))
+import Config (NormalFormConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
 import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
@@ -41,7 +41,7 @@ validBoundsLegalNormalForm = do
     allowArrowOperators <- elements [True, False]
     return $ LegalNormalFormConfig
         {
-          cnfConfig = CnfConfig{
+          normalFormConfig = NormalFormConfig{
             minClauseAmount,
             maxClauseAmount,
             baseConf = BaseConfig{
@@ -75,7 +75,7 @@ invalidBoundsLegalCNF = do
     maxStringSize <- choose (1, minStringSize)
     return $ LegalNormalFormConfig
         {
-          cnfConfig = CnfConfig{
+          normalFormConfig = NormalFormConfig{
             minClauseAmount,
             maxClauseAmount,
             baseConf = BaseConfig{
@@ -112,7 +112,7 @@ spec = do
 
     describe "genIllegalCnfSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
                 forAll
                   (genIllegalCnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
@@ -122,7 +122,7 @@ spec = do
                   (not . judgeCnfSynTree)
     describe "genIllegalDnfSynTree" $
         it "the syntax Tree are not DNF syntax tree" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
                 forAll
                   (genIllegalDnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
@@ -132,13 +132,13 @@ spec = do
                   (not . judgeDnfSynTree)
     describe "judgeCnfSynTree" $
         it "is reasonably implemented" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
+            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
                   (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
                   (judgeCnfSynTree . cnfToSynTree)
     describe "judgeDnfSynTree" $
         it "is reasonably implemented" $
-            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
+            forAll validBoundsLegalNormalForm $ \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
                   (genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
                   (judgeDnfSynTree . dnfToSynTree)

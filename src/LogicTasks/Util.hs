@@ -12,17 +12,17 @@ module LogicTasks.Util
 import Util
 import Test.QuickCheck (Gen)
 import Formula.Types (Cnf, genCnf, genDnf, Dnf)
-import Config (CnfConfig (..), BaseConfig(..), FormulaInst (..), FormulaConfig (..))
+import Config (NormalFormConfig (..), BaseConfig(..), FormulaInst (..), FormulaConfig (..))
 import Trees.Print (display)
 import Tasks.SynTree.Config (SynTreeConfig(minAmountOfUniqueAtoms, availableAtoms))
 import Formula.Util (isEmptyCnf, hasEmptyClause, isEmptyDnf, hasEmptyCon)
 
-genCnf' :: CnfConfig -> Gen Cnf
-genCnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
+genCnf' :: NormalFormConfig -> Gen Cnf
+genCnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
   = genCnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
 
-genDnf' :: CnfConfig -> Gen Dnf
-genDnf' (CnfConfig{baseConf = BaseConfig{..}, ..})
+genDnf' :: NormalFormConfig -> Gen Dnf
+genDnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
   = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
 
 displayFormula :: FormulaInst -> String

@@ -3,7 +3,7 @@ module Semantics.TruthTables.MaxTerm.Config where
 import LogicTasks.Config (
   BaseConfig(..),
   MinMaxConfig (..),
-  CnfConfig (..),
+  NormalFormConfig (..),
   )
 import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
@@ -14,7 +14,7 @@ import Control.OutputCapable.Blocks (Language(German))
 -- Type: Max
 unused01 :: MinMaxConfig
 unused01 = MinMaxConfig
-  { cnfConf = CnfConfig
+  { cnfConf = NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 2
@@ -33,7 +33,7 @@ unused01 = MinMaxConfig
 -- Type: Max
 unused02 :: MinMaxConfig
 unused02 = MinMaxConfig
-  { cnfConf = CnfConfig
+  { cnfConf = NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 3

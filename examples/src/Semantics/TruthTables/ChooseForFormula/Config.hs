@@ -3,7 +3,7 @@ module Semantics.TruthTables.ChooseForFormula.Config where
 import LogicTasks.Config (
   BaseConfig(..),
   PickConfig(..),
-  CnfConfig(..),
+  NormalFormConfig(..),
   FormulaConfig(..)
   )
 
@@ -13,7 +13,7 @@ import Util.VerifyConfig
 -- Weight 0.33
 task08 :: PickConfig
 task08 = PickConfig
-  { formulaConfig = FormulaCnf $ CnfConfig
+  { formulaConfig = FormulaCnf $ NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 3
       , maxClauseLength = 3
@@ -31,7 +31,7 @@ task08 = PickConfig
 -- Weight 0.25
 task19 :: PickConfig
 task19 = PickConfig
-  { formulaConfig = FormulaCnf $ CnfConfig
+  { formulaConfig = FormulaCnf $ NormalFormConfig
     { baseConf = BaseConfig
         { minClauseLength = 3
         , maxClauseLength = 3

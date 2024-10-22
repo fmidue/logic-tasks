@@ -16,8 +16,8 @@ import Trees.Formula ()
 
 
 data FormulaConfig
-  = FormulaCnf CnfConfig
-  | FormulaDnf CnfConfig
+  = FormulaCnf NormalFormConfig
+  | FormulaDnf NormalFormConfig
   | FormulaArbitrary SynTreeConfig
   deriving Show
 
@@ -261,14 +261,14 @@ dBaseConf = BaseConfig {
 
 
 
-data CnfConfig = CnfConfig
+data NormalFormConfig = NormalFormConfig
     { baseConf:: BaseConfig
     , minClauseAmount :: Int
     , maxClauseAmount :: Int
     } deriving (Typeable, Generic, Show)
 
-dCnfConf :: CnfConfig
-dCnfConf = CnfConfig
+dNormalFormConf :: NormalFormConfig
+dNormalFormConf = NormalFormConfig
     { baseConf = dBaseConf
     , minClauseAmount = 2
     , maxClauseAmount = 4
@@ -288,7 +288,7 @@ data PickConfig = PickConfig {
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
-    { formulaConfig = FormulaCnf dCnfConf
+    { formulaConfig = FormulaCnf dNormalFormConf
     , amountOfOptions = 3
     , percentTrueEntries = Just (30,70)
     , printSolution = False
@@ -308,7 +308,7 @@ data FillConfig = FillConfig {
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
-    { formulaConfig = FormulaCnf dCnfConf
+    { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfGaps = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False
@@ -318,7 +318,7 @@ dFillConf = FillConfig
 
 
 data MinMaxConfig = MinMaxConfig {
-      cnfConf :: CnfConfig
+      cnfConf :: NormalFormConfig
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
@@ -328,7 +328,7 @@ data MinMaxConfig = MinMaxConfig {
 
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
-    { cnfConf = dCnfConf
+    { cnfConf = dNormalFormConf
     , percentTrueEntries = Just (50,70)
     , printSolution = False
     , extraText = Nothing
@@ -348,7 +348,7 @@ data DecideConfig = DecideConfig {
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
-    { formulaConfig = FormulaCnf dCnfConf
+    { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfChanged = 40
     , percentTrueEntries = Just (30,70)
     , printSolution = False

@@ -7,7 +7,7 @@ module Tasks.LegalNormalForm.Quiz
 where
 
 import Auxiliary (listNoDuplicate)
-import Config (BaseConfig (..), CnfConfig (..))
+import Config (BaseConfig (..), NormalFormConfig (..))
 import Data.List ((\\))
 import Data.Set (fromList)
 import Formula.Types (genCnf, genDnf)
@@ -106,7 +106,7 @@ genSynTreeWithSerial
   serialsOfWrong
   serialsOfJustOneClause
   serialsOfJustOneLiteralPerClause
-  LegalNormalFormConfig {cnfConfig = CnfConfig {baseConf = BaseConfig {..}, ..}, ..}
+  LegalNormalFormConfig {normalFormConfig = NormalFormConfig {baseConf = BaseConfig {..}, ..}, ..}
   serial
   gen
   toSynTree
