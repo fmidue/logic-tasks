@@ -5,7 +5,7 @@ import LogicTasks.Config (
   CnfConfig(..),
   )
 import Tasks.LegalNormalForm.Config (
-  LegalNormalFormConfig(..), checkLegalCNFConfig,
+  LegalNormalFormConfig(..), checkLegalNormalFormConfig,
   )
 import Test.Hspec
 import Util.VerifyConfig
@@ -53,5 +53,5 @@ task18 = LegalNormalFormConfig
 
 spec :: Spec
 spec = do
-  describe "task07" $ verifyConfig German task07 checkLegalCNFConfig
-  describe "task18" $ verifyConfig German task18 checkLegalCNFConfig
+  describe "task07" $ verifyConfig German task07 checkLegalNormalFormConfig
+  describe "task18" $ verifyConfig German task18 checkLegalNormalFormConfig

@@ -19,7 +19,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Map as Map (Map,fromAscList)
 import LogicTasks.Helpers
-import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalCNFConfig)
+import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
 
 
 
@@ -60,7 +60,7 @@ verifyInst _ = pure ()
 
 
 verifyConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
-verifyConfig = checkLegalCNFConfig
+verifyConfig = checkLegalNormalFormConfig
 
 
 

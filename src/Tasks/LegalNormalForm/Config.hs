@@ -7,7 +7,7 @@
 module Tasks.LegalNormalForm.Config (
     LegalNormalFormConfig(..),
     LegalNormalFormInst(..),
-    checkLegalCNFConfig,
+    checkLegalNormalFormConfig,
     defaultLegalNormalFormConfig,
     ) where
 
@@ -60,8 +60,8 @@ defaultLegalNormalFormConfig =
   }
 
 
-checkLegalCNFConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
-checkLegalCNFConfig LegalNormalFormConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
+checkLegalNormalFormConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
+checkLegalNormalFormConfig LegalNormalFormConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben können Literale sein."

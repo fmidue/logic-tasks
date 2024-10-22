@@ -15,7 +15,7 @@ import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (CnfConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
-import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalCNFConfig)
+import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
 import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree, )
 import Tasks.LegalNormalForm.Quiz (generateLegalCNFInst, generateLegalDNFInst)
 import Control.OutputCapable.Blocks (Language(German))
@@ -103,12 +103,12 @@ spec = do
     describe "validBoundsLegalNormalForm" $
         it "produces a valid config" $
           withMaxSuccess 1000 $ forAll validBoundsLegalNormalForm $ \conf ->
-            ioProperty $ checkConfigWith German conf checkLegalCNFConfig
+            ioProperty $ checkConfigWith German conf checkLegalNormalFormConfig
 
     describe "invalidBoundsLegalCNF" $
         xit "produces a valid config" $
           forAll invalidBoundsLegalCNF $ \conf ->
-            ioProperty (not <$> checkConfigWith German conf checkLegalCNFConfig)
+            ioProperty (not <$> checkConfigWith German conf checkLegalNormalFormConfig)
 
     describe "genIllegalCnfSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
