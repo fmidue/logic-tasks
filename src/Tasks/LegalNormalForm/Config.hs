@@ -82,7 +82,7 @@ checkLegalNormalFormConfig LegalNormalFormConfig{cnfConfig = cnfConf@CnfConfig {
        (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
        `div` (2 :: Integer) + 1
       = reject $ do
-        english "Amount of Formulas is too big and bears the risk of generating similar CNFs."
+        english "Amount of Formulas is too big and bears the risk of generating similar formal forms."
         german "Menge an Formeln ist zu groß. Eine Formeln könnte mehrfach generiert werden."
     | maxClauseLength == 1 && maxClauseAmount == 1 = reject $ do
         english "Atomic propositions have no illegal forms"
@@ -94,8 +94,8 @@ checkLegalNormalFormConfig LegalNormalFormConfig{cnfConfig = cnfConf@CnfConfig {
         german "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
     | minClauseAmount > lengthBound (length usedLiterals) maxClauseLength
       = reject $ do
-        english "minClauseAmount is too large. The generator cannot generate a CNF."
-        german "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
+        english "minClauseAmount is too large. The generator cannot generate a normal form."
+        german "minClauseAmount ist zu groß. Es kann keine passende Normalform geriert werden."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 4 + 1) = reject $ do
         english "Cannot generate string with given minStringSize."
         german "String kann mit gegebenen minStringSize nicht generiert werden."
