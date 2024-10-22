@@ -1,28 +1,60 @@
 
 module Tasks.LegalNormalForm.GenerateIllegal (
     genIllegalCnfSynTree,
-    genIllegalDNFSynTree
+    genIllegalDnfSynTree
     ) where
 
 
 import Formula.Types
-    ( genCnf, genDnf, genClause, genCon, Clause(Clause) )
+    ( genCnf, genDnf, genClause, genCon )
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import qualified Formula.Types as SetFormulaDnf (Dnf(..),Con(..))
 
 import Control.Monad (join)
 import Data.List ((\\))
-import Data.Set (size, toList)
+import Data.Set (size, toList, Set)
 import Test.QuickCheck (Gen, choose, elements, frequency)
 import Test.QuickCheck.Gen (oneof)
 
 import Trees.Helpers (clauseToSynTree, collectLeaves, literalToSynTree, relabelShape, conToSynTree)
 import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators)
 
-
-
 genIllegalCnfSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
-genIllegalCnfSynTree
+genIllegalCnfSynTree =
+  genIllegalSynTree genCnf genClause SetFormula.clauseSet SetFormula.literalSet clauseToSynTree And Or
+
+genIllegalDnfSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
+genIllegalDnfSynTree =
+  genIllegalSynTree genDnf genCon SetFormulaDnf.clauseSet SetFormulaDnf.literalSet conToSynTree Or And
+
+genIllegalSynTree ::
+    ((Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen a)
+    -- ^^ generator for CNF/DNF
+    -> ((Int, Int) -> [Char] -> Gen b)
+    -- ^^ generator for Clause/Con
+    -> (a -> Set b)
+    -- ^^ getter for clauseSet/conSet from CNF/DNF
+    -> (b -> Set SetFormula.Literal)
+    -- ^^ getter for literalSet from Clause/Con
+    -> (b -> SynTree BinOp Char)
+    -- ^^ mapper Clause/Con -> SynTree
+    -> BinOp
+    -- ^^ characterizing operator for CNF/DNF
+    -> BinOp
+    -- ^^ characterizing operator for Clause/Con
+    -> (Int,Int)
+    -> (Int,Int)
+    -> [Char]
+    -> Bool
+    -> Gen (SynTree BinOp Char)
+genIllegalSynTree
+  genF
+  genS
+  getC
+  getL
+  cToS
+  charOpF
+  charOpC
   (minClauseAmount, maxClauseAmount)
   (minClauseLength, maxClauseLength)
   usedLiterals
@@ -35,161 +67,147 @@ genIllegalCnfSynTree
      in if ifUseError'
         then do
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
-            firstSyntaxShape <- genIllegalCNFShape allowArrowOperators (clauses - 1)
-            clauseList <- toList . SetFormula.clauseSet
-              <$> genCnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals False
-            return (genIllegalCNF firstSyntaxShape clauseList)
+            firstSyntaxShape <- genIllegalFormulaShape charOpF charOpC allowArrowOperators (clauses - 1)
+            clauseList <- toList . getC
+              <$> genF (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals False
+            return (genIllegal firstSyntaxShape cToS clauseList)
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
-            genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1) allowArrowOperators
+            genWithOneIllegalClause
+              genF
+              genS
+              getC
+              getL
+              cToS
+              charOpF
+              charOpC
+              (minClauseLength, maxClauseLength)
+              usedLiterals
+              (clauses - 1)
+              allowArrowOperators
 
 
 
-genCNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Bool -> Gen (SynTree BinOp Char)
-genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands allowArrowOperators = do
-        clauseList <- toList . SetFormula.clauseSet <$>
-          genCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals False
-        illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
-        let illLength = length (collectLeaves illegalTree)
-            (first, second) = span (\(Clause clause) -> illLength >= size clause) clauseList
-            headTrees = map clauseToSynTree first
-            tailTrees = map clauseToSynTree second
-        return (foldr1 (Binary And) (headTrees ++ (illegalTree : tailTrees)))
-
-
-
-genIllegalCNF :: SynTree BinOp () -> [SetFormula.Clause] -> SynTree BinOp Char
-genIllegalCNF treeShape = join . relabelShape treeShape . map clauseToSynTree
-
-
-
-illegalClauseTree :: (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
-illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators = do
-    treeLength <- choose (max 2 minClauseLength, maxClauseLength)
-    illegalSynTreeShape <- genIllegalClauseShape True allowArrowOperators (treeLength - 1)
-    leaves <- toList . SetFormula.literalSet <$> genClause (treeLength,treeLength) usedLiterals
-    return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree)
-
-
-
-
-genIllegalClauseShape :: Bool -> Bool -> Int -> Gen (SynTree BinOp ())
-genIllegalClauseShape _ _ 0 = error "impossible"
-genIllegalClauseShape ifFirstLayer allowArrowOperators ors = do
-    ifUseError <- frequency [(1, return True), (ors - 1, return False)]
-    if ifUseError
-    then  if allowArrowOperators
-          then oneof [ return (Not (legalShape Or ors))
-                     , genIllegalOperator (legalShape Or) (Equi : Impl : BackImpl : [And | not ifFirstLayer]) ors
-                     ]
-          else  if ifFirstLayer
-                then return (Not (legalShape Or ors))
-                else oneof [ return (Not (legalShape Or ors))
-                           , genIllegalOperator (legalShape Or) [And] ors
-                           ]
-    else genIllegalShapeInSubTree ors (genIllegalClauseShape False allowArrowOperators) Or
-
-
-
-genIllegalCNFShape :: Bool -> Int -> Gen (SynTree BinOp ())
-genIllegalCNFShape _ 0 = error "impossible"
-genIllegalCNFShape True 1 = oneof [ return (Not (legalShape And 1))
-                                  , genIllegalOperator (legalShape And) (allBinaryOperators \\ [And, Or]) 1
-                                  ]
-genIllegalCNFShape False 1 = return (Not (legalShape And 1))
-genIllegalCNFShape allowArrowOperators ands = do
-    ifUseError <- frequency [(1, return True), (ands - 1, return False)]
-    if ifUseError
-    then oneof [ return (Not (legalShape And ands))
-               , genIllegalOperator (legalShape And)
-                   (if allowArrowOperators then allBinaryOperators \\ [And] else [Or]) ands
-               ]
-    else genIllegalShapeInSubTree ands (genIllegalCNFShape allowArrowOperators) And
-
-------
-
-genIllegalDNFSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
-genIllegalDNFSynTree
-  (minClauseAmount, maxClauseAmount)
+genWithOneIllegalClause ::
+    ((Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen a)
+    -- ^^ generator for CNF/DNF
+    -> ((Int, Int) -> [Char] -> Gen b)
+    -- ^^ generator for Clause/Con
+    -> (a -> Set b)
+    -- ^^ getter for clauseSet/conSet from CNF/DNF
+    -> (b -> Set SetFormula.Literal)
+    -- ^^ getter for literalSet from Clause/Con
+    -> (b -> SynTree BinOp Char)
+    -- ^^ mapper Clause/Con -> SynTree
+    -> BinOp
+    -- ^^ characterizing operator for CNF/DNF
+    -> BinOp
+    -- ^^characterizing operator for Clause/Con
+    -> (Int,Int)
+    -> [Char]
+    -> Int
+    -> Bool
+    -> Gen (SynTree BinOp Char)
+genWithOneIllegalClause
+  genF
+  genS
+  getC
+  getL
+  cToS
+  charOpF
+  charOpC
   (minClauseLength, maxClauseLength)
   usedLiterals
+  ands
   allowArrowOperators = do
-    ifUseError <- elements [True,False]
-    let ifUseError'
-          | maxClauseAmount == 1 = False
-          | maxClauseLength == 1 = True
-          | otherwise = ifUseError
-     in if ifUseError'
-        then do
-            clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
-            firstSyntaxShape <- genIllegalDNFShape allowArrowOperators (clauses - 1)
-            conList <- toList . SetFormulaDnf.clauseSet
-              <$> genDnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals False
-            return (genIllegalDNF firstSyntaxShape conList)
-        else do
-            clauses <- choose (minClauseAmount, maxClauseAmount)
-            genDNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1) allowArrowOperators
+        clauseList <- toList . getC <$>
+          genF (ands, ands) (minClauseLength, maxClauseLength) usedLiterals False
+        illegalTree' <- illegalTree genS getL charOpC charOpF (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
+        let illLength = length (collectLeaves illegalTree')
+            (first, second) = span (\x -> illLength >= size (getL x)) clauseList
+            headTrees = map cToS first
+            tailTrees = map cToS second
+        return (foldr1 (Binary And) (headTrees ++ (illegalTree' : tailTrees)))
 
 
 
-genDNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Bool -> Gen (SynTree BinOp Char)
-genDNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands allowArrowOperators = do
-        conList <- toList . SetFormulaDnf.clauseSet <$>
-          genDnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals False
-        illegalTree <- illegalConTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
-        let illLength = length (collectLeaves illegalTree)
-            (first, second) = span (\(SetFormulaDnf.Con con) -> illLength >= size con) conList
-            headTrees = map conToSynTree first
-            tailTrees = map conToSynTree second
-        return (foldr1 (Binary Or) (headTrees ++ (illegalTree : tailTrees)))
+genIllegal ::
+    SynTree BinOp ()
+    -> (a -> SynTree BinOp Char)
+    -- ^^ mapper Clause/Con -> SynTree
+    -> [a]
+    -> SynTree BinOp Char
+genIllegal treeShape toTree = join . relabelShape treeShape . map toTree
 
 
 
-genIllegalDNF :: SynTree BinOp () -> [SetFormulaDnf.Con] -> SynTree BinOp Char
-genIllegalDNF treeShape = join . relabelShape treeShape . map conToSynTree
-
-
-
-illegalConTree :: (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
-illegalConTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators = do
+illegalTree ::
+    ((Int,Int) -> [Char] -> Gen b)
+    -- ^^ generator for Clause/Con
+    -> (b -> Set SetFormula.Literal)
+    -- ^^ getter for literalSet from Clause/Con
+    -> BinOp
+    -- ^^ characterizing operator for Clause/Con
+    -> BinOp
+    -- ^^ flipped characterizing operator for Clause/Con
+    -> (Int,Int)
+    -> [Char]
+    -> Bool
+    -> Gen (SynTree BinOp Char)
+illegalTree gen getLiterals charOpC fCharOpC (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators = do
     treeLength <- choose (max 2 minClauseLength, maxClauseLength)
-    illegalSynTreeShape <- genIllegalConShape True allowArrowOperators (treeLength - 1)
-    leaves <- toList . SetFormulaDnf.literalSet <$> genCon (treeLength,treeLength) usedLiterals
+    illegalSynTreeShape <- genIllegalShape charOpC fCharOpC True allowArrowOperators (treeLength - 1)
+    leaves <- toList . getLiterals <$> gen (treeLength,treeLength) usedLiterals
     return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree)
 
 
-genIllegalConShape :: Bool -> Bool -> Int -> Gen (SynTree BinOp ())
-genIllegalConShape _ _ 0 = error "impossible"
-genIllegalConShape ifFirstLayer allowArrowOperators ors = do
+genIllegalShape ::
+    BinOp
+    -- ^^ characterizing operator in Clause/Con
+    -> BinOp
+    -- ^^ flipped characterizing operator in Clause/Con
+    -> Bool
+    -> Bool
+    -> Int
+    -> Gen (SynTree BinOp ())
+genIllegalShape _ _ _ _ 0 = error "impossible"
+genIllegalShape charOpC fCharOpC ifFirstLayer allowArrowOperators ors = do
     ifUseError <- frequency [(1, return True), (ors - 1, return False)]
     if ifUseError
     then  if allowArrowOperators
-          then oneof [ return (Not (legalShape And ors))
-                     , genIllegalOperator (legalShape And) (Equi : Impl : BackImpl : [Or | not ifFirstLayer]) ors
+          then oneof [ return (Not (legalShape charOpC ors))
+                     , genIllegalOperator (legalShape charOpC) (Equi : Impl : BackImpl : [fCharOpC | not ifFirstLayer]) ors
                      ]
           else  if ifFirstLayer
-                then return (Not (legalShape And ors))
-                else oneof [ return (Not (legalShape And ors))
-                           , genIllegalOperator (legalShape And) [Or] ors
+                then return (Not (legalShape charOpC ors))
+                else oneof [ return (Not (legalShape charOpC ors))
+                           , genIllegalOperator (legalShape charOpC) [fCharOpC] ors
                            ]
-    else genIllegalShapeInSubTree ors (genIllegalConShape False allowArrowOperators) And
+    else genIllegalShapeInSubTree ors (genIllegalShape charOpC fCharOpC False allowArrowOperators) charOpC
 
 
 
-genIllegalDNFShape :: Bool -> Int -> Gen (SynTree BinOp ())
-genIllegalDNFShape _ 0 = error "impossible"
-genIllegalDNFShape True 1 = oneof [ return (Not (legalShape Or 1))
-                                  , genIllegalOperator (legalShape Or) (allBinaryOperators \\ [And, Or]) 1
+genIllegalFormulaShape ::
+    BinOp
+    -- ^^ characterizing operator for CNF/DNF
+    -> BinOp
+    -- ^^ characterizing operator for Clause/Con
+    -> Bool
+    -> Int
+    -> Gen (SynTree BinOp ())
+genIllegalFormulaShape _ _ _ 0 = error "impossible"
+genIllegalFormulaShape charOpF charOpC True 1 = oneof [ return (Not (legalShape charOpF 1))
+                                  , genIllegalOperator (legalShape charOpF) (allBinaryOperators \\ [charOpF, charOpC]) 1
                                   ]
-genIllegalDNFShape False 1 = return (Not (legalShape Or 1))
-genIllegalDNFShape allowArrowOperators ands = do
+genIllegalFormulaShape charOpF _ False 1 = return (Not (legalShape charOpF 1))
+genIllegalFormulaShape charOpF charOpC allowArrowOperators ands = do
     ifUseError <- frequency [(1, return True), (ands - 1, return False)]
     if ifUseError
-    then oneof [ return (Not (legalShape Or ands))
-               , genIllegalOperator (legalShape Or)
-                   (if allowArrowOperators then allBinaryOperators \\ [Or] else [And]) ands
+    then oneof [ return (Not (legalShape charOpF ands))
+               , genIllegalOperator (legalShape charOpF)
+                   (if allowArrowOperators then allBinaryOperators \\ [charOpF] else [charOpC]) ands
                ]
-    else genIllegalShapeInSubTree ands (genIllegalDNFShape allowArrowOperators) Or
+    else genIllegalShapeInSubTree ands (genIllegalFormulaShape charOpF charOpC allowArrowOperators) charOpF
 
 ------
 

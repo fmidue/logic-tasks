@@ -12,7 +12,7 @@ import Data.List ((\\))
 import Data.Set (fromList)
 import Formula.Types (genCnf, genDnf)
 import Tasks.LegalNormalForm.Config (LegalNormalFormConfig (..), LegalNormalFormInst (..))
-import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDNFSynTree)
+import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree)
 import Test.QuickCheck (Gen, choose, elements, suchThat, vectorOf)
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
 import Trees.Print (simplestDisplay)
@@ -22,7 +22,7 @@ generateLegalCNFInst :: LegalNormalFormConfig -> Gen LegalNormalFormInst
 generateLegalCNFInst = generateLegalNormalFormInst genCnf cnfToSynTree genIllegalCnfSynTree
 
 generateLegalDNFInst :: LegalNormalFormConfig -> Gen LegalNormalFormInst
-generateLegalDNFInst = generateLegalNormalFormInst genDnf dnfToSynTree genIllegalDNFSynTree
+generateLegalDNFInst = generateLegalNormalFormInst genDnf dnfToSynTree genIllegalDnfSynTree
 
 generateLegalNormalFormInst ::
   ((Int, Int) -> (Int, Int) -> [Char] -> Bool -> Gen a) ->
