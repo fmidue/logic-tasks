@@ -8,6 +8,7 @@ concat
 dnf
 Dnf
 DNFs
+Dnfs
 DSL
 equi
 fmap
