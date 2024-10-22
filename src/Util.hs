@@ -148,8 +148,8 @@ checkBaseConf BaseConfig{..}
 
 
 
-checkCnfConf :: OutputCapable m => NormalFormConfig -> LangM m
-checkCnfConf NormalFormConfig {..}
+checkNormalFormConfig :: OutputCapable m => NormalFormConfig -> LangM m
+checkNormalFormConfig NormalFormConfig {..}
     | any (<1) [minClauseAmount, maxClauseAmount] =
         refuse $ indent $ translate $ do
           german "Mindestens eines der 'amount'-Parater ist negativ."
@@ -193,8 +193,8 @@ checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaCo
 checkTruthValueRangeAndFormulaConf range formulaConf = do
   checkTruthValueRange range
   case formulaConf of
-    (FormulaCnf cnfCfg) -> checkCnfConf cnfCfg
-    (FormulaDnf cnfCfg) -> checkCnfConf cnfCfg
+    (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
+    (FormulaDnf cnfCfg) -> checkNormalFormConfig cnfCfg
     (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
 

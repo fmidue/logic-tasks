@@ -6,7 +6,7 @@ import LogicTasks.Config (
   NormalFormConfig (..),
   )
 import Test.Hspec
-import LogicTasks.Util (checkCnfConf)
+import LogicTasks.Util (checkNormalFormConfig)
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 
@@ -50,5 +50,5 @@ unused02 = MinMaxConfig
 
 spec :: Spec
 spec = do
-  describe "unused01" $ verifyConfig German (cnfConf unused01) checkCnfConf
-  describe "unused02" $ verifyConfig German (cnfConf unused02) checkCnfConf
+  describe "unused01" $ verifyConfig German (cnfConf unused01) checkNormalFormConfig
+  describe "unused02" $ verifyConfig German (cnfConf unused02) checkNormalFormConfig

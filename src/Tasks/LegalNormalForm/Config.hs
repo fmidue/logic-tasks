@@ -21,7 +21,7 @@ import GHC.Generics (Generic)
 import Config (BaseConfig(..), NormalFormConfig(..), dNormalFormConf)
 import Formula.Types (lengthBound)
 import LogicTasks.Helpers (reject)
-import Util (checkCnfConf)
+import Util (checkNormalFormConfig)
 
 
 
@@ -102,7 +102,7 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
         english "Cannot generate string with given maxStringSize."
         german "String kann mit gegebenen maxStringSize nicht generiert werden."
-    | otherwise = checkCnfConf cnfConf
+    | otherwise = checkNormalFormConfig cnfConf
   where
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
     boundsError = any (\(a,b) -> b < a)

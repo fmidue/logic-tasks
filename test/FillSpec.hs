@@ -23,7 +23,7 @@ import Control.OutputCapable.Blocks.Generic (evalLangM)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Util (withRatio, checkBaseConf, checkCnfConf)
+import Util (withRatio, checkBaseConf, checkNormalFormConfig)
 -- jscpd:ignore-end
 
 validBoundsBase :: Gen BaseConfig
@@ -85,10 +85,10 @@ spec = do
         isJust $ runIdentity $ evalLangM (checkBaseConf baseConfig :: LangM Maybe)
   describe "NormalFormConfig" $ do
     it "default cnf config should pass config check" $
-      isJust $ runIdentity $ evalLangM (checkCnfConf dNormalFormConf :: LangM Maybe)
+      isJust $ runIdentity $ evalLangM (checkNormalFormConfig dNormalFormConf :: LangM Maybe)
     it "validBoundsCnf should generate a valid config" $
       forAll validBoundsCnf $ \normalFormConfig ->
-        isJust $ runIdentity $ evalLangM (checkCnfConf normalFormConfig :: LangM Maybe)
+        isJust $ runIdentity $ evalLangM (checkNormalFormConfig normalFormConfig :: LangM Maybe)
   describe "config" $ do
     it "default config should pass config check" $
       isJust $ runIdentity $ evalLangM (verifyQuiz dFillConf :: LangM Maybe)
