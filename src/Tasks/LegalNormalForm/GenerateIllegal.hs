@@ -28,6 +28,7 @@ genIllegalDnfSynTree =
   genIllegalSynTree genDnf genCon SetFormulaDnf.clauseSet SetFormulaDnf.literalSet conToSynTree Or And
 
 genIllegalSynTree ::
+-- jscpd:ignore-start
     ((Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen a)
     -- ^^ generator for CNF/DNF
     -> ((Int, Int) -> [Char] -> Gen b)
@@ -47,6 +48,7 @@ genIllegalSynTree ::
     -> [Char]
     -> Bool
     -> Gen (SynTree BinOp Char)
+-- jscpd:ignore-end
 genIllegalSynTree
   genF
   genS
