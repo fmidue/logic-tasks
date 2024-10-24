@@ -35,8 +35,8 @@ import ParsingHelpers (tokenSymbol)
 
 
 
-description :: (OutputCapable m, MonadIO m) => FilePath -> ComposeFormulaInst -> LangM m
-description path ComposeFormulaInst{..} = do
+description :: (OutputCapable m, MonadIO m) => Bool -> FilePath -> ComposeFormulaInst -> LangM m
+description inputHelp path ComposeFormulaInst{..} = do
     instruct $ do
       english $ "Imagine that the two displayed " ++ eTreesOrFormulas ++ " are hung below a root node with operator "
       english $ showOperator operator
@@ -79,7 +79,7 @@ description path ComposeFormulaInst{..} = do
     basicOpKey unicodeAllowed
     arrowsKey
 
-    paragraph $ indent $ do
+    when inputHelp $ paragraph $ indent $ do
       translate $ do
         english "A solution attempt could look like this: "
         german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
