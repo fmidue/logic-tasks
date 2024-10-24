@@ -19,13 +19,13 @@ data FormulaConfig
   = FormulaCnf NormalFormConfig
   | FormulaDnf NormalFormConfig
   | FormulaArbitrary SynTreeConfig
-  deriving Show
+  deriving (Show,Generic)
 
 data FormulaInst
   = InstCnf Cnf
   | InstDnf Dnf
   | InstArbitrary (ST.SynTree ST.BinOp Char)
-  deriving (Show,Eq)
+  deriving (Show,Eq,Generic)
 
 instance Formula FormulaInst where
   literals (InstCnf c) = literals c

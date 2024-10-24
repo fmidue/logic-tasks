@@ -65,8 +65,8 @@ class ToSAT f where
 
 
 
-data ClauseShape = AnyClause | HornClause HornShape deriving (Show, Eq)
-data HornShape = AnyHornClause | Fact | Procedure | Query deriving (Show, Eq)
+data ClauseShape = AnyClause | HornClause HornShape deriving (Show, Eq, Generic)
+data HornShape = AnyHornClause | Fact | Procedure | Query deriving (Show, Eq, Generic)
 
 anyClause, anyHornClause, factClause, procedureClause, queryClause :: ClauseShape
 anyClause = AnyClause
