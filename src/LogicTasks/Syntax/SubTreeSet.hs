@@ -86,7 +86,7 @@ description withListInput SubTreeInst{..} = do
           | otherwise = (["A oder (B und C)", "B und C"],["A or (B and C)", "B and C"])
 
         exampleForm s
-          | withListInput = "[ " ++ intercalate "," s ++ " ]"
+          | withListInput = "[ " ++ intercalate ", " s ++ " ]"
           | otherwise = intercalate "\n" s
 
 
