@@ -83,7 +83,7 @@ description withListInput SubTreeInst{..} = do
 
         (ger,eng)
           | unicodeAllowed = (["A ∨ (B ∧ C)", "B und C"] ,["A ∨ (B ∧ C)", "B and C"]) -- no-spell-check
-          | otherwise = (["A oder (B und C)", "B und C"],["A or (B and C)", "B and C"])
+          | otherwise = (["A oder (B und C)", "B und C"],["A or (B and C)", "B and C"]) -- no-spell-check
 
         exampleForm s
           | withListInput = "[ " ++ intercalate ", " s ++ " ]"
