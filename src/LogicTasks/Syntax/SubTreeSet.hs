@@ -23,7 +23,7 @@ import Control.OutputCapable.Blocks (
   ArticleToUse (IndefiniteArticle),
   reRefuse,
   )
-import Data.List (nub, sort)
+import Data.List (intercalate, nub, sort)
 import Data.Set (toList)
 import qualified Data.Set (map)
 import qualified Data.Map as Map (fromSet, insert, filter)
@@ -43,8 +43,8 @@ import Control.Applicative (Alternative)
 import GHC.Real ((%))
 
 
-description :: OutputCapable m => SubTreeInst -> LangM m
-description SubTreeInst{..} = do
+description :: OutputCapable m => Bool -> SubTreeInst -> LangM m
+description withListInput SubTreeInst{..} = do
     instruct $ do
       english "Consider the following propositional logic formula:"
       german "Betrachten Sie die folgende aussagenlogische Formel:"
@@ -77,12 +77,17 @@ description SubTreeInst{..} = do
     extra addText
     pure ()
       where
-        exampleCode | unicodeAllowed = do
-                      german "[ A ∨ (B ∧ C), B und C ]"
-                      english "[ A ∨ (B ∧ C), B and C ]"
-                    | otherwise      = do
-                      german "[ A oder (B und C), B und C ]"
-                      english "[ A or (B and C), B and C ]"
+        exampleCode = do
+          german $ exampleForm ger
+          english $ exampleForm eng
+
+        (ger,eng)
+          | unicodeAllowed = (["A ∨ (B ∧ C)", "B und C"] ,["A ∨ (B ∧ C)", "B and C"])
+          | otherwise = (["A oder (B und C)", "B und C"],["A or (B and C)", "B and C"])
+
+        exampleForm s
+          | withListInput = "[ " ++ intercalate "," s ++ " ]"
+          | otherwise = intercalate "\n" s
 
 
 verifyInst :: OutputCapable m => SubTreeInst -> LangM m
