@@ -108,11 +108,11 @@ description inputHelp path ComposeFormulaInst{..} = do
                       english "[(A or not B) and C, C and (A or not B)]"
                       german "[(A oder nicht B) und C, C und (A oder nicht B)]"
         (onListsEng, onListsGer)
-          | inputHelp = (" and put them into a list", " und geben Sie diese in einer Liste an")
+          | inputHelp = (" and put them into a list", " und geben Sie diese in einer Liste an") -- no-spell-check
           | otherwise = ("", "")
         (onOrderEng,onOrderGer)
-          | inputHelp = (" in the list ", "in der Liste stehen")
-          | otherwise = ("", "angegeben werden")
+          | inputHelp = (" in the list ", "in der Liste stehen") -- no-spell-check
+          | otherwise = ("", "angegeben werden") -- no-spell-check
 
 
 verifyInst :: OutputCapable m => ComposeFormulaInst -> LangM m
