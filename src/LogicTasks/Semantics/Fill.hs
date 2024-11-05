@@ -68,8 +68,8 @@ genFillInst FillConfig{..} = do
 
 
 
-description :: OutputCapable m => FillInst -> LangM m
-description FillInst{..} = do
+description :: OutputCapable m => Bool -> FillInst -> LangM m
+description inputHelp FillInst{..} = do
   paragraph $ do
     translate $ do
       german  "Betrachten Sie die folgende Formel:"
@@ -82,7 +82,7 @@ description FillInst{..} = do
       english "Fill all blanks in the corresponding truth table with truth values (True or False)."
     indent $ code $ show $ gapsAt (getTable formula) missing
     pure ()
-  paragraph $ translate $ do
+  when inputHelp $ paragraph $ translate $ do
     german "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
     english "Provide the solution as a list of truth values. The first element of the list fills the first blank from the top, the second element fills the second blank, etc."
 

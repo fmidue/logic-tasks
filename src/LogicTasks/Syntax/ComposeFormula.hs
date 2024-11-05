@@ -62,10 +62,10 @@ description inputHelp path ComposeFormulaInst{..} = do
       Just image' -> image $=<< liftIO $ cacheTree image' path
 
     instruct $ do
-      english "Build the corresponding formulas for the two resulting trees and put them into a list. "
-      english "The order of the formulas in the list does not matter."
-      german "Bilden Sie für die beiden entstehenden Bäume die repräsentierenden Formeln und geben Sie diese in einer Liste an. "
-      german "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Liste stehen."
+      english $ "Build the corresponding formulas for the two resulting trees" ++ onListsEng ++ ". "
+      english $ "The order of the formulas" ++ onOrderEng ++ "does not matter."
+      german $ "Bilden Sie für die beiden entstehenden Bäume die repräsentierenden Formeln" ++ onListsGer ++ ". "
+      german $ "Es spielt keine Rolle, in welcher Reihenfolge die Formeln " ++ onOrderGer ++ "."
 
     instruct $ do
       english "(You are allowed to add arbitrarily many additional pairs of brackets in the formulas.)"
@@ -107,6 +107,12 @@ description inputHelp path ComposeFormulaInst{..} = do
                     | otherwise      = do
                       english "[(A or not B) and C, C and (A or not B)]"
                       german "[(A oder nicht B) und C, C und (A oder nicht B)]"
+        (onListsEng, onListsGer)
+          | inputHelp = (" and put them into a list", " und geben Sie diese in einer Liste an")
+          | otherwise = ("", "")
+        (onOrderEng,onOrderGer)
+          | inputHelp = (" in the list ", "in der Liste stehen")
+          | otherwise = ("", "angegeben werden")
 
 
 verifyInst :: OutputCapable m => ComposeFormulaInst -> LangM m
