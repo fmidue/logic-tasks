@@ -63,7 +63,7 @@ description inputHelp path ComposeFormulaInst{..} = do
 
     instruct $ do
       english $ "Build the corresponding formulas for the two resulting trees" ++ onListsEng ++ ". "
-      english $ "The order of the formulas" ++ onOrderEng ++ "does not matter."
+      english $ "The order of the formulas" ++ onOrderEng ++ " does not matter."
       german $ "Bilden Sie für die beiden entstehenden Bäume die repräsentierenden Formeln" ++ onListsGer ++ ". "
       german $ "Es spielt keine Rolle, in welcher Reihenfolge die Formeln " ++ onOrderGer ++ "."
 
