@@ -90,7 +90,7 @@ description inputHelp FillInst{..} = do
     german "Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (falsch, wahr) oder als Kurzform (f, w) erfolgen."
     english "Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word (false, true) or by giving a shorthand (f, t)."
 
-  paragraph $ indent $ do
+  when inputHelp $ paragraph $ indent $ do
     translate $ do
       german "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen:"
       english "A valid solution for four blanks could look like this:"
