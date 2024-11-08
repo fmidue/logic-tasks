@@ -17,7 +17,7 @@ import qualified LogicTasks.Syntax.IllegalCnfs as IllegalCnfs
 
 
 
-description :: OutputCapable m => LegalNormalFormInst -> LangM m
+description :: OutputCapable m => Bool -> LegalNormalFormInst -> LangM m
 description = IllegalCnfs.descriptionTemplate $ translations $ do
   german "disjunktiver Normalform (DNF)"
   english "disjunctive normal form (dnf)"

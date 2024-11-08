@@ -17,6 +17,7 @@ import Control.OutputCapable.Blocks (
   Language (..),
   localise,
   )
+import Control.Monad (when)
 import Data.Map as Map (Map,fromAscList)
 import LogicTasks.Helpers
 import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
@@ -24,8 +25,8 @@ import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormIn
 
 
 
-descriptionTemplate :: OutputCapable m => Map Language String -> LegalNormalFormInst -> LangM m
-descriptionTemplate what LegalNormalFormInst{..} = do
+descriptionTemplate :: OutputCapable m => Map Language String -> Bool -> LegalNormalFormInst -> LangM m
+descriptionTemplate what inputHelp LegalNormalFormInst{..} = do
     instruct $ do
       english "Consider the following propositional logic formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
@@ -36,19 +37,21 @@ descriptionTemplate what LegalNormalFormInst{..} = do
       english $ "Which of these formulas are given in " ++ localise English what ++ "?"
       german $ "Welche dieser Formeln sind in " ++ localise German what ++ " angegeben?"
 
-    instruct $ do
-      english $  "Enter a list containing the indices of the formulas in " ++ localise English what ++ " to submit your answer."
-      german $ "Geben Sie eine Liste der Indizes aller in " ++ localise German what ++ " vorliegender Formeln als Ihre Lösung an."
+    when inputHelp $ do
+      instruct $ do
+        english $  "Enter a list containing the indices of the formulas in " ++ localise English what ++ " to submit your answer."
+        german $ "Geben Sie eine Liste der Indizes aller in " ++ localise German what ++ " vorliegender Formeln als Ihre Lösung an."
 
-    example "[2,3]" $ do
-      english $ "For example, if only choices 2 and 3 are given in " ++ localise English what ++ ", then the solution is:"
-      german $ "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 in " ++ localise German what ++ " vor, dann ist diese Lösung korrekt:"
+      example "[2,3]" $ do
+        english $ "For example, if only choices 2 and 3 are given in " ++ localise English what ++ ", then the solution is:"
+        german $ "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 in " ++ localise German what ++ " vor, dann ist diese Lösung korrekt:"
+      pure ()
 
     extra addText
 
     pure ()
 
-description :: OutputCapable m => LegalNormalFormInst -> LangM m
+description :: OutputCapable m => Bool -> LegalNormalFormInst -> LangM m
 description = descriptionTemplate $ translations $ do
   german "konjunktiver Normalform (KNF)"
   english "conjunctive normal form (cnf)"
