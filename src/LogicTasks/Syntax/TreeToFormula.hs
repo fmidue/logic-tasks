@@ -27,11 +27,8 @@ import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
 import Formula.Parsing.Delayed (Delayed, withDelayedSucceeding, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn)
-import Formula.Parsing (Parse(..))
+import Formula.Parsing (Parse(..), formulaSymbolParser)
 import Trees.Parsing()
-import UniversalParser (logicToken)
-import Text.Parsec (many)
-import Data.Functor (void)
 import Formula.Types (Formula(atomics))
 import Data.List ((\\), intercalate)
 import Data.List.Extra (notNull)
@@ -80,7 +77,7 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputCapable m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade = parseDelayedWithAndThen parser complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
+partialGrade = parseDelayedWithAndThen parser complainAboutMissingParenthesesIfNotFailingOn formulaSymbolParser . partialGrade'
 
 partialGrade' :: OutputCapable m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' inst sol

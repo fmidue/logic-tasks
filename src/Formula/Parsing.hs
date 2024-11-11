@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Formula.Parsing (
   module Formula.Parsing.Type,
+  formulaSymbolParser,
   clauseSetParser,
   clauseFormulaParser,
   resStepsParser,
@@ -26,6 +27,7 @@ import Text.ParserCombinators.Parsec (
   between,
   char,
   digit,
+  many,
   many1,
   notFollowedBy,
   optionMaybe,
@@ -334,6 +336,9 @@ prologClauseFormulaParser = (lexeme (emptyClauseParser <|> clauseParse) <?> "Cla
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkPrologClause ts
+
+formulaSymbolParser :: Parser ()
+formulaSymbolParser = void $ many logicToken
 
 instance Parse PrologClause where
  parser = prologClauseFormulaParser
