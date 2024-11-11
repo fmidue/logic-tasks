@@ -158,8 +158,8 @@ instance Parse TruthValue where
                     notFollowedBy alphaNum
                     return res
 
-                eitherDeEn = caseInsensitive "fals" >>
-                  (try (caseInsensitive "e") <|> caseInsensitive "ch") -- no-spell-check
+                eitherDeEn = caseInsensitive "fals" >> -- no-spell-check
+                  (try (caseInsensitive "e") <|> caseInsensitive "ch")
 
 
 
