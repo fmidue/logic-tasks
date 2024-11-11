@@ -13,12 +13,11 @@ module Formula.Parsing (
 
 import Config
 import Formula.Util
-import ParsingHelpers (lexeme, tokenSymbol)
+import ParsingHelpers (caseInsensitive, lexeme, tokenSymbol)
 import Formula.Types
 
 import Control.Monad (void)
 import Data.Map (fromList)
-import Text.Parsec.Extra (caseInsensitiveString)
 import Text.ParserCombinators.Parsec (
   Parser,
   (<?>),
@@ -146,8 +145,8 @@ instance Parse TruthValue where
               where
                 parseTrue = do
                   string "1" <|> try (single "w") <|> try (single "t")
-                    <|> caseInsensitiveString "wahr" -- no-spell-check
-                    <|> caseInsensitiveString "true"
+                    <|> caseInsensitive "wahr" -- no-spell-check
+                    <|> caseInsensitive "true"
                   pure $ TruthValue True
                 parseFalse = do
                   string "0" <|> try (single "f") <|> eitherDeEn
@@ -155,12 +154,12 @@ instance Parse TruthValue where
 
                 single :: String -> Parser String
                 single s = do
-                    res <- caseInsensitiveString s
+                    res <- caseInsensitive s
                     notFollowedBy alphaNum
                     return res
 
-                eitherDeEn = caseInsensitiveString "fals" >>
-                  (try (caseInsensitiveString "e") <|> caseInsensitiveString "ch") -- no-spell-check
+                eitherDeEn = caseInsensitive "fals" >>
+                  (try (caseInsensitive "e") <|> caseInsensitive "ch") -- no-spell-check
 
 
 

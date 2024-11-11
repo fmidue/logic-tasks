@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module ParsingHelpers (
   formulaSymbol,
@@ -6,6 +7,7 @@ module ParsingHelpers (
   lexeme,
   parens,
   brackets,
+  caseInsensitive,
   token,
   keyword,
   tokenSymbol,
@@ -18,12 +20,12 @@ module ParsingHelpers (
 
 import Control.Applicative ((<**>))
 
-import Data.Char (isLetter)
+import Data.Char (isLetter, toLower, toUpper)
 import Data.Functor (void)
 import Data.List.Extra (nubOrd)
 
 import Text.Parsec ((<|>), try, notFollowedBy, alphaNum, string, eof)
-import Text.Parsec.Char (oneOf, satisfy, spaces)
+import Text.Parsec.Char (char, oneOf, satisfy, spaces)
 import Text.Parsec.String (Parser)
 
 import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)
@@ -41,6 +43,13 @@ parens p = try $ tokenSymbol "(" *> p <* tokenSymbol ")"
 {-# Deprecated brackets "Use parens instead" #-}
 brackets :: Parser a -> Parser a
 brackets = parens
+
+caseInsensitive :: String -> Parser String
+caseInsensitive = mapM caseInsensitiveChar
+  where
+    caseInsensitiveChar c = do
+      char (toLower c) <|> char (toUpper c)
+      return c
 
 lexeme :: Parser a ->  Parser a
 lexeme x = x <* spaces

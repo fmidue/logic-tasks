@@ -16,7 +16,6 @@ dependencies:
   - text
   - output-blocks >= 0.2
   - pretty-simple
-  - parsec-extra
   - latex-svg-image >= 0.2
   - bytestring
   - utf8-string
