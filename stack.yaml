@@ -9,6 +9,7 @@ allow-newer: true
 extra-deps:
   - minisat-solver-0.1
   - latex-svg-image-0.2
+  - parsec-extra-0.2.0.0
   - git: https://github.com/fmidue/output-blocks.git
     commit: f14dca13e3fa06858ee6299333764b9b89d820c9
     subdirs:

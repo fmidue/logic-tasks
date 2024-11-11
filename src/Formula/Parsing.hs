@@ -17,8 +17,8 @@ import ParsingHelpers (lexeme, tokenSymbol)
 import Formula.Types
 
 import Control.Monad (void)
-import Data.Char (toLower)
 import Data.Map (fromList)
+import Text.Parsec.Extra (caseInsensitiveString)
 import Text.ParserCombinators.Parsec (
   Parser,
   (<?>),
@@ -27,13 +27,11 @@ import Text.ParserCombinators.Parsec (
   between,
   char,
   digit,
-  getInput,
   many1,
   notFollowedBy,
   optionMaybe,
   satisfy,
   sepBy,
-  setInput,
   spaces,
   string,
   try,
@@ -132,8 +130,6 @@ instance Parse TruthValue where
   parser = lexeme truthParse <?> "Truth Value"
 
     where truthParse = do
-            s <- getInput
-            setInput (map toLower s)
             t <- try
              (    parseTrue
               <|> parseFalse
@@ -150,7 +146,8 @@ instance Parse TruthValue where
               where
                 parseTrue = do
                   string "1" <|> try (single "w") <|> try (single "t")
-                    <|> string "wahr" <|> string "true" -- no-spell-check
+                    <|> caseInsensitiveString "wahr" -- no-spell-check
+                    <|> caseInsensitiveString "true"
                   pure $ TruthValue True
                 parseFalse = do
                   string "0" <|> try (single "f") <|> eitherDeEn
@@ -158,11 +155,12 @@ instance Parse TruthValue where
 
                 single :: String -> Parser String
                 single s = do
-                    res <- string s
+                    res <- caseInsensitiveString s
                     notFollowedBy alphaNum
                     return res
 
-                eitherDeEn = string "fals" >> (try (string "e") <|> string "ch") -- no-spell-check
+                eitherDeEn = caseInsensitiveString "fals" >>
+                  (try (caseInsensitiveString "e") <|> caseInsensitiveString "ch") -- no-spell-check
 
 
 
