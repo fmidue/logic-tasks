@@ -101,6 +101,11 @@ instance (Parse a, Parse b) => Parse (a,b) where
     b <- parser
     pure (a,b)
 
+
+instance Parse a => Parse (Maybe a) where
+  parser = (tokenSymbol "Nothing" >> pure Nothing) <|> (Just <$> lexeme parser)
+
+
 instance Parse Number where
   parser = (lexeme numParse <?> "Number") <|> fail "Could not parse a number"
     where numParse = do
