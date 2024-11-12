@@ -2,7 +2,9 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Formula.Parsing (
   module Formula.Parsing.Type,
+  allSymbolParser,
   formulaSymbolParser,
+  formulaListSymbolParser,
   clauseSetParser,
   clauseFormulaParser,
   resStepsParser,
@@ -342,8 +344,22 @@ prologClauseFormulaParser = (lexeme (emptyClauseParser <|> clauseParse) <?> "Cla
                       Just _ -> char ')'
        pure $ mkPrologClause ts
 
+
+listSymbolParser :: Parser ()
+listSymbolParser = tokenSymbol "[" <|> tokenSymbol "," <|> tokenSymbol "]"
+
+maybeSymbolParser :: Parser ()
+maybeSymbolParser = tokenSymbol "Nothing"
+
 formulaSymbolParser :: Parser ()
 formulaSymbolParser = void $ many logicToken
+
+formulaListSymbolParser :: Parser ()
+formulaListSymbolParser = void $ many $ logicToken <|> listSymbolParser
+
+allSymbolParser :: Parser ()
+allSymbolParser = void $ many1 $ try maybeSymbolParser <|> logicToken <|> listSymbolParser
+
 
 instance Parse PrologClause where
  parser = prologClauseFormulaParser

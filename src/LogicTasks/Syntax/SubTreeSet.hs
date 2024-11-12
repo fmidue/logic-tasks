@@ -37,13 +37,9 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
-import Formula.Parsing (Parse(..))
+import Formula.Parsing (Parse(..), formulaListSymbolParser)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
-import UniversalParser (logicToken)
-import Text.Parsec (many, (<|>))
-import Data.Functor (void)
-import ParsingHelpers (tokenSymbol)
 
 
 description :: OutputCapable m => Bool -> SubTreeInst -> LangM m
@@ -108,8 +104,7 @@ start = [FormulaAnswer Nothing]
 
 
 partialGrade :: OutputCapable m => SubTreeInst -> Delayed [FormulaAnswer] -> LangM m
-partialGrade = parseDelayedWithAndThen parser complainAboutMissingParenthesesIfNotFailingOn (void $ many (logicToken <|> listToken)) . partialGrade'
-  where listToken = tokenSymbol "[" <|> tokenSymbol "," <|> tokenSymbol "]"
+partialGrade = parseDelayedWithAndThen parser complainAboutMissingParenthesesIfNotFailingOn formulaListSymbolParser . partialGrade'
 
 partialGrade' :: OutputCapable m => SubTreeInst -> [FormulaAnswer] -> LangM m
 partialGrade' SubTreeInst{..} fs
