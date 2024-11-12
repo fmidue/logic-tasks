@@ -358,7 +358,7 @@ formulaListSymbolParser :: Parser ()
 formulaListSymbolParser = void $ many $ logicToken <|> listSymbolParser
 
 allSymbolParser :: Parser ()
-allSymbolParser = void $ many1 $ try maybeSymbolParser <|> logicToken <|> listSymbolParser
+allSymbolParser = void $ many $ try maybeSymbolParser <|> logicToken <|> listSymbolParser
 
 
 instance Parse PrologClause where
