@@ -6,6 +6,7 @@
 module LogicTasks.Semantics.Pick where
 
 
+import Control.Monad (when)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
@@ -60,8 +61,8 @@ genPickInst PickConfig{..} = do
 
 
 
-description :: OutputCapable m => PickInst -> LangM m
-description PickInst{..} = do
+description :: OutputCapable m => Bool -> PickInst -> LangM m
+description inputHelp PickInst{..} = do
     paragraph $ do
       translate $ do
         german "Betrachten Sie die folgende Formel:"
@@ -74,7 +75,7 @@ description PickInst{..} = do
         english "Which of the following truth tables represents the formula? Specify the correct table by giving its number."
       indent $ code $ showIndexedList 120 5 $ map getTable formulas
       pure ()
-    paragraph $ indent $ do
+    when inputHelp $ paragraph $ indent $ do
       translate $ do
         german "Ein Lösungsversuch könnte so aussehen: "
         english "A solution attempt could look like this: "
