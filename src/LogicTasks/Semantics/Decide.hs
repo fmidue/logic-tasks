@@ -10,6 +10,7 @@ module LogicTasks.Semantics.Decide where
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
+  Language,
   OutputCapable,
   english,
   german,
@@ -24,7 +25,8 @@ import Control.OutputCapable.Blocks (
   TargetedCorrect (TargetedCorrect),
   multipleChoiceSyntax,
   )
-import Data.List.Extra (nubSort)
+import Data.List.Extra (nubSort, (\\))
+import Data.Map (Map, fromList)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
@@ -160,11 +162,9 @@ partialGrade DecideInst{..} = multipleChoiceSyntax False [1..tableLen]
 
 completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> [Int] -> Rated m
 completeGrade DecideInst{..} sol = reRefuse
-  (extendedMultipleChoice
-    (MinimumThreshold (1 % 2))
-    (Punishment (1 % fromIntegral tableLen))
-    (TargetedCorrect (length changed))
-    DefiniteArticle
+  (withExtendedMultipleChoice
+    (fromIntegral tableLen)
+    (length changed)
     what
     solutionDisplay
     solution
@@ -186,3 +186,62 @@ completeGrade DecideInst{..} sol = reRefuse
     tableLen = length $ readEntries $ getTable formula
     solution = Map.fromAscList $ map (,True) changed
     submission = Map.fromAscList $ map (,True) nubSol
+
+
+data Choice
+  = Correct
+  | Wrong
+  | NoAnswer
+  deriving (Ord,Eq,Enum,Bounded)
+
+
+completeGradeThreeChoices
+  :: (OutputCapable m,Alternative m, Monad m)
+  => DecideInst
+  -> [Choice]
+  -> Rated m
+completeGradeThreeChoices DecideInst{..} sol = reRefuse
+  (withExtendedMultipleChoice
+    (fromIntegral tableLen)
+    tableLen
+    what
+    solutionDisplay
+    (fromList $ answerListWrong ++ answerListCorrect)
+    indexed
+    )
+    $ when showSolution $ indent $ translate $ do
+      english "All of the row indices given in the above list contain a wrong entry. "
+      english "Any other entry is correct."
+      german "Die obige Liste enthält alle Indizes von Reihen mit einem falschen Eintrag. "
+      german "Alle anderen Einträge sind korrekt."
+    where
+      indexed = fromList $ map (,True) $ filter ((/=NoAnswer) . snd) $ zip [1..] sol
+      tableLen = length $ readEntries $ getTable formula
+      restOf = [1..tableLen] \\ changed
+      answerListWrong = map ((,True) . (,Wrong)) changed ++ map ((,False) . (,Wrong)) restOf
+      answerListCorrect = map ((,False) . (,Correct)) changed ++ map ((,True) . (,Correct)) restOf
+
+      what = translations $ do
+        german "Antworten"
+        english "Answers"
+
+      solutionDisplay
+        | showSolution = Just $ show changed
+        | otherwise = Nothing
+
+
+withExtendedMultipleChoice
+  :: (Ord a, OutputCapable m)
+  => Integer
+  -> Int
+  -> Map Language String
+  -> Maybe String
+  -> Map a Bool
+  -> Map a Bool
+  -> Rated m
+withExtendedMultipleChoice options changed =
+  extendedMultipleChoice
+    (MinimumThreshold (1 % 2))
+    (Punishment (1 % options))
+    (TargetedCorrect changed)
+    DefiniteArticle
