@@ -220,12 +220,12 @@ completeGradeThreeChoices DecideInst{..} sol = reRefuse
     indexed
     )
     $ when showSolution $ indent $ translate $ do
-      english "All of the rows of the table given in the above enumeration contain a wrong entry. "
-      english "Any other row of the table contains a correct entry."
-      english $ "As such, your answer should be " ++ show Wrong ++ " for all listed rows and " ++ show Correct ++ " for all rows not listed."
-      german "Die obige Aufzählung enthält alle Reihen der Tafel, welche einen falschen Eintrag beinhalten. "
-      german "Alle anderen Reihen der Tafel enthalten einen korrekten Eintrag."
-      german $ "Das bedeutet, für jede aufgelistete Reihe sollte Ihre Antwort " ++ show Wrong ++ " und für jede nicht aufgelistete Reihe " ++ show Correct ++ " lauten."
+      english "All of the table rows given in the above enumeration contain a wrong entry. "
+      english "Every other row of the table contains a correct entry."
+      english $ "As such, your answer should be " ++ show (show Wrong) ++ " for all listed rows and " ++ show (show Correct) ++ " for all rows not listed."
+      german "Die obige Aufzählung enthält alle Zeilen der Tafel, welche einen falschen Eintrag enthalten. "
+      german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag."
+      german $ "Das bedeutet, für jede aufgelistete Zeile sollte Ihre Antwort " ++ show (show Wrong) ++ " und für jede nicht aufgelistete Zeile " ++ show (show Correct) ++ " lauten."
     where
       indexed = fromList $ map (,True) $ filter ((/=NoAnswer) . snd) $ zip [1..] sol
       tableLen = length $ readEntries $ getTable formula
