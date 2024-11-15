@@ -53,9 +53,9 @@ data Choice
 
 
 instance Show Choice where
-  show Correct  = "Richtig"
-  show Wrong    = "Falsch"
-  show NoAnswer = "Keine Antwort"
+  show Correct  = "Richtig"       -- no-spell-check
+  show Wrong    = "Falsch"        -- no-spell-check
+  show NoAnswer = "Keine Antwort" -- no-spell-check
 
 
 genDecideInst :: DecideConfig -> Gen DecideInst
