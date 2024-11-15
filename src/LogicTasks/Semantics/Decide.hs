@@ -219,7 +219,7 @@ completeGradeThreeChoices DecideInst{..} sol = reRefuse
     (fromList $ answerListWrong ++ answerListCorrect)
     solMap
     )
-    $ when (showSolution && not (all correctOption indexed)) $ indent $ do
+    $ when (showSolution && not (all correctOption indexed && tableLen == length indexed)) $ indent $ do
       translate $ do
         english "All of the above table rows given in the above list contain a wrong entry. "
         english "Every other row of the table contains a correct entry. "
