@@ -222,10 +222,10 @@ completeGradeThreeChoices DecideInst{..} sol = reRefuse
     $ when (showSolution && not (all correctOption indexed)) $ indent $ do
       translate $ do
         english "All of the above table rows given in the above list contain a wrong entry. "
-        english "Every other row of the table contains a correct entry."
+        english "Every other row of the table contains a correct entry. "
         english "Please compare with the correct version of the table:"
         german "Die obige Liste enthält alle Zeilen der Tafel, welche einen falschen Eintrag enthalten. "
-        german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag."
+        german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag. "
         german "Vergleichen Sie mit der richtigen Tafel für diese Formel:"
       code $ show table
       pure ()
