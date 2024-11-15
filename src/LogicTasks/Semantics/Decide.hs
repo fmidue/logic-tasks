@@ -85,16 +85,16 @@ description withDropdowns DecideInst{..} = do
   if withDropdowns
     then do
       paragraph $ translate $ do
-        english "Consider the repeated truth table below. "
-        english "Next to each row a selection menu with three options, \"correct\", \"wrong\" and \"no answer\" (in German), is given."
-        english "Choose a fitting value for each row or keep the default value of \"no answer\"."
-        german "Betrachten Sie dazu die folgende erneute Darstellung der Tabelle. "
-        german "Neben jeder Zeile befindet sich ein Auswahlmenü mit den drei Werten \"Richtig\", \"Falsch\" und \"Keine Antwort\". "
-        german "Wählen Sie für jede Zeile einen passenden Wert aus oder belassen Sie diesen bei \"keine Antwort\"."
+        english "For this, consider the repeated truth table below. "
+        english "Next to each row a selection menu with three options, \"correct\", \"wrong\" and \"no answer\" (in German) is given."
+        english "Choose the appropriate option for each row."
+        german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
+        german "Neben jeder Zeile befindet sich ein Auswahlmenü mit den drei Optionen \"Richtig\", \"Falsch\" und \"Keine Antwort\". "
+        german "Wählen Sie für jede Zeile die passende Option aus."
     else do
       paragraph $ translate $ do
-        english  "Give the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
-        german  "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
+        english "Give the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
+        german "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
 
       paragraph $ indent $ do
         translate $ do
