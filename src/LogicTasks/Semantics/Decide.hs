@@ -25,7 +25,7 @@ import Control.OutputCapable.Blocks (
   TargetedCorrect (TargetedCorrect),
   multipleChoiceSyntax,
   )
-import Data.List.Extra (nubSort, (\\))
+import Data.List.Extra ((\\), intercalate, nubSort)
 import Data.Map (Map, fromList)
 import Test.QuickCheck (Gen, suchThat)
 
@@ -43,6 +43,19 @@ import qualified Data.Map as Map (fromAscList)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
 
+
+
+data Choice
+  = Correct
+  | Wrong
+  | NoAnswer
+  deriving (Ord,Eq,Enum,Bounded)
+
+
+instance Show Choice where
+  show Correct  = "Richtig"
+  show Wrong    = "Falsch"
+  show NoAnswer = "Keine Antwort"
 
 
 genDecideInst :: DecideConfig -> Gen DecideInst
@@ -86,13 +99,17 @@ description withDropdowns DecideInst{..} = do
     pure ()
   if withDropdowns
     then do
-      paragraph $ translate $ do
-        english "For this, consider the repeated truth table below. "
-        english "Next to each row a selection menu with three options, \"correct\", \"wrong\" and \"no answer\" (in German) is given."
-        english "Choose the appropriate option for each row."
-        german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
-        german "Neben jeder Zeile befindet sich ein Auswahlmenü mit den drei Optionen \"Richtig\", \"Falsch\" und \"Keine Antwort\". "
-        german "Wählen Sie für jede Zeile die passende Option aus."
+      paragraph $ do
+        translate $ do
+          english "For this, consider the repeated truth table below. "
+          english "Next to each row a selection menu with these three options (in German) is given:"
+          german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
+          german "Neben jeder Zeile befindet sich ein Auswahlmenü mit diesen drei Optionen:"
+        code $ intercalate ", " $ map show [Correct,Wrong,NoAnswer]
+        translate $ do
+          english "Choose the appropriate option for each row."
+          german "Wählen Sie für jede Zeile die passende Option aus."
+        pure ()
     else do
       paragraph $ translate $ do
         english "Give the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
@@ -186,13 +203,6 @@ completeGrade DecideInst{..} sol = reRefuse
     tableLen = length $ readEntries $ getTable formula
     solution = Map.fromAscList $ map (,True) changed
     submission = Map.fromAscList $ map (,True) nubSol
-
-
-data Choice
-  = Correct
-  | Wrong
-  | NoAnswer
-  deriving (Ord,Eq,Enum,Bounded)
 
 
 completeGradeThreeChoices
