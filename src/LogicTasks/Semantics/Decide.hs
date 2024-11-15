@@ -219,17 +219,21 @@ completeGradeThreeChoices DecideInst{..} sol = reRefuse
     (fromList $ answerListWrong ++ answerListCorrect)
     solMap
     )
-    $ when (showSolution && not (all correctOption indexed)) $ indent $ translate $ do
-      english "All of the rows of the table given in the above enumeration contain a wrong entry. "
-      english "Any other row of the table contains a correct entry."
-      english $ "As such, your answer should be " ++ show Wrong ++ " for all listed rows and " ++ show Correct ++ " for all rows not listed."
-      german "Die obige Aufzählung enthält alle Reihen der Tafel, welche einen falschen Eintrag beinhalten. "
-      german "Alle anderen Reihen der Tafel enthalten einen korrekten Eintrag."
-      german $ "Das bedeutet, für jede aufgelistete Reihe sollte Ihre Antwort " ++ show Wrong ++ " und für jede nicht aufgelistete Reihe " ++ show Correct ++ " lauten."
+    $ when (showSolution && not (all correctOption indexed)) $ indent $ do
+      translate $ do
+        english "All of the above table rows given in the above list contain a wrong entry. "
+        english "Any other row of the table contains a correct entry."
+        english "Please compare with the correct version of the table:"
+        german "Die obige Liste enthält alle Zeilen der Tafel, welche einen falschen Eintrag enthalten. "
+        german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag."
+        german "Vergleichen Sie mit der richtigen Tafel für diese Formel:"
+      code $ show table
+      pure ()
     where
       indexed = filter ((/=NoAnswer) . snd) $ zip [1..] sol
       solMap = fromList $ map (,True) indexed
-      tableLen = length $ readEntries $ getTable formula
+      table = getTable formula
+      tableLen = length $ readEntries table
       restOf = [1..tableLen] \\ changed
       answerListWrong = map ((,True) . (,Wrong)) changed ++ map ((,False) . (,Wrong)) restOf
       answerListCorrect = map ((,False) . (,Correct)) changed ++ map ((,True) . (,Correct)) restOf
@@ -242,7 +246,7 @@ completeGradeThreeChoices DecideInst{..} sol = reRefuse
         english "Answers"
 
       solutionDisplay
-        | showSolution = Just $ unlines $ map (("Zeile/Row " ++) . show) changed
+        | showSolution = Just $ show changed
         | otherwise    = Nothing
 
 
