@@ -27,6 +27,7 @@ library:
   source-dirs: src
   exposed-modules:
     - LogicTasks.Formula
+    - LogicTasks.Keys
     - LogicTasks.Table
     - LogicTasks.Resolution
     - LogicTasks.Config
