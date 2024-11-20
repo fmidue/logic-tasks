@@ -13,11 +13,10 @@ import Trees.Types (PropFormula(..), BinOp(..))
 
 taskData :: Gen ((Char, Bool), (Char, Bool), (Char, Bool), Bool)
 taskData = do
-  perm <- shuffle ['A','B','C']
-  bools <- vectorOf 3 arbitrary
-  let [(xn, xw), (yn, yw), (zn, zw)] = zip perm bools
+  permutation <- shuffle ['A','B','C']
+  values <- vectorOf 3 arbitrary
   v <- arbitrary
-  return ((xn, xw), (yn, yw), (zn, zw), v)
+  return (zip permutation values !! 0, zip permutation values !! 1, zip permutation values !! 2, v)
 
 
 makeHintsAndFormula :: ((Char, Bool), (Char, Bool), (Char, Bool), Bool) -> (PropFormula Char, [Text])
@@ -53,6 +52,7 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (formula, hints)
     whichOp :: BinOp -> String
     whichOp And = if isNeg (vneg xn) == isNeg (vnegz yn) then " und" else ", aber"
     whichOp Or = "oder"
+    whichOp _ = "unbekannter Operator"
 
     undoderyn :: String
     undoderyn = [i|#{whichOp op} #{yn} #{if isNeg (vneg xn) then "lügen"::String else "sagen die Wahrheit"::String}|]
