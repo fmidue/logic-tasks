@@ -69,6 +69,10 @@ description withListInput SubTreeInst{..} = do
       translatedCode $ flip localise $ translations exampleCode
       pure ()
 
+    paragraph $ translate $ do
+      german "Sie können dafür die Ausgangsformel mehrfach in die Abgabe kopieren und anpassen, oder die folgenden Schreibweisen nutzen:"
+      english "You can copy the original formula into the solution box several times and adapt it or use the following syntax:"
+
     keyHeading
     basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
