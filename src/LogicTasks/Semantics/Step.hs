@@ -51,8 +51,8 @@ genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
 
 
 
-description :: OutputCapable m => StepInst -> LangM m
-description StepInst{..} = do
+description :: OutputCapable m => Bool -> StepInst -> LangM m
+description oneInput StepInst{..} = do
   paragraph $ do
     translate $ do
       german "Betrachten Sie die zwei folgenden Klauseln:"
@@ -65,8 +65,9 @@ description StepInst{..} = do
     english "Resolve the clauses and give the resulting resolvent."
 
   paragraph $ translate $ do
-    german "Geben Sie das in dem Resolutionsschritt genutzte Literal (in positiver oder negativer Form) und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
-    english "Provide the literal (in positive or negative form) used for the step and the resolvent in the following tuple form: (literal, resolvent)."
+    german $ "Geben Sie das in dem Resolutionsschritt genutzte Literal (in positiver oder negativer Form) und das Ergebnis" ++ gerEnd
+    english $ "Provide the literal (in positive or negative form) used for the step and the resolvent" ++ engEnd
+
 
   keyHeading
   negationKey unicodeAllowed
@@ -83,9 +84,7 @@ description StepInst{..} = do
     translate $ do
       german "Nutzen Sie zur Angabe der Resolvente die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the resolvent using set notation! A valid solution could look like this: "
-    translatedCode $ flip localise $ translations $ do
-      german "(A, {nicht B, C})"
-      english "(A, {not B, C})"
+    translatedCode $ flip localise $ translations setExample
     pure ()
 
   unless usesSetNotation $ paragraph $ indent $ do
@@ -102,12 +101,39 @@ description StepInst{..} = do
       show' clause = if usesSetNotation
         then showClauseAsSet clause
         else show clause
-      exampleCode | unicodeAllowed = do
-                      german "(A, ¬B ∨ C)"
-                      english "(A, ¬B ∨ C)"
-                  | otherwise      = do
-                      german "(A, nicht B oder C)"
-                      english "(A, not B or C)"
+      (gerEnd, engEnd)
+        | oneInput = (" in der folgenden Tupelform an: (Literal, Resolvente)." -- no-spell-check
+                     , " in the following tuple form: (literal, resolvent)."
+                     )
+        | otherwise = (" an.",".")
+
+      setExample
+        | unicodeAllowed && oneInput = do
+          german "(A, {¬B, C})"
+          english "(A, {¬B, C})"
+        | not unicodeAllowed && oneInput = do
+          german "(A, {nicht B, C})"
+          english "(A, {not B, C})"
+        | unicodeAllowed && not oneInput = do
+          german $ unlines ["Literal: A", "Resolvente: {¬B, C}"]
+          english $ unlines ["Literal: A", "Resolvent: {¬B, C}"]
+        | otherwise = do
+          german $ unlines ["Literal: A", "Resolvente: {nicht B, C}"]
+          english $ unlines ["Literal: A", "Resolvent: {not B, C}"]
+
+      exampleCode
+        | unicodeAllowed && oneInput = do
+          german "(A, ¬B ∨ C)"
+          english "(A, ¬B ∨ C)"
+        | not unicodeAllowed && oneInput = do
+          german "(A, nicht B oder C)"
+          english "(A, not B or C)"
+        | unicodeAllowed && not oneInput = do
+          german $ unlines ["Literal: A", "Resolvente: ¬B ∨ C"]
+          english $ unlines ["Literal: A", "Resolvent: ¬B ∨ C"]
+        | otherwise = do
+          german $ unlines ["Literal: A", "Resolvente: nicht B oder C"]
+          english $ unlines ["Literal: A", "Resolvent: not B or C"]
 
 
 verifyStatic :: OutputCapable m => StepInst -> LangM m
