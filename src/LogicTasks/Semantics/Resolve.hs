@@ -71,8 +71,8 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
 
 
 
-description :: OutputCapable m => ResolutionInst -> LangM m
-description ResolutionInst{..} = do
+description :: OutputCapable m => Bool -> ResolutionInst -> LangM m
+description oneInput ResolutionInst{..} = do
   paragraph $ do
     translate $ do
       german "Betrachten Sie die folgende Formel in KNF:"
@@ -83,10 +83,19 @@ description ResolutionInst{..} = do
     german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
     english "Use the resolution technique on this formula to derive the empty clause."
 
-  paragraph $ translate $ do
-    german "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
-    english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
-
+  paragraph $ translate $ if oneInput
+    then do
+      german "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
+      english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
+    else do
+      german "Geben Sie die Lösung als eine Auflistung von Schritten an. "
+      german "Füllen Sie für jeden Schritt die zugehörigen drei Eingabefelder mit den zwei verwendeten Klauseln sowie der daraus entstehenden Resolventen. "
+      german "Schritte können nicht partiell ausgefüllt werden. Wenn Sie einen Schritt hinzufügen, MUSS dieser vollständig sein. "
+      german "Es ist aber erlaubt Schritte auszulassen, z. B. wenn Sie weniger Schritte benötigen, als im Eingabeformular angegeben."
+      english "Provide the solution as a sequence of steps. "
+      english "Fill in the three input fields for each step with the two used clauses and the resulting resolvent. "
+      english "Steps can not be partially filled in. Each added step MUST be complete. "
+      english "You are allowed to skip steps, e.g. if your solution has less steps overall than the amount of given steps."
   keyHeading
   negationKey unicodeAllowed
   unless usesSetNotation (orKey unicodeAllowed)
@@ -112,17 +121,18 @@ description ResolutionInst{..} = do
     german "Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)."
     english "Clauses in the starting formula are already numbered by their order. first clause = 1, second clause = 2, ...)."
 
-  paragraph $ translate $ do
-    german "Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
-    english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
-
+  paragraph $ translate $ if oneInput
+    then do
+      german "Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
+      english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
+    else do
+      german "Neu resolvierte Klauseln erhalten automatisch die Nummer rechts neben ihrem Eingabefeld."
+      english "Newly resolved clauses are automatically assigned the number directly right of their input field."
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Nutzen Sie zur Angabe der Klauseln die Mengennotation!. Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      german "Nutzen Sie zur Angabe der Klauseln die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the clauses using set notation! A solution attempt could look like this: "
-    translatedCode $ flip localise $ translations $ do
-      english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
-      german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
+    translatedCode $ flip localise $ translations setExample
     pure ()
 
   unless usesSetNotation $ paragraph $ indent $ do
@@ -138,12 +148,73 @@ description ResolutionInst{..} = do
       show' = if usesSetNotation
         then showCnfAsSet . mkCnf
         else show . mkCnf
-      exampleCode | unicodeAllowed = do
-                      english "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, not A), (A, not A, {})]"
-                      german "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, nicht A), (A, nicht A, {})]"
-                  | otherwise      = do
-                      english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
-                      german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+
+      setExample
+        | unicodeAllowed && oneInput = do
+          english "[(1, 2, {A}), (3, 4, {¬A, ¬B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
+          german "[(1, 2, {A}), (3, 4, {¬A, ¬B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
+        | not unicodeAllowed && oneInput = do
+          english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
+          german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
+        | unicodeAllowed && not oneInput = do
+          english $ unlines
+            [ "Step 1: First Clause:   1, Second Clause:       2, Resolvent: {A}       = 6"
+            , "Step 2: First Clause:   3, Second Clause:       4, Resolvent: {¬A ∨ ¬B} = 7"
+            , "Step 3: First Clause:   5, Second Clause:       7, Resolvent: {not A}   = 8"
+            , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}        = 9"
+            ]
+          german $ unlines
+            [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:       2, Resolvente: {A}       = 6" -- no-spell-check
+            , "Schritt 2: Erste Klausel:   3, Zweite Klausel:       4, Resolvente: {¬A ∨ ¬B} = 7" -- no-spell-check
+            , "Schritt 3: Erste Klausel:   5, Zweite Klausel:       7, Resolvente: {not A}   = 8" -- no-spell-check
+            , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {not A}, Resolvente: {}        = 9" -- no-spell-check
+            ]
+        | otherwise = do
+          english $ unlines
+            [ "Step 1: First Clause:   1, Second Clause:       2, Resolvent: {A}        = 6"
+            , "Step 2: First Clause:   3, Second Clause:       4, Resolvent: {-A or -B} = 7"
+            , "Step 3: First Clause:   5, Second Clause:       7, Resolvent: {not A}    = 8"
+            , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}         = 9"
+            ]
+          german $ unlines
+            [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}          = 6" -- no-spell-check
+            , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {-A oder -B} = 7" -- no-spell-check
+            , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A}    = 8" -- no-spell-check
+            , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}           = 9" -- no-spell-check
+            ]
+      exampleCode
+        | unicodeAllowed && oneInput = do
+          english "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, not A), (A, not A, {})]"
+          german "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+        | not unicodeAllowed && oneInput = do
+          english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
+          german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+        | unicodeAllowed && not oneInput = do
+          english $ unlines
+            [ "Step 1: First Clause: 1, Second Clause:     2, Resolvent: A       = 6"
+            , "Step 2: First Clause: 3, Second Clause:     4, Resolvent: ¬A ∨ ¬B = 7"
+            , "Step 3: First Clause: 5, Second Clause:     7, Resolvent: not A   = 8"
+            , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}      = 9"
+            ]
+          german $ unlines
+            [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:     2, Resolvente: A       = 6" -- no-spell-check
+            , "Schritt 2: Erste Klausel: 3, Zweite Klausel:     4, Resolvente: ¬A ∨ ¬B = 7" -- no-spell-check
+            , "Schritt 3: Erste Klausel: 5, Zweite Klausel:     7, Resolvente: not A   = 8" -- no-spell-check
+            , "Schritt 4: Erste Klausel: A, Zweite Klausel: not A, Resolvente: {}      = 9" -- no-spell-check
+            ]
+        | otherwise = do
+          english $ unlines
+            [ "Step 1: First Clause: 1, Second Clause:     2, Resolvent: A        = 6"
+            , "Step 2: First Clause: 3, Second Clause:     4, Resolvent: -A or -B = 7"
+            , "Step 3: First Clause: 5, Second Clause:     7, Resolvent: not A    = 8"
+            , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}       = 9"
+            ]
+          german $ unlines
+            [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A          = 6" -- no-spell-check
+            , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: -A oder -B = 7" -- no-spell-check
+            , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A    = 8" -- no-spell-check
+            , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}         = 9" -- no-spell-check
+            ]
 
 
 verifyStatic :: OutputCapable m => ResolutionInst -> LangM m
