@@ -91,11 +91,13 @@ description oneInput ResolutionInst{..} = do
       german "Geben Sie die Lösung als eine Auflistung von Schritten an. "
       german "Füllen Sie für jeden Schritt die zugehörigen drei Eingabefelder mit den zwei verwendeten Klauseln sowie der daraus entstehenden Resolventen. "
       german "Schritte können nicht partiell ausgefüllt werden. Wenn Sie einen Schritt hinzufügen, MUSS dieser vollständig sein. "
-      german "Es ist aber erlaubt Schritte auszulassen, z. B. wenn Sie weniger Schritte benötigen, als im Eingabeformular angegeben."
+      german "Bei Nichtbeachtung wird Ihre Abgabe aus Syntaxgründen abgelehnt. "
+      german "Es ist aber erlaubt Schritte komplett auszulassen, z. B. wenn Sie weniger Schritte benötigen, als im Eingabeformular angegeben."
       english "Provide the solution as a sequence of steps. "
       english "Fill in the three input fields for each step with the two used clauses and the resulting resolvent. "
       english "Steps can not be partially filled in. Each added step MUST be complete. "
-      english "You are allowed to skip steps, e.g. if your solution has less steps overall than the amount of given steps."
+      english "Submissions containing partially filled in steps will be rejected as syntactically wrong. "
+      english "You are allowed to entirely skip steps, e.g. if your solution has fewer steps overall than the amount of step inputs."
   keyHeading
   negationKey unicodeAllowed
   unless usesSetNotation (orKey unicodeAllowed)
