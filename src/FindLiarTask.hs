@@ -26,14 +26,17 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
   where
     xYOrNotY = if xw == yw then Atomic yn else Neg (Atomic yn)
     yZOrNotZ = if yw == zw then Atomic zn else Neg (Atomic zn)
-    op = if zw then Or else And
     zXOrNotX = if v then Atomic xn else Neg (Atomic xn)
     zYOrNotY = if (xw == yw) == v then Neg (Atomic yn) else Atomic yn
+    zOperator :: String
+      | zw                               = " oder"
+      | isNeg zXOrNotX == isNeg zYOrNotY = " und"
+      | otherwise                        = ", aber"
 
     parts = [p1, p2, p3]
-    p1 = Assoc Equi (Atomic xn) xYOrNotY                                    -- X_n <=> ?Y_n
-    p2 = Assoc Equi (Atomic yn) yZOrNotZ                                    -- Y_n <=> ?Z_n
-    p3 = Assoc Equi (Atomic zn) (Brackets (Assoc op zXOrNotX zYOrNotY))     -- Z_n <=> (?X_n op ?Y_n)
+    p1 = Assoc Equi (Atomic xn) xYOrNotY
+    p2 = Assoc Equi (Atomic yn) yZOrNotZ
+    p3 = Assoc Equi (Atomic zn) (Brackets (Assoc (if zw then Or else And) zXOrNotX zYOrNotY))
     -- formula = foldr1 (Assoc And) (map Brackets parts)
 
     hints = [h1, h2, h3]
@@ -54,13 +57,8 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
         let truthstatement = if isNeg zXOrNotX
             then "lügen"::String
             else "sagen die Wahrheit"::String
-        in [i|#{whichOp op} #{yn} #{truthstatement}|]
+        in [i|#{zOperator} #{yn} #{truthstatement}|]
       else
         let partX = if isNeg zXOrNotX then " lügt"::String else sdW
             partY = if isNeg zYOrNotY then " lügt"::String else sdW
-        in [i|#{partX}#{whichOp op} #{yn}#{partY}|]
-
-    whichOp :: BinOp -> String
-    whichOp And = if isNeg zXOrNotX == isNeg zYOrNotY then " und" else ", aber"
-    whichOp Or = " oder"
-    whichOp _ = " unbekannter Operator"
+        in [i|#{partX}#{zOperator} #{yn}#{partY}|]
