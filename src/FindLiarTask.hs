@@ -24,25 +24,25 @@ taskData = do
 makeHintsAndFormula :: ((Char, Bool), (Char, Bool), (Char, Bool), Bool) -> ([PropFormula Char], [Text])
 makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
   where
-    xYOrNotY = if xw == yw then Atomic yn else Neg (Atomic yn)
-    yZOrNotZ = if yw == zw then Atomic zn else Neg (Atomic zn)
-    zXOrNotX = if v then Atomic xn else Neg (Atomic xn)
-    zYOrNotY = if (xw == yw) == v then Neg (Atomic yn) else Atomic yn
+    xYnOrNotYn = if xw == yw then Atomic yn else Neg (Atomic yn)
+    yZnOrNotZn = if yw == zw then Atomic zn else Neg (Atomic zn)
+    zXnOrNotXn = if v then Atomic xn else Neg (Atomic xn)
+    zYnOrNotYn = if (xw == yw) == v then Neg (Atomic yn) else Atomic yn
     zOperator :: String
-      | zw                               = " oder"
-      | isNeg zXOrNotX == isNeg zYOrNotY = " und"
-      | otherwise                        = ", aber"
+      | zw                                   = " oder"
+      | isNeg zXnOrNotXn == isNeg zYnOrNotYn = " und"
+      | otherwise                            = ", aber"
 
-    parts = [p1, p2, p3]
-    p1 = Assoc Equi (Atomic xn) xYOrNotY
-    p2 = Assoc Equi (Atomic yn) yZOrNotZ
-    p3 = Assoc Equi (Atomic zn) (Brackets (Assoc (if zw then Or else And) zXOrNotX zYOrNotY))
+    parts = [px, py, pz]
+    px = Assoc Equi (Atomic xn) xYnOrNotYn
+    py = Assoc Equi (Atomic yn) yZnOrNotZn
+    pz = Assoc Equi (Atomic zn) (Brackets (Assoc (if zw then Or else And) zXnOrNotXn zYnOrNotYn))
     -- formula = foldr1 (Assoc And) (map Brackets parts)
 
-    hints = [h1, h2, h3]
-    h1 = [i|#{xn} sagt: #{yn}#{if isNeg xYOrNotY then " lügt"::String else sdW}.|]
-    h2 = [i|#{yn} sagt: #{zn}#{if isNeg yZOrNotZ then " lügt"::String else sdW}.|]
-    h3 = [i|#{zn} sagt: #{xn}#{statement}.|]
+    hints = [hx, hy, hz]
+    hx = [i|#{xn} sagt: #{yn}#{if isNeg xYnOrNotYn then " lügt"::String else sdW}.|]
+    hy = [i|#{yn} sagt: #{zn}#{if isNeg yZnOrNotZn then " lügt"::String else sdW}.|]
+    hz = [i|#{zn} sagt: #{xn}#{statement}.|]
 
     isNeg :: PropFormula c -> Bool
     isNeg (Neg _) = True
@@ -52,13 +52,13 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
     sdW = " sagt die Wahrheit"
 
     statement :: String
-    statement = if isNeg zXOrNotX == isNeg zYOrNotY
+    statement = if isNeg zXnOrNotXn == isNeg zYnOrNotYn
       then
-        let truthstatement = if isNeg zXOrNotX
+        let truthStatement = if isNeg zXnOrNotXn
             then "lügen"::String
             else "sagen die Wahrheit"::String
-        in [i|#{zOperator} #{yn} #{truthstatement}|]
+        in [i|#{zOperator} #{yn} #{truthStatement}|]
       else
-        let partX = if isNeg zXOrNotX then " lügt"::String else sdW
-            partY = if isNeg zYOrNotY then " lügt"::String else sdW
+        let partX = if isNeg zXnOrNotXn then " lügt"::String else sdW
+            partY = if isNeg zYnOrNotYn then " lügt"::String else sdW
         in [i|#{partX}#{zOperator} #{yn}#{partY}|]
