@@ -40,9 +40,9 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
     -- formula = foldr1 (Assoc And) (map Brackets parts)
 
     hints = [hx, hy, hz]
-    hx = [i|#{xn} sagt: #{yn}#{if isNeg xYnOrNotYn then " lügt"::String else sdW}.|]
-    hy = [i|#{yn} sagt: #{zn}#{if isNeg yZnOrNotZn then " lügt"::String else sdW}.|]
-    hz = [i|#{zn} sagt: #{xn}#{statement}.|]
+    hx = [i|#{xn} sagt: "#{yn}#{if isNeg xYnOrNotYn then " lügt"::String else sdW}."|]
+    hy = [i|#{yn} sagt: "#{zn}#{if isNeg yZnOrNotZn then " lügt"::String else sdW}."|]
+    hz = [i|#{zn} sagt: "#{xn}#{statement}."|]
 
     isNeg :: PropFormula c -> Bool
     isNeg (Neg _) = True
