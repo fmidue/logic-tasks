@@ -75,13 +75,13 @@ description :: OutputCapable m => Bool -> ResolutionInst -> LangM m
 description oneInput ResolutionInst{..} = do
   paragraph $ do
     translate $ do
-      german "Betrachten Sie die folgende Formel in KNF:"
-      english "Consider the following formula in cnf:"
+      german $ "Betrachten Sie die folgende " ++ gerSet ++ "Formel in KNF:"
+      english $ "Consider the following " ++ engSet ++ "formula in cnf:"
     indent $ code $ show' clauses
     pure ()
   paragraph $ translate $ do
-    german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
-    english "Use the resolution technique on this formula to derive the empty clause."
+    german "Führen Sie das Resolutionsverfahren an ihr durch, um die leere Klausel abzuleiten."
+    english "Use the resolution technique on it to derive the empty clause."
 
   paragraph $ translate $ if oneInput
     then do
@@ -120,8 +120,8 @@ description oneInput ResolutionInst{..} = do
     english "You can optionally replace clauses with numbers."
 
   paragraph $ translate $ do
-    german "Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)."
-    english "Clauses in the starting formula are already numbered by their order. first clause = 1, second clause = 2, ...)."
+    german "Bestehende Klauseln sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)."
+    english "Existing Clauses are already numbered by their order. first clause = 1, second clause = 2, ...)."
 
   paragraph $ translate $ if oneInput
     then do
@@ -150,6 +150,13 @@ description oneInput ResolutionInst{..} = do
       show' = if usesSetNotation
         then showCnfAsSet . mkCnf
         else show . mkCnf
+
+      (gerSet,engSet)
+        | unicodeAllowed =
+          ( "Mengenschreibweise einer " -- no-spell-check
+          , "Set notation of a "
+          )
+        | otherwise = ( "", "")
 
       setExample
         | unicodeAllowed && oneInput = do
