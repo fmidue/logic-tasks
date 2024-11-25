@@ -419,6 +419,6 @@ replaceAll (Res (c1,c2,(c3,i)) : rest) mapping = (replaceNum c1, replaceNum c2, 
 
 tripShow :: Bool -> (Clause,Clause,Clause) -> String
 tripShow setNotation (c1,c2,c3) =
-    '(' : show' c1 ++ ',' : show' c2 ++ ',' : show' c3 ++ ")"
+    '(' : show' c1 ++ ", " ++ show' c2 ++ ", " ++ show' c3 ++ ")"
   where
     show' = showClause setNotation

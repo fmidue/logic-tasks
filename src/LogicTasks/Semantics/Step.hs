@@ -232,7 +232,7 @@ completeGrade' StepInst{..} sol =
 
     solToString =
       let (l,cl) = solution
-      in  '(' : show l ++ ',' : showClause usesSetNotation cl ++ ")"
+      in  '(' : show l ++ ", " ++ showClause usesSetNotation cl ++ ")"
 
 
 genResStepClause :: Int -> Int -> [Char] -> Gen (Clause, Literal, [Literal])
