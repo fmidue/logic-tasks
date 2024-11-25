@@ -98,9 +98,8 @@ description oneInput StepInst{..} = do
   extra addText
   pure ()
     where
-      show' clause = if usesSetNotation
-        then showClauseAsSet clause
-        else show clause
+      show' = showClause usesSetNotation
+
       (gerEnd, engEnd)
         | oneInput = (" in der folgenden Tupelform an: (Literal, Resolvente)." -- no-spell-check
                      , " in the following tuple form: (literal, resolvent)."
@@ -227,9 +226,13 @@ completeGrade' StepInst{..} sol =
             pure ()
   where
     mSol = fromJust $ step sol
-    displaySolution = when showSolution $ example (show solution) $ do
+    displaySolution = when showSolution $ example solToString $ do
           english "A possible solution for this task is:"
           german "Eine mögliche Lösung für die Aufgabe ist:"
+
+    solToString =
+      let (l,cl) = solution
+      in  '(' : show l ++ ',' : showClause usesSetNotation cl ++ ")"
 
 
 genResStepClause :: Int -> Int -> [Char] -> Gen (Clause, Literal, [Literal])
@@ -246,3 +249,9 @@ genResStepClause minClauseLength maxClauseLength usedLiterals = do
     clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restLits) 100
         (all (\lit -> opposite lit `notElem` lits1) .  literals)
     pure (clause2, resolveLit, lits1)
+
+
+showClause :: Bool -> Clause -> String
+showClause setNotation clause = if setNotation
+        then showClauseAsSet clause
+        else show clause

@@ -29,11 +29,11 @@ import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
+import LogicTasks.Semantics.Step (showClause)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
 import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
-import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
 import Formula.Parsing (resStepsParser, clauseSetParser, clauseFormulaParser)
 import Formula.Helpers (showCnfAsSet)
@@ -259,8 +259,8 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
-gradeSteps :: OutputCapable m => [(Clause,Clause,Clause)] -> Bool -> LangM m
-gradeSteps steps appliedIsNothing = do
+gradeSteps :: OutputCapable m => Bool -> [(Clause,Clause,Clause)] -> Bool -> LangM m
+gradeSteps setNotation steps appliedIsNothing = do
     preventWithHint (notNull noResolveSteps)
         (translate $ do
           german "Alle Schritte sind gültig?"
@@ -270,7 +270,7 @@ gradeSteps steps appliedIsNothing = do
           translate $ do
             german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
             english "At least one step is not a valid resolution step. "
-          itemizeM $ map (text . show) noResolveSteps
+          itemizeM $ map (text . tripShow setNotation) noResolveSteps
           pure ()
         )
 
@@ -329,7 +329,7 @@ partialGrade' ResolutionInst{..} sol = do
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
     applied = applySteps clauses steps
-    stepsGraded = gradeSteps steps (isNothing applied)
+    stepsGraded = gradeSteps usesSetNotation steps (isNothing applied)
 
 completeGrade :: (OutputCapable m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` resStepsParser clauseParser
@@ -346,16 +346,19 @@ completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
       english "Solution is correct?"
 
     when (showSolution && not isCorrect) $
-      example (show (pretty solution)) $ do
+      example solutionDisplay $ do
         english "A possible solution for this task is:"
         german "Eine mögliche Lösung für die Aufgabe ist:"
 
     pure ()
   where
     steps = replaceAll sol $ baseMapping clauses
+    solClauses = replaceAll solution $ baseMapping clauses
     applied = applySteps clauses steps
-    stepsGraded = gradeSteps steps (isNothing applied)
+    stepsGraded = gradeSteps usesSetNotation steps (isNothing applied)
     isCorrect = any isEmptyClause (fromMaybe [] applied)
+    solutionDisplay = show $ map (tripShow usesSetNotation) solClauses
+
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
@@ -399,3 +402,10 @@ replaceAll (Res (c1,c2,(c3,i)) : rest) mapping = (replaceNum c1, replaceNum c2, 
     replaceNum (Left c) = c
     replaceNum (Right n) = case lookup n mapping of Nothing  -> error "no mapping"
                                                     (Just c) -> c
+
+
+tripShow :: Bool -> (Clause,Clause,Clause) -> String
+tripShow setNotation (c1,c2,c3) =
+    '(' : show' c1 ++ ',' : show' c2 ++ ',' : show' c3 ++ ")"
+  where
+    show' = showClause setNotation
