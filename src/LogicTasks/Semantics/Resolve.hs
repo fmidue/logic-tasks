@@ -259,6 +259,11 @@ verifyQuiz ResolutionConfig{..}
           german "Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
           english "This amount of steps is impossible with the given amount of literals."
 
+    | printFeedbackImmediately && printSolution =
+        refuse $ indent $ translate $ do
+          german "Wenn sofortiges Feedback eingeschaltet ist, kann nicht abschließend die Lösung angezeigt werden."
+          english "If instant feedback is turned on, then the correct solution cannot be given."
+
     | otherwise = checkBaseConf baseConf
 
 
