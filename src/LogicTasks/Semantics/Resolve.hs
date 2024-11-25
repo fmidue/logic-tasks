@@ -154,7 +154,7 @@ description oneInput ResolutionInst{..} = do
       (gerSet,engSet)
         | usesSetNotation =
           ( "Mengenschreibweise einer " -- no-spell-check
-          , "Set notation of a "
+          , "set notation of a "
           )
         | otherwise = ( "", "")
 
