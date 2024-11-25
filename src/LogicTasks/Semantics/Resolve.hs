@@ -326,7 +326,7 @@ partialGrade' ResolutionInst{..} sol = do
       translate $ do
         german "Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
         english "At least one step contains literals not found in the original formula. "
-      itemizeM $ map (text . show) wrongLitsSteps
+      itemizeM $ map (text . tripShow usesSetNotation) wrongLitsSteps
       pure ()
     )
 
