@@ -20,7 +20,7 @@ import Control.OutputCapable.Blocks (
   yesNo,
   recoverFrom,
   )
-import Data.List (sort)
+import Data.List (intercalate, sort)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Test.QuickCheck (Gen)
 
@@ -369,7 +369,8 @@ completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
     applied = applySteps clauses steps
     stepsGraded = gradeSteps usesSetNotation steps (isNothing applied)
     isCorrect = any isEmptyClause (fromMaybe [] applied)
-    solutionDisplay = show $ map (tripShow usesSetNotation) solClauses
+    solutionDisplay =
+      '[' : intercalate ", " (map (tripShow usesSetNotation) solClauses) ++ "]"
 
 
 baseMapping :: [Clause] -> [(Int,Clause)]
