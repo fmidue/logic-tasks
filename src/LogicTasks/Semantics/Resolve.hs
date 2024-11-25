@@ -152,7 +152,7 @@ description oneInput ResolutionInst{..} = do
         else show . mkCnf
 
       (gerSet,engSet)
-        | unicodeAllowed =
+        | usesSetNotation =
           ( "Mengenschreibweise einer " -- no-spell-check
           , "Set notation of a "
           )
