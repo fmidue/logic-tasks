@@ -252,6 +252,6 @@ genResStepClause minClauseLength maxClauseLength usedLiterals = do
 
 
 showClause :: Bool -> Clause -> String
-showClause setNotation clause = if setNotation
-        then showClauseAsSet clause
-        else show clause
+showClause setNotation
+  | setNotation = showClauseAsSet
+  | otherwise = show
