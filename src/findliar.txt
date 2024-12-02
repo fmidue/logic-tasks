@@ -19,9 +19,10 @@ type Submission = (Table,String,[Namen])
 
 
 emptyColumns, staticColumns, totalColumns, rows :: Int
-emptyColumns  = 13
-staticColumns = 4
-totalColumns  = staticColumns + emptyColumns
+emptyColumns  = 4
+staticColumns = 3
+staticColsEnd = 1
+totalColumns  = staticColumns + emptyColumns + staticColsEnd
 rows          = 2^staticColumns
 
 
@@ -91,9 +92,13 @@ getTask = do
     pure (show (hints,formulas), checkers False True, getFormData form)
   where
     form :: Rendered
-    form = tableForm ["A","B","C","D"] $$>
-             formify (Just ("hallo", [A]) :: Maybe (String,[Namen]))
-                     [[single "Formel"], [buttonsEnum Vertical "Wer kommt?" (pack . show @Namen)]]
+    form = formify (Nothing :: Maybe (String,String,String))
+                     [[single "Aussage 1) :"],[single "Aussage 2) :"],[single "Aussage 3) :"]] $$>
+           formify (Nothing :: Maybe (String))
+                     [[single "Formel F="]] $$>
+           tableForm ["A","B","C"] $$>
+           formify (Nothing :: Maybe [Namen])
+                     [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
 
 
 
@@ -177,6 +182,7 @@ tableForm staticHeaders =
                     <th>#{sh}
                   $forall header <- headers
                     <th>^{fvInput header}
+                  <th>F
                 $forall row <- rows
                   <tr>
                     $forall input <- row
@@ -198,16 +204,14 @@ tableForm staticHeaders =
         border: 1px solid black
         border-collapse: collapse
         text-align: center
-      table tr th:nth-child(-n+4)
+      table tr th:nth-child(-n+3)
         width: 20px
-      table tr td:nth-child(-n+4)
+      table tr td:nth-child(-n+3)
         height: 25px
-      table tr th:nth-child(n+5)
-        width: 30px
-      table tr th:nth-child(n+9)
-        width: 75px
-      table tr th:nth-child(n+14)
+      table tr th:nth-child(n+4)
         width: 125px
+      table tr th:nth-child(n+8)
+        width: 25px
       table tr th:last-child
         padding: 10px 0px
       table
@@ -378,6 +382,7 @@ checkSemantics' nSol columns n (headers,f) = do
 
 =============================================
 
+
 {-# Language ApplicativeDo #-}
 
 module Description (description) where
@@ -397,7 +402,7 @@ description _ (hints,_) = do
     paragraph $ bothLangs
       "Übersetzen Sie die einzelnen Aussagen und die Kombination aller Aussagen jeweils in eine aussagenlogische Formel. Geben Sie die Formeln in die entsprechend benannten Textfelder ein."
     paragraph $ bothLangs
-      "Wer lügt? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. Kreuzen Sie dann die entsprechenden Namen an."
+      "Wer lügt? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. Füllen Sie dabei alle benannten Spalten vollständig aus. Sie können Hilfsspalten verwenden. Kreuzen Sie dann die entsprechenden Namen an."
     paragraph $ bothLangs
       "Verwenden Sie für die Angabe der Formel die atomaren Formeln A, B, C und die folgenden Operatoren:"
     enumerateM code $ zip ["Negation","Und","Oder","Implikation","Biimplikation"] $ map code ["¬","∧","∨","=>","<=>"]
