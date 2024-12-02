@@ -1,0 +1,461 @@
+module Global where
+
+
+import Control.OutputCapable.Blocks
+import LogicTasks.Formula (TruthValue(..))
+
+
+
+instance Eq TruthValue where
+  (TruthValue a) == (TruthValue b) = a == b
+
+newtype Table = Table [(Maybe String, [Maybe TruthValue])] deriving (Eq,Show)
+
+data Namen = A | B | C | D deriving (Eq,Enum,Bounded,Show)
+
+type FormType = (String,[Namen])
+
+type Submission = (Table,String,[Namen])
+
+
+emptyColumns, staticColumns, totalColumns, rows :: Int
+emptyColumns  = 13
+staticColumns = 4
+totalColumns  = staticColumns + emptyColumns
+rows          = 2^staticColumns
+
+
+bothLangs :: OutputCapable m => String -> LangM m
+bothLangs s = translate $ german s >> english s
+
+=============================================
+
+{-# language FlexibleContexts #-}
+{-# language OverloadedStrings #-}
+{-# language QuasiQuotes #-}
+{-# language RecordWildCards #-}
+{-# language TupleSections #-}
+
+module TaskData (getTask) where
+
+
+import Control.Monad.Reader    (reader)
+import Data.Char               (digitToInt)
+import Data.List               (transpose)
+import Data.Maybe              (fromJust)
+import Data.Text               (Text, pack)
+import Data.String.Interpolate (i)
+import FlexTask.FormUtil (
+  ($$>),
+  addCss,
+  addNameAndCssClass,
+  getFormData,
+  )
+import FlexTask.Generic.Form (
+  Alignment(..),
+  FieldInfo,
+  Formify(..),
+  formify,
+  formifyInstanceMultiChoice,
+  single,
+  buttonsEnum
+  )
+import FlexTask.YesodConfig    (Handler, FlexForm, Rendered)
+import LogicTasks.Formula      (TruthValue(..))
+import Numeric                 (showBin)
+import Test.QuickCheck.Arbitrary (arbitrary)
+import Test.QuickCheck.Gen
+import Yesod
+
+import Trees.Types (BinOp(..), SynTree(..))
+import Trees.Print (simplestDisplay)
+
+import Global
+
+
+
+
+instance MonadFail Gen where
+  fail = error
+
+
+getParticipants :: Gen [Bool]
+getParticipants = vectorOf 4 arbitrary `suchThat` \bs -> or bs && not (and bs)
+
+
+getTask :: Gen (String, String, IO ([String],String))
+getTask = do
+    [a,b,c,d] <- getParticipants
+    names <- getNames
+    (formula, legend, hints) <- formulaAndHints a b c d names
+    let
+      zipped = [(a, A), (b, B), (c, C), (d, D)]
+      coming = [ n | (True,n) <- zipped ]
+    pure (show ((legend,hints),coming), checkers formula False True, getFormData (form names))
+  where
+    form :: (Text,Text,Text,Text) -> Rendered
+    form n = tableForm ["A","B","C","D"] $$>
+             formify (Nothing :: Maybe FormType) (nonTableFields n)
+
+    getNames :: Gen (Text,Text,Text,Text)
+    getNames = do
+      a <- elements ["Astrid","Anna"]
+      b <- elements ["Ben","Bernd"]
+      c <- elements ["Claudia","Carla"]
+      d <- elements ["David","Daniel"]
+      return (a,b,c,d)
+
+
+
+formulaAndHints :: Bool -> Bool -> Bool -> Bool -> (Text,Text,Text,Text) -> Gen (SynTree BinOp Char, String, [String])
+formulaAndHints a b c d (aN,bN,cN,dN) = do
+    shuffled <- shuffle (zip [part1,part2,part3,part4,part5] [hint1,hint2,hint3,hint4,hint5])
+    let (parts,hints) = unzip shuffled
+    let formula = foldr1 (Binary And) parts
+    pure (formula, namesLegend, hints)
+  where
+    namesLegend = [i|Sie fragt ihre Freunde #{aN} (A), #{bN} (B), #{cN} (C) und #{dN} (D), |]
+    hint1 = (if b == d
+              then [i|Falls #{bN} und #{dN}#{nicht b} kommen,|]
+              else
+                if b
+                  then [i|Falls #{bN} nicht, aber #{dN} kommt,|]
+                  else [i|Falls #{bN}, aber nicht #{dN} kommt,|]
+            )
+            ++ [i| kommt #{cN}#{nicht (not c)}.|]
+    hint2 = [i|#{bN} kommt#{nicht b} mit, wenn #{aN}#{nicht a} mitkommt.|]
+    hint3 = [i|Wenn #{bN}#{nicht b} kommt, kommt #{if b == c then auch else ""} #{cN}#{nicht c}.|]
+    hint4 = [i|Wenn #{cN}#{nicht c} kommt, kommt #{if c == d then auch else ""} #{dN}#{nicht d}.|]
+    hint5 = [i|Wenn #{dN}#{nicht d} kommt, |]
+         ++ if a == b
+              then [i|kommen #{if d == a then auch else ""} #{aN} oder #{bN}#{nicht a}.|]
+              else
+                if a
+                  then [i|kommt #{if d then auch else ""} #{aN} nicht oder #{bN} kommt.|]
+                  else [i|kommt #{if d then "" else auch} #{aN} oder #{bN} kommt nicht.|]
+
+    nicht :: Bool -> String
+    nicht f = if f then " nicht" else ""
+
+    -- to avoid inline type annotations due to String vs Text
+    auch :: String
+    auch = " auch"
+
+    neg expr x = if expr then Not (Leaf x) else Leaf x
+    part1 = Binary Impl
+             (Binary And (neg b 'B') (neg d 'D'))
+             (neg (not c) 'C')
+    part2 = Binary Impl (neg a 'A') (neg b 'B')
+    part3 = Binary Impl (neg b 'B') (neg c 'C')
+    part4 = Binary Impl (neg c 'C') (neg d 'D')
+    part5 = Binary Impl
+             (neg d 'D')
+             (Binary Or (neg a 'A') (neg b 'B'))
+
+
+
+tableForm :: [Text] -> Rendered
+tableForm staticHeaders =
+  addCss css $ reader $ \extra -> do
+    let addAttr a fs@FieldSettings{..} = fs {fsAttrs = a : fsAttrs}
+        headerTextField t = mopt textField (addAttr ("tabindex",pack $ show 1) $ addNameAndCssClass t "header") Nothing
+        tableTextField tabOrd t = mopt textField (addAttr ("tabindex",pack $ show tabOrd) $ addNameAndCssClass t "tableInput") Nothing
+
+        headerList = replicate emptyColumns "headers"
+        cellList = replicate rows "cells"
+
+    headersRes <- traverse headerTextField headerList
+    columnsRes <- traverse (\i -> traverse (tableTextField i) cellList) [2..totalColumns+1]
+    let headers = map snd headersRes
+        rows = transpose $ map (map snd) columnsRes
+    pure ( ["headers","cells"]
+         , [whamlet|
+              #{extra}
+              <table>
+                <tr>
+                  $forall sh <- staticHeaders
+                    <th>#{sh}
+                  $forall header <- headers
+                    <th>^{fvInput header}
+                $forall row <- rows
+                  <tr>
+                    $forall input <- row
+                      <td>^{fvInput input}|]
+         )
+  where
+    css = [cassius|
+      #flexident287
+        width: 600px
+        margin: 10px 10px
+      .header
+        width: 100%
+        text-align: center
+        height: 25px
+      .tableInput
+        width: 100%
+        text-align: center
+      th, td
+        border: 1px solid black
+        border-collapse: collapse
+        text-align: center
+      table tr th:nth-child(-n+4)
+        width: 20px
+      table tr td:nth-child(-n+4)
+        height: 25px
+      table tr th:nth-child(n+5)
+        width: 30px
+      table tr th:nth-child(n+9)
+        width: 75px
+      table tr th:nth-child(n+14)
+        width: 125px
+      table tr th:last-child
+        padding: 10px 0px
+      table
+        table-layout: fixed
+    |]
+
+
+
+
+nonTableFields :: (Text,Text,Text,Text) -> [[FieldInfo]]
+nonTableFields (a,b,c,d) = [[single "Formel"], [buttonsEnum Vertical "Wer kommt?" (fromJust . flip lookup nameMatching)]]
+  where
+    nameMatching = [(A, a), (B, b), (C, c), (D, d)]
+
+
+
+instance Formify [Namen] where
+  formifyImplementation = formifyInstanceMultiChoice
+
+
+
+startingTable :: [[Maybe TruthValue]]
+startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
+    transpose (pad . (`showBin` "") <$> [0..rows -1])
+  where pad s = replicate (staticColumns - length s) '0' ++ s
+
+
+
+checkers :: SynTree BinOp Char -> Bool -> Bool -> String
+checkers fSol tableRequired showSolution = [i|
+
+{-\# language ApplicativeDo \#-}
+{-\# language OverloadedStrings \#-}
+
+module Check (checkSemantics, checkSyntax) where
+
+
+import Control.Monad (when)
+import Control.OutputCapable.Blocks
+import Data.Foldable (toList)
+import Data.List     (intercalate, isInfixOf)
+import Data.Maybe    (catMaybes, fromJust)
+import Data.Map      (fromList)
+import Data.Ratio    ((%))
+
+import LogicTasks.Formula (TruthValue(..), isSemanticEqual, convert)
+import LogicTasks.Parsing (allSymbolParser, parser)
+import Formula.Parsing.Delayed
+import Trees.Types (SynTree(..), PropFormula(..), BinOp(..))
+import Trees.Print (simplestDisplay)
+
+import qualified SAT.MiniSat as Sat
+import qualified Data.Text   as T
+
+import Global
+
+
+
+correctColumn :: (PropFormula Char,[Maybe TruthValue]) -> Bool
+correctColumn (f,bs) = all lookFor allocationsAndValues
+  where
+    ones = Sat.solve_all $ convert f
+    allocations = filter ((`elem` atoms) . fst) <$> map (zip "ABCD" . map (truth . fromJust)) #{transpose startingTable}
+    allocationsAndValues = [(truth a,b) | (Just a,b) <- zip bs allocations]
+    lookFor (True,a) = fromList a `elem` ones
+    lookFor (False,a) = fromList a `notElem` ones
+    atoms = toList f
+
+
+
+isSubFormula :: PropFormula Char -> PropFormula Char -> Bool
+isSubFormula a b = noSpaces a `isInfixOf` noSpaces b
+  where
+    noSpaces = filter (/=' ') . show
+
+
+stringTuple :: String -> String -> String
+stringTuple s1 s2 = '(':s1 ++ ',':s2 ++ ")"
+
+
+stringList :: [Maybe String] -> String
+stringList xs = '[': intercalate "," (map stringMaybe xs) ++ "]"
+  where
+    stringMaybe Nothing = "Nothing"
+    stringMaybe (Just s) = s
+
+
+toTree :: PropFormula Char -> SynTree BinOp Char
+toTree (Atomic c) = Leaf c
+toTree (Neg p) = Not $ toTree p
+toTree (Brackets p) = toTree p
+toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
+
+
+dropStatic :: [a] -> [a]
+dropStatic = drop staticColumns
+
+
+checkSyntax :: OutputCapable m => a -> FilePath -> Submission -> LangM m
+checkSyntax _ _ (Table xs,formula,names) =
+  parseDelayedWithAndThen
+    parser
+    complainAboutMissingParenthesesIfNotFailingOn
+    allSymbolParser
+    (checkSyntax' names)
+    $ delayed $ stringTuple (stringList $ map fst xs) formula
+
+
+
+checkSyntax' :: OutputCapable m => [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char) -> LangM m
+checkSyntax' n (fs,f) = do
+    paragraph $ do
+      bothLangs $ do
+        "Es wurden Formeln wie folgt gelesen:"
+      when (any (/=Nothing) entered) $ indent $ do
+        bothLangs "Tabellenspalten"
+        code $ unlines $ map (simplestDisplay . toTree) $ catMaybes entered
+        pure ()
+      indent $ do
+        bothLangs "Antwortformel"
+        code $ simplestDisplay $ toTree f
+        pure ()
+      pure ()
+    assertion (all (`notElem` map (Just . Atomic) "ABCD") entered) $ bothLangs
+      "Tabellenspalten existieren nur einmal?"
+    assertion (not (null n)) $ bothLangs
+      "Es wurde mindestens ein Name angekreuzt? (Alleine gehen ist ausgeschlossen.)"
+    pure ()
+  where
+    entered = dropStatic fs
+
+
+checkSemantics :: OutputCapable m => (a,[Namen]) -> FilePath -> Submission -> Rated m
+checkSemantics (_,nSol) _ (Table xs,formula,names) =
+  withDelayedSucceeding
+    (checkSemantics' nSol columns names)
+    parser
+    $ delayed $ stringTuple (stringList headers) formula
+  where
+    (headers,columns) = unzip xs
+
+
+
+checkSemantics' :: OutputCapable m => [Namen] -> [[Maybe TruthValue]] -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char) -> Rated m
+checkSemantics' nSol columns n (headers,f) = do
+    let correctStart = take staticColumns columns == #{startingTable}
+    #{checkType} correctStart $ bothLangs
+      "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
+    let subFormulas = all (`isSubFormula` f) $ catMaybes $ dropStatic headers
+    #{checkType} subFormulas $ bothLangs
+      "Als Tabellenspalten kommen nur Teilformeln der Gesamtformel vor?"
+    let correctValues = all correctColumn [(sf,b)| (Just sf,b) <- dropStatic $ zip headers columns]
+    #{checkType} correctValues $ bothLangs
+      "Tabellenspalten enthalten nur korrekt ermittelte Wahrheitswerte?"
+    yesNo (T.all (`elem` f) "ABCD") $ bothLangs
+       "Gesamtformel enthält alle vorkommenden atomaren Formeln?"
+    let correctFormula = isSemanticEqual (#{fSol}) (toTree f)
+    yesNo correctFormula $ bothLangs
+        "Gesamtformel ist korrekt?"
+    let correctNames = n == nSol
+    yesNo correctNames $ bothLangs
+       "Die Auflistung der Begleitenden ist korrekt?"
+    let correct = filter id [correctStart, correctFormula, correctNames, correctValues]
+    let points = fromIntegral (length correct) % 4
+    res <- printSolutionAndAssert IndefiniteArticle maybeAnswer points
+    pure res
+  where
+    maybeAnswer = flip (++) (show nSol) <$>
+                    #{if showSolution
+                       then Just ("Formel: " ++ simplestDisplay fSol ++ "\nKorrekte Einträge in Wahrheitstafel.\nBegleitende: ")
+                       else Nothing
+                    }
+
+|]
+  where
+    checkType :: String
+    checkType = if tableRequired then "assertion" else "yesNo"
+
+=============================================
+
+{-# Language ApplicativeDo #-}
+
+module Description (description) where
+
+
+import Control.OutputCapable.Blocks
+
+import Global
+
+
+
+description :: OutputCapable m => FilePath -> ((String,[String]),a) -> LangM m
+description _ ((legend,hints),_) = do
+    paragraph $ bothLangs
+      ( "Eva möchte gerne auf ein Konzert ihrer Lieblingsband gehen. " ++
+        legend ++
+        "ob sie mitkommen wollen. Leider sind die Antworten etwas seltsam."
+      )
+    itemizeM $ map bothLangs hints
+    paragraph $ bothLangs
+      "Übersetzen Sie die Kombination der Aussagen in eine aussagenlogische Formel. Geben Sie diese Formel in das entsprechend benannte Textfeld ein."
+    paragraph $ bothLangs
+      "Wer geht mit Eva zum Konzert? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. Kreuzen Sie dann alle Begleitenden in der Namensliste an."
+    paragraph $ bothLangs
+      "Verwenden Sie für die Angabe der Formel die atomaren Formeln A, B, C, D und die folgenden Operatoren:"
+    enumerateM code $ zip ["Negation","Und","Oder","Implikation","Biimplikation"] $ map code ["¬","∧","∨","=>","<=>"]
+    pure ()
+
+
+=============================================
+
+module Parse (parseSubmission) where
+
+
+import Data.List               (transpose)
+import Data.List.Split         (chunksOf)
+import FlexTask.Generic.Parse (
+  Parse(..),
+  parseInstanceMultiChoice,
+  escaped,
+  useParser
+  )
+import LogicTasks.Formula      (TruthValue)
+import Text.Parsec             (ParseError)
+import Trees.Parsing           ()
+
+import qualified Formula.Parsing as FP
+
+import Global
+
+
+
+instance Parse TruthValue where
+  parseInput = escaped FP.parser
+
+
+instance Parse [Namen] where
+  parseInput = parseInstanceMultiChoice
+
+
+
+instance Parse Table where
+  parseInput = do
+    (headers,values) <- parseInput
+    let allHeaders = map (Just . (:[])) "ABCD" ++ headers
+    pure $ Table $ zip allHeaders $ transpose $ chunksOf totalColumns values
+
+
+
+parseSubmission :: String -> Either ParseError Submission
+parseSubmission = useParser parseInput
