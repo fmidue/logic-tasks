@@ -39,8 +39,8 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
     pz = Binary Equi (Leaf zn) (Binary (if zw then Or else And) zXnOrNotXn zYnOrNotYn)
 
     hints = [hx, hy, hz]
-    hx = [i|#{xn} sagt: "#{yn}#{if isNot xYnOrNotYn then " lügt"::String else sdW}."|]
-    hy = [i|#{yn} sagt: "#{zn}#{if isNot yZnOrNotZn then " lügt"::String else sdW}."|]
+    hx = [i|#{xn} sagt: "#{yn}#{if isNot xYnOrNotYn then " lügt" else sdW}."|]
+    hy = [i|#{yn} sagt: "#{zn}#{if isNot yZnOrNotZn then " lügt" else sdW}."|]
     hz = [i|#{zn} sagt: "#{xn}#{statement}."|]
 
     isNot :: SynTree b c -> Bool
@@ -53,11 +53,11 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
     statement :: String
     statement = if isNot zXnOrNotXn == isNot zYnOrNotYn
       then
-        let truthStatement = if isNot zXnOrNotXn
-            then "lügen"::String
-            else "sagen die Wahrheit"::String
+        let truthStatement :: String = if isNot zXnOrNotXn
+            then "lügen"
+            else "sagen die Wahrheit"
         in [i|#{zOperator} #{yn} #{truthStatement}|]
       else
-        let partX = if isNot zXnOrNotXn then " lügt"::String else sdW
-            partY = if isNot zYnOrNotYn then " lügt"::String else sdW
+        let partX = if isNot zXnOrNotXn then " lügt" else sdW
+            partY = if isNot zYnOrNotYn then " lügt" else sdW
         in [i|#{partX}#{zOperator} #{yn}#{partY}|]
