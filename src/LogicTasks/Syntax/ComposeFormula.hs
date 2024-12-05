@@ -12,7 +12,14 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   ($=<<),
   english,
-  german, translate, localise, translations,
+  german,
+  translate,
+  localise,
+  translations,
+  reRefuse,
+  Rated,
+  multipleChoice,
+  ArticleToUse (IndefiniteArticle),
   )
 import Data.Maybe (fromJust, isNothing)
 
@@ -27,8 +34,8 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Formula.Parsing (Parse(parser), formulaListSymbolParser)
 import Formula.Parsing.Delayed (Delayed, withDelayedSucceeding, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn)
-
-
+import qualified Data.Map as Map (fromList)
+import Control.Applicative (Alternative)
 
 
 description :: (OutputCapable m, MonadIO m) => Bool -> FilePath -> ComposeFormulaInst -> LangM m
@@ -166,29 +173,39 @@ partialGrade' ComposeFormulaInst{..} sol
         collectUniqueBinOpsInSynTree leftTree ++
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
 
-completeGrade :: (OutputCapable m, MonadIO m) =>
-  FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
+completeGrade :: (OutputCapable m, MonadIO m, Alternative m) =>
+  FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> Rated m
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
-completeGrade' :: (OutputCapable m, MonadIO m) =>
-  FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
-completeGrade' path ComposeFormulaInst{..} sol
-  | lrTree `notElem` parsedSol || rlTree `notElem` parsedSol = refuse $ do
-    instruct $ do
-      english "Your submission is not correct. The syntax trees for your entered formulas look like this:"
-      german "Ihre Abgabe ist nicht die korrekte Lösung. Die Syntaxbäume zu Ihren eingegebenen Formeln sehen so aus:"
+completeGrade' :: (OutputCapable m, MonadIO m, Alternative m) =>
+  FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> Rated m
+completeGrade' path ComposeFormulaInst{..} sol = reRefuse (
+    multipleChoice
+      IndefiniteArticle
+      what
+      Nothing
+      solution
+      parsedSol
+    ) $ when notCorrect $ do
+      instruct $ do
+        english "The syntax trees for your entered formulas look like this:"
+        german "Die Syntaxbäume zu Ihren eingegebenen Formeln sehen so aus:"
 
-    for_ parsedSol $ \synTree ->
-      image $=<< liftIO $ cacheTree (transferToPicture synTree) path
+      for_ parsedSol $ \synTree ->
+        image $=<< liftIO $ cacheTree (transferToPicture synTree) path
 
-    when showSolution $
-      example (concat ["[", display lrTree, ",", display rlTree, "]"]) $ do
-        english "A possible solution for this task is:"
-        german "Eine mögliche Lösung für diese Aufgabe ist:"
+      when showSolution $
+        example (concat ["[", display lrTree, ",", display rlTree, "]"]) $ do
+          english "A possible solution for this task is:"
+          german "Eine mögliche Lösung für diese Aufgabe ist:"
 
-    pure ()
-  | otherwise = pure ()
+      pure ()
     where
       parsedSol = map (fromJust . maybeTree) sol
       lrTree = Binary operator leftTree rightTree
       rlTree = Binary operator rightTree leftTree
+      notCorrect =  lrTree `notElem` parsedSol || rlTree `notElem` parsedSol
+      what = translations $ do
+        german "Formeln"
+        english "formulas"
+      solution = Map.fromList [(lrTree, True), (rlTree, True)]
