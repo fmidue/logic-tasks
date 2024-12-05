@@ -13,9 +13,7 @@ newtype Table = Table [(Maybe String, [Maybe TruthValue])] deriving (Eq,Show)
 
 data Namen = A | B | C deriving (Eq,Enum,Bounded,Show)
 
-type FormType = (String,[Namen])
-
-type Submission = (Table,String,[Namen])
+type Submission = (String,String,String,String,Table,[Namen])
 
 
 emptyColumns, staticColumns, totalColumns, rows :: Int
@@ -86,11 +84,15 @@ getParticipants = vectorOf 4 arbitrary `suchThat` \bs -> or bs && not (and bs)
 
 getTask :: Gen (String, String, IO ([String],String))
 getTask = do
-    d <- taskData
+    d@(x,y,z,_) <- taskData
     let (formulas,hints) = makeHintsAndFormula d
+    let lying = map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
 
-    pure (show (hints,formulas), checkers False True, getFormData form)
+    pure (show (hints,(lying,formulas)), checkers False True, getFormData form)
   where
+    fromChar 'A' = A
+    fromChar 'B' = B
+    fromChar 'C' = C
     form :: Rendered
     form = formify (Nothing :: Maybe (String,String,String))
                      [[single "Aussage 1) :"],[single "Aussage 2) :"],[single "Aussage 3) :"]] $$>
@@ -263,23 +265,6 @@ import Global
 
 
 
-correctColumn :: (PropFormula Char,[Maybe TruthValue]) -> Bool
-correctColumn (f,bs) = all lookFor allocationsAndValues
-  where
-    ones = Sat.solve_all $ convert f
-    allocations = filter ((`elem` atoms) . fst) <$> map (zip "ABCD" . map (truth . fromJust)) #{transpose startingTable}
-    allocationsAndValues = [(truth a,b) | (Just a,b) <- zip bs allocations]
-    lookFor (True,a) = fromList a `elem` ones
-    lookFor (False,a) = fromList a `notElem` ones
-    atoms = toList f
-
-
-
-isSubFormula :: PropFormula Char -> PropFormula Char -> Bool
-isSubFormula a b = noSpaces a `isInfixOf` noSpaces b
-  where
-    noSpaces = filter (/=' ') . show
-
 
 stringTuple :: String -> String -> String
 stringTuple s1 s2 = '(':s1 ++ ',':s2 ++ ")"
@@ -292,93 +277,40 @@ stringList xs = '[': intercalate "," (map stringMaybe xs) ++ "]"
     stringMaybe (Just s) = s
 
 
-toTree :: PropFormula Char -> SynTree BinOp Char
-toTree (Atomic c) = Leaf c
-toTree (Neg p) = Not $ toTree p
-toTree (Brackets p) = toTree p
-toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
-
-
-dropStatic :: [a] -> [a]
-dropStatic = drop staticColumns
-
 
 checkSyntax :: OutputCapable m => a -> FilePath -> Submission -> LangM m
-checkSyntax _ _ (Table xs,formula,names) =
+checkSyntax _ _ (f1,f2,f3,f4,Table xs, names) =
   parseDelayedWithAndThen
     parser
     complainAboutMissingParenthesesIfNotFailingOn
     allSymbolParser
     (checkSyntax' names)
-    $ delayed $ stringTuple (stringList $ map fst xs) formula
+    $ delayed $ stringTuple (stringList $ map fst xs) f4
 
 
 
 checkSyntax' :: OutputCapable m => [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char) -> LangM m
-checkSyntax' n (fs,f) = do
-    paragraph $ do
-      bothLangs $ do
-        "Es wurden Formeln wie folgt gelesen:"
-      when (any (/=Nothing) entered) $ indent $ do
-        bothLangs "Tabellenspalten"
-        code $ unlines $ map (simplestDisplay . toTree) $ catMaybes entered
-        pure ()
-      indent $ do
-        bothLangs "Antwortformel"
-        code $ simplestDisplay $ toTree f
-        pure ()
-      pure ()
-    assertion (all (`notElem` map (Just . Atomic) "ABCD") entered) $ bothLangs
-      "Tabellenspalten existieren nur einmal?"
-    assertion (not (null n)) $ bothLangs
-      "Es wurde mindestens ein Name angekreuzt? (Alleine gehen ist ausgeschlossen.)"
-    pure ()
-  where
-    entered = dropStatic fs
+checkSyntax' n (fs,f) = pure ()
 
 
-checkSemantics :: OutputCapable m => (a,[Namen]) -> FilePath -> Submission -> Rated m
-checkSemantics (_,nSol) _ (Table xs,formula,names) =
+
+checkSemantics :: OutputCapable m => (a,([Namen],[SynTree BinOp Char])) -> FilePath -> Submission -> Rated m
+checkSemantics (_,(lying,formulas)) _ (f1,f2,f3,f4,Table xs,names) =
   withDelayedSucceeding
-    (checkSemantics' nSol columns names)
+    (checkSemantics' lying columns names)
     parser
-    $ delayed $ stringTuple (stringList headers) formula
+    $ delayed $ stringTuple (stringList headers) f4
   where
     (headers,columns) = unzip xs
 
 
 
 checkSemantics' :: OutputCapable m => [Namen] -> [[Maybe TruthValue]] -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char) -> Rated m
-checkSemantics' nSol columns n (headers,f) = do
-    let correctStart = take staticColumns columns == #{startingTable}
-    #{checkType} correctStart $ bothLangs
-      "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
-    let subFormulas = all (`isSubFormula` f) $ catMaybes $ dropStatic headers
-    #{checkType} subFormulas $ bothLangs
-      "Als Tabellenspalten kommen nur Teilformeln der Gesamtformel vor?"
-    let correctValues = all correctColumn [(sf,b)| (Just sf,b) <- dropStatic $ zip headers columns]
-    #{checkType} correctValues $ bothLangs
-      "Tabellenspalten enthalten nur korrekt ermittelte Wahrheitswerte?"
-    yesNo (T.all (`elem` f) "ABCD") $ bothLangs
-       "Gesamtformel enthält alle vorkommenden atomaren Formeln?"
-    let correctFormula = isSemanticEqual (toTree f)
-    yesNo correctFormula $ bothLangs
-        "Gesamtformel ist korrekt?"
-    let correctNames = n == nSol
-    yesNo correctNames $ bothLangs
-       "Die Auflistung der Begleitenden ist korrekt?"
-    let correct = filter id [correctStart, correctFormula, correctNames, correctValues]
-    let points = fromIntegral (length correct) % 4
-    res <- printSolutionAndAssert IndefiniteArticle maybeAnswer points
-    pure res
-  where
-    maybeAnswer = flip (++) (show nSol) <$>
+checkSemantics' lying columns n (headers,f) = pure 1
                    
 
 |]
-  where
-    checkType :: String
-    checkType = if tableRequired then "assertion" else "yesNo"
+
 
 =============================================
 
@@ -431,6 +363,8 @@ import qualified Formula.Parsing as FP
 import Global
 
 
+
+instance (Parse a,Parse b,Parse c,Parse d,Parse e,Parse f) => Parse (a,b,c,d,e,f)
 
 instance Parse TruthValue where
   parseInput = escaped FP.parser
