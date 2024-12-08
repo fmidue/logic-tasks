@@ -11,7 +11,7 @@ instance Eq TruthValue where
 
 newtype Table = Table [(Maybe String, [Maybe TruthValue])] deriving (Eq,Show)
 
-data Namen = A | B | C deriving (Eq,Enum,Bounded,Show)
+data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord)
 
 type Submission = (String,String,String,String,Table,[Namen])
 
@@ -40,7 +40,7 @@ module TaskData (getTask) where
 
 import Control.Monad.Reader    (reader)
 import Data.Char               (digitToInt)
-import Data.List               (transpose)
+import Data.List               (transpose, sort)
 import Data.Maybe              (fromJust)
 import Data.Text               (Text, pack)
 import Data.String.Interpolate (i)
@@ -86,7 +86,7 @@ getTask :: Gen (String, String, IO ([String],String))
 getTask = do
     d@(x,y,z,_) <- taskData
     let (formulas,hints) = makeHintsAndFormula d
-    let lying = map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
+    let lying = sort $ map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
 
     pure (show (hints,(lying,formulas)), checkers False True, getFormData form)
   where
@@ -304,10 +304,13 @@ checkSemantics (_,(lying,formulas)) _ (f1,f2,f3,f4,Table xs,names) =
     (headers,columns) = unzip xs
 
 
-
 checkSemantics' :: OutputCapable m => [Namen] -> [[Maybe TruthValue]] -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char) -> Rated m
-checkSemantics' lying columns n (headers,f) = pure 1
-                   
+checkSemantics' lying columns n (headers,f) = do
+  let correctNames = n == lying
+  yesNo correctNames $ bothLangs
+    $ "Die Auswahl der Lügner ist korrekt?" ++ show lying ++ " " ++ show n
+  pure 1
+
 
 |]
 
