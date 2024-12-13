@@ -87,8 +87,8 @@ getTask = do
     d@(x,y,z,_) <- taskData
     let (formulas,hints) = makeHintsAndFormula d
     let lying = sort $ map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
-
-    pure (show (hints,(lying,formulas)), checkers False True, getFormData form)
+    let f = foldr1 (Binary And) formulas
+    pure (show (hints,(lying,formulas,f)), checkers False True, getFormData form)
   where
     fromChar 'A' = A
     fromChar 'B' = B
@@ -255,6 +255,8 @@ import Data.Ratio    ((%))
 import LogicTasks.Formula (TruthValue(..), isSemanticEqual, convert)
 import LogicTasks.Parsing (allSymbolParser, parser)
 import Formula.Parsing.Delayed
+import Formula.Parsing.Type (Parse(..))
+import Text.Parsec.Char (string)
 import Trees.Types (SynTree(..), PropFormula(..), BinOp(..))
 import Trees.Print (simplestDisplay)
 
@@ -263,11 +265,26 @@ import qualified Data.Text   as T
 
 import Global
 
+import Text.Parsec.String
+
+instance (Parse a,Parse b,Parse c,Parse d, Parse e) => Parse (a,b,c,d,e) where
+  parser = do
+    string "("
+    a <- parser
+    string ","
+    b <- parser
+    string ","
+    c <- parser
+    string ","
+    d <- parser
+    string ","
+    e <- parser
+    string ")"
+    pure (a,b,c,d,e)
 
 
-
-stringTuple :: String -> String -> String
-stringTuple s1 s2 = '(':s1 ++ ',':s2 ++ ")"
+stringTuple :: String -> String -> String -> String -> String -> String
+stringTuple s1 s2 s3 s4 s5 = '(':s1 ++ ',':s2 ++ ',':s3 ++ ',':s4 ++ ',':s5 ++ ")"
 
 
 stringList :: [Maybe String] -> String
@@ -279,36 +296,48 @@ stringList xs = '[': intercalate "," (map stringMaybe xs) ++ "]"
 
 
 checkSyntax :: OutputCapable m => a -> FilePath -> Submission -> LangM m
-checkSyntax _ _ (f1,f2,f3,f4,Table xs, names) =
+checkSyntax _ _ (f1,f2,f3,f,Table xs, names) =
   parseDelayedWithAndThen
     parser
     complainAboutMissingParenthesesIfNotFailingOn
     allSymbolParser
     (checkSyntax' names)
-    $ delayed $ stringTuple (stringList $ map fst xs) f4
+    $ delayed $ stringTuple (stringList $ map fst xs) f1 f2 f3 f
+
+checkSyntax' :: OutputCapable m => [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> LangM m
+checkSyntax' n (fs,f1,f2,f3,f) = pure ()
+
+toTree :: PropFormula Char -> SynTree BinOp Char
+toTree (Atomic c) = Leaf c
+toTree (Neg p) = Not $ toTree p
+toTree (Brackets p) = toTree p
+toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
 
 
 
-checkSyntax' :: OutputCapable m => [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char) -> LangM m
-checkSyntax' n (fs,f) = pure ()
-
-
-
-checkSemantics :: OutputCapable m => (a,([Namen],[SynTree BinOp Char])) -> FilePath -> Submission -> Rated m
-checkSemantics (_,(lying,formulas)) _ (f1,f2,f3,f4,Table xs,names) =
+checkSemantics :: OutputCapable m => (a,([Namen],[SynTree BinOp Char],SynTree BinOp Char)) -> FilePath -> Submission -> Rated m
+checkSemantics (_isSemanticEqual,(lying,formulas,solF)) _ (f1,f2,f3,f,Table xs,names) =
   withDelayedSucceeding
-    (checkSemantics' lying columns names)
+    (checkSemantics' formulas lying columns solF names)
     parser
-    $ delayed $ stringTuple (stringList headers) f4
+    $ delayed $ stringTuple (stringList headers) f1 f2 f3 f
   where
     (headers,columns) = unzip xs
 
 
-checkSemantics' :: OutputCapable m => [Namen] -> [[Maybe TruthValue]] -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char) -> Rated m
-checkSemantics' lying columns n (headers,f) = do
+checkSemantics' :: OutputCapable m => [SynTree BinOp Char] -> [Namen] -> [[Maybe TruthValue]] -> SynTree BinOp Char
+  -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> Rated m
+checkSemantics' formulas lying columns solF n (headers,f1,f2,f3,f) = do
+  let correctStart = take staticColumns columns == #{startingTable}
+  yesNo correctStart $ bothLangs
+      "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
   let correctNames = n == lying
   yesNo correctNames $ bothLangs
-    $ "Die Auswahl der Lügner ist korrekt?" ++ show lying ++ " " ++ show n
+    ("Die Auswahl der Lügner ist korrekt?" ++ show lying ++ " " ++ show n)
+  let correctFormula = isSemanticEqual (toTree f) solF
+  yesNo correctFormula $ bothLangs
+    ("Gesamtformel ist korrekt?" ++ simplestDisplay (toTree f) ++ " " ++ simplestDisplay solF)
+
   pure 1
 
 
@@ -381,7 +410,7 @@ instance Parse [Namen] where
 instance Parse Table where
   parseInput = do
     (headers,values) <- parseInput
-    let allHeaders = map (Just . (:[])) "ABCD" ++ headers
+    let allHeaders = map (Just . (:[])) "ABC" ++ headers
     pure $ Table $ zip allHeaders $ transpose $ chunksOf totalColumns values
 
 
