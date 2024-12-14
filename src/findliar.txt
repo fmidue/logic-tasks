@@ -338,7 +338,9 @@ checkSemantics' formulas lying columns solF n (headers,f1,f2,f3,f) = do
   let correctFormula = isSemanticEqual (toTree f) solF
   yesNo correctFormula $ bothLangs
     ("Gesamtformel ist korrekt?" ++ simplestDisplay (toTree f) ++ " " ++ simplestDisplay solF)
-
+  let correctParts = zipWith (\\fsol f -> isSemanticEqual fsol (toTree f)) formulas [f1,f2,f3]
+  yesNo (and correctParts) $ bothLangs
+    ("Die Aussagen sind korrekt übersetzt?" ++ show correctParts)
   pure 1
 
 
