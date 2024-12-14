@@ -88,19 +88,20 @@ getTask = do
     let (formulas,hints) = makeHintsAndFormula d
     let lying = sort $ map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
     let f = foldr1 (Binary And) formulas
+    let form = formify (Nothing :: Maybe (String, String, String))
+                     [[single $ pack $ "Aussage von " ++ [fst x] ++ ":"],
+                      [single $ pack $ "Aussage von " ++ [fst y] ++ ":"],
+                      [single $ pack $ "Aussage von " ++ [fst z] ++ ":"]] $$>
+               formify (Nothing :: Maybe (String))
+                     [[single "Formel F="]] $$>
+               tableForm ["A", "B", "C"] $$>
+               formify (Nothing :: Maybe [Namen])
+                     [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
     pure (show (hints,(lying,formulas,f)), checkers False True, getFormData form)
   where
     fromChar 'A' = A
     fromChar 'B' = B
     fromChar 'C' = C
-    form :: Rendered
-    form = formify (Nothing :: Maybe (String,String,String))
-                     [[single "Aussage 1) :"],[single "Aussage 2) :"],[single "Aussage 3) :"]] $$>
-           formify (Nothing :: Maybe (String))
-                     [[single "Formel F="]] $$>
-           tableForm ["A","B","C"] $$>
-           formify (Nothing :: Maybe [Namen])
-                     [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
 
 
 
