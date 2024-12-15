@@ -40,7 +40,7 @@ module TaskData (getTask) where
 
 import Control.Monad.Reader    (reader)
 import Data.Char               (digitToInt)
-import Data.List               (transpose, sort)
+import Data.List               (transpose, sort, sortOn)
 import Data.Maybe              (fromJust)
 import Data.Text               (Text, pack)
 import Data.String.Interpolate (i)
@@ -87,6 +87,7 @@ getTask = do
     d@(x,y,z,_) <- taskData
     let (formulas,hints) = makeHintsAndFormula d
     let lying = sort $ map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
+    let solutionValues = map snd $ sortOn fst [x, y, z]
     let f = foldr1 (Binary And) formulas
     let form = formify (Nothing :: Maybe (String, String, String))
                      [[single $ pack $ "Aussage von " ++ [fst x] ++ ":"],
@@ -97,7 +98,7 @@ getTask = do
                tableForm ["A", "B", "C"] $$>
                formify (Nothing :: Maybe [Namen])
                      [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
-    pure (show (hints,(lying,formulas,f)), checkers False True, getFormData form)
+    pure (show (hints,(lying,solutionValues,formulas,f)), checkers False True, getFormData form)
   where
     fromChar 'A' = A
     fromChar 'B' = B
@@ -314,24 +315,38 @@ toTree (Neg p) = Not $ toTree p
 toTree (Brackets p) = toTree p
 toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
 
+truthValuesToBinaryToIndex :: [Bool] -> Int
+truthValuesToBinaryToIndex = foldl (\\acc value -> acc * 2 + if value then 1 else 0) 0
+
+generateTruthtable :: [Bool] -> [[Maybe TruthValue]]
+generateTruthtable solutionValues =
+  let solIndex = truthValuesToBinaryToIndex solutionValues
+  in [[ if i == solIndex then
+         Just (TruthValue True)
+       else
+         Just (TruthValue False)
+     | i <- [0..7] ]]
 
 
-checkSemantics :: OutputCapable m => (a,([Namen],[SynTree BinOp Char],SynTree BinOp Char)) -> FilePath -> Submission -> Rated m
-checkSemantics (_isSemanticEqual,(lying,formulas,solF)) _ (f1,f2,f3,f,Table xs,names) =
+checkSemantics :: OutputCapable m => (a,([Namen],[Bool],[SynTree BinOp Char],SynTree BinOp Char)) -> FilePath -> Submission -> Rated m
+checkSemantics (_isSemanticEqual,(lying,solutionValues,formulas,solF)) _ (f1,f2,f3,f,Table xs,names) =
   withDelayedSucceeding
-    (checkSemantics' formulas lying columns solF names)
+    (checkSemantics' formulas lying solutionValues columns solF names)
     parser
     $ delayed $ stringTuple (stringList headers) f1 f2 f3 f
   where
     (headers,columns) = unzip xs
 
 
-checkSemantics' :: OutputCapable m => [SynTree BinOp Char] -> [Namen] -> [[Maybe TruthValue]] -> SynTree BinOp Char
+checkSemantics' :: OutputCapable m => [SynTree BinOp Char] -> [Namen] -> [Bool] -> [[Maybe TruthValue]] -> SynTree BinOp Char
   -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> Rated m
-checkSemantics' formulas lying columns solF n (headers,f1,f2,f3,f) = do
+checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f) = do
   let correctStart = take staticColumns columns == #{startingTable}
   yesNo correctStart $ bothLangs
-      "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
+    "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
+  let correctLast = drop (staticColumns+emptyColumns) columns == generateTruthtable solutionValues
+  yesNo correctLast $ bothLangs
+    ("Spalte F der Wahrheitstafel korrekt?" ++ " 1 bei : " ++ show solutionValues)
   let correctNames = n == lying
   yesNo correctNames $ bothLangs
     ("Die Auswahl der Lügner ist korrekt?" ++ show lying ++ " " ++ show n)
@@ -413,7 +428,7 @@ instance Parse [Namen] where
 instance Parse Table where
   parseInput = do
     (headers,values) <- parseInput
-    let allHeaders = map (Just . (:[])) "ABC" ++ headers
+    let allHeaders = map (Just . (:[])) "ABC" ++ headers ++ [Just "F"]
     pure $ Table $ zip allHeaders $ transpose $ chunksOf totalColumns values
 
 
