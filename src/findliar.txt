@@ -318,8 +318,8 @@ toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
 truthValuesToBinaryToIndex :: [Bool] -> Int
 truthValuesToBinaryToIndex = foldl (\\acc value -> acc * 2 + if value then 1 else 0) 0
 
-generateTruthtable :: [Bool] -> [[Maybe TruthValue]]
-generateTruthtable solutionValues =
+generateTruthTable :: [Bool] -> [[Maybe TruthValue]]
+generateTruthTable solutionValues =
   let solIndex = truthValuesToBinaryToIndex solutionValues
   in [[ if i == solIndex then
          Just (TruthValue True)
@@ -344,7 +344,7 @@ checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f
   let correctStart = take staticColumns columns == #{startingTable}
   yesNo correctStart $ bothLangs
     "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
-  let correctLast = drop (staticColumns+emptyColumns) columns == generateTruthtable solutionValues
+  let correctLast = drop (staticColumns+emptyColumns) columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
     ("Spalte F der Wahrheitstafel korrekt?" ++ " 1 bei : " ++ show solutionValues)
   let correctNames = n == lying
@@ -353,7 +353,7 @@ checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f
   let correctFormula = isSemanticEqual (toTree f) solF
   yesNo correctFormula $ bothLangs
     ("Gesamtformel ist korrekt?" ++ simplestDisplay (toTree f) ++ " " ++ simplestDisplay solF)
-  let correctParts = zipWith (\\fsol f -> isSemanticEqual fsol (toTree f)) formulas [f1,f2,f3]
+  let correctParts = zipWith (\\fSol f -> isSemanticEqual fSol (toTree f)) formulas [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
     ("Die Aussagen sind korrekt übersetzt?" ++ show correctParts)
   pure 1
