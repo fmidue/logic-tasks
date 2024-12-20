@@ -59,6 +59,7 @@ import FlexTask.Generic.Form (
   single,
   buttonsEnum
   )
+import FindLiarTask
 import FlexTask.YesodConfig    (Handler, FlexForm, Rendered)
 import LogicTasks.Formula      (TruthValue(..))
 import Numeric                 (showBin)
@@ -85,80 +86,28 @@ getParticipants = vectorOf 4 arbitrary `suchThat` \bs -> or bs && not (and bs)
 getTask :: Gen (String, String, IO ([String],String))
 getTask = do
     d@(x,y,z,_) <- taskData
+    let [a,b,c] = sortOn fst [x,y,z]
     let (formulas,hints) = makeHintsAndFormula d
+    let zipped = zip formulas hints
+    let sorted = sortOn snd zipped
+    let (formulasSorted,hintsSorted) = unzip sorted
     let lying = sort $ map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
     let solutionValues = map snd $ sortOn fst [x, y, z]
-    let f = foldr1 (Binary And) formulas
+    let f = foldr1 (Binary And) formulasSorted
     let form = formify (Nothing :: Maybe (String, String, String))
-                     [[single $ pack $ "Aussage von " ++ [fst x] ++ ":"],
-                      [single $ pack $ "Aussage von " ++ [fst y] ++ ":"],
-                      [single $ pack $ "Aussage von " ++ [fst z] ++ ":"]] $$>
+                     [[single $ pack $ "Aussage von " ++ [fst a] ++ ":"],
+                      [single $ pack $ "Aussage von " ++ [fst b] ++ ":"],
+                      [single $ pack $ "Aussage von " ++ [fst c] ++ ":"]] $$>
                formify (Nothing :: Maybe (String))
                      [[single "Formel F="]] $$>
                tableForm ["A", "B", "C"] $$>
                formify (Nothing :: Maybe [Namen])
                      [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
-    pure (show (hints,(lying,solutionValues,formulas,f)), checkers False True, getFormData form)
+    pure (show (hintsSorted,(lying,solutionValues,formulasSorted,f)), checkers False True, getFormData form)
   where
     fromChar 'A' = A
     fromChar 'B' = B
     fromChar 'C' = C
-
-
-
-taskData :: Gen ((Char, Bool), (Char, Bool), (Char, Bool), Bool)
-taskData = do
-  permutation <- shuffle ['A','B','C']
-  values <- vectorOf 3 arbitrary
-  v <- arbitrary
-  case zip permutation values of
-    [(p0,v0), (p1,v1), (p2,v2)]
-      -> return ((p0,v0), (p1,v1), (p2,v2), v)
-    _
-      -> error "This is impossible!"
-
-makeHintsAndFormula :: ((Char, Bool), (Char, Bool), (Char, Bool), Bool) -> ([SynTree BinOp Char], [Text])
-makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
-  where
-    xYnOrNotYn = if xw == yw then Leaf yn else Not (Leaf yn)
-    yZnOrNotZn = if yw == zw then Leaf zn else Not (Leaf zn)
-    zXnOrNotXn = if v then Leaf xn else Not (Leaf xn)
-    zYnOrNotYn = if (xw == yw) == v then Not (Leaf yn) else Leaf yn
-    zOperator :: String
-      | zw                                   = " oder"
-      | isNot zXnOrNotXn == isNot zYnOrNotYn = " und"
-      | otherwise                            = ", aber"
-
-    parts = [px, py, pz]
-    px = Binary Equi (Leaf xn) xYnOrNotYn
-    py = Binary Equi (Leaf yn) yZnOrNotZn
-    pz = Binary Equi (Leaf zn) (Binary (if zw then Or else And) zXnOrNotXn zYnOrNotYn)
-
-    hints = [hx, hy, hz]
-    hx = [i|#{xn} sagt: "#{yn}#{if isNot xYnOrNotYn then " lügt"::String else sdW}."|]
-    hy = [i|#{yn} sagt: "#{zn}#{if isNot yZnOrNotZn then " lügt"::String else sdW}."|]
-    hz = [i|#{zn} sagt: "#{xn}#{statement}."|]
-
-    isNot :: SynTree b c -> Bool
-    isNot (Not _) = True
-    isNot _       = False
-
-    sdW :: String
-    sdW = " sagt die Wahrheit"
-
-    statement :: String
-    statement = if isNot zXnOrNotXn == isNot zYnOrNotYn
-      then
-        let truthStatement = if isNot zXnOrNotXn
-            then "lügen"::String
-            else "sagen die Wahrheit"::String
-        in [i|#{zOperator} #{yn} #{truthStatement}|]
-      else
-        let partX = if isNot zXnOrNotXn then " lügt"::String else sdW
-            partY = if isNot zYnOrNotYn then " lügt"::String else sdW
-        in [i|#{partX}#{zOperator} #{yn}#{partY}|]
-
-
 
 
 
