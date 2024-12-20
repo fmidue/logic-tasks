@@ -245,18 +245,23 @@ stringList xs = '[': intercalate "," (map stringMaybe xs) ++ "]"
     stringMaybe (Just s) = s
 
 
-
 checkSyntax :: OutputCapable m => a -> FilePath -> Submission -> LangM m
 checkSyntax _ _ (f1,f2,f3,f,Table xs, names) =
   parseDelayedWithAndThen
     parser
     complainAboutMissingParenthesesIfNotFailingOn
     allSymbolParser
-    (checkSyntax' names)
-    $ delayed $ stringTuple (stringList $ map fst xs) f1 f2 f3 f
+    (checkSyntax' columns)
+    $ delayed $ stringTuple (stringList headers) f1 f2 f3 f
+  where
+    (headers,columns) = unzip xs
 
-checkSyntax' :: OutputCapable m => [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> LangM m
-checkSyntax' n (fs,f1,f2,f3,f) = pure ()
+checkSyntax' :: OutputCapable m => [[Maybe TruthValue]] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> LangM m
+checkSyntax' columns (fs,f1,f2,f3,f) = do
+  assertion (take staticColumns columns == #{startingTable}) $ bothLangs
+    "Spalten der atomaren Formeln ergeben eine aufsteigend geordnete Wahrheitstafel?"
+  pure ()
+
 
 toTree :: PropFormula Char -> SynTree BinOp Char
 toTree (Atomic c) = Leaf c
@@ -286,13 +291,9 @@ checkSemantics (_isSemanticEqual,(lying,solutionValues,formulas,solF)) _ (f1,f2,
   where
     (headers,columns) = unzip xs
 
-
 checkSemantics' :: OutputCapable m => [SynTree BinOp Char] -> [Namen] -> [Bool] -> [[Maybe TruthValue]] -> SynTree BinOp Char
   -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> Rated m
 checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f) = do
-  let correctStart = take staticColumns columns == #{startingTable}
-  yesNo correctStart $ bothLangs
-    "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
   let correctLast = drop (staticColumns+emptyColumns) columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
     ("Spalte F der Wahrheitstafel korrekt?" ++ " 1 bei : " ++ show solutionValues)
