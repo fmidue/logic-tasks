@@ -312,9 +312,11 @@ checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f
   yesNo correctNames $ bothLangs
     ("Die Auswahl der Lügner ist korrekt?" ++ show lying ++ " " ++ show n)
 
-  pure 1
-
-
+  let points = ((if (and correctParts) then 0.4 else 0.0) +
+                (if correctFormula then 0.2 else 0.0) +
+                (if correctLast then 0.2 else 0.0) +
+                (if correctNames then 0.2 else 0.0))
+  pure points
 |]
 
 
