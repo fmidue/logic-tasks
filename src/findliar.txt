@@ -299,7 +299,8 @@ checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f
   yesNo (and correctParts) $ bothLangs
     ("Die Aussagen sind korrekt übersetzt?" ++ show correctParts)
 
-  let correctFormula = isSemanticEqual (toTree f) solF
+  let correctFormula = isSemanticEqual (toTree f) solF ||
+                       (isSemanticEqual (toTree f) (toTree (foldr1 (Assoc And) (map Brackets [f1,f2,f3]))))
   yesNo correctFormula $ bothLangs
     ("Gesamtformel ist korrekt?" ++ simplestDisplay (toTree f) ++ " " ++ simplestDisplay solF)
 
