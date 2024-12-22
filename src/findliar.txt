@@ -95,11 +95,11 @@ getTask = do
     let solutionValues = map snd $ sortOn fst [x, y, z]
     let f = foldr1 (Binary And) formulasSorted
     let form = formify (Nothing :: Maybe (String, String, String))
-                     [[single $ pack $ "Aussage von " ++ [fst a] ++ ":"],
-                      [single $ pack $ "Aussage von " ++ [fst b] ++ ":"],
-                      [single $ pack $ "Aussage von " ++ [fst c] ++ ":"]] $$>
+                     [[single $ pack $ "Aussage " ++ [fst a] ++ ":"],
+                      [single $ pack $ "Aussage " ++ [fst b] ++ ":"],
+                      [single $ pack $ "Aussage " ++ [fst c] ++ ":"]] $$>
                formify (Nothing :: Maybe (String))
-                     [[single "Formel F="]] $$>
+                     [[single "Gesamtformel F="]] $$>
                tableForm ["A", "B", "C"] $$>
                formify (Nothing :: Maybe [Namen])
                      [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
