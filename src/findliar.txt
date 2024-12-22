@@ -337,12 +337,19 @@ import Trees.Types
 description :: OutputCapable m => FilePath -> ([String],a) -> LangM m
 description _ (hints,_) = do
     paragraph $ bothLangs
-      "Ein Logiker irrt auf dem Campus herum, um seinen Hörsaal zu finden. Er fragt drei Studierende (mit den ausgefallenen Namen A, B, C), wo er den Raum LB 107 finden kann. Diese Studierenden sagen (jeweils) immer die Wahrheit oder lügen immer. Um die Zuverlässigkeit der Antworten zu überprüfen, fragt er die drei Studierenden, ob die anderen lügen, und erhält folgende Antworten:"
+      ("Ein Logiker irrt auf dem Campus herum, um seinen Hörsaal zu finden. " ++
+       "Er fragt drei Studierende (mit den ausgefallenen Namen A, B, C), wo er den Raum LB 107 finden kann. " ++
+       "Diese Studierenden sagen (jeweils) immer die Wahrheit oder lügen immer. " ++
+       "Um die Zuverlässigkeit der Antworten zu überprüfen, fragt er die drei Studierenden, ob die anderen lügen, " ++
+       "und erhält folgende Antworten:")
     itemizeM $ map bothLangs hints
     paragraph $ bothLangs
-      "Übersetzen Sie die einzelnen Aussagen und die Kombination aller Aussagen jeweils in eine aussagenlogische Formel. Geben Sie die Formeln in die entsprechend benannten Textfelder ein."
+      ("Übersetzen Sie die einzelnen Aussagen und die Kombination aller Aussagen jeweils in eine aussagenlogische Formel. " ++
+       "Geben Sie die Formeln in die entsprechend benannten Textfelder ein.")
     paragraph $ bothLangs
-      "Wer lügt? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. Füllen Sie dabei alle benannten Spalten vollständig aus. Sie können Hilfsspalten verwenden. Kreuzen Sie dann die entsprechenden Namen an."
+      ("Wer lügt? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. " ++
+       "Füllen Sie dabei alle benannten Spalten vollständig aus. " ++
+       "Sie können Hilfsspalten verwenden. Kreuzen Sie dann die entsprechenden Namen an.")
     paragraph $ bothLangs
       "Verwenden Sie für die Angabe der Formel die atomaren Formeln A, B, C und die folgenden Operatoren:"
     enumerateM code $ zip ["Negation","Und","Oder","Implikation","Biimplikation"] $ map code ["¬","∧","∨","=>","<=>"]
