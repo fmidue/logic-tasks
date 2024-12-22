@@ -297,20 +297,20 @@ checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f
 
   let correctParts = zipWith (\\fSol f -> isSemanticEqual fSol (toTree f)) formulas [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
-    ("Die Aussagen sind korrekt übersetzt?" ++ show correctParts)
+    "Aussagen sind korrekt übersetzt?"
 
   let correctFormula = isSemanticEqual (toTree f) solF ||
                        (isSemanticEqual (toTree f) (toTree (foldr1 (Assoc And) (map Brackets [f1,f2,f3]))))
   yesNo correctFormula $ bothLangs
-    ("Gesamtformel ist korrekt?" ++ simplestDisplay (toTree f) ++ " " ++ simplestDisplay solF)
+    "Gesamtformel ist korrekt?"
 
   let correctLast = drop (staticColumns+emptyColumns) columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
-    ("Spalte F der Wahrheitstafel korrekt?" ++ " 1 bei : " ++ show solutionValues)
+    "Spalte F der Wahrheitstafel korrekt?"
 
   let correctNames = n == lying
   yesNo correctNames $ bothLangs
-    ("Die Auswahl der Lügner ist korrekt?" ++ show lying ++ " " ++ show n)
+    "Auswahl der Lügner ist korrekt?"
 
   let points = ((if (and correctParts) then 0.4 else 0.0) +
                 (if correctFormula then 0.2 else 0.0) +
