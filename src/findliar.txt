@@ -256,7 +256,8 @@ checkSyntax _ _ (f1,f2,f3,f,Table xs, names) =
   where
     (headers,columns) = unzip xs
 
-checkSyntax' :: OutputCapable m => [[Maybe TruthValue]] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> LangM m
+checkSyntax' :: OutputCapable m => [[Maybe TruthValue]] ->
+  ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> LangM m
 checkSyntax' columns (fs,f1,f2,f3,f) = do
   assertion (take staticColumns columns == #{startingTable}) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
