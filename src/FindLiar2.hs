@@ -3,7 +3,7 @@
 
 module FindLiar2 where
 
-import Data.Text (Text, unpack)
+import Data.Text (Text)
 import Data.String.Interpolate (i)
 import Trees.Types (BinOp(..), SynTree(..))
 
