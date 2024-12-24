@@ -6,7 +6,6 @@ module FindLiar2 where
 import Data.Text (Text, unpack)
 import Data.String.Interpolate (i)
 import Trees.Types (BinOp(..), SynTree(..))
-import Trees.Print (simplestDisplay)-- Testing
 
 makeHintsAndFormula :: ((Char, Bool), (Char, Bool), (Char, Bool)) -> ([SynTree BinOp Char], [Text])
 makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw)) = (parts, hints)
@@ -57,37 +56,3 @@ hintFromFormula (Binary Equi (Leaf nameA) (Binary operator b c)) =
     isNot _       = False
 
 hintFromFormula _ = error "formula not supported"
-
-
--- Testing
-main :: IO ()
-main = do
-    let (formulas, hints) = makeHintsAndFormula (('A', False), ('B', False), ('C', False))
-    putStrLn "\nFormulas:"
-    mapM_ (print . simplestDisplay) formulas
-    putStrLn "\nHints:"
-    mapM_ (putStrLn . unpack) hints
-
-    let (formulas2, hints2) = makeHintsAndFormula (('A', False), ('B', False), ('C', True))
-    putStrLn "\nFormulas:"
-    mapM_ (print . simplestDisplay) formulas2
-    putStrLn "\nHints:"
-    mapM_ (putStrLn . unpack) hints2
-
-    let (formulas3, hints3) = makeHintsAndFormula (('A', False), ('B', True), ('C', False))
-    putStrLn "\nFormulas:"
-    mapM_ (print . simplestDisplay) formulas3
-    putStrLn "\nHints:"
-    mapM_ (putStrLn . unpack) hints3
-
-    let (formulas4, hints4) = makeHintsAndFormula (('A', False), ('B', True), ('C', True))
-    putStrLn "\nFormulas:"
-    mapM_ (print . simplestDisplay) formulas4
-    putStrLn "\nHints:"
-    mapM_ (putStrLn . unpack) hints4
-
-    let (formulas5, hints5) = makeHintsAndFormula (('A', True), ('B', False), ('C', False))
-    putStrLn "\nFormulas:"
-    mapM_ (print . simplestDisplay) formulas5
-    putStrLn "\nHints:"
-    mapM_ (putStrLn . unpack) hints5
