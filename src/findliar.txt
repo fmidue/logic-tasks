@@ -350,7 +350,7 @@ description _ (hints,_) = do
     paragraph $ bothLangs
       ("Wer lügt? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. " ++
        "Füllen Sie dabei alle benannten Spalten vollständig aus. " ++
-       "Sie können Hilfsspalten verwenden. Kreuzen Sie dann die entsprechenden Namen an.")
+       "Sie können Hilfsspalten verwenden. Kreuzen Sie anschließend die entsprechenden Namen an.")
     paragraph $ bothLangs
       "Verwenden Sie für die Angabe der Formel die atomaren Formeln A, B, C und die folgenden Operatoren:"
     enumerateM code $ zip ["Negation","Und","Oder","Implikation","Biimplikation"] $ map code ["¬","∧","∨","=>","<=>"]
