@@ -49,7 +49,7 @@ hintFromFormula (Binary Equi (Leaf nameA) (Binary operator b c)) =
     nameFromLeaf :: SynTree BinOp Char -> String
     nameFromLeaf (Leaf name)       = [name]
     nameFromLeaf (Not (Leaf name)) = [name]
-    nameFromLeaf _                 = error "This is impossible!"
+    nameFromLeaf _                 = error "not a Leaf or not a Not Leaf"
 
     isNot :: SynTree b c -> Bool
     isNot (Not _) = True
