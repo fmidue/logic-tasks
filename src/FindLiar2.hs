@@ -31,7 +31,7 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw)) = (parts, hints)
 
 hintFromFormula :: SynTree BinOp Char -> Text
 hintFromFormula (Binary Equi (Leaf nameA) (Binary operator b c)) =
-  [i|#{nameA} sagt: "#{nameFromLeaf b}#{word1}#{operatorName} #{nameFromLeaf c}#{word2}"|]
+  [i|#{nameA} sagt: "#{nameFromLeaf b}#{word1}#{operatorName} #{nameFromLeaf c}#{word2}."|]
   where
     operatorName :: String
       | operator == Or                        = " oder"
@@ -52,7 +52,7 @@ hintFromFormula (Binary Equi (Leaf nameA) (Binary operator b c)) =
     nameFromLeaf :: SynTree BinOp Char -> String
     nameFromLeaf (Leaf name)       = [name]
     nameFromLeaf (Not (Leaf name)) = [name]
-    nameFromLeaf _                 = error "not a Leaf or not a Not Leaf"
+    nameFromLeaf _                 = error "not a Leaf and not a Not Leaf"
 
     isNot :: SynTree b c -> Bool
     isNot (Not _) = True
