@@ -83,32 +83,35 @@ getParticipants :: Gen [Bool]
 getParticipants = vectorOf 4 arbitrary `suchThat` \bs -> or bs && not (and bs)
 
 
-getTask :: Gen (String, String, IO ([String],String))
+getTask :: Gen (String, String, IO ([String], String))
 getTask = do
-    d@(x,y,z,_) <- taskData
-    let [a,b,c] = sortOn fst [x,y,z]
-    let (formulas,hints) = makeHintsAndFormula d
-    let zipped = zip formulas hints
-    let sorted = sortOn snd zipped
-    let (formulasSorted,hintsSorted) = unzip sorted
-    let lying = sort $ map (fromChar . fst) $ filter (\(_,x) -> x == False) [x,y,z]
-    let solutionValues = map snd $ sortOn fst [x, y, z]
-    let f = foldr1 (Binary And) formulasSorted
-    let form = formify (Nothing :: Maybe (String, String, String))
-                     [[single $ pack $ "Aussage " ++ [fst a] ++ ":"],
-                      [single $ pack $ "Aussage " ++ [fst b] ++ ":"],
-                      [single $ pack $ "Aussage " ++ [fst c] ++ ":"]] $$>
-               formify (Nothing :: Maybe (String))
-                     [[single "Gesamtformel F="]] $$>
-               tableForm ["A", "B", "C"] $$>
-               formify (Nothing :: Maybe [Namen])
-                     [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
-    pure (show (hintsSorted,(lying,solutionValues,formulasSorted,f)), checkers False True, getFormData form)
+    d@(x, y, z, _) <- taskData
+    let (formulas, hints) = makeHintsAndFormula d
+
+        dataSortedOnName = sortOn fst [x, y, z]
+        (formulasSorted, hintsSorted) = unzip $ sortOn snd $ zip formulas hints
+
+        listOfLiars = map (fromChar . fst) $ filter (not . snd) dataSortedOnName
+        solutionValues = map snd dataSortedOnName
+        combinedFormula = foldr1 (Binary And) formulasSorted
+
+    pure (show (hintsSorted, (listOfLiars, solutionValues, formulasSorted, combinedFormula)),
+          checkers False True,
+          getFormData form)
   where
+    form = formify (Nothing :: Maybe (String, String, String))
+             [[single $ pack "Aussage A:"],
+             [single $ pack "Aussage B:"],
+             [single $ pack "Aussage C:"]] $$>
+           formify (Nothing :: Maybe String)
+             [[single "Gesamtformel F="]] $$>
+           tableForm ["A", "B", "C"] $$>
+           formify (Nothing :: Maybe [Namen])
+             [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
+
     fromChar 'A' = A
     fromChar 'B' = B
     fromChar 'C' = C
-
 
 
 
@@ -307,7 +310,7 @@ checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f
 
   let correctLast = drop (staticColumns+emptyColumns) columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
-    "Spalte F der Wahrheitstafel korrekt?"
+    "Spalte F der Wahrheitstafel ist korrekt?"
 
   let correctNames = n == lying
   yesNo correctNames $ bothLangs
