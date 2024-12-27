@@ -1,5 +1,3 @@
-{-# language OverloadedStrings #-}
-
 module FindLiar2 where
 
 import Data.Text (Text)
