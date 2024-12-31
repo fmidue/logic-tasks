@@ -177,6 +177,11 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
 
     for_ correctTrees $ \x -> do
       code (display x)
+
+      instruct $ do
+        german "mit zugehörigem Teil-Syntaxbaum:"
+        english "with associated partial syntax tree:"
+
       image $=<< liftIO $ cacheTree (transferToPicture x) path
       pure ()
 
