@@ -2,11 +2,11 @@
 
 module LegalNormalFormSpec (spec) where
 
-import Data.Set (toList)
 import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it, xit)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess, within)
 import Data.List((\\))
+import Data.Tuple.Extra (thd3)
 
 import ParsingHelpers (fully)
 import Formula.Types (Cnf, genCnf, genDnf, Dnf)
@@ -15,7 +15,7 @@ import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (NormalFormConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
-import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
+import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig, treeIsErroneous)
 import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree, )
 import Tasks.LegalNormalForm.Quiz (generateLegalCNFInst, generateLegalDNFInst)
 import Control.OutputCapable.Blocks (Language(German))
@@ -57,7 +57,7 @@ validBoundsLegalNormalForm = do
           maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
           minStringSize = minClauseAmount * ((minClauseLength - 1) * 4 + 1),
           allowArrowOperators,
-          printSolution = False,
+          printSolution = Nothing,
           extraText = Nothing
         }
 
@@ -91,7 +91,7 @@ invalidBoundsLegalCNF = do
           maxStringSize,
           minStringSize,
           allowArrowOperators = False,
-          printSolution = False,
+          printSolution = Nothing,
           extraText = Nothing
         }
 
@@ -120,7 +120,7 @@ spec = do
                      usedLiterals
                      allowArrowOperators
                   )
-                  (not . judgeCnfSynTree)
+                  (not . judgeCnfSynTree . fst)
     describe "genIllegalDnfSynTree" $
         it "the syntax Tree are not DNF syntax tree" $
             forAll validBoundsLegalNormalForm $
@@ -131,7 +131,7 @@ spec = do
                      usedLiterals
                      allowArrowOperators
                   )
-                  (not . judgeDnfSynTree)
+                  (not . judgeDnfSynTree . fst)
     describe "judgeCnfSynTree" $
         it "is reasonably implemented" $
             forAll validBoundsLegalNormalForm $
@@ -150,20 +150,28 @@ spec = do
         it "all of the formulas in the wrong serial should not be Cnf" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config ->
                 forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
-                  all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) serialsOfWrong
+                  let formulaStrings = map thd3 formulaInfos in
+                  all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) [i | (i, info,_) <- formulaInfos, treeIsErroneous info]
         it "all of the formulas not in the wrong serial should be Cnf" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
                 forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
-                  all (\x -> isRight (cnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
+                  let formulaStrings = map thd3 formulaInfos in
+                  all
+                    (\x -> isRight (cnfParse (formulaStrings !! (x - 1))))
+                    ([1..formulas] \\ [i | (i, info,_) <- formulaInfos, treeIsErroneous info])
     describe "generateLegalDNFInst" $ do
         it "all of the formulas in the wrong serial should not be Dnf" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config ->
                 forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
-                  all (\x -> isLeft (dnfParse (formulaStrings !! (x - 1)))) serialsOfWrong
+                  let formulaStrings = map thd3 formulaInfos in
+                  all (\x -> isLeft (dnfParse (formulaStrings !! (x - 1)))) [i | (i, info,_) <- formulaInfos, treeIsErroneous info]
         it "all of the formulas not in the wrong serial should be Dnf" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
                 forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
-                  all (\x -> isRight (dnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
+                  let formulaStrings = map thd3 formulaInfos in
+                  all
+                    (\x -> isRight (dnfParse (formulaStrings !! (x - 1))))
+                    ([1..formulas] \\ [i | (i, info,_) <- formulaInfos, treeIsErroneous info])
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool
 judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b
