@@ -149,7 +149,7 @@ andParser :: Parser ()
 andParser =
       keyword "and"
   <|> keyword "und" {- german -}
-  <|> tokenSymbol "∧" <|> tokenSymbol "/\\"
+  <|> tokenSymbol "∧" <|> tokenSymbol "^" <|> tokenSymbol "/\\"
   <?> "Conjunction"
 
 implicationParser :: Parser ()

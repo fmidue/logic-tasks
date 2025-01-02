@@ -82,8 +82,6 @@ data PropFormula c
   deriving (Data, Eq, Ord, Foldable)
 
 
-
-
 instance Show (PropFormula Char) where
   show (Atomic c) = [c]
   show (Neg f) = showOperatorNot ++ show f

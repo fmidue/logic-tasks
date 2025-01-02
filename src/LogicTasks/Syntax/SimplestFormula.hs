@@ -67,8 +67,8 @@ description SuperfluousBracketsInst{..} = do
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die ürsprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
-      english "You can copy the original formula into the submission field and remove unnecessary brackets, or use the following syntax:"
+      german "Sie können dafür die ürsprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
+      english "You can copy the original formula into the submission field and remove unnecessary brackets, or start from scratch and use the following syntax:"
     basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
 
