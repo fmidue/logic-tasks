@@ -15,7 +15,7 @@ task16 = ResolutionConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 3
-      , usedLiterals = "ABCD"
+      , usedAtoms = "ABCD"
       }
     , minSteps = 3
     , printFeedbackImmediately = True
@@ -31,7 +31,7 @@ task17 = ResolutionConfig
   { baseConf = BaseConfig
       { minClauseLength = 4
       , maxClauseLength = 5
-      , usedLiterals = "ABCDE"
+      , usedAtoms = "ABCDE"
       }
   , minSteps = 4
   , printFeedbackImmediately = True

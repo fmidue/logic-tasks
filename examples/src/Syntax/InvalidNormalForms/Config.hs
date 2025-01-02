@@ -16,7 +16,7 @@ task08 :: LegalNormalFormConfig
 task08 = LegalNormalFormConfig
   { normalFormConfig = NormalFormConfig
     { baseConf = BaseConfig
-      { minClauseLength = 2, maxClauseLength = 4, usedLiterals = "ABCD" }
+      { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 4
     }
@@ -36,7 +36,7 @@ task09 :: LegalNormalFormConfig
 task09 = LegalNormalFormConfig
   { normalFormConfig = NormalFormConfig
     { baseConf = BaseConfig
-      { minClauseLength = 2, maxClauseLength = 4, usedLiterals = "ABCD" }
+      { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 4
     }
@@ -56,7 +56,7 @@ task18 :: LegalNormalFormConfig
 task18 = LegalNormalFormConfig
   { normalFormConfig = NormalFormConfig
     { baseConf = BaseConfig
-      { minClauseLength = 2, maxClauseLength = 4, usedLiterals = "ABCD" }
+      { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 5
     }

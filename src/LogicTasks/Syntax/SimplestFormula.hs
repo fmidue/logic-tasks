@@ -107,12 +107,12 @@ partialGrade' SuperfluousBracketsInst{..} f
         english "Your submission is empty."
         german "Sie haben keine Formel angegeben."
 
-    | any (`notElem` correctLits) literals =
+    | any (`notElem` correctAtoms) atoms =
       reject $ do
         english "Your submission contains unknown atomic formulas."
         german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
 
-    | any (`notElem` literals) correctLits =
+    | any (`notElem` atoms) correctAtoms =
       reject $ do
         english "Your submission does not contain all atomic formulas present in the original formula."
         german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus der ursprünglichen Formel."
@@ -130,9 +130,9 @@ partialGrade' SuperfluousBracketsInst{..} f
     | otherwise = pure()
   where
     pForm = fromJust $ maybeForm f
-    literals = sort $ nub $ collectLeaves pForm
+    atoms = sort $ nub $ collectLeaves pForm
     opsNum = numOfOpsInFormula pForm
-    correctLits = sort $ nub $ collectLeaves tree
+    correctAtoms = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
 completeGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m

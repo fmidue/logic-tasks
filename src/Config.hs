@@ -248,7 +248,7 @@ dPrologInst =  PrologInst
 data BaseConfig = BaseConfig
     { minClauseLength :: Int
     , maxClauseLength :: Int
-    , usedLiterals :: String
+    , usedAtoms :: String
     } deriving (Typeable, Generic, Show)
 
 
@@ -256,7 +256,7 @@ dBaseConf :: BaseConfig
 dBaseConf = BaseConfig {
       minClauseLength = 2
     , maxClauseLength = 3
-    , usedLiterals = "ABCD"
+    , usedAtoms = "ABCD"
     }
 
 

@@ -59,7 +59,7 @@ genIllegalSynTree
   charOpC
   (minClauseAmount, maxClauseAmount)
   (minClauseLength, maxClauseLength)
-  usedLiterals
+  usedAtoms
   allowArrowOperators = do
     ifUseError <- elements [True,False]
     let ifUseError'
@@ -71,7 +71,7 @@ genIllegalSynTree
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
             firstSyntaxShape <- genIllegalFormulaShape charOpF charOpC allowArrowOperators (clauses - 1)
             clauseList <- toList . getC
-              <$> genF (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals False
+              <$> genF (clauses, clauses) (minClauseLength, maxClauseLength) usedAtoms False
             return (genIllegal firstSyntaxShape cToS clauseList)
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
@@ -84,7 +84,7 @@ genIllegalSynTree
               charOpF
               charOpC
               (minClauseLength, maxClauseLength)
-              usedLiterals
+              usedAtoms
               (clauses - 1)
               allowArrowOperators
 
@@ -119,12 +119,12 @@ genWithOneIllegalClause
   charOpF
   charOpC
   (minClauseLength, maxClauseLength)
-  usedLiterals
+  usedAtoms
   ands
   allowArrowOperators = do
         clauseList <- toList . getC <$>
-          genF (ands, ands) (minClauseLength, maxClauseLength) usedLiterals False
-        illegalTree' <- illegalTree genS getL charOpC charOpF (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
+          genF (ands, ands) (minClauseLength, maxClauseLength) usedAtoms False
+        illegalTree' <- illegalTree genS getL charOpC charOpF (minClauseLength, maxClauseLength) usedAtoms allowArrowOperators
         let illLength = length (collectLeaves illegalTree')
             (first, second) = span (\x -> illLength >= size (getL x)) clauseList
             headTrees = map cToS first
@@ -156,10 +156,10 @@ illegalTree ::
     -> [Char]
     -> Bool
     -> Gen (SynTree BinOp Char)
-illegalTree gen getLiterals charOpC fCharOpC (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators = do
+illegalTree gen getLiterals charOpC fCharOpC (minClauseLength, maxClauseLength) usedAtoms allowArrowOperators = do
     treeLength <- choose (max 2 minClauseLength, maxClauseLength)
     illegalSynTreeShape <- genIllegalShape charOpC fCharOpC True allowArrowOperators (treeLength - 1)
-    leaves <- toList . getLiterals <$> gen (treeLength,treeLength) usedLiterals
+    leaves <- toList . getLiterals <$> gen (treeLength,treeLength) usedAtoms
     return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree)
 
 

@@ -19,11 +19,11 @@ import Formula.Util (isEmptyCnf, hasEmptyClause, isEmptyDnf, hasEmptyCon)
 
 genCnf' :: NormalFormConfig -> Gen Cnf
 genCnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genCnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
+  = genCnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
 
 genDnf' :: NormalFormConfig -> Gen Dnf
 genDnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
+  = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
 
 displayFormula :: FormulaInst -> String
 displayFormula (InstCnf c) = show c

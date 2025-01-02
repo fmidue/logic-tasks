@@ -142,11 +142,11 @@ partialGrade' ComposeFormulaInst{..} sol
     reject $ do
       english "At least one of your formulas does not contain the given operator."
       german "Mindestens eine Ihrer Formeln beinhaltet nicht den vorgegebenen Operator."
-  | any (`notElem` correctLits) literals =
+  | any (`notElem` correctAtoms) atoms =
     reject $ do
       english "Your submission contains unknown atomic formulas."
       german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
-  | any (`notElem` literals) correctLits =
+  | any (`notElem` atoms) correctAtoms =
     reject $ do
       english "Your submission does not contain all atomic formulas present in the original syntax trees/formulas."
       german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus den ursprünglichen Syntaxbäumen/Formeln."
@@ -158,8 +158,8 @@ partialGrade' ComposeFormulaInst{..} sol
   | otherwise = pure ()
     where
       containsOperator = (operator `elem`) . collectUniqueBinOpsInSynTree . fromJust . maybeTree
-      correctLits = nubOrd $ collectLeaves leftTree ++ collectLeaves rightTree
-      literals = nubOrd $ concatMap (collectLeaves . pForm) sol
+      correctAtoms = nubOrd $ collectLeaves leftTree ++ collectLeaves rightTree
+      atoms = nubOrd $ concatMap (collectLeaves . pForm) sol
       pForm = fromJust . maybeTree
       usedOperators = length $ nubOrd $ operator : concatMap (collectUniqueBinOpsInSynTree . pForm) sol
       correctOperators = length $ nubOrd $

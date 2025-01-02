@@ -16,7 +16,7 @@ task14 =
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 2
-      , usedLiterals = "ABCD"
+      , usedAtoms = "ABCD"
       }
     , useSetNotation = True
     , printSolution = True
@@ -30,7 +30,7 @@ task13 = StepConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 2
-      , usedLiterals = "ABCD"
+      , usedAtoms = "ABCD"
       }
     , useSetNotation = False
     , extraText = Nothing
@@ -45,7 +45,7 @@ task15 =
     { baseConf = BaseConfig
       { minClauseLength = 3
       , maxClauseLength = 3
-      , usedLiterals = "ABCD"
+      , usedAtoms = "ABCD"
       }
     , useSetNotation = True
     , printSolution = True

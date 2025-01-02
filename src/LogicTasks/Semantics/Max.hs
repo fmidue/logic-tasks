@@ -42,7 +42,7 @@ genMaxInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},.
     , unicodeAllowed = offerUnicodeInput
     }
   where
-    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
+    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
 
 
@@ -109,31 +109,31 @@ start = mkCnf [mkClause [Literal 'A']]
 
 
 partialMinMax :: (OutputCapable m, Formula f) => [Literal] -> f -> f -> Bool -> Bool -> LangM m
-partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
-  preventWithHint (not $ null extraLiterals)
+partialMinMax correctAtoms correct solution allValidTerms isMaxTermTask = do
+  preventWithHint (not $ null extraAtoms)
     (translate $ do
-      german "Angegebene Literale kommen in Aufgabe vor?"
-      english "Given literals are used in task?"
+      german "Angegebene atomare Formeln kommen in Aufgabe vor?"
+      english "Given atomic formulas are used in task?"
     )
 
     (paragraph $ do
       translate $ do
-        german "Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
-        english "Your submission contains unknown literals. These do not appear in a correct solution: "
-      itemizeM $ map (text . show) extraLiterals
+        german "Es sind unbekannte atomare Formeln enthalten. Diese atomaren Formeln kommen in der korrekten Lösung nicht vor: "
+        english "Your submission contains unknown atomic formulas. These do not appear in a correct solution: "
+      itemizeM $ map (text . show) extraAtoms
       pure ()
     )
 
   preventWithHint (not $ null missing)
     (translate $ do
-      german "Alle Literale kommen vor?"
-      english "All literals are contained in solution?"
+      german "Alle atomaren Formeln kommen vor?"
+      english "All atomic formulas are contained in solution?"
     )
 
     (paragraph $ do
       translate $ do
-        german "Es fehlen Literale. Fügen Sie diese Literale der Abgabe hinzu: "
-        english "Some literals are missing. Add these literals to your submission: "
+        german "Es fehlen atomare Formeln. Fügen Sie diese atomaren Formeln der Abgabe hinzu: "
+        english "Some atomic formulas are missing. Add these atomic formulas to your submission: "
       itemizeM $ map (text . show) missing
       pure ()
     )
@@ -175,9 +175,9 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
     )
   pure ()
  where
-    solLits = atomics solution
-    extraLiterals = solLits \\ correctLits
-    missing = correctLits \\ solLits
+    atoms = atomics solution
+    extraAtoms = atoms \\ correctAtoms
+    missing = correctAtoms \\ atoms
     table = getTable correct
     corrLen = length $ filter (== Just False) (readEntries table)
     solLen = amount solution
@@ -190,10 +190,10 @@ partialGrade :: OutputCapable m => MaxInst -> Delayed Cnf -> LangM m
 partialGrade inst = (partialGrade' inst `withDelayed` parser) displayParseError
 
 partialGrade' :: OutputCapable m => MaxInst -> Cnf -> LangM m
-partialGrade' MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
+partialGrade' MaxInst{..} sol = partialMinMax correctAtoms cnf sol allMaxTerms True
   where
-    corLits = atomics cnf
-    allMaxTerms = not $ all (\c -> amount c == length corLits) $ getClauses sol
+    correctAtoms = atomics cnf
+    allMaxTerms = not $ all (\c -> amount c == length correctAtoms) $ getClauses sol
 
 
 
