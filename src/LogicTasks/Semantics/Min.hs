@@ -41,7 +41,7 @@ genMinInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},.
     , unicodeAllowed = offerUnicodeInput
     }
    where
-     getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
+     getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
      dnfInRange = tryGen getDnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
 
 

@@ -17,39 +17,39 @@ import Data.List.Extra (replace)
 illegalDisplay :: SynTree BinOp Char -> Gen String
 illegalDisplay (Leaf _) = elements (showOperatorNot : map showOperator allBinaryOperators)
 illegalDisplay synTree =
-    let usedLiterals = collectLeaves synTree
-    in replace' <$> ifUseIllegal True False synTree usedLiterals
+    let usedAtoms = collectLeaves synTree
+    in replace' <$> ifUseIllegal True False synTree usedAtoms
       where replace' = replace "_" "" . replace "_ " "" . replace " _" ""
 
 ifUseIllegal :: Bool -> Bool -> SynTree BinOp Char -> String -> Gen String
-ifUseIllegal useBug notFirstLayer synTree usedLiterals =
+ifUseIllegal useBug notFirstLayer synTree usedAtoms =
     let
       nodeNum = treeNodes synTree
     in
       if not useBug
         then return (normalShow synTree)
         else frequency
-          [ (1, implementIllegal notFirstLayer synTree usedLiterals)
-          , (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedLiterals)
+          [ (1, implementIllegal notFirstLayer synTree usedAtoms)
+          , (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedAtoms)
           ]
 
 
 
 subTreeIllegal ::Bool -> SynTree BinOp Char -> String -> Gen String
-subTreeIllegal notFirstLayer (Binary operator a b) usedLiterals =
-    allocateBugToSubtree notFirstLayer a b usedLiterals operator
-subTreeIllegal _ (Not a) usedLiterals = do
-    left <- ifUseIllegal True True a usedLiterals
+subTreeIllegal notFirstLayer (Binary operator a b) usedAtoms =
+    allocateBugToSubtree notFirstLayer a b usedAtoms operator
+subTreeIllegal _ (Not a) usedAtoms = do
+    left <- ifUseIllegal True True a usedAtoms
     return (showOperatorNot ++ left)
 subTreeIllegal _ (Leaf _) _ = error "This will not happen but must be write"
 
 
 
 allocateBugToSubtree :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> BinOp -> Gen String
-allocateBugToSubtree notFirstLayer a b usedLiterals usedOperator = do
+allocateBugToSubtree notFirstLayer a b usedAtoms usedOperator = do
     ifUseBug <- elements [True, False]
-    left <- ifUseIllegal ifUseBug True a usedLiterals
-    right <- ifUseIllegal (not ifUseBug) True b usedLiterals
+    left <- ifUseIllegal ifUseBug True a usedAtoms
+    right <- ifUseIllegal (not ifUseBug) True b usedAtoms
     if notFirstLayer
     then return ("(" ++ left ++ " " ++ showOperator usedOperator ++ " " ++ right ++ ")")
     else return (left ++ " " ++ showOperator usedOperator ++ " " ++ right)
@@ -57,15 +57,15 @@ allocateBugToSubtree notFirstLayer a b usedLiterals usedOperator = do
 
 
 illegalShow :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> BinOp -> Gen String
-illegalShow notFirstLayer a b usedLiterals usedOperator =
+illegalShow notFirstLayer a b usedAtoms usedOperator =
     if notFirstLayer
     then  do
-        letter <- elements usedLiterals
+        letter <- elements usedAtoms
         frequency (map (\(probability, replacedOperator) ->
           (probability, combineNormalShow a b replacedOperator True))
             [(2, ""), (2, showOperatorNot), (2, [letter])] ++ illegalParentheses a b usedOperator)
     else  do
-        letter <- elements usedLiterals
+        letter <- elements usedAtoms
         frequency (map (\(probability, replacedOperator) ->
           (probability, combineNormalShow a b replacedOperator False)) [(2, ""), (1, showOperatorNot), (1, [letter])])
 
@@ -81,10 +81,10 @@ combineNormalShow a b replacedOperator True =
 
 
 implementIllegal :: Bool -> SynTree BinOp Char -> String -> Gen String
-implementIllegal notFirstLayer (Binary operator a b) usedLiterals =
-    illegalShow notFirstLayer a b usedLiterals operator
-implementIllegal _ (Not a) usedLiterals = do
-    letter <- elements usedLiterals
+implementIllegal notFirstLayer (Binary operator a b) usedAtoms =
+    illegalShow notFirstLayer a b usedAtoms operator
+implementIllegal _ (Not a) usedAtoms = do
+    letter <- elements usedAtoms
     elements  $ map (++ (' ' : normalShow a)) ([letter] : map showOperator allBinaryOperators)
 implementIllegal _ (Leaf _) _ = do
     operator <- elements (showOperatorNot : map showOperator allBinaryOperators)

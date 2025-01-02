@@ -37,7 +37,7 @@ import Text.ParserCombinators.Parsec (Parser)
 
 genPrologInst :: PrologConfig -> Gen PrologInst
 genPrologInst PrologConfig{..} = (do
-    (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
+    (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedAtoms
     let
       termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
       termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
@@ -54,7 +54,7 @@ genPrologInst PrologConfig{..} = (do
   `suchThat` \(PrologInst clause1 clause2 _ _ _ _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
   where
     mapping = zip usedPredicates ['A'..'Z']
-    usedLiterals = map snd mapping
+    usedAtoms = map snd mapping
     reverseMapping = map swap mapping
     remap l = if isPositive l then predicate else flipPol predicate
       where

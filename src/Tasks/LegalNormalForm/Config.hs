@@ -62,7 +62,7 @@ defaultLegalNormalFormConfig =
 
 checkLegalNormalFormConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
 checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@NormalFormConfig {baseConf = BaseConfig{..}, ..}, ..}
-    | not (all isLetter usedLiterals) = reject $ do
+    | not (all isLetter usedAtoms) = reject $ do
         english "Only letters are allowed as atomic formulas."
         german "Nur Buchstaben können atomare Formeln sein."
     | negArgs = reject $ do
@@ -74,7 +74,7 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
     | boundsError = reject $ do
         english "At least one upper bound is smaller than its corresponding lower bound."
         german "Mindestens eine Obergrenze ist niedriger als die zugehörige Untergrenze."
-    | maxClauseLength > length usedLiterals
+    | maxClauseLength > length usedAtoms
       = reject $ do
         english "The used atomic formulas cannot generate a clause with maxClauseLength."
         german "Die angegebenen atomaren Formeln können die maximale Klauselgröße nicht generieren."
@@ -92,7 +92,7 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
       = reject $ do
         english "The formulas used to generate special formula are not sufficient."
         german "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
-    | minClauseAmount > lengthBound (length usedLiterals) maxClauseLength
+    | minClauseAmount > lengthBound (length usedAtoms) maxClauseLength
       = reject $ do
         english "minClauseAmount is too large. The generator cannot generate a normal form."
         german "minClauseAmount ist zu groß. Es kann keine passende Normalform geriert werden."

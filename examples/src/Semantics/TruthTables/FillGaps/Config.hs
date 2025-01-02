@@ -17,7 +17,7 @@ task07 = FillConfig
                   { baseConf = BaseConfig
                     { minClauseLength = 2
                     , maxClauseLength = 2
-                    , usedLiterals = "ABC"
+                    , usedAtoms = "ABC"
                     }
                   , minClauseAmount = 3
                   , maxClauseAmount = 3
@@ -36,7 +36,7 @@ task20 = FillConfig
                    { baseConf = BaseConfig
                      { minClauseLength = 3
                      , maxClauseLength = 3
-                     , usedLiterals = "ABCDE"
+                     , usedAtoms = "ABCDE"
                      }
                    , minClauseAmount = 4
                    , maxClauseAmount = 4

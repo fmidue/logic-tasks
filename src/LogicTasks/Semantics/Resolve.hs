@@ -67,7 +67,7 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
     unicodeAllowed = offerUnicodeInput
   }
   where
-    inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
+    inst = genRes (minClauseLength, maxClauseLength) minSteps usedAtoms
 
 
 
@@ -254,10 +254,10 @@ verifyQuiz ResolutionConfig{..}
           german "Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
           english "More than one step using only length 1 clauses is not possible."
 
-    | minSteps > 2 * length (usedLiterals baseConf) =
+    | minSteps > 2 * length (usedAtoms baseConf) =
         refuse $ indent $ translate $ do
-          german "Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
-          english "This amount of steps is impossible with the given amount of literals."
+          german "Diese minimale Schrittzahl kann mit den gegebenen atomaren Formeln nicht durchgeführt werden."
+          english "This amount of steps is impossible with the given amount of atomic formulas."
 
     | printFeedbackImmediately && printSolution =
         refuse $ indent $ translate $ do

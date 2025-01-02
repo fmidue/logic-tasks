@@ -145,9 +145,9 @@ verifyQuiz PickConfig{..}
     doesOvershootOptions (FormulaArbitrary syntaxTreeConfig)
       = amountOfOptions > 4*2^ length (availableAtoms syntaxTreeConfig)
     doesOvershootOptions (FormulaCnf cnfCfg)
-      = amountOfOptions > 4*2^ length (usedLiterals (baseConf cnfCfg))
+      = amountOfOptions > 4*2^ length (usedAtoms (baseConf cnfCfg))
     doesOvershootOptions (FormulaDnf dnfCfg)
-      = amountOfOptions > 4*2^ length (usedLiterals (baseConf dnfCfg))
+      = amountOfOptions > 4*2^ length (usedAtoms (baseConf dnfCfg))
 
 
 

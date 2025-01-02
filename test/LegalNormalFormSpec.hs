@@ -25,7 +25,7 @@ import FormulaSpec (validBoundsCnf)
 
 validBoundsLegalNormalForm :: Gen LegalNormalFormConfig
 validBoundsLegalNormalForm = do
-    ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedLiterals) <- validBoundsCnf
+    ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedAtoms) <- validBoundsCnf
 
     let
       maxFormulas = (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1) `div` 2 + 1
@@ -47,7 +47,7 @@ validBoundsLegalNormalForm = do
             baseConf = BaseConfig{
                 minClauseLength,
                 maxClauseLength,
-                usedLiterals
+                usedAtoms
             }
           },
           formulas,
@@ -63,10 +63,10 @@ validBoundsLegalNormalForm = do
 
 invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
 invalidBoundsLegalCNF = do
-    usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` \literals -> not (null literals) && (10>=length literals)
-    maxClauseLength <- choose (1, 2 * length usedLiterals)
+    usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \atoms -> not (null atoms) && (10>=length atoms)
+    maxClauseLength <- choose (1, 2 * length usedAtoms)
     minClauseLength <- choose (maxClauseLength, 100)
-    let clauses = product (take maxClauseLength (reverse [1 .. (2 * length usedLiterals)]))
+    let clauses = product (take maxClauseLength (reverse [1 .. (2 * length usedAtoms)]))
     maxClauseAmount <- choose (1, max 15 clauses)  `suchThat` \amount ->amount > 1 || maxClauseLength > 1
     minClauseAmount <- choose (1, maxClauseAmount + 20)
     formulas <- choose (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
@@ -81,7 +81,7 @@ invalidBoundsLegalCNF = do
             baseConf = BaseConfig{
                 minClauseLength,
                 maxClauseLength,
-                usedLiterals
+                usedAtoms
             }
           },
           formulas,
@@ -117,7 +117,7 @@ spec = do
                 forAll
                   (genIllegalCnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
-                     usedLiterals
+                     usedAtoms
                      allowArrowOperators
                   )
                   (not . judgeCnfSynTree)
@@ -128,7 +128,7 @@ spec = do
                 forAll
                   (genIllegalDnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
-                     usedLiterals
+                     usedAtoms
                      allowArrowOperators
                   )
                   (not . judgeDnfSynTree)
@@ -137,14 +137,14 @@ spec = do
             forAll validBoundsLegalNormalForm $
               \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
-                  (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
+                  (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms False)
                   (judgeCnfSynTree . cnfToSynTree)
     describe "judgeDnfSynTree" $
         it "is reasonably implemented" $
             forAll validBoundsLegalNormalForm $
               \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
-                  (genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
+                  (genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms False)
                   (judgeDnfSynTree . dnfToSynTree)
     describe "generateLegalCNFInst" $ do
         it "all of the formulas in the wrong serial should not be Cnf" $

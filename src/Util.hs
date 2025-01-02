@@ -129,20 +129,20 @@ checkBaseConf BaseConfig{..}
           german "Die untere Grenze der Klausellänge ist höher als die obere."
 
 
-    | length usedLiterals < minClauseLength =
+    | length usedAtoms < minClauseLength =
         refuse $ indent $ translate $ do
-          german "Zu wenige Literale für minimale Klausellänge."
-          english "There are not enough literals available for minimal clause length."
+          german "Zu wenige atomare Formeln für minimale Klausellänge."
+          english "There are not enough atomic formulas available for minimal clause length."
 
-    | length usedLiterals < maxClauseLength =
+    | length usedAtoms < maxClauseLength =
         refuse $ indent $ translate $ do
-          german "Zu wenige Literale um maximale Klausellänge zu erreichen."
-          english "There are not enough literals available to reach the maximal clause length."
+          german "Zu wenige atomare Formeln um maximale Klausellänge zu erreichen."
+          english "There are not enough atomic formulas available to reach the maximal clause length."
 
-    | null usedLiterals =
+    | null usedAtoms =
         refuse $ indent $ translate $ do
-          german "Es wurden keine Literale angegeben."
-          english "You did not specify which literals should be used."
+          german "Es wurden keine atomaren Formeln angegeben."
+          english "You did not specify which atomic formulas should be used."
 
     | otherwise = pure ()
 
@@ -160,23 +160,23 @@ checkNormalFormConfig NormalFormConfig {..}
           german "Die untere Grenze der Klauselanzahl ist höher als die obere."
           english "The minimum amount of clauses is greater than the maximum amount."
 
-    | minClauseAmount * minClauseLength baseConf < length (usedLiterals baseConf) =
+    | minClauseAmount * minClauseLength baseConf < length (usedAtoms baseConf) =
         refuse $ indent $ translate $ do
           german $ unlines
-            [ "Nicht immer genug Platz für alle Literale in der Formel."  {- german -}
+            [ "Nicht immer genug Platz für alle atomaren Formeln in der Formel."  {- german -}
             , "(Mögliche Lösung: Eine der unteren Schranken erhöhen)" {- german -}
             ]
           english $ unlines
-            [ "Not always enough space in formula for all literals."
+            [ "Not always enough space in formula for all atomic formulas."
             , "(Possible solution: raise one of the lower bounds)"
             ]
 
-    | minClauseAmount > 2 ^ length (usedLiterals baseConf) =
+    | minClauseAmount > 2 ^ length (usedAtoms baseConf) =
         refuse $ indent $ translate $ do
-          german "Zu wenig Literale für gewünschte Anzahl an Klauseln."
-          english "There are not enough literals for the desired number of clauses."
+          german "Zu wenig atomare Formeln für gewünschte Anzahl an Klauseln."
+          english "There are not enough atomic formulas for the desired number of clauses."
 
-    | minClauseAmount > lengthBound (length (usedLiterals baseConf)) (maxClauseLength baseConf) =
+    | minClauseAmount > lengthBound (length (usedAtoms baseConf)) (maxClauseLength baseConf) =
         refuse $ indent $ translate $ do
           german "Zu kurze Klauseln für gewünschte Anzahl an Klauseln."
           english "Clauses are to short for the desired number of clauses."

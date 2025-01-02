@@ -18,7 +18,7 @@ unused03 = MinMaxConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 3
-      , usedLiterals = "ABCD"
+      , usedAtoms = "ABCD"
       }
     , minClauseAmount = 2
     , maxClauseAmount = 3

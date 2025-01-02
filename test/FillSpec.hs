@@ -30,11 +30,11 @@ validBoundsBase :: Gen BaseConfig
 validBoundsBase = do
   minClauseLength <- choose (1, 5)
   maxClauseLength <- choose (2, 10) `suchThat` \x -> minClauseLength <= x
-  usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
+  usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength
-  , usedLiterals
+  , usedAtoms
   }
 
 validBoundsCnf :: Gen NormalFormConfig
@@ -42,9 +42,9 @@ validBoundsCnf = do
   minClauseAmount <- choose (1, 5)
   maxClauseAmount <- choose (2, 10) `suchThat` \x -> minClauseAmount <= x
   baseConf <- validBoundsBase `suchThat` \bc ->
-    minClauseAmount * minClauseLength bc >= length (usedLiterals bc) &&
-    minClauseAmount <= 2 ^ length (usedLiterals bc) &&
-    minClauseAmount <= lengthBound (length (usedLiterals bc)) (maxClauseLength bc)
+    minClauseAmount * minClauseLength bc >= length (usedAtoms bc) &&
+    minClauseAmount <= 2 ^ length (usedAtoms bc) &&
+    minClauseAmount <= lengthBound (length (usedAtoms bc)) (maxClauseLength bc)
   pure $ NormalFormConfig {
     baseConf
   , minClauseAmount

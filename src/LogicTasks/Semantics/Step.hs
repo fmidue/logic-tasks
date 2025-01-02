@@ -34,7 +34,7 @@ import Formula.Helpers (showClauseAsSet)
 
 genStepInst :: StepConfig -> Gen StepInst
 genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
-    (clause2, resolveLit, lits1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
+    (clause2, resolveLit, lits1) <- genResStepClause minClauseLength maxClauseLength usedAtoms
     let
       litAddedClause1 = mkClause $ resolveLit : lits1
       litAddedClause2 = mkClause $ opposite resolveLit : literals clause2
@@ -236,11 +236,11 @@ completeGrade' StepInst{..} sol =
 
 
 genResStepClause :: Int -> Int -> [Char] -> Gen (Clause, Literal, [Literal])
-genResStepClause minClauseLength maxClauseLength usedLiterals = do
-    rChar <- elements usedLiterals
+genResStepClause minClauseLength maxClauseLength usedAtoms = do
+    rChar <- elements usedAtoms
     resolveLit <- elements [Literal rChar, Not rChar]
     let
-      restLits = delete rChar usedLiterals
+      restLits = delete rChar usedAtoms
     minLen1 <- elements [minClauseLength-1..maxClauseLength-1]
     minLen2 <- elements [minClauseLength-1..maxClauseLength-1]
     clause1 <- genClause (minLen1,maxClauseLength-1) restLits

@@ -18,7 +18,7 @@ task08 = PickConfig
                   { baseConf = BaseConfig
                     { minClauseLength = 3
                     , maxClauseLength = 3
-                    , usedLiterals = "ABCD"
+                    , usedAtoms = "ABCD"
                     }
                   , minClauseAmount = 2
                   , maxClauseAmount = 2
@@ -37,7 +37,7 @@ task11 = PickConfig
                    { baseConf = BaseConfig
                      { minClauseLength = 3
                      , maxClauseLength = 3
-                     , usedLiterals = "ABCDE"
+                     , usedAtoms = "ABCDE"
                      }
                    , minClauseAmount = 4
                    , maxClauseAmount = 4

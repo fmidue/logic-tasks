@@ -117,7 +117,7 @@ partialGrade' SubTreeInst{..} fs
         english "At least one of your answers is not a well-formed formula."
         german "Mindestens eine Ihrer Antworten ist keine wohlaufgebaute Formel."
 
-    | any (`notElem` origLits) literals =
+    | any (`notElem` correctAtoms) atoms =
       reject $ do
         english "At least one formula in your submission contains unknown atomic formulas."
         german "Ihre Abgabe beinhaltet mindestens eine Formel mit unbekannten atomaren Formeln."
@@ -140,9 +140,9 @@ partialGrade' SubTreeInst{..} fs
     | otherwise = pure ()
   where
     amount = fromIntegral $ length $ nub fs
-    literals = sort $ nub $ concatMap (collectLeaves . fromJust . maybeForm) fs
+    atoms = sort $ nub $ concatMap (collectLeaves . fromJust . maybeForm) fs
     opsNum = map (numOfOpsInFormula . fromJust . maybeForm) fs
-    origLits = sort $ nub $ collectLeaves tree
+    correctAtoms = sort $ nub $ collectLeaves tree
     origOpsNum = numOfOps tree
 
 

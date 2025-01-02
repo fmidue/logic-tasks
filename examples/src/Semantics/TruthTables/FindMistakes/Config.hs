@@ -26,7 +26,7 @@ task10 = DecideConfig
                    { baseConf = BaseConfig
                      { minClauseLength = 2
                      , maxClauseLength = 2
-                     , usedLiterals = "ABCD"
+                     , usedAtoms = "ABCD"
                      }
                    , minClauseAmount = 3
                    , maxClauseAmount = 3
