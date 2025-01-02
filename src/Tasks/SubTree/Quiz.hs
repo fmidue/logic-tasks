@@ -22,11 +22,11 @@ generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
 generateSubTreeInst SubTreeConfig {..} = do
     tree <- genSynTree syntaxTreeConfig
       `suchThat` \synTree ->
-        (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
+        (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= subTreeAmount
     let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
       { tree
-      , minInputTrees = minSubTrees
+      , inputTreeAmount = subTreeAmount
       , correctTrees = correctTrees
       , showArrowOperators = any (`elem` Map.keys (binOpFrequencies syntaxTreeConfig)) [Impl, BackImpl, Equi]
       , showSolution = printSolution
