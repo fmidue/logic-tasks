@@ -10,6 +10,7 @@ build-type:     Simple
 
 library
   exposed-modules:
+      LogicTasks.Forms
       LogicTasks.Formula
       LogicTasks.Keys
       LogicTasks.Table
@@ -77,7 +78,6 @@ library
       Auxiliary
       Formula.Parsing.Delayed.Internal
       Formula.Table
-      LogicTasks.Forms
       LogicTasks.Helpers
       UniversalParser
       Paths_logic_tasks

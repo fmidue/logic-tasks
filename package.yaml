@@ -28,6 +28,7 @@ dependencies:
 library:
   source-dirs: src
   exposed-modules:
+    - LogicTasks.Forms
     - LogicTasks.Formula
     - LogicTasks.Keys
     - LogicTasks.Table
