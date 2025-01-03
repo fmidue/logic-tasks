@@ -34,6 +34,7 @@ Leftrightarrow
 Leijen
 maxterms
 minterms
+mopt
 MReport
 oneof
 parseable
@@ -43,6 +44,7 @@ scanl
 snd
 subformula
 subformulas
+tabindex
 tupled
 UML
 uncurry
@@ -51,10 +53,12 @@ unwords
 usepackage
 UTF
 vcat
+whamlet
 Wno
 workflows
 xit
 xor
 XOR
+Yesod
 PLit
 unicode
