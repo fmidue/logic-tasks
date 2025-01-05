@@ -117,5 +117,6 @@ tests:
       - -Widentities
       - -Wunused-top-binds
       - -Werror
+      - -Wno-x-partial # keep this or remove uses of head and tail?
     dependencies:
       - logic-tasks
