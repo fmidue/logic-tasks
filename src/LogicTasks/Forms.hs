@@ -26,14 +26,16 @@ import Yesod (
 
 
 
-tableForm :: Int -> Int -> [Text] -> Rendered
-tableForm emptyColumns rows staticHeaders =
+tableForm :: Int -> Int -> [Text] -> [Text] -> Rendered
+tableForm emptyColumns rows staticStart staticEnd =
   addCss css $ reader $ \extra -> do
     let headerList = replicate emptyColumns headerName
         cellList = replicate rows inputName
-        totalColumns = emptyColumns + length staticHeaders
+        totalColumns = emptyColumns + length staticStart + length staticEnd
     headersRes <- traverse (field 1 headerClass) headerList
-    columnsRes <- traverse (\num -> traverse (field num inputClass) cellList) [2..totalColumns+1]
+    columnsRes <- traverse
+      (\num -> traverse (field num inputClass) cellList)
+      [2..totalColumns+1]
     let tableHeaders = map snd headersRes
         tableRows = transpose $ map (map snd) columnsRes
     pure ( [headerName, inputName]
@@ -41,10 +43,12 @@ tableForm emptyColumns rows staticHeaders =
               #{extra}
               <table>
                 <tr>
-                  $forall sh <- staticHeaders
-                    <th>#{sh}
-                  $forall header <- tableHeaders
-                    <th>^{fvInput header}
+                  $forall startHeader <- staticStart
+                    <th>#{startHeader}
+                  $forall inputHeader <- tableHeaders
+                    <th>^{fvInput inputHeader}
+                  $forall endHeader <- staticEnd
+                    <th>#{endHeader}
                 $forall row <- tableRows
                   <tr>
                     $forall input <- row
