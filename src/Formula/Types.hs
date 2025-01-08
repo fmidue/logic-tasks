@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wwarn=x-partial #-}
 {-# language DeriveGeneric #-}
 {-# language DuplicateRecordFields #-}
 

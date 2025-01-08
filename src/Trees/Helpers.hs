@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wwarn=x-partial #-}
 {-# LANGUAGE FlexibleContexts #-}
 
 module Trees.Helpers

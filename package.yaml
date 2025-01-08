@@ -99,7 +99,6 @@ library:
     - -fno-warn-unused-do-bind
     - -Werror
     - -Wwarn=incomplete-uni-patterns
-    - -Wno-x-partial # keep this or remove uses of head and tail?
     - -Wwarn=unrecognised-warning-flags # should be removed when on lts-22 or later
     - -fdefer-typed-holes
 
@@ -117,6 +116,5 @@ tests:
       - -Widentities
       - -Wunused-top-binds
       - -Werror
-      - -Wno-x-partial # keep this or remove uses of head and tail?
     dependencies:
       - logic-tasks

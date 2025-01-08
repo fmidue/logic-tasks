@@ -83,7 +83,7 @@ library
       Paths_logic_tasks
   hs-source-dirs:
       src
-  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -Wno-x-partial -Wwarn=unrecognised-warning-flags -fdefer-typed-holes
+  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -Wwarn=unrecognised-warning-flags -fdefer-typed-holes
   build-depends:
       QuickCheck >=2.14
     , SHA
@@ -131,7 +131,7 @@ test-suite src-test
       Paths_logic_tasks
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Wunused-top-binds -Werror -Wno-x-partial
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Wunused-top-binds -Werror
   build-depends:
       QuickCheck >=2.14
     , SHA
