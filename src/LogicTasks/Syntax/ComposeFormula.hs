@@ -138,7 +138,7 @@ partialGrade' ComposeFormulaInst{..} sol
     reject $ do
       english "At least one input does not represent a syntax tree."
       german "Mindestens eine der Eingaben entspricht nicht einem Syntaxbaum."
-  | not (all containsOperator sol) =
+  | not (all containsOperator parsedSol) =
     reject $ do
       english "At least one of your formulas does not contain the given operator."
       german "Mindestens eine Ihrer Formeln beinhaltet nicht den vorgegebenen Operator."
@@ -154,17 +154,34 @@ partialGrade' ComposeFormulaInst{..} sol
     reject $ do
       english "Your submission contains too many different operators."
       german "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren."
+  | any (\s -> s == leftTree || s == rightTree) parsedSol =
+    reject $ do
+      english $ "At least one input corresponds to one of the " ++ eTreesOrFormulas ++ " already given. "
+      english "Read the task again more carefully."
+      german $ "Mindestens eine der Eingaben entspricht " ++ einerEinem ++ " der bereits gegebenen " ++ gTreesOrFormulas ++ ". "
+      german "Lesen Sie die Aufgabenstellung noch einmal genauer."
+
 
   | otherwise = pure ()
     where
-      containsOperator = (operator `elem`) . collectUniqueBinOpsInSynTree . fromJust . maybeTree
+      parsedSol = map pForm sol
+      containsOperator = (operator `elem`) . collectUniqueBinOpsInSynTree
       correctLits = nubOrd $ collectLeaves leftTree ++ collectLeaves rightTree
-      literals = nubOrd $ concatMap (collectLeaves . pForm) sol
+      literals = nubOrd $ concatMap collectLeaves parsedSol
       pForm = fromJust . maybeTree
       usedOperators = length $ nubOrd $ operator : concatMap (collectUniqueBinOpsInSynTree . pForm) sol
       correctOperators = length $ nubOrd $
         collectUniqueBinOpsInSynTree leftTree ++
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
+
+      einerEinem = einerEinem' leftTreeImage rightTreeImage
+      einerEinem' Nothing Nothing = "einer"
+      einerEinem' (Just _) (Just _) = "einem"
+      einerEinem' _ _ = "einem/einer"
+      (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
+      treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
+      treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
+      treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
 
 completeGrade :: (OutputCapable m, MonadIO m) =>
   FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
