@@ -19,6 +19,7 @@ import Control.OutputCapable.Blocks (LangM, Language, OutputCapable)
 data TreeToFormulaConfig = TreeToFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
     , extraHintsOnSemanticEquivalence :: Bool
+    , extraHintsOnAssociativity :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
@@ -29,6 +30,7 @@ defaultTreeToFormulaConfig :: TreeToFormulaConfig
 defaultTreeToFormulaConfig = TreeToFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
     , extraHintsOnSemanticEquivalence = True
+    , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = False
     , offerUnicodeInput = False
@@ -46,6 +48,7 @@ data TreeToFormulaInst = TreeToFormulaInst {
                , latexImage :: String
                , correct :: String
                , addExtraHintsOnSemanticEquivalence :: Bool
+               , addExtraHintsOnAssociativity :: Bool
                , showArrowOperators :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
