@@ -6,9 +6,6 @@ import LogicTasks.Formula (TruthValue(..))
 
 
 
-instance Eq TruthValue where
-  (TruthValue a) == (TruthValue b) = a == b
-
 newtype Table = Table [(Maybe String, [Maybe TruthValue])] deriving (Eq,Show)
 
 data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord)
@@ -16,7 +13,7 @@ data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord)
 type Submission = (String,String,String,String,Table,[Namen])
 
 
-emptyColumns, staticColumns, totalColumns, rows :: Int
+emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
 emptyColumns  = 4
 staticColumns = 3
 staticColsEnd = 1
@@ -38,21 +35,17 @@ bothLangs s = translate $ german s >> english s
 module TaskData (getTask) where
 
 
-import Control.Monad.Reader    (reader)
 import Data.Char               (digitToInt)
-import Data.List               (transpose, sort, sortOn)
-import Data.Maybe              (fromJust)
-import Data.Text               (Text, pack)
+import Data.List               (transpose, sortOn)
+import Data.String             (fromString)
 import Data.String.Interpolate (i)
 import FlexTask.FormUtil (
   ($$>),
   addCss,
-  addNameAndCssClass,
   getFormData,
   )
 import FlexTask.Generic.Form (
   Alignment(..),
-  FieldInfo,
   Formify(..),
   formify,
   formifyInstanceMultiChoice,
@@ -60,15 +53,13 @@ import FlexTask.Generic.Form (
   buttonsEnum
   )
 import FindLiarTask
-import FlexTask.YesodConfig    (Handler, FlexForm, Rendered)
+import LogicTasks.Forms        (tableForm)
 import LogicTasks.Formula      (TruthValue(..))
 import Numeric                 (showBin)
-import Test.QuickCheck.Arbitrary (arbitrary)
 import Test.QuickCheck.Gen
 import Yesod
 
 import Trees.Types (BinOp(..), SynTree(..))
-import Trees.Print (simplestDisplay)
 
 import Global
 
@@ -77,10 +68,6 @@ import Global
 
 instance MonadFail Gen where
   fail = error
-
-
-getParticipants :: Gen [Bool]
-getParticipants = vectorOf 4 arbitrary `suchThat` \bs -> or bs && not (and bs)
 
 
 getTask :: Gen (String, String, IO ([String], String))
@@ -96,67 +83,27 @@ getTask = do
         combinedFormula = foldr1 (Binary And) formulasSorted
 
     pure (show (hintsSorted, (listOfLiars, solutionValues, formulasSorted, combinedFormula)),
-          checkers False True,
+          checkers,
           getFormData form)
   where
     form = formify (Nothing :: Maybe (String, String, String))
-             [[single $ pack "Aussage A:"],
-             [single $ pack "Aussage B:"],
-             [single $ pack "Aussage C:"]] $$>
+             [[single "Aussage A:"],
+             [single "Aussage B:"],
+             [single "Aussage C:"]] $$>
            formify (Nothing :: Maybe String)
              [[single "Gesamtformel F="]] $$>
-           tableForm ["A", "B", "C"] $$>
+           addCss formulaCss (tableForm emptyColumns rows ["A","B","C"] ["F"]) $$>
            formify (Nothing :: Maybe [Namen])
-             [[buttonsEnum Vertical "Wer lügt?" (pack . show @Namen)]]
+             [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
 
     fromChar 'A' = A
     fromChar 'B' = B
     fromChar 'C' = C
+    fromChar  _  = error "invalid Name"
 
 
-
-tableForm :: [Text] -> Rendered
-tableForm staticHeaders =
-  addCss css $ reader $ \extra -> do
-    let addAttr a fs@FieldSettings{..} = fs {fsAttrs = a : fsAttrs}
-        headerTextField t = mopt textField (addAttr ("tabindex",pack $ show 1) $ addNameAndCssClass t "header") Nothing
-        tableTextField tabOrd t = mopt textField (addAttr ("tabindex",pack $ show tabOrd) $ addNameAndCssClass t "tableInput") Nothing
-
-        headerList = replicate emptyColumns "headers"
-        cellList = replicate rows "cells"
-
-    headersRes <- traverse headerTextField headerList
-    columnsRes <- traverse (\i -> traverse (tableTextField i) cellList) [2..totalColumns+1]
-    let headers = map snd headersRes
-        rows = transpose $ map (map snd) columnsRes
-    pure ( ["headers","cells"]
-         , [whamlet|
-              #{extra}
-              <table>
-                <tr>
-                  $forall sh <- staticHeaders
-                    <th>#{sh}
-                  $forall header <- headers
-                    <th>^{fvInput header}
-                  <th>F
-                $forall row <- rows
-                  <tr>
-                    $forall input <- row
-                      <td>^{fvInput input}|]
-         )
-  where
-    css = [cassius|
-      #flexident287
-        width: 600px
-        margin: 10px 10px
-      .header
-        width: 100%
-        text-align: center
-        height: 25px
-      .tableInput
-        width: 100%
-        text-align: center
-      th, td
+    formulaCss = [cassius|
+       th, td
         border: 1px solid black
         border-collapse: collapse
         text-align: center
@@ -170,10 +117,7 @@ tableForm staticHeaders =
         width: 25px
       table tr th:last-child
         padding: 10px 0px
-      table
-        table-layout: fixed
-    |]
-
+       |]
 
 
 
@@ -189,37 +133,25 @@ startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
 
 
 
-checkers :: Bool -> Bool -> String
-checkers tableRequired showSolution = [i|
+checkers :: String
+checkers = [i|
 
 {-\# language ApplicativeDo \#-}
 {-\# language OverloadedStrings \#-}
 
 module Check (checkSemantics, checkSyntax) where
 
-
-import Control.Monad (when)
 import Control.OutputCapable.Blocks
-import Data.Foldable (toList)
-import Data.List     (intercalate, isInfixOf)
-import Data.Maybe    (catMaybes, fromJust)
-import Data.Map      (fromList)
-import Data.Ratio    ((%))
+import Data.List     (intercalate)
 
-import LogicTasks.Formula (TruthValue(..), isSemanticEqual, convert)
-import LogicTasks.Parsing (allSymbolParser, parser)
+import LogicTasks.Formula (TruthValue(..), isSemanticEqual)
+import LogicTasks.Parsing (allSymbolParser)
 import Formula.Parsing.Delayed
 import Formula.Parsing.Type (Parse(..))
 import Text.Parsec.Char (string)
-import Trees.Types (SynTree(..), PropFormula(..), BinOp(..))
-import Trees.Print (simplestDisplay)
-
-import qualified SAT.MiniSat as Sat
-import qualified Data.Text   as T
+import Trees.Types (SynTree(..), PropFormula(..), BinOp(..), toSynTree)
 
 import Global
-
-import Text.Parsec.String
 
 instance (Parse a,Parse b,Parse c,Parse d, Parse e) => Parse (a,b,c,d,e) where
   parser = do
@@ -249,7 +181,7 @@ stringList xs = '[': intercalate "," (map stringMaybe xs) ++ "]"
 
 
 checkSyntax :: OutputCapable m => a -> FilePath -> Submission -> LangM m
-checkSyntax _ _ (f1,f2,f3,f,Table xs, names) =
+checkSyntax _ _ (f1,f2,f3,f,Table xs, _) =
   parseDelayedWithAndThen
     parser
     complainAboutMissingParenthesesIfNotFailingOn
@@ -261,17 +193,10 @@ checkSyntax _ _ (f1,f2,f3,f,Table xs, names) =
 
 checkSyntax' :: OutputCapable m => [[Maybe TruthValue]] ->
   ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> LangM m
-checkSyntax' columns (fs,f1,f2,f3,f) = do
+checkSyntax' columns _ = do
   assertion (take staticColumns columns == #{startingTable}) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
   pure ()
-
-
-toTree :: PropFormula Char -> SynTree BinOp Char
-toTree (Atomic c) = Leaf c
-toTree (Neg p) = Not $ toTree p
-toTree (Brackets p) = toTree p
-toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
 
 truthValuesToBinaryToIndex :: [Bool] -> Int
 truthValuesToBinaryToIndex = foldl (\\acc value -> acc * 2 + if value then 1 else 0) 0
@@ -297,14 +222,14 @@ checkSemantics (_isSemanticEqual,(lying,solutionValues,formulas,solF)) _ (f1,f2,
 
 checkSemantics' :: OutputCapable m => [SynTree BinOp Char] -> [Namen] -> [Bool] -> [[Maybe TruthValue]] -> SynTree BinOp Char
   -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> Rated m
-checkSemantics' formulas lying solutionValues columns solF n (headers,f1,f2,f3,f) = do
+checkSemantics' formulas lying solutionValues columns solF n (_,f1,f2,f3,f) = do
 
-  let correctParts = zipWith (\\fSol f -> isSemanticEqual fSol (toTree f)) formulas [f1,f2,f3]
+  let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulas [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
 
-  let correctFormula = isSemanticEqual (toTree f) solF ||
-                       (isSemanticEqual (toTree f) (toTree (foldr1 (Assoc And) (map Brackets [f1,f2,f3]))))
+  let correctFormula = isSemanticEqual (toSynTree f) solF ||
+                       (isSemanticEqual (toSynTree f) (toSynTree (foldr1 (Assoc And) (map Brackets [f1,f2,f3]))))
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
@@ -382,8 +307,6 @@ import qualified Formula.Parsing as FP
 import Global
 
 
-
-instance (Parse a,Parse b,Parse c,Parse d,Parse e,Parse f) => Parse (a,b,c,d,e,f)
 
 instance Parse TruthValue where
   parseInput = escaped FP.parser
