@@ -175,8 +175,8 @@ partialGrade' ComposeFormulaInst{..} sol
           collectUniqueBinOpsInSynTree rightTree ++ [operator]
 
       einerEinem = einerEinem' leftTreeImage rightTreeImage
-      einerEinem' Nothing Nothing = "einer"
-      einerEinem' (Just _) (Just _) = "einem"
+      einerEinem' Nothing Nothing = "einer" {- german -}
+      einerEinem' (Just _) (Just _) = "einem" {- german -}
       einerEinem' _ _ = "einem/einer"
       (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
       treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
