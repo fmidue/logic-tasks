@@ -7,9 +7,11 @@ CNFs
 concat
 dnf
 Dnf
-DNFs
 Dnfs
+DNFs
 DSL
+einem
+einer
 equi
 fmap
 fmidue
@@ -37,6 +39,7 @@ minterms
 MReport
 oneof
 parseable
+PLit
 println
 Rightarrow
 scanl
@@ -46,6 +49,7 @@ subformulas
 tupled
 UML
 uncurry
+unicode
 unlines
 unwords
 usepackage
@@ -56,5 +60,3 @@ workflows
 xit
 xor
 XOR
-PLit
-unicode
