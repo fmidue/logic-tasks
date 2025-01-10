@@ -87,9 +87,9 @@ getTask = do
           getFormData form)
   where
     form = formify (Nothing :: Maybe (String, String, String))
-             [[single "Aussage A:"],
-             [single "Aussage B:"],
-             [single "Aussage C:"]] $$>
+             [[single "- 1 - "],
+             [single "- 2 - "],
+             [single "- 3 - "]] $$>
            formify (Nothing :: Maybe String)
              [[single "Gesamtformel F="]] $$>
            addCss formulaCss (tableForm emptyColumns rows ["A","B","C"] ["F"]) $$>
@@ -271,7 +271,7 @@ description _ (hints,_) = do
        "Diese Studierenden sagen (jeweils) immer die Wahrheit oder lügen immer. " ++
        "Um die Zuverlässigkeit der Antworten zu überprüfen, fragt er die drei Studierenden, ob die anderen lügen, " ++
        "und erhält folgende Antworten:")
-    itemizeM $ map bothLangs hints
+    itemizeM $ map (bothLangs . uncurry (++)) (zip ["1 - ", "2 - ", "3 - "] hints)
     paragraph $ bothLangs
       ("Übersetzen Sie die Hinweise und die Kombination dieser jeweils in eine aussagenlogische Formel. " ++
        "Geben Sie die Formeln in die entsprechend benannten Textfelder ein.")
