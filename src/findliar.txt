@@ -258,6 +258,7 @@ module Description (description) where
 
 
 import Control.OutputCapable.Blocks
+import LogicTasks.Keys (keyHeading, basicOpKey, arrowsKey)
 
 import Global
 import Trees.Types
@@ -281,9 +282,10 @@ description _ (hints,_) = do
        "Sie können Hilfsspalten verwenden. Kreuzen Sie anschließend die entsprechenden Namen an.")
     paragraph $ bothLangs
       ("Verwenden Sie dabei die atomaren Formeln A, B, C mit der Interpretation, " ++
-      "dass eine Zuordnung von 'wahr' dafür steht, dass die entsprechende Person die Wahrheit sagt, " ++
-      "und die folgenden Operatoren:")
-    enumerateM code $ zip ["Negation","Und","Oder","Implikation","Biimplikation"] $ map code ["¬","∧","∨","=>","<=>"]
+      "dass eine Zuordnung von 'wahr' dafür steht, dass die entsprechende Person die Wahrheit sagt.")
+    keyHeading
+    basicOpKey True
+    arrowsKey
     pure ()
 
 
