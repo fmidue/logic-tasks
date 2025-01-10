@@ -273,14 +273,16 @@ description _ (hints,_) = do
        "und erhält folgende Antworten:")
     itemizeM $ map bothLangs hints
     paragraph $ bothLangs
-      ("Übersetzen Sie die einzelnen Aussagen und die Kombination aller Aussagen jeweils in eine aussagenlogische Formel. " ++
+      ("Übersetzen Sie die Hinweise und die Kombination dieser jeweils in eine aussagenlogische Formel. " ++
        "Geben Sie die Formeln in die entsprechend benannten Textfelder ein.")
     paragraph $ bothLangs
       ("Wer lügt? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. " ++
        "Füllen Sie dabei alle benannten Spalten vollständig aus. " ++
        "Sie können Hilfsspalten verwenden. Kreuzen Sie anschließend die entsprechenden Namen an.")
     paragraph $ bothLangs
-      "Verwenden Sie für die Angabe der Formel die atomaren Formeln A, B, C und die folgenden Operatoren:"
+      ("Verwenden Sie dabei die atomaren Formeln A, B, C mit der Interpretation, " ++
+      "dass eine Zuordnung von 'wahr' dafür steht, dass die entsprechende Person die Wahrheit sagt, " ++
+      "und die folgenden Operatoren:")
     enumerateM code $ zip ["Negation","Und","Oder","Implikation","Biimplikation"] $ map code ["¬","∧","∨","=>","<=>"]
     pure ()
 
