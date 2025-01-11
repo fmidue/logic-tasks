@@ -7,9 +7,11 @@ CNFs
 concat
 dnf
 Dnf
-DNFs
 Dnfs
+DNFs
 DSL
+einem
+einer
 equi
 fmap
 fmidue
@@ -38,6 +40,7 @@ mopt
 MReport
 oneof
 parseable
+PLit
 println
 Rightarrow
 scanl
@@ -48,6 +51,7 @@ tabindex
 tupled
 UML
 uncurry
+unicode
 unlines
 unwords
 usepackage
@@ -60,5 +64,3 @@ xit
 xor
 XOR
 Yesod
-PLit
-unicode
