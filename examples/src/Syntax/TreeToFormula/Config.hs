@@ -39,6 +39,7 @@ task02 = TreeToFormulaConfig
     , minUniqueBinOperators = 2
     }
   , extraHintsOnSemanticEquivalence = True
+  , extraHintsOnAssociativity = True
   , extraText = Nothing
   , printSolution = True
   , offerUnicodeInput = True
@@ -66,6 +67,7 @@ task04 =  TreeToFormulaConfig
     , minUniqueBinOperators = 2
     }
   , extraHintsOnSemanticEquivalence = True
+  , extraHintsOnAssociativity = True
   , extraText = Nothing
   , printSolution = True
   , offerUnicodeInput = False

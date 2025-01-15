@@ -25,6 +25,7 @@ generateTreeToFormulaInst TreeToFormulaConfig {..} = do
       , latexImage = transferToPicture tree
       , correct = display tree
       , addExtraHintsOnSemanticEquivalence = extraHintsOnSemanticEquivalence
+      , addExtraHintsOnAssociativity = extraHintsOnAssociativity
       , showArrowOperators = any (`elem` Map.keys (binOpFrequencies syntaxTreeConfig)) [Impl, BackImpl, Equi]
       , addText = extraText
       , showSolution = printSolution
