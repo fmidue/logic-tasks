@@ -1,7 +1,8 @@
 {-# language QuasiQuotes #-}
 {-# language OverloadedStrings #-}
 
-module FindLiarTask where
+module FindLiarTask (taskData,
+                     makeHintsAndFormula) where
 
 import Data.Text (Text)
 import Data.String.Interpolate (i)
@@ -33,7 +34,7 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
     parts = [px, py, pz]
     px = Binary Equi (Leaf xn) xYnOrNotYn
     py = Binary Equi (Leaf yn) yZnOrNotZn
-    pz = Binary Equi (Leaf zn) (Binary (if zw then Or else And) zXnOrNotXn zYnOrNotYn)
+    pz = Binary Equi (Leaf zn) $ (if xn > yn then flip else id) (Binary (if zw then Or else And)) zXnOrNotXn zYnOrNotYn
 
     hints = [hx, hy, hz]
     hx = [i|#{xn} sagt: "#{yn}#{if isNot xYnOrNotYn then " lügt" else " sagt die Wahrheit"::String}."|]
