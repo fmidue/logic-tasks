@@ -1,4 +1,4 @@
-module FindLiar2 where
+module FindLiar2 (makeHintsAndFormula) where
 
 import Data.Text (Text)
 import Trees.Types (BinOp(..), SynTree(..))
