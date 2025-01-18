@@ -27,10 +27,10 @@ spec = do
 
        describe "LiarTask2" $ do
          it "flip needed" $ do
-           fst (FindLiar2.makeHintsAndFormula (('C', True), ('B', False), ('A', False))) `shouldBe`
-             [Binary Equi (Leaf 'C') (Binary Or (Leaf 'A') (Not (Leaf 'B'))),
-              Binary Equi (Leaf 'B') (Binary And (Leaf 'A') (Not (Leaf 'C'))),
-              Binary Equi (Leaf 'A') (Binary Or (Leaf 'B') (Not (Leaf 'C')))]
+           fst (FindLiar2.makeHintsAndFormula (('C', True), ('A', False), ('B', False))) `shouldBe`
+             [Binary Equi (Leaf 'C') (Binary Or (Not (Leaf 'A')) (Leaf 'B')),
+              Binary Equi (Leaf 'A') (Binary And (Leaf 'B') (Not (Leaf 'C'))),
+              Binary Equi (Leaf 'B') (Binary Or (Leaf 'A') (Not (Leaf 'C')))]
          it "no flip needed" $ do
            fst (FindLiar2.makeHintsAndFormula (('A', True), ('B', False), ('C', False))) `shouldBe`
              [Binary Equi (Leaf 'A') (Binary Or (Not (Leaf 'B')) (Leaf 'C')),
