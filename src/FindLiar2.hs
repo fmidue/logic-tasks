@@ -20,8 +20,8 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw)) = (parts, hints)
     zYnOrNotYn = if zw == yw then Leaf yn       else Not (Leaf yn)
 
     parts = [px, py, pz]
-    px = Binary Equi (Leaf xn) $ (if xn > zn then flip else id) (Binary xOperator) xYnOrNotYn xZnOrNotZn
-    py = Binary Equi (Leaf yn) $ (if yn > zn then flip else id) (Binary yOperator) yXnOrNotXn yZnOrNotZn
+    px = Binary Equi (Leaf xn) $ (if yn > zn then flip else id) (Binary xOperator) xYnOrNotYn xZnOrNotZn
+    py = Binary Equi (Leaf yn) $ (if xn > zn then flip else id) (Binary yOperator) yXnOrNotXn yZnOrNotZn
     pz = Binary Equi (Leaf zn) $ (if xn > yn then flip else id) (Binary zOperator) zXnOrNotXn zYnOrNotYn
 
     hints = [hintFromFormula px, hintFromFormula py, hintFromFormula pz]
