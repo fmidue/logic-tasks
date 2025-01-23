@@ -20,6 +20,10 @@ staticColsEnd = 1
 totalColumns  = staticColumns + emptyColumns + staticColsEnd
 rows          = 2^staticColumns
 
+showSolution :: Bool
+showSolution  = True
+
+
 
 bothLangs :: OutputCapable m => String -> LangM m
 bothLangs s = translate $ german s >> english s
@@ -240,12 +244,18 @@ checkSemantics' formulas lying solutionValues columns solF n (_,f1,f2,f3,f) = do
   let correctNames = n == lying
   yesNo correctNames $ bothLangs
     "Auswahl der Lügner ist korrekt?"
-
   let points = ((if (and correctParts) then 0.4 else 0.0) +
                 (if correctFormula then 0.2 else 0.0) +
                 (if correctLast then 0.2 else 0.0) +
                 (if correctNames then 0.2 else 0.0))
-  pure points
+  res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
+  pure res
+    where
+      maybeAnswer = flip (++) (show lying) <$>
+        if showSolution
+            then Just ("Formel: " ++ simplestDisplay solF ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: ")
+            else Nothing
+
 |]
 
 
