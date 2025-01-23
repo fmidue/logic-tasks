@@ -157,6 +157,7 @@ import LogicTasks.Parsing (allSymbolParser)
 import Formula.Parsing.Delayed
 import Formula.Parsing.Type (Parse(..))
 import Text.Parsec.Char (string)
+import Text.Parsec.String (Parser)
 import Trees.Print (simplestDisplay)
 import Trees.Types (SynTree(..), PropFormula(..), BinOp(..), toSynTree)
 
@@ -209,11 +210,11 @@ stringList xs = '[': intercalate "," (map stringMaybe xs) ++ "]"
 checkSyntax :: OutputCapable m => a -> FilePath -> Submission -> LangM m
 checkSyntax _ _ (f1,f2,f3,f,Table xs, _) =
   parseDelayedWithAndThen
-    parser
+    (parser :: Parser ([Maybe (PropFormula Char)], PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char))
     complainAboutMissingParenthesesIfNotFailingOn
     allSymbolParser
     (\\_ -> checkSyntax' columns)
-    $ delayed @([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) (stringTuple5 (stringList headers) f1 f2 f3 f)
+    $ delayed (stringTuple5 (stringList headers) f1 f2 f3 f)
   where
     (headers,columns) = unzip xs
 
