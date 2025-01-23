@@ -142,17 +142,22 @@ checkers = [i|
 
 {-\# language ApplicativeDo \#-}
 {-\# language OverloadedStrings \#-}
+{-\# language TypeApplications \#-}
+
 
 module Check (checkSemantics, checkSyntax) where
 
 import Control.OutputCapable.Blocks
 import Data.List     (intercalate)
+import Data.Ratio    ((%))
+
 
 import LogicTasks.Formula (TruthValue(..), isSemanticEqual)
 import LogicTasks.Parsing (allSymbolParser)
 import Formula.Parsing.Delayed
 import Formula.Parsing.Type (Parse(..))
 import Text.Parsec.Char (string)
+import Trees.Print (simplestDisplay)
 import Trees.Types (SynTree(..), PropFormula(..), BinOp(..), toSynTree)
 
 import Global
@@ -173,8 +178,25 @@ instance (Parse a,Parse b,Parse c,Parse d, Parse e) => Parse (a,b,c,d,e) where
     pure (a,b,c,d,e)
 
 
-stringTuple :: String -> String -> String -> String -> String -> String
-stringTuple s1 s2 s3 s4 s5 = '(':s1 ++ ',':s2 ++ ',':s3 ++ ',':s4 ++ ',':s5 ++ ")"
+instance (Parse a,Parse b,Parse c,Parse d) => Parse (a,b,c,d) where
+  parser = do
+    string "("
+    a <- parser
+    string ","
+    b <- parser
+    string ","
+    c <- parser
+    string ","
+    d <- parser
+    string ")"
+    pure (a,b,c,d)
+
+
+stringTuple4 :: String -> String -> String -> String -> String
+stringTuple4 s1 s2 s3 s4 = '(':s1 ++ ',':s2 ++ ',':s3 ++ ',':s4 ++ ")"
+
+stringTuple5 :: String -> String -> String -> String -> String -> String
+stringTuple5 s1 s2 s3 s4 s5 = '(':s1 ++ ',':s2 ++ ',':s3 ++ ',':s4 ++ ',':s5 ++ ")"
 
 
 stringList :: [Maybe String] -> String
@@ -190,14 +212,13 @@ checkSyntax _ _ (f1,f2,f3,f,Table xs, _) =
     parser
     complainAboutMissingParenthesesIfNotFailingOn
     allSymbolParser
-    (checkSyntax' columns)
-    $ delayed $ stringTuple (stringList headers) f1 f2 f3 f
+    (\\_ -> checkSyntax' columns)
+    $ delayed @([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) (stringTuple5 (stringList headers) f1 f2 f3 f)
   where
     (headers,columns) = unzip xs
 
-checkSyntax' :: OutputCapable m => [[Maybe TruthValue]] ->
-  ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> LangM m
-checkSyntax' columns _ = do
+checkSyntax' :: OutputCapable m => [[Maybe TruthValue]] -> LangM m
+checkSyntax' columns = do
   assertion (take staticColumns columns == #{startingTable}) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
   pure ()
@@ -220,13 +241,13 @@ checkSemantics (_isSemanticEqual,(lying,solutionValues,formulas,solF)) _ (f1,f2,
   withDelayedSucceeding
     (checkSemantics' formulas lying solutionValues columns solF names)
     parser
-    $ delayed $ stringTuple (stringList headers) f1 f2 f3 f
+    $ delayed $ stringTuple4 f1 f2 f3 f
   where
     (headers,columns) = unzip xs
 
 checkSemantics' :: OutputCapable m => [SynTree BinOp Char] -> [Namen] -> [Bool] -> [[Maybe TruthValue]] -> SynTree BinOp Char
-  -> [Namen] -> ([Maybe (PropFormula Char)],PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> Rated m
-checkSemantics' formulas lying solutionValues columns solF n (_,f1,f2,f3,f) = do
+  -> [Namen] -> (PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> Rated m
+checkSemantics' formulas lying solutionValues columns solF n (f1,f2,f3,f) = do
 
   let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulas [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
