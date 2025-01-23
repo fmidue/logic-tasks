@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -12,6 +13,7 @@ module Tasks.ComposeFormula.Config (
 
 -- jscpd:ignore-start
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
+import Data.Data (Data)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
@@ -79,5 +81,5 @@ data ComposeFormulaInst = ComposeFormulaInst
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
+               deriving (Data, Show, Typeable, Generic)
 

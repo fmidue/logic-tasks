@@ -44,7 +44,7 @@ data SynTree o c
     = Binary o (SynTree o c) (SynTree o c)
     | Not (SynTree o c)
     | Leaf c
-  deriving (Eq, Generic, Ord, Show, Functor, Foldable, Traversable)
+  deriving (Data, Eq, Generic, Ord, Show, Functor, Foldable, Traversable)
 
 instance Applicative (SynTree o) where
   pure = Leaf
