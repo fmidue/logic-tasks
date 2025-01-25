@@ -29,7 +29,8 @@ module Trees.Helpers
     bothKids,
     swapKids,
     collectUniqueBinOpsInSynTree,
-    mirrorTree
+    mirrorTree,
+    replaceSubFormula
     ) where
 
 import Control.Monad (void)
@@ -193,3 +194,9 @@ mirrorTree (Binary BackImpl l r) = Binary Impl (mirrorTree r) (mirrorTree l)
 mirrorTree (Binary b l r) = Binary b (mirrorTree r) (mirrorTree l)
 mirrorTree (Not x) = Not $ mirrorTree x
 mirrorTree x = x
+
+replaceSubFormula :: (Eq o, Eq a) => SynTree o a -> SynTree o a -> SynTree o a -> SynTree o a
+replaceSubFormula old new tree | old == tree = new
+replaceSubFormula old new (Binary o l r) = Binary o (replaceSubFormula old new l) (replaceSubFormula old new r)
+replaceSubFormula old new (Not c) = Not $ replaceSubFormula old new c
+replaceSubFormula _ _ leaf = leaf

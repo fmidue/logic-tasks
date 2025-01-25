@@ -30,7 +30,7 @@ import Formula.Types (TruthValue, availableLetter, atomics, getTable, literals, 
 import Util (isOutside, pairwiseCheck, preventWithHint, remove, withRatio, tryGen, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Helpers (extra)
 import Trees.Generate (genSynTree)
-import Trees.Formula ()
+import Trees.Formula (hasUnusedAtoms)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 import qualified Data.Map as Map (fromAscList)
 import GHC.Real ((%))
@@ -45,7 +45,7 @@ genFillInst FillConfig{..} = do
 
     formula <- case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t
+        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t && not (hasUnusedAtoms t)
       (FormulaCnf cnfCfg) ->
         tryGen (InstCnf <$> genCnf' cnfCfg) 100 $ withRatio percentTrueEntries'
       (FormulaDnf dnfCfg) ->

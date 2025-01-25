@@ -30,7 +30,7 @@ import LogicTasks.Helpers (extra)
 import Data.Maybe (fromJust, fromMaybe)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
-import Trees.Formula ()
+import Trees.Formula (hasUnusedAtoms)
 import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 
@@ -43,7 +43,7 @@ genPickInst PickConfig{..} = do
     isSemanticEqual
     $ case formulaConfig of
         (FormulaArbitrary syntaxTreeConfig) ->
-          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
+          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t && not (hasUnusedAtoms t)
         (FormulaCnf cnfCfg) ->
           InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
         (FormulaDnf dnfCfg) ->

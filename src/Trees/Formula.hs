@@ -1,13 +1,15 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 module Trees.Formula where
 import Formula.Types (Formula(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import qualified Formula.Types as F (Literal(..))
 import Data.List (find)
 import Data.List.Extra (nubSort)
-import Trees.Helpers (collectLeaves, treeNodes)
+import Trees.Helpers (collectLeaves, treeNodes, replaceSubFormula)
+import Formula.Util (isSemanticEqual)
 
 instance Formula (SynTree BinOp Char) where
   literals (Leaf x) = [F.Literal x]
@@ -35,3 +37,6 @@ instance Formula (SynTree BinOp Char) where
       applyMaybe _ _ Nothing = Nothing
       applyMaybe f (Just x) (Just y) = Just $ f x y
 
+hasUnusedAtoms :: SynTree BinOp Char -> Bool
+hasUnusedAtoms t = any (\(F.Literal c) -> isSemanticEqual t (replaceSubFormula (Leaf c) (Not (Leaf c)) t)) atoms
+  where atoms = atomics t
