@@ -34,4 +34,3 @@ instance Formula (SynTree BinOp Char) where
       applyMaybe _ Nothing _ = Nothing
       applyMaybe _ _ Nothing = Nothing
       applyMaybe f (Just x) (Just y) = Just $ f x y
-

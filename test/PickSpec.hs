@@ -16,6 +16,7 @@ import Data.List.Extra (nubOrd, nubSort, nubBy)
 import Util (withRatio)
 import Formula.Types(atomics)
 import FillSpec (validBoundsCnf)
+import LogicTasks.Util (formulaDependsOnAllAtoms)
 
 validBoundsPick :: Gen PickConfig
 validBoundsPick = do
@@ -63,6 +64,10 @@ spec = do
       forAll validBoundsPick $ \pickConfig ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           length (nubOrd (map (nubSort . atomics) formulas)) == 1
+    it "generated formulas should depend on all atomics" $
+      forAll validBoundsPick $ \pickConfig ->
+        forAll (genPickInst pickConfig) $ \PickInst{..} ->
+          all formulaDependsOnAllAtoms formulas
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsPick $ \pickConfig -> do
         forAll (genPickInst pickConfig) $ \pickInst ->

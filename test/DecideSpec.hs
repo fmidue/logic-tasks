@@ -16,6 +16,7 @@ import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio)
 import FillSpec (validBoundsCnf)
+import LogicTasks.Util (formulaDependsOnAllAtoms)
 -- jscpd:ignore-end
 
 validBoundsDecide :: Gen DecideConfig
@@ -57,6 +58,10 @@ spec = do
           let tableLen = length (getEntries (getTable formula))
               mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1 in
           length changed == mistakeCount
+    it "generated formula should depend on all atomics" $
+      forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
+        forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
+          formulaDependsOnAllAtoms formula
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsDecide $ \decideConfig -> do
         forAll (genDecideInst decideConfig) $ \decideInst ->

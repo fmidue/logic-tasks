@@ -27,16 +27,25 @@ import Test.QuickCheck(Gen, suchThat)
 import Config ( FillConfig(..), FillInst(..), FormulaInst (..), FormulaConfig (..))
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, getTable, literals, truth)
-import Util (isOutside, pairwiseCheck, preventWithHint, remove, withRatio, tryGen, checkTruthValueRangeAndFormulaConf)
+import Util (
+  isOutside,
+  pairwiseCheck,
+  preventWithHint,
+  remove,
+  withRatio,
+  tryGen,
+  checkTruthValueRangeAndFormulaConf,
+  formulaDependsOnAllAtoms
+  )
 import LogicTasks.Helpers (extra)
 import Trees.Generate (genSynTree)
-import Trees.Formula ()
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 import qualified Data.Map as Map (fromAscList)
 import GHC.Real ((%))
 import Control.Applicative (Alternative)
 import Control.Monad (when)
 import Data.Foldable.Extra (notNull)
+import Trees.Helpers (synTreeDependsOnAllAtomics)
 
 
 genFillInst :: FillConfig -> Gen FillInst
@@ -45,11 +54,11 @@ genFillInst FillConfig{..} = do
 
     formula <- case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t
+        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t && synTreeDependsOnAllAtomics t
       (FormulaCnf cnfCfg) ->
-        tryGen (InstCnf <$> genCnf' cnfCfg) 100 $ withRatio percentTrueEntries'
+        tryGen (InstCnf <$> genCnf' cnfCfg) 100 $ \f -> withRatio percentTrueEntries' f && formulaDependsOnAllAtoms f
       (FormulaDnf dnfCfg) ->
-        tryGen (InstDnf <$> genDnf' dnfCfg) 100 $ withRatio percentTrueEntries'
+        tryGen (InstDnf <$> genDnf' dnfCfg) 100 $ \f -> withRatio percentTrueEntries' f && formulaDependsOnAllAtoms f
 
     let
       entries = readEntries $ getTable formula

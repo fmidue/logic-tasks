@@ -19,6 +19,8 @@ module Formula.Util
        , flipPol
        , isSemanticEqual
        -- , isSemanticEqualSat
+       , cnfDependsOnAllAtomics
+       , dnfDependsOnAllAtomics
        ) where
 
 
@@ -36,6 +38,11 @@ import Formula.Types
 isPositive :: Literal -> Bool
 isPositive (Not _) = False
 isPositive _ = True
+
+-- | Return the used char in an atom. Can be removed after #248 was merged.
+atomicChar :: Literal -> Char
+atomicChar (Literal c) = c
+atomicChar _ = error "this should not happen"
 
 ---------------------------------------------------------------------------------------------------
 
@@ -89,6 +96,40 @@ hasEmptyCon :: Dnf -> Bool
 hasEmptyCon (Dnf set) = Con Set.empty `Set.member` set
 
 
+
+
+---------------------------------------------------------------------------------------------------
+
+cnfDependsOnAllAtomics :: Cnf -> Bool
+cnfDependsOnAllAtomics cnf = not $ any (\c -> isSemanticEqual cnf (replaceAtomInCnf c cnf) ) atoms
+  where atoms = map atomicChar $ atomics cnf
+
+        replaceAtomInCnf c (Cnf clauses) = Cnf $ Set.map (replaceAtomInClause c) clauses
+
+        replaceAtomInClause c (Clause lits) = Clause $ Set.map (replaceLiteral c) lits
+
+        replaceLiteral c l@(Literal a)
+          | a == c = Not c
+          | otherwise = l
+        replaceLiteral c l@(Not a)
+          | a == c = Literal c
+          | otherwise = l
+
+
+dnfDependsOnAllAtomics :: Dnf -> Bool
+dnfDependsOnAllAtomics dnf = not $ any (\c -> isSemanticEqual dnf (replaceAtomInDnf c dnf) ) atoms
+  where atoms = map atomicChar $ atomics dnf
+
+        replaceAtomInDnf c (Dnf cons) = Dnf $ Set.map (replaceAtomInCon c) cons
+
+        replaceAtomInCon c (Con lits) = Con $ Set.map (replaceLiteral c) lits
+
+        replaceLiteral c l@(Literal a)
+          | a == c = Not c
+          | otherwise = l
+        replaceLiteral c l@(Not a)
+          | a == c = Literal c
+          | otherwise = l
 
 
 ---------------------------------------------------------------------------------------------------

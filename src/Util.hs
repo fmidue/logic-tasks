@@ -19,10 +19,12 @@ import Control.Monad (when)
 import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
 
-import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..))
+import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Types (Formula, getTable, lengthBound)
 import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig, checkSynTreeConfig)
+import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
+import Trees.Helpers (synTreeDependsOnAllAtomics)
 
 
 prevent :: OutputCapable m => Bool -> LangM m -> LangM m
@@ -204,3 +206,8 @@ vectorOfUniqueBy amount p gen = do
   xs <- vectorOfUniqueBy (amount - 1) p gen
   x <- gen `suchThat` \x' -> not (any (p x') xs)
   pure (x:xs)
+
+formulaDependsOnAllAtoms :: FormulaInst -> Bool
+formulaDependsOnAllAtoms (InstCnf cnf) = cnfDependsOnAllAtomics cnf
+formulaDependsOnAllAtoms (InstDnf dnf) = dnfDependsOnAllAtomics dnf
+formulaDependsOnAllAtoms (InstArbitrary tree) = synTreeDependsOnAllAtomics tree

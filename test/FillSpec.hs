@@ -24,6 +24,7 @@ import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
+import LogicTasks.Util (formulaDependsOnAllAtoms)
 -- jscpd:ignore-end
 
 validBoundsBase :: Gen BaseConfig
@@ -102,6 +103,10 @@ spec = do
           let tableLen = length (getEntries (getTable formula))
               gapCount = max (tableLen * percentageOfGaps `div` 100) 1 in
           length missing == gapCount
+    it "generated formula should depend on all atomics" $
+     forAll validBoundsFill $ \fillConfig@FillConfig{..} -> do
+        forAll (genFillInst fillConfig) $ \FillInst{..} ->
+          formulaDependsOnAllAtoms formula
     it "should respect percentTrueEntries" $
       forAll validBoundsFill $ \fillConfig@FillConfig{..} ->
         forAll (genFillInst fillConfig) $ \FillInst{..} ->

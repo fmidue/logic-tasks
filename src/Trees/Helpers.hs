@@ -29,7 +29,8 @@ module Trees.Helpers
     bothKids,
     swapKids,
     collectUniqueBinOpsInSynTree,
-    mirrorTree
+    mirrorTree,
+    synTreeDependsOnAllAtomics,
     ) where
 
 import Control.Monad (void)
@@ -41,6 +42,7 @@ import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import qualified Formula.Types as SetFormulaDnf (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
+import Formula.Util (isSemanticEqual)
 
 numberAllBinaryNodes :: SynTree o c -> SynTree (o, Integer) c
 numberAllBinaryNodes = flip evalState 1 . go
@@ -193,3 +195,8 @@ mirrorTree (Binary BackImpl l r) = Binary Impl (mirrorTree r) (mirrorTree l)
 mirrorTree (Binary b l r) = Binary b (mirrorTree r) (mirrorTree l)
 mirrorTree (Not x) = Not $ mirrorTree x
 mirrorTree x = x
+
+
+synTreeDependsOnAllAtomics :: SynTree BinOp Char -> Bool
+synTreeDependsOnAllAtomics t = not $ any (\c -> isSemanticEqual t (t >>= \a -> if a == c then Not (Leaf a) else Leaf a)) atoms
+  where atoms = nubOrd $ collectLeaves t
