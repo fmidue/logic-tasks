@@ -17,7 +17,8 @@ module Formula.Parsing (
 import Config
 import Formula.Util
 import ParsingHelpers (caseInsensitive, lexeme, tokenSymbol)
-import Formula.Types
+import Formula.Types hiding (Literal(..))
+import qualified Formula.Types as Lit (Literal(..))
 
 import Control.Monad (void)
 import Data.Map (fromList)
@@ -174,8 +175,8 @@ instance Parse TruthValue where
 
 
 
-instance Parse Literal
-instance FromGrammar Literal where
+instance Parse Lit.Literal
+instance FromGrammar Lit.Literal where
   topLevelSpec = LevelSpec
     { allowOr = False
     , allowAnd = False
@@ -188,8 +189,8 @@ instance FromGrammar Literal where
     , nextLevelSpec = Nothing
     }
 
-  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (OfAtom (Atom x)))))) = Just $ Literal x
-  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (NegAtom (Atom x)))))) = Just $ Not x
+  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (OfAtom (Atom x)))))) = Just $ Lit.Pos x
+  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (NegAtom (Atom x)))))) = Just $ Lit.Neg x
   fromGrammar _ = Nothing
 
 clauseSetParser :: Parser Clause
@@ -222,9 +223,9 @@ instance FromGrammar Clause where
   fromGrammar (WithPrecedence TopLevelBackImpl) = Nothing
   fromGrammar (WithPrecedence (NoArrows f)) =  mkClause <$> foldlOrs phi (Just []) f
     where
-      phi :: Maybe [Literal] -> Ands -> Maybe [Literal]
-      phi xs (NoAnds (OfAtom (Atom x))) = (Literal x :) <$> xs
-      phi xs (NoAnds ((NegAtom (Atom x)))) = (Not x :) <$> xs
+      phi :: Maybe [Lit.Literal] -> Ands -> Maybe [Lit.Literal]
+      phi xs (NoAnds (OfAtom (Atom x))) = (Lit.Pos x :) <$> xs
+      phi xs (NoAnds ((NegAtom (Atom x)))) = (Lit.Neg x :) <$> xs
       phi _ (NoAnds (Neg{})) = Nothing
       phi _ (NoAnds (OfNested{})) = Nothing
       phi _ Ands{} = Nothing
@@ -247,9 +248,9 @@ instance FromGrammar Con where
   fromGrammar OfNoFixity{} = Nothing
   fromGrammar (WithPrecedence (NoArrows (OfAnds f))) = mkCon <$> foldlAnds phi (Just []) f
     where
-      phi :: Maybe [Literal] -> Neg -> Maybe [Literal]
-      phi xs (OfAtom (Atom x)) = (Literal x :) <$> xs
-      phi xs (NegAtom (Atom x)) = (Not x :) <$> xs
+      phi :: Maybe [Lit.Literal] -> Neg -> Maybe [Lit.Literal]
+      phi xs (OfAtom (Atom x)) = (Lit.Pos x :) <$> xs
+      phi xs (NegAtom (Atom x)) = (Lit.Neg x :) <$> xs
       phi _ Neg{} = Nothing
       phi _ OfNested{} = Nothing
   fromGrammar _ = Nothing
@@ -269,8 +270,8 @@ instance FromGrammar Cnf where
       go (WithPrecedence TopLevelBackImpl) = Nothing
       phi :: Maybe [Clause] -> Neg -> Maybe [Clause]
       phi xs (OfNested (Nested f)) = (:) <$> fromGrammar f  <*> xs
-      phi xs (OfAtom (Atom x)) = (mkClause [Literal x] :) <$> xs
-      phi xs (NegAtom (Atom x)) = (mkClause [Not x] :) <$> xs
+      phi xs (OfAtom (Atom x)) = (mkClause [Lit.Pos x] :) <$> xs
+      phi xs (NegAtom (Atom x)) = (mkClause [Lit.Neg x] :) <$> xs
       phi _ Neg{} = Nothing
 
 instance Parse Dnf
@@ -285,8 +286,8 @@ instance FromGrammar Dnf where
     where
       phi :: Maybe [Con] -> Ands -> Maybe [Con]
       phi xs (NoAnds (OfNested (Nested x))) = (:) <$> fromGrammar x <*> xs
-      phi xs (NoAnds (OfAtom (Atom x))) = (mkCon [Literal x] :) <$> xs
-      phi xs (NoAnds (NegAtom (Atom x))) = (mkCon [Not x] :) <$> xs
+      phi xs (NoAnds (OfAtom (Atom x))) = (mkCon [Lit.Pos x] :) <$> xs
+      phi xs (NoAnds (NegAtom (Atom x))) = (mkCon [Lit.Neg x] :) <$> xs
       phi _ (NoAnds Neg{}) = Nothing
       phi _ (Ands{}) = Nothing
 

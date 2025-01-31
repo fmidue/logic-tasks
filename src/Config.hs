@@ -71,7 +71,7 @@ data PickInst = PickInst {
 
 dPickInst :: PickInst
 dPickInst =  PickInst
-          { formulas = [InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']], InstCnf $ mkCnf [mkClause [Not 'A', Literal 'B']]]
+          { formulas = [InstCnf $ mkCnf [mkClause [Pos 'A', Neg 'B']], InstCnf $ mkCnf [mkClause [Neg 'A', Pos 'B']]]
           , correct = 1
           , showSolution = False
           , addText = Nothing
@@ -89,7 +89,7 @@ data MaxInst = MaxInst {
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
-          { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
+          { cnf = mkCnf [mkClause [Pos 'A', Neg 'B']]
           , showSolution = False
           , addText = Nothing
           , unicodeAllowed = False
@@ -108,7 +108,7 @@ data MinInst = MinInst {
 
 dMinInst :: MinInst
 dMinInst =  MinInst
-          { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
+          { dnf = mkDnf [mkCon [Pos 'A', Neg 'B']]
           , showSolution = False
           , addText = Nothing
           , unicodeAllowed = False
@@ -127,7 +127,7 @@ data FillInst = FillInst {
 
 dFillInst :: FillInst
 dFillInst =  FillInst
-          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
+          { formula = InstCnf $ mkCnf [mkClause [Pos 'A', Neg 'B']]
           , missing = [1,4]
           , missingValues = [True, True]
           , showSolution = False
@@ -146,7 +146,7 @@ data DecideInst = DecideInst {
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
-          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
+          { formula = InstCnf $ mkCnf [mkClause [Pos 'A', Neg 'B']]
           , changed = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -167,9 +167,9 @@ data StepInst = StepInst {
 
 dStepInst :: StepInst
 dStepInst =  StepInst
-          { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
-          , clause2 = mkClause [Literal 'A', Not 'C']
-          , solution = (Literal 'A', mkClause [Not 'C', Literal 'B'])
+          { clause1 = mkClause [Neg 'A', Neg 'C', Pos 'B']
+          , clause2 = mkClause [Pos 'A', Neg 'C']
+          , solution = (Pos 'A', mkClause [Neg 'C', Pos 'B'])
           , usesSetNotation = False
           , showSolution = False
           , addText = Nothing
@@ -191,13 +191,13 @@ data ResolutionInst = ResolutionInst {
 
 dResInst :: ResolutionInst
 dResInst = let
-            nAnCpB = mkClause [Not 'A', Not 'C', Literal 'B']
-            pAnC = mkClause [Literal 'A', Not 'C']
-            pC = mkClause [Literal 'C']
-            nB = mkClause [Not 'B']
-            pA = mkClause [Literal 'A']
-            nC = mkClause [Not 'C']
-            nCpB = mkClause [Not 'C', Literal 'B']
+            nAnCpB = mkClause [Neg 'A', Neg 'C', Pos 'B']
+            pAnC = mkClause [Pos 'A', Neg 'C']
+            pC = mkClause [Pos 'C']
+            nB = mkClause [Neg 'B']
+            pA = mkClause [Pos 'A']
+            nC = mkClause [Neg 'C']
+            nCpB = mkClause [Neg 'C', Pos 'B']
               in ResolutionInst
                 { clauses =
                     [ nAnCpB

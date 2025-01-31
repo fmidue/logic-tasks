@@ -238,7 +238,7 @@ completeGrade' StepInst{..} sol =
 genResStepClause :: Int -> Int -> [Char] -> Gen (Clause, Literal, [Literal])
 genResStepClause minClauseLength maxClauseLength usedLiterals = do
     rChar <- elements usedLiterals
-    resolveLit <- elements [Literal rChar, Not rChar]
+    resolveLit <- elements [Pos rChar, Neg rChar]
     let
       restLits = delete rChar usedLiterals
     minLen1 <- elements [minClauseLength-1..maxClauseLength-1]

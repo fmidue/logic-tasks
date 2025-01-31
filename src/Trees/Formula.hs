@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-{-# LANGUAGE InstanceSigs #-}
 module Trees.Formula where
 import Formula.Types (Formula(..))
 import Trees.Types (SynTree(..), BinOp(..))
@@ -10,17 +9,16 @@ import Data.List.Extra (nubSort)
 import Trees.Helpers (collectLeaves, treeNodes)
 
 instance Formula (SynTree BinOp Char) where
-  literals (Leaf x) = [F.Literal x]
-  literals (Not (Leaf x)) = [F.Not x]
+  literals (Leaf x) = [F.Pos x]
+  literals (Not (Leaf x)) = [F.Neg x]
   literals (Not x) = literals x
   literals (Binary _ l r) = nubSort $ literals l ++ literals r
 
-  atomics :: SynTree BinOp Char -> [F.Literal]
-  atomics = map F.Literal . nubSort . collectLeaves
+  atomics = nubSort . collectLeaves
 
   amount = fromIntegral . treeNodes
 
-  evaluate allocation (Leaf x) = snd <$> find (\(k,_) -> F.Literal x == k) allocation
+  evaluate allocation (Leaf x) = snd <$> find (\(k,_) -> x == k) allocation
   evaluate allocation (Not x) = not <$> evaluate allocation x
   evaluate allocation (Binary op l r) = applyMaybe (
     case op of

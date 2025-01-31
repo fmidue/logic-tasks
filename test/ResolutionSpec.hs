@@ -4,7 +4,7 @@ module ResolutionSpec where
 import Test.Hspec
 import Formula.Resolution (applySteps)
 import Data.Maybe (isJust, fromJust, isNothing)
-import Formula.Types (Clause(Clause), Literal (Literal,Not))
+import Formula.Types (Clause(Clause), Literal (..))
 import qualified Data.Set
 import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution))
 import Test.QuickCheck (Gen, choose, suchThat, forAll)
@@ -15,19 +15,19 @@ import Control.OutputCapable.Blocks.Generic (evalLangM)
 import FillSpec (validBoundsBase)
 
 justA :: Clause
-justA = Clause (Data.Set.fromList [Literal 'A'])
+justA = Clause (Data.Set.fromList [Pos 'A'])
 
 notAnotB :: Clause
-notAnotB = Clause (Data.Set.fromList [Not 'A', Not 'B'])
+notAnotB = Clause (Data.Set.fromList [Neg 'A', Neg 'B'])
 
 notAjustB :: Clause
-notAjustB = Clause (Data.Set.fromList [Not 'A', Literal 'B'])
+notAjustB = Clause (Data.Set.fromList [Neg 'A', Pos 'B'])
 
 notB :: Clause
-notB = Clause (Data.Set.fromList [Not 'B'])
+notB = Clause (Data.Set.fromList [Neg 'B'])
 
 justB :: Clause
-justB = Clause (Data.Set.fromList [Literal 'B'])
+justB = Clause (Data.Set.fromList [Pos 'B'])
 
 emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
@@ -54,7 +54,7 @@ spec = do
     it "should return a Just value if there are no clauses" $
       isJust $ applySteps [] []
     it "should return the original list of clauses if there are no steps to apply" $ do
-      let clauses = [Clause (Data.Set.fromList [Literal 'A'])]
+      let clauses = [Clause (Data.Set.fromList [Pos 'A'])]
       fromJust (applySteps clauses []) == clauses
     it "should return the correct list of clauses if the steps are able to be applied" $ do
       let clauses = [justA, notAnotB, notAjustB]

@@ -84,7 +84,7 @@ spec = do
     it "should generate a random cnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
-          all (\c -> Literal c `elem` atomics cnf') chars
+          all (\c -> c `elem` atomics cnf') chars
 
   describe "genDnf" $ do
     it "should return the empty disjunction when called with the empty list" $
@@ -106,4 +106,4 @@ spec = do
     it "should generate a random dnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
-          all (\c -> Literal c `elem` atomics dnf') chars
+          all (\c -> c `elem` atomics dnf') chars

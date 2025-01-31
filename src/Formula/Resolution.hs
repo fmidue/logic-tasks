@@ -53,7 +53,7 @@ resolvableWith c1 c2
     | length possible == 1 = Just (head possible)
     | otherwise = Nothing
   where
-    lits = atomics c1
+    lits = map Pos $ atomics c1 -- TODO: Should `literals` be used here?
     possible = filter (isJust . resolve c1 c2) lits
 
 
@@ -100,8 +100,8 @@ genRes (minLen,maxLen) steps lits = do
               then do
                 chosenChar <- elements xs
                 let
-                  pos = Set.singleton $ Literal chosenChar
-                  neg = Set.singleton $ Not chosenChar
+                  pos = Set.singleton $ Pos chosenChar
+                  neg = Set.singleton $ Neg chosenChar
                   startSet = Set.fromList [pos,neg]
                 buildClauses xs (startSet,[Res (Left (toClause pos),Left (toClause neg), (toClause empty,Nothing))]) 0
               else do
@@ -111,7 +111,7 @@ genRes (minLen,maxLen) steps lits = do
                 chosenClause <- setElements (if Set.null underMin then underMax else underMin)
                 let
                   chooseableLits = filter (\lit ->
-                    Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
+                    Pos lit `Set.notMember` chosenClause && Neg lit `Set.notMember` chosenClause) xs
                 if null chooseableLits
                     then buildClauses xs (ys,rs) (runs+1)
                     else do
@@ -124,10 +124,10 @@ genRes (minLen,maxLen) steps lits = do
                                 else choose (1,2)
                       chosenChar <- elements chooseableLits
                       if choice == 1
-                        then checkValidAndInsert (Literal chosenChar) chosenClause rs clauseSize 0
+                        then checkValidAndInsert (Pos chosenChar) chosenClause rs clauseSize 0
                         else do
                           firstAmount <- choose (1, clauseSize-1)
-                          chosenSign <- elements [Literal chosenChar, Not chosenChar]
+                          chosenSign <- elements [Pos chosenChar, Neg chosenChar]
                           checkValidAndInsert chosenSign chosenClause rs firstAmount firstAmount
       where
         checkValidAndInsert :: Literal -> Set Literal -> [ResStep] -> Int -> Int -> Gen (Set (Set Literal),[ResStep])

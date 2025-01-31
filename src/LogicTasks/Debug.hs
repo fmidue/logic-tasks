@@ -55,10 +55,10 @@ analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $
   tabulate "clause lengths" (map (show . size . literalSet) . toList $ clauseSet cnf) $
   tabulate "number of clauses" (pure . show . size $ clauseSet cnf) $
   tabulate "trivial clauses (containing both X and not X)" (map (show . isTrivial) . toList $ clauseSet cnf) $
-  tabulate "usage of atomic formulas" (pure . nubSort . map (\case (Literal x) -> x ; (Not x) -> x) $ literals cnf)
+  tabulate "usage of atomic formulas" (pure . nubSort . map (\case (Pos x) -> x ; (Neg x) -> x) $ literals cnf)
     True
 
 isTrivial :: Clause -> Bool
 isTrivial x =
   let (pos,neg) = partition isPositive $ toList $ literalSet x
-  in any (\case (Literal a) -> Not a `elem` neg; _ -> error "impossible") pos
+  in any (\case (Pos a) -> Neg a `elem` neg; _ -> error "impossible") pos

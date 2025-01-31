@@ -26,7 +26,7 @@ import Test.QuickCheck(Gen, suchThat)
 
 import Config ( FillConfig(..), FillInst(..), FormulaInst (..), FormulaConfig (..))
 import Formula.Table (gapsAt, readEntries)
-import Formula.Types (TruthValue, availableLetter, atomics, getTable, literals, truth)
+import Formula.Types (TruthValue, availableLetter, atomics, getTable, truth)
 import Util (isOutside, pairwiseCheck, preventWithHint, remove, withRatio, tryGen, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Helpers (extra)
 import Trees.Generate (genSynTree)
@@ -74,7 +74,7 @@ description inputHelp FillInst{..} = do
     translate $ do
       german  "Betrachten Sie die folgende Formel:"
       english "Consider the following formula:"
-    indent $ code $ availableLetter (literals formula) : " = " ++ displayFormula formula
+    indent $ code $ availableLetter (atomics formula) : " = " ++ displayFormula formula
     pure ()
   paragraph $ do
     translate $ do

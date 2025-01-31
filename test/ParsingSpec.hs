@@ -5,7 +5,7 @@ import Data.Either (isLeft, isRight)
 import Test.Hspec ( describe, it, Spec)
 
 import LogicTasks.Parsing (Parse(parser))
-import LogicTasks.Formula (Cnf, Dnf, mkDnf, mkCon, Literal (Literal, Not))
+import LogicTasks.Formula (Cnf, Dnf, mkDnf, mkCon, Literal (..))
 import Trees.Parsing (formulaParse)
 
 import Text.Parsec (parse)
@@ -48,7 +48,7 @@ spec = do
     it "correctly parses the pretty representation of a PickInst (cnf)" $
       either (const False) (== dPickInst) $ parse (parser @PickInst) "" $ show $ pretty dPickInst
     it "correctly parses the pretty representation of a PickInst (dnf)" $
-      let pickInst = dPickInst { formulas = [InstDnf (mkDnf [mkCon [Literal 'A', Not 'B']])] } in
+      let pickInst = dPickInst { formulas = [InstDnf (mkDnf [mkCon [Pos 'A', Neg 'B']])] } in
         either (const False) (== pickInst) $ parse (parser @PickInst) "" $ show $ pretty pickInst
     it "correctly parses the pretty representation of a PickInst (arbitrary)" $
       let pickInst = dPickInst { formulas = [InstArbitrary (TT.Binary TT.And (TT.Leaf 'A') (TT.Not (TT.Leaf 'B')))] } in

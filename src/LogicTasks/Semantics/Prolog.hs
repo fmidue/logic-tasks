@@ -250,9 +250,9 @@ transform (pc1,pc2) = (clause1, clause2, applyPol)
 
     polLookup p = (p,lit)
       where lit = case lookup p mapping of
-                    Just l1  -> Literal l1
+                    Just l1  -> Pos l1
                     Nothing  -> case lookup (flipPol p) mapping of
-                                  Just l2 -> Not l2
+                                  Just l2 -> Neg l2
                                   Nothing -> error "each literal should have a mapping."
 
     applyPol = map polLookup allPredicates

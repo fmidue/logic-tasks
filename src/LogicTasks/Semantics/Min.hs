@@ -62,7 +62,7 @@ description MinInst{..} = do
 
   paragraph $ indent $ do
     translate $ do
-      let formulaStr = show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
+      let formulaStr = show $ mkDnf [mkCon [Pos 'A', Neg 'B'], mkCon [Neg 'C', Neg 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
     translatedCode $ flip localise $ translations exampleCode
@@ -96,7 +96,7 @@ verifyQuiz = Max.verifyQuiz
 
 
 start :: Dnf
-start = mkDnf [mkCon [Literal 'A']]
+start = mkDnf [mkCon [Pos 'A']]
 
 partialGrade :: OutputCapable m => MinInst -> Delayed Dnf -> LangM m
 partialGrade inst = (partialGrade' inst `withDelayed` parser) displayParseError

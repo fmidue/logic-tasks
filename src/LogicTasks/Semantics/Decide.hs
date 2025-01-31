@@ -31,7 +31,7 @@ import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Table (flipAt, readEntries)
-import Formula.Types (atomics, availableLetter, getTable, literals)
+import Formula.Types (atomics, availableLetter, getTable)
 import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Helpers (extra)
 import Control.Monad (when)
@@ -89,7 +89,7 @@ description withDropdowns DecideInst{..} = do
     translate $ do
       english "Consider the following formula:"
       german "Betrachten Sie die folgende Formel:"
-    indent $ code $ availableLetter (literals formula) : " = " ++ displayFormula formula
+    indent $ code $ availableLetter (atomics formula) : " = " ++ displayFormula formula
     pure ()
   paragraph $ do
     translate $ do

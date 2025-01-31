@@ -34,7 +34,7 @@ import Formula.Types
 
 -- | Is the input a positive literal?
 isPositive :: Literal -> Bool
-isPositive (Not _) = False
+isPositive (Neg _) = False
 isPositive _ = True
 
 ---------------------------------------------------------------------------------------------------
