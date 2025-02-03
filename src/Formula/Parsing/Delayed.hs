@@ -5,7 +5,7 @@ module Formula.Parsing.Delayed (
   withDelayed,
   displayParseError,
   withDelayedSucceeding,
-  parseDelayedWith,
+  parseDelayedAbortOrProcess,
   parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
@@ -49,16 +49,17 @@ displayParseError err = do
   english $ show err
   german $ show err
 
-parseDelayedWith ::
+parseDelayedAbortOrProcess ::
   OutputCapable m
-  => Parser a
+  => (a -> LangM' m b)
+  -> Parser a
   -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
   -> Delayed a
-  -> Either (LangM m) (LangM' m a)
-parseDelayedWith p messaging fallBackParser delayedAnswer = bimap
+  -> Either (LangM m) (LangM' m b)
+parseDelayedAbortOrProcess whatToDo p messaging fallBackParser delayedAnswer = bimap
   (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
-  pure
+  whatToDo
   $ parseDelayed (fully p) delayedAnswer
 
 parseDelayedWithAndThen ::
