@@ -5,6 +5,7 @@ module Formula.Parsing.Delayed (
   withDelayed,
   displayParseError,
   withDelayedSucceeding,
+  parseDelayedWith,
   parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
@@ -16,6 +17,7 @@ import ParsingHelpers (fully)
 
 import Control.OutputCapable.Blocks (LangM, LangM', Language, OutputCapable, english, german)
 import Control.Monad.State (State)
+import Data.Bifunctor (bimap)
 import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
@@ -46,6 +48,18 @@ displayParseError :: ParseError -> State (Map Language String) ()
 displayParseError err = do
   english $ show err
   german $ show err
+
+parseDelayedWith ::
+  OutputCapable m
+  => Parser a
+  -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
+  -> Parser ()
+  -> Delayed a
+  -> Either (LangM m) (LangM' m a)
+parseDelayedWith p messaging fallBackParser delayedAnswer = bimap
+  (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
+  pure
+  $ parseDelayed (fully p) delayedAnswer
 
 parseDelayedWithAndThen ::
   OutputCapable m
