@@ -1,0 +1,99 @@
+---
+name: Compile and Lint Flex-Tasks
+
+env:
+  tasks: src
+  config: .github/actions/test-flex
+  script: src
+
+on:
+  workflow_run:
+    workflows: ["Haskell CI"]
+    types: completed
+
+permissions: read-all
+
+jobs:
+  test_flex:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: zsh hlint expect colorized-logs
+          version: 1.0
+
+      - name: Cache DB
+        id: restore-cache-db
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.tasks }}/root
+          key: ${{ hashFiles('stack.yaml') }}-${{ hashFiles(format('{0}/package.yaml', env.config)) }}
+          restore-keys: |
+            ${{ hashFiles('stack.yaml') }}
+
+      - name: Checkout Setup Repository
+        uses: actions/checkout@v4
+        if: steps.restore-cache-db.outputs.cache-hit != 'true'
+        with:
+          repository: fmidue/haskell-template-setup
+          path: haskell-template-setup
+
+      - name: Setup DB
+        if: steps.restore-cache-db.outputs.cache-hit != 'true'
+        run: |
+          set -ex
+          sudo mv -f stack.yaml ./haskell-template-setup
+          sudo mv -f ./${{ env.config }}/package.yaml ./haskell-template-setup
+          cd haskell-template-setup
+          this_repo="https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          sed -i "/extra-deps/a\  - git: $this_repo\n    commit: ${{ github.sha }}" stack.yaml
+          sed -i "s@/autotool/default@$(realpath "$PWD"/../${{ env.tasks }}/root)@" env
+          ./create.sh
+          sudo mv root ../${{ env.tasks }}
+          set +ex
+
+      - name: Determine GHC-Version
+        id: ghc-version
+        run: |
+          set -ex
+          cd ${{ env.tasks }}
+          ghc_file="$(find root/pkgdb -name "ghci*" -print -quit)"
+          temp="${ghc_file##*/ghci-}"
+          ghc_version="${temp%-*.conf*}"
+          echo version="$ghc_version" >> $GITHUB_OUTPUT
+          set +ex
+
+      - name: Install GHC
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: ${{steps.ghc-version.outputs.version}}
+
+      - name: Run Test Script
+        run: |
+          set -ex
+          cd ${{ env.tasks }}
+          find . -name '*.txt' -exec ../${{ env.script }}/test.sh {} root \;
+          set +ex
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        id: upload-artifact
+        with:
+          name: reports
+          path: ${{ env.tasks }}/*/*.html
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Link Comment
+        uses: peter-evans/commit-comment@v3
+        with:
+          body: |
+            Changes in task folder or test-flex workflow. You may review the test results:
+
+            [Download Reports](${{ steps.upload-artifact.outputs.artifact-url }})
