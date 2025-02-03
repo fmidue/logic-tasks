@@ -17,7 +17,7 @@ import ParsingHelpers (fully)
 
 import Control.OutputCapable.Blocks (LangM, LangM', Language, OutputCapable, english, german)
 import Control.Monad.State (State)
-import Data.Bifunctor (bimap)
+import Data.Functor (($>))
 import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
@@ -51,16 +51,16 @@ displayParseError err = do
 
 parseDelayedAbortOrProcess ::
   OutputCapable m
-  => (a -> LangM' m b)
-  -> Parser a
+  => Parser a
   -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
   -> Delayed a
-  -> Either (LangM m) (LangM' m b)
-parseDelayedAbortOrProcess whatToDo p messaging fallBackParser delayedAnswer = bimap
-  (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
-  whatToDo
-  $ parseDelayed (fully p) delayedAnswer
+  -> (a -> LangM' m b)
+  -> LangM' m b
+parseDelayedAbortOrProcess p messaging fallBackParser delayedAnswer whatToDo =
+  case parseDelayed (fully p) delayedAnswer of
+    Left err -> reject (messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer) err) $> undefined
+    Right x  -> whatToDo x
 
 parseDelayedWithAndThen ::
   OutputCapable m
