@@ -59,7 +59,12 @@ parseDelayedAbortOrProcess ::
   -> LangM' m b
 parseDelayedAbortOrProcess p messaging fallBackParser delayedAnswer whatToDo =
   case parseDelayed (fully p) delayedAnswer of
-    Left err -> reject (messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer) err) $> undefined
+    Left err -> reject (
+                  messaging (either Just (const Nothing) $
+                    parseDelayedRaw (fully fallBackParser) delayedAnswer)
+                    err
+                )
+                $> undefined
     Right x  -> whatToDo x
 
 parseDelayedWithAndThen ::
