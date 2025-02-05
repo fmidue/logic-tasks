@@ -5,7 +5,7 @@ module Formula.Parsing.Delayed (
   withDelayed,
   displayParseError,
   withDelayedSucceeding,
-  parseDelayedAbortOrProcess,
+  withDelayedReportOrSucceed,
   parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
@@ -23,14 +23,10 @@ import Control.OutputCapable.Blocks (
   ReportT,
   english,
   german,
-  indent,
-  translate
-  )
-import Control.OutputCapable.Blocks.Generic (
-  toAbort,
   )
 import Control.Monad.State (State)
 import Data.Map (Map)
+import FlexTask.Generic.Parse (parseWithOrReport)
 
 import LogicTasks.Helpers (reject)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
@@ -61,24 +57,20 @@ displayParseError err = do
   english $ show err
   german $ show err
 
-parseDelayedAbortOrProcess ::
+withDelayedReportOrSucceed ::
   (Monad m, OutputCapable (ReportT o m))
   => Parser a
   -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
   -> String
-  -> (a -> LangM' (ReportT o m) b)
-  -> LangM' (ReportT o m) b
-parseDelayedAbortOrProcess p messaging fallBackParser answerString whatToDo =
-  case parseDelayed (fully p) asDelayed of
-    Left err -> toAbort (indent $ translate $
-                  messaging (either Just (const Nothing) $
-                    parseDelayedRaw (fully fallBackParser) asDelayed)
-                    err
-                )
-    Right x  -> whatToDo x
-  where
-    asDelayed = delayed answerString
+  -> LangM' (ReportT o m) a
+withDelayedReportOrSucceed p messaging fallBackParser =
+  parseWithOrReport
+    (parseDelayed (fully p))
+    (\answer -> messaging (either Just (const Nothing) $
+                    parseDelayedRaw (fully fallBackParser) answer)
+    )
+    . delayed
 
 parseDelayedWithAndThen ::
   OutputCapable m
