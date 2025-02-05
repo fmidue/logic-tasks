@@ -15,9 +15,21 @@ import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
 import ParsingHelpers (fully)
 
-import Control.OutputCapable.Blocks (LangM, LangM', Language, OutputCapable, english, german)
+import Control.OutputCapable.Blocks (
+  LangM,
+  LangM',
+  Language,
+  OutputCapable,
+  ReportT,
+  english,
+  german,
+  indent,
+  translate
+  )
+import Control.OutputCapable.Blocks.Generic (
+  toAbort,
+  )
 import Control.Monad.State (State)
-import Data.Functor (($>))
 import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
@@ -50,21 +62,20 @@ displayParseError err = do
   german $ show err
 
 parseDelayedAbortOrProcess ::
-  OutputCapable m
+  (Monad m, OutputCapable (ReportT o m))
   => Parser a
   -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
   -> Delayed a
-  -> (a -> LangM' m b)
-  -> LangM' m b
+  -> (a -> LangM' (ReportT o m) b)
+  -> LangM' (ReportT o m) b
 parseDelayedAbortOrProcess p messaging fallBackParser delayedAnswer whatToDo =
   case parseDelayed (fully p) delayedAnswer of
-    Left err -> reject (
+    Left err -> toAbort (indent $ translate $
                   messaging (either Just (const Nothing) $
                     parseDelayedRaw (fully fallBackParser) delayedAnswer)
                     err
                 )
-                $> undefined
     Right x  -> whatToDo x
 
 parseDelayedWithAndThen ::
