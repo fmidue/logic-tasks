@@ -66,17 +66,19 @@ parseDelayedAbortOrProcess ::
   => Parser a
   -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
-  -> Delayed a
+  -> String
   -> (a -> LangM' (ReportT o m) b)
   -> LangM' (ReportT o m) b
-parseDelayedAbortOrProcess p messaging fallBackParser delayedAnswer whatToDo =
-  case parseDelayed (fully p) delayedAnswer of
+parseDelayedAbortOrProcess p messaging fallBackParser answerString whatToDo =
+  case parseDelayed (fully p) asDelayed of
     Left err -> toAbort (indent $ translate $
                   messaging (either Just (const Nothing) $
-                    parseDelayedRaw (fully fallBackParser) delayedAnswer)
+                    parseDelayedRaw (fully fallBackParser) asDelayed)
                     err
                 )
     Right x  -> whatToDo x
+  where
+    asDelayed = delayed answerString
 
 parseDelayedWithAndThen ::
   OutputCapable m
