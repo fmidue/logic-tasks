@@ -5,7 +5,6 @@ module Formula.Parsing.Delayed (
   withDelayed,
   displayParseError,
   withDelayedSucceeding,
-  withDelayedReportOrSucceed,
   parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
@@ -20,13 +19,11 @@ import Control.OutputCapable.Blocks (
   LangM',
   Language,
   OutputCapable,
-  ReportT,
   english,
   german,
   )
 import Control.Monad.State (State)
 import Data.Map (Map)
-import FlexTask.Generic.Parse (parseWithOrReport)
 
 import LogicTasks.Helpers (reject)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
@@ -56,21 +53,6 @@ displayParseError :: ParseError -> State (Map Language String) ()
 displayParseError err = do
   english $ show err
   german $ show err
-
-withDelayedReportOrSucceed ::
-  (Monad m, OutputCapable (ReportT o m))
-  => Parser a
-  -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
-  -> Parser ()
-  -> String
-  -> LangM' (ReportT o m) a
-withDelayedReportOrSucceed p messaging fallBackParser =
-  parseWithOrReport
-    (parseDelayed (fully p))
-    (\answer -> messaging (either Just (const Nothing) $
-                    parseDelayedRaw (fully fallBackParser) answer)
-    )
-    . delayed
 
 parseDelayedWithAndThen ::
   OutputCapable m
