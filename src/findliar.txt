@@ -255,7 +255,7 @@ checkSemantics (_isSemanticEqual,(lying,solutionValues,formulas,solF)) _ (f1,f2,
     parser
     $ delayed $ stringTuple4 f1 f2 f3 f
   where
-    (headers,columns) = unzip xs
+    (_,columns) = unzip xs
 
 checkSemantics' :: OutputCapable m => [SynTree BinOp Char] -> [Namen] -> [Bool] -> [[Maybe TruthValue]] -> SynTree BinOp Char
   -> [Namen] -> (PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char) -> Rated m
