@@ -222,7 +222,7 @@ checkSyntax _ _ (f1,f2,f3,f,Table xs, _) =
 
 checkSyntax' :: OutputCapable m => [[Maybe TruthValue]] -> LangM m
 checkSyntax' columns = do
-  when (not (nubOrd atomicRows == atomicRows)) $ refuse $ indent $ bothLangs $
+  when (nubOrd atomicRows /= atomicRows) $ refuse $ indent $ bothLangs $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
       "Es müssen alle Belegungen genau einmal vorkommen."
   when (atomicCols == map reverse #{startingTable}) $ refuse $ indent $ bothLangs $
@@ -277,10 +277,10 @@ checkSemantics' formulas lying solutionValues columns solF n (f1,f2,f3,f) = do
   let correctNames = n == lying
   yesNo correctNames $ bothLangs
     "Auswahl der Lügner ist korrekt?"
-  let points = ((if (and correctParts) then 0.4 else 0.0) +
-                (if correctFormula then 0.2 else 0.0) +
-                (if correctLast then 0.2 else 0.0) +
-                (if correctNames then 0.2 else 0.0))
+  let points = (if (and correctParts) then 0.4 else 0.0) +
+               (if correctFormula then 0.2 else 0.0) +
+               (if correctLast then 0.2 else 0.0) +
+               (if correctNames then 0.2 else 0.0)
   res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
   pure res
     where
