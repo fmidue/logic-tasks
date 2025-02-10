@@ -14,7 +14,17 @@ import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
 import ParsingHelpers (fully)
 
-import Control.OutputCapable.Blocks (LangM, LangM', OutputCapable, english, german, indent, refuse, text, translate)
+import Control.OutputCapable.Blocks (
+  LangM,
+  LangM',
+  OutputCapable,
+  english,
+  german,
+  indent,
+  refuse,
+  text,
+  translate
+  )
 
 import Formula.Parsing.Delayed.Internal (Delayed(..))
 
