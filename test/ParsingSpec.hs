@@ -7,7 +7,6 @@ import Test.Hspec ( describe, it, Spec)
 import LogicTasks.Parsing (Parse(parser))
 import LogicTasks.Formula (Cnf, Dnf, mkDnf, mkCon, Literal (Literal, Not))
 import Trees.Parsing (formulaParse)
-import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 
 import Text.Parsec (parse)
 import Formula.Types (ResStep)
@@ -25,11 +24,6 @@ spec = do
       isLeft $ formulaParse "A/\\B/\\C"
     it "correctly rejects stuff with strange spaces" $
       isLeft $ formulaParse "A/ \\B"
-  describe "superfluousBracketsExcParser" $ do
-    it "correctly recognizes stuff that isn't strictly well-bracketed" $
-      isRight $ superfluousBracketsExcParser "A/\\B/\\C"
-    it "correctly rejects stuff with strange spaces" $
-      isLeft $ superfluousBracketsExcParser "A/ \\B"
   describe "parser @Literal" $ do
     it "correctly recognizes negation notations" $
       and

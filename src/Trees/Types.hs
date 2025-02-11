@@ -13,6 +13,7 @@ module Trees.Types
     showOperator,
     showOperatorNot,
     allBinaryOperators,
+    toSynTree,
     ) where
 
 
@@ -43,7 +44,7 @@ data SynTree o c
     = Binary o (SynTree o c) (SynTree o c)
     | Not (SynTree o c)
     | Leaf c
-  deriving (Eq, Generic, Ord, Show, Functor, Foldable, Traversable)
+  deriving (Data, Eq, Generic, Ord, Show, Functor, Foldable, Traversable)
 
 instance Applicative (SynTree o) where
   pure = Leaf
@@ -90,12 +91,14 @@ instance Show (PropFormula Char) where
 
 
 instance ToSAT (PropFormula Char) where
-  convert = convert . toTree
-    where
-      toTree (Atomic c) = Leaf c
-      toTree (Neg p) = Not $ toTree p
-      toTree (Brackets p) = toTree p
-      toTree (Assoc op l r) = Binary op (toTree l) (toTree r)
+  convert = convert . toSynTree
+
+
+toSynTree :: PropFormula a -> SynTree BinOp a
+toSynTree (Atomic c) = Leaf c
+toSynTree (Neg p) = Not $ toSynTree p
+toSynTree (Brackets p) = toSynTree p
+toSynTree (Assoc op l r) = Binary op (toSynTree l) (toSynTree r)
 
 
 newtype FormulaAnswer = FormulaAnswer {maybeForm :: Maybe (PropFormula Char)} deriving (Eq, Generic)

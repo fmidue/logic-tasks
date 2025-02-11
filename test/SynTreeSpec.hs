@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wwarn=x-partial #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}

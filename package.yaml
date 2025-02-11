@@ -14,6 +14,7 @@ dependencies:
   - wl-pprint-text
   - parsec
   - text
+  - flex-tasks
   - output-blocks >= 0.2
   - pretty-simple
   - latex-svg-image >= 0.2
@@ -22,10 +23,12 @@ dependencies:
   - SHA
   - directory
   - math-functions
+  - yesod
 
 library:
   source-dirs: src
   exposed-modules:
+    - LogicTasks.Forms
     - LogicTasks.Formula
     - LogicTasks.Keys
     - LogicTasks.Table
@@ -60,7 +63,6 @@ library:
     - Tasks.LegalProposition.Quiz
     - Tasks.LegalProposition.Helpers
     - Tasks.SuperfluousBrackets.Config
-    - Tasks.SuperfluousBrackets.Parsing
     - Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
     - Tasks.SuperfluousBrackets.Quiz
     - Tasks.TreeToFormula.Config
@@ -96,7 +98,6 @@ library:
     - -fno-warn-unused-do-bind
     - -Werror
     - -Wwarn=incomplete-uni-patterns
-    - -Wwarn=x-partial
     - -Wwarn=unrecognised-warning-flags # should be removed when on lts-22 or later
     - -fdefer-typed-holes
 

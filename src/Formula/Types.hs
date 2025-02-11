@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wwarn=x-partial #-}
 {-# language DeriveGeneric #-}
 {-# language DuplicateRecordFields #-}
 
@@ -50,7 +51,8 @@ import Numeric.SpecFunctions as Math (choose)
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
 
-newtype TruthValue = TruthValue {truth :: Bool} deriving (Show, Typeable, Generic)
+newtype TruthValue = TruthValue {truth :: Bool}
+  deriving (Eq, Ord, Show, Typeable, Generic)
 
 
 

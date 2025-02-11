@@ -29,7 +29,7 @@ data SubTreeConfig =
     {
       syntaxTreeConfig :: SynTreeConfig
     , allowSameSubTree :: Bool
-    , minSubTrees :: Integer
+    , subTreeAmount :: Integer
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
@@ -42,7 +42,7 @@ defaultSubTreeConfig =
     SubTreeConfig
     { syntaxTreeConfig = defaultSynTreeConfig
     , allowSameSubTree = True
-    , minSubTrees = 3
+    , subTreeAmount = 3
     , extraText = Nothing
     , printSolution = False
     , offerUnicodeInput = False
@@ -57,11 +57,11 @@ checkSubTreeConfig subConfig@SubTreeConfig {..} =
 
 
 checkAdditionalConfig :: OutputCapable m => SubTreeConfig -> LangM m
-checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, minSubTrees}
-    | minSubTrees < 2 = reject $ do
+checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, subTreeAmount}
+    | subTreeAmount < 2 = reject $ do
         english "The task makes no sense if not at least two subtrees are generated."
         german "Es müssen mindestens zwei Unterbäume erzeugt werden."
-    | minNodes - maxLeavesForNodes minNodes < minSubTrees = reject $ do
+    | minNodes - maxLeavesForNodes minNodes < subTreeAmount = reject $ do
         english "These settings do not allow for enough non-atomic subtrees."
         german "Mit diesen Einstellungen können nicht genügend nicht-triviale Unterbäume erzeugt werden."
     | otherwise = pure()
@@ -72,7 +72,7 @@ data SubTreeInst =
     SubTreeInst
     { tree :: SynTree BinOp Char
     , correctTrees :: Set (SynTree BinOp Char)
-    , minInputTrees :: Integer
+    , inputTreeAmount :: Integer
     , showArrowOperators :: Bool
     , showSolution :: Bool
     , addText :: Maybe (Map Language String)

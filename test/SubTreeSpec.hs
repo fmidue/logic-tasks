@@ -28,12 +28,12 @@ validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
     allowSameSubTree <- elements [True,False]
     syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((4<=) . minNodes)
-    minSubTrees <- choose (2, minNodes - maxLeavesForNodes minNodes)
+    subTreeAmount <- choose (2, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {
         syntaxTreeConfig
       , allowSameSubTree
-      , minSubTrees
+      , subTreeAmount
       , extraText = Nothing
       , printSolution = False
       , offerUnicodeInput = False
@@ -65,7 +65,7 @@ spec = do
     it "it should generate not less Syntax Sub tree number it required as excepted" $
       forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
-          fromIntegral (size correctTrees) >= minSubTrees
+          fromIntegral (size correctTrees) >= subTreeAmount
     it "all subformulas are the sublist of the formula" $
       forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->

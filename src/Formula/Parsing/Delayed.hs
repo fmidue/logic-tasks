@@ -14,11 +14,18 @@ import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
 import ParsingHelpers (fully)
 
-import Control.OutputCapable.Blocks (LangM, LangM', Language, OutputCapable, english, german)
-import Control.Monad.State (State)
-import Data.Map (Map)
+import Control.OutputCapable.Blocks (
+  LangM,
+  LangM',
+  OutputCapable,
+  english,
+  german,
+  indent,
+  refuse,
+  text,
+  translate
+  )
 
-import LogicTasks.Helpers (reject)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
 
 delayed :: String -> Delayed a
@@ -34,23 +41,21 @@ withDelayed ::
   OutputCapable m
   => (a -> LangM m)
   -> Parser a
-  -> (ParseError -> State (Map Language String) ())
+  -> (ParseError -> LangM m)
   -> Delayed a
   -> LangM m
 withDelayed whatToDo p displayError delayedAnswer =
   case parseDelayed (fully p) delayedAnswer of
-    Left err -> reject (displayError err)
+    Left err -> refuse $ indent $ displayError err
     Right x -> whatToDo x
 
-displayParseError :: ParseError -> State (Map Language String) ()
-displayParseError err = do
-  english $ show err
-  german $ show err
+displayParseError :: OutputCapable m => ParseError -> LangM m
+displayParseError = text . show
 
 parseDelayedWithAndThen ::
   OutputCapable m
   => Parser a
-  -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
+  -> (Maybe ParseError -> ParseError -> LangM m)
   -> Parser ()
   -> (a -> LangM m)
   -> Delayed a
@@ -72,26 +77,26 @@ withDelayedSucceeding whatToDo p delayedAnswer =
     Left err -> error $ "It should be impossible here, and yet the following ParseError was encountered: " ++ show err
     Right x -> whatToDo x
 
-complainAboutMissingParenthesesIfNotFailingOn :: Maybe a -> ParseError -> State (Map Language String) ()
+complainAboutMissingParenthesesIfNotFailingOn :: OutputCapable m => Maybe a -> ParseError -> LangM m
 complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
   case maybeHereError of
-      Just _ -> do
-        german $ show latentError
-        english $ show latentError
-      Nothing -> do
-        german $  unlines
-          [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
-          , "Bitte prüfen Sie, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit der Eingaben genügt." {- german -}
-          , "Insbesondere sollten Sie genügend Klammern benutzen." {- german -}
-          ]
-        english $ unlines
-          [ "Unable to read submission."
-          , "Please make sure that the arrangement of symbols adheres to the rules for well-formed inputs."
-          , "In particular, you should use enough parentheses."
-          ]
+      Just _ ->
+        text $ show latentError
+      Nothing ->
+        translate $ do
+          german $  unlines
+            [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
+            , "Bitte prüfen Sie, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit der Eingaben genügt." {- german -}
+            , "Insbesondere sollten Sie genügend Klammern benutzen." {- german -}
+            ]
+          english $ unlines
+            [ "Unable to read submission."
+            , "Please make sure that the arrangement of symbols adheres to the rules for well-formed inputs."
+            , "In particular, you should use enough parentheses."
+            ]
 
-complainAboutWrongNotation :: State (Map Language String) ()
-complainAboutWrongNotation = do
+complainAboutWrongNotation :: OutputCapable m => LangM m
+complainAboutWrongNotation = translate $ do
   german $ unlines
     [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
     , "Bitte stellen Sie sicher, dass Sie die geforderte Notation verwenden." {- german -}

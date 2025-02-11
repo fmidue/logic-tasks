@@ -38,7 +38,7 @@ task04 = SubTreeConfig
     , minUniqueBinOperators = 2
     }
   , allowSameSubTree = False
-  , minSubTrees = 3
+  , subTreeAmount = 3
   , extraText = Just (listToFM
                       [ (English, "It does not matter in which order the formulas appear in the list.")
                       , (German, "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Liste stehen.") {- german -}

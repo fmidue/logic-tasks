@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS_GHC -Wwarn=x-partial #-}
 {-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
 

@@ -10,6 +10,7 @@ build-type:     Simple
 
 library
   exposed-modules:
+      LogicTasks.Forms
       LogicTasks.Formula
       LogicTasks.Keys
       LogicTasks.Table
@@ -44,7 +45,6 @@ library
       Tasks.LegalProposition.Quiz
       Tasks.LegalProposition.Helpers
       Tasks.SuperfluousBrackets.Config
-      Tasks.SuperfluousBrackets.Parsing
       Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
       Tasks.SuperfluousBrackets.Quiz
       Tasks.TreeToFormula.Config
@@ -82,7 +82,7 @@ library
       Paths_logic_tasks
   hs-source-dirs:
       src
-  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -Wwarn=x-partial -Wwarn=unrecognised-warning-flags -fdefer-typed-holes
+  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -Wwarn=unrecognised-warning-flags -fdefer-typed-holes
   build-depends:
       QuickCheck >=2.14
     , SHA
@@ -91,6 +91,7 @@ library
     , containers
     , directory
     , extra
+    , flex-tasks
     , hspec
     , latex-svg-image >=0.2
     , math-functions
@@ -103,6 +104,7 @@ library
     , text
     , utf8-string
     , wl-pprint-text
+    , yesod
   default-language: Haskell2010
 
 test-suite src-test
@@ -137,6 +139,7 @@ test-suite src-test
     , containers
     , directory
     , extra
+    , flex-tasks
     , hspec
     , latex-svg-image >=0.2
     , logic-tasks
@@ -150,4 +153,5 @@ test-suite src-test
     , text
     , utf8-string
     , wl-pprint-text
+    , yesod
   default-language: Haskell2010
