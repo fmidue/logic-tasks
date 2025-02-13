@@ -1,16 +1,21 @@
+{-# language DeriveDataTypeable#-}
+
 module Global where
 
 
 import Control.OutputCapable.Blocks
 import LogicTasks.Formula (TruthValue(..))
-
+import Trees.Types (SynTree(..), BinOp(..))
+import Data.Text (Text,pack)
+import Data.Data (Data)
 
 
 newtype Table = Table [(Maybe String, [Maybe TruthValue])] deriving (Eq,Show)
 
-data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord)
+data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord,Data)
 
 type Submission = (String,String,String,String,Table,[Namen])
+type TaskData = ([Text],([Namen],[Bool],[SynTree BinOp Char],SynTree BinOp Char))
 
 
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
@@ -43,6 +48,7 @@ import Data.Char               (digitToInt)
 import Data.List               (transpose, sortOn)
 import Data.String             (fromString)
 import Data.String.Interpolate (i)
+import Data.Text               (Text)
 import FlexTask.FormUtil (
   ($$>),
   addCss,
@@ -56,6 +62,7 @@ import FlexTask.Generic.Form (
   single,
   buttonsEnum
   )
+import FlexTask.Types          (HtmlDict)
 import FindLiarTask
 import LogicTasks.Forms        (tableForm)
 import LogicTasks.Formula      (TruthValue(..))
@@ -74,7 +81,7 @@ instance MonadFail Gen where
   fail = error
 
 
-getTask :: Gen (String, String, IO ([String], String))
+getTask :: Gen (TaskData, String, IO ([Text], HtmlDict))
 getTask = do
     d@(x, y, z, _) <- taskData
     let (formulas, hints) = makeHintsAndFormula d
@@ -86,7 +93,7 @@ getTask = do
         solutionValues = map snd dataSortedOnName
         combinedFormula = foldr1 (Binary And) formulasSorted
 
-    pure (show (hintsSorted, (listOfLiars, solutionValues, formulasSorted, combinedFormula)),
+    pure ((hintsSorted, (listOfLiars, solutionValues, formulasSorted, combinedFormula)),
           checkers,
           getFormData form)
   where
@@ -209,7 +216,7 @@ stringList xs = '[': intercalate "," (map stringMaybe xs) ++ "]"
     stringMaybe (Just s) = s
 
 
-checkSyntax :: OutputCapable m => a -> FilePath -> Submission -> LangM m
+checkSyntax :: OutputCapable m => FilePath -> a -> Submission -> LangM m
 checkSyntax _ _ (f1,f2,f3,f,Table xs, _) =
   parseDelayedWithAndThen
     (parser :: Parser ([Maybe (PropFormula Char)], PropFormula Char, PropFormula Char, PropFormula Char, PropFormula Char))
@@ -248,8 +255,8 @@ generateTruthTable solutionValues =
      | i <- [0..7] ]]
 
 
-checkSemantics :: OutputCapable m => (a,([Namen],[Bool],[SynTree BinOp Char],SynTree BinOp Char)) -> FilePath -> Submission -> Rated m
-checkSemantics (_isSemanticEqual,(lying,solutionValues,formulas,solF)) _ (f1,f2,f3,f,Table xs,names) =
+checkSemantics :: OutputCapable m => FilePath -> (a,([Namen],[Bool],[SynTree BinOp Char],SynTree BinOp Char)) -> Submission -> Rated m
+checkSemantics _ (_isSemanticEqual,(lying,solutionValues,formulas,solF)) (f1,f2,f3,f,Table xs,names) =
   withDelayedSucceeding
     (checkSemantics' formulas lying solutionValues columns solF names)
     parser
@@ -305,9 +312,10 @@ import LogicTasks.Keys (keyHeading, basicOpKey, arrowsKey)
 
 import Global
 import Trees.Types
+import Data.Text (Text, unpack)
 
 
-description :: OutputCapable m => FilePath -> ([String],a) -> LangM m
+description :: OutputCapable m => FilePath -> ([Text],a) -> LangM m
 description _ (hints,_) = do
     paragraph $ bothLangs
       ("Ein Logiker irrt auf dem Campus herum, um seinen Hörsaal zu finden. " ++
@@ -315,7 +323,7 @@ description _ (hints,_) = do
        "Diese Studierenden sagen (jeweils) immer die Wahrheit oder lügen immer. " ++
        "Um die Zuverlässigkeit der Antworten zu überprüfen, fragt er die drei Studierenden, ob die anderen lügen, " ++
        "und erhält folgende Antworten:")
-    enumerateM (bothLangs . (++ ")") . show) (zip [1..] (map bothLangs hints))
+    enumerateM (bothLangs . (++ ")") . show) (zip [1..] (map (bothLangs . unpack) hints))
     paragraph $ bothLangs
       ("Übersetzen Sie die Hinweise und die Kombination dieser jeweils in eine aussagenlogische Formel. " ++
        "Geben Sie die Formeln in die entsprechend benannten Textfelder ein.")
@@ -342,8 +350,8 @@ import Data.List.Split         (chunksOf)
 import FlexTask.Generic.Parse (
   Parse(..),
   parseInstanceMultiChoice,
-  escaped,
-  useParser
+  parseWithOrReport,
+  reportWithFieldNumber
   )
 import LogicTasks.Formula      (TruthValue)
 import Text.Parsec             (ParseError)
@@ -352,6 +360,7 @@ import Trees.Parsing           ()
 import qualified Formula.Parsing as FP
 
 import Global
+
 
 
 
@@ -372,5 +381,12 @@ instance Parse Table where
 
 
 
-parseSubmission :: String -> Either ParseError Submission
-parseSubmission = useParser parseInput
+parseSubmission :: (Monad m, OutputCapable (ReportT o m)) => String -> LangM' (ReportT o m) Submission
+parseSubmission = parseWithOrReport formParser reportWithFieldNumber $>>= \(f1,f2,f3,f,Table xs,names) -> undefined
+  where
+    parseIt =
+      parseWithFallback
+        (fully parser)
+        (displayInputAnd complainAboutMissingParenthesesIfNotFailingOn)
+        (fully formulaSymbolParser)
+
