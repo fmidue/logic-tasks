@@ -7,12 +7,14 @@ import Data.List ((\\))
 import Data.Char (isLetter)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, within)
+import Data.Tuple.Extra (thd3)
 
 import Tasks.LegalProposition.Config (
   LegalPropositionConfig (..),
   LegalPropositionInst(..),
   checkLegalPropositionConfig,
-  defaultLegalPropositionConfig)
+  defaultLegalPropositionConfig,
+  propFormulaIsErroneous)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst)
@@ -23,7 +25,7 @@ import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
 import TestHelpers (deleteBrackets, deleteSpaces)
 import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (isJust,isNothing)
+import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.LegalProposition.Helpers (formulaAmount)
@@ -42,7 +44,7 @@ validBoundsLegalProposition = do
             , illegals
             , bracketFormulas
             , extraText = Nothing
-            , printSolution = False
+            , printSolution = Nothing
         }
 
 timeout :: Int
@@ -61,13 +63,13 @@ spec = do
             within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
-                      forAll (deleteSpaces <$> illegalDisplay synTree) $
+                      forAll (deleteSpaces . fst <$> illegalDisplay synTree) $
                       all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
         it "the string after illegalDisplay cannot be parsed" $
             within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
-                      forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
+                      forAll (fst <$> illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
     describe "bracket display" $ do
         it "the String after bracketDisplay just add a bracket " $
             within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
@@ -88,12 +90,12 @@ spec = do
         it "the generateLegalPropositionInst should generate expected illegal number" $
             within timeout $ forAll validBoundsLegalProposition $ \config ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  let serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) (zip [1..] pseudoFormulas) in
-                    all (\x -> isLeft (formulaParse (fst (pseudoFormulas !! (x - 1))))) serialsOfWrong
+                  let serialsOfWrong = [i | (i,info,_) <- formulaInfos, propFormulaIsErroneous info] in
+                    all (\x -> isLeft (formulaParse (thd3 (formulaInfos !! (x - 1))))) serialsOfWrong
         it "the generateLegalPropositionInst should generate expected legal number" $
             within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  let serialsOfWrong = map fst $ filter (\(_,(_,mt)) -> isNothing mt) (zip [1..] pseudoFormulas) in
+                  let serialsOfWrong = [i | (i,info,_) <- formulaInfos, propFormulaIsErroneous info] in
                     all
-                    (\x -> isRight (formulaParse (fst (pseudoFormulas !! (x - 1)))))
+                    (\x -> isRight (formulaParse (thd3 (formulaInfos !! (x - 1)))))
                     ([1 .. fromIntegral formulas] \\ serialsOfWrong)
