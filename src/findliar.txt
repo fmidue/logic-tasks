@@ -17,7 +17,7 @@ allNamen :: [Namen]
 allNamen = [A,B,C]
 
 type Submission = (PropFormula Char,PropFormula Char,PropFormula Char,PropFormula Char,Table,[Namen])
-type TaskData = ([Text],([Bool],[SynTree BinOp Char]))
+type TaskData = ([Text],[Bool],[SynTree BinOp Char])
 
 
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
@@ -93,7 +93,7 @@ getTask = do
 
         solutionValues = map snd dataSortedOnName
 
-    pure ((hintsSorted, (solutionValues, formulasSorted)),
+    pure ((hintsSorted, solutionValues, formulasSorted),
           checkers,
           getFormData form)
   where
@@ -198,8 +198,8 @@ generateTruthTable solutionValues =
      | i <- [0..7] ]]
 
 
-checkSemantics :: OutputCapable m => FilePath -> (a,([Bool],[SynTree BinOp Char])) -> Submission -> Rated m
-checkSemantics _ (_,(solutionValues,formulaParts)) (f1,f2,f3,f,Table xs,n) = do
+checkSemantics :: OutputCapable m => FilePath -> (a,[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
+checkSemantics _ (_,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,n) = do
   let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
@@ -250,8 +250,8 @@ import Trees.Types
 import Data.Text (Text, unpack)
 
 
-description :: OutputCapable m => FilePath -> ([Text],a) -> LangM m
-description _ (hints,_) = do
+description :: OutputCapable m => FilePath -> ([Text],a,b) -> LangM m
+description _ (hints,_,_) = do
     paragraph $ bothLangs
       ("Ein Logiker irrt auf dem Campus herum, um seinen Hörsaal zu finden. " ++
        "Er fragt drei Studierende (mit den ausgefallenen Namen A, B, C), wo er den Raum LB 107 finden kann. " ++
