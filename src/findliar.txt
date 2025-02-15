@@ -15,7 +15,7 @@ newtype Table = Table [(Maybe (PropFormula Char), [Maybe TruthValue])] deriving 
 data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord,Data)
 
 type Submission = (PropFormula Char,PropFormula Char,PropFormula Char,PropFormula Char,Table,[Namen])
-type TaskData = ([Text],([Namen],[Bool],[SynTree BinOp Char],SynTree BinOp Char))
+type TaskData = ([Text],([Namen],[Bool],[SynTree BinOp Char]))
 
 
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
@@ -91,9 +91,8 @@ getTask = do
 
         listOfLiars = map (fromChar . fst) $ filter (not . snd) dataSortedOnName
         solutionValues = map snd dataSortedOnName
-        combinedFormula = foldr1 (Binary And) formulasSorted
 
-    pure ((hintsSorted, (listOfLiars, solutionValues, formulasSorted, combinedFormula)),
+    pure ((hintsSorted, (listOfLiars, solutionValues, formulasSorted)),
           checkers,
           getFormData form)
   where
@@ -198,14 +197,14 @@ generateTruthTable solutionValues =
      | i <- [0..7] ]]
 
 
-checkSemantics :: OutputCapable m => FilePath -> (a,([Namen],[Bool],[SynTree BinOp Char],SynTree BinOp Char)) -> Submission -> Rated m
-checkSemantics _ (_,(lying,solutionValues,formulas,solF)) (f1,f2,f3,f,Table xs,n) = do
-  let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulas [f1,f2,f3]
+checkSemantics :: OutputCapable m => FilePath -> (a,([Namen],[Bool],[SynTree BinOp Char])) -> Submission -> Rated m
+checkSemantics _ (_,(lying,solutionValues,formulaParts)) (f1,f2,f3,f,Table xs,n) = do
+  let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
 
-  let correctFormula = isSemanticEqual (toSynTree f) solF ||
-                       (isSemanticEqual (toSynTree f) (toSynTree (foldr1 (Assoc And) (map Brackets [f1,f2,f3]))))
+  let correctFormula = isSemanticEqual (toSynTree f) solutionFormula ||
+                       (isSemanticEqual (toSynTree f) (foldr1 (Binary And) (map toSynTree [f1, f2, f3])))
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
@@ -223,10 +222,11 @@ checkSemantics _ (_,(lying,solutionValues,formulas,solF)) (f1,f2,f3,f,Table xs,n
   res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
   pure res
     where
+      solutionFormula = foldr1 (Binary And) formulaParts
       columns = map snd xs
       maybeAnswer = flip (++) (show lying) <$>
         if showSolution
-            then Just ("Formel: " ++ simplestDisplay solF ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: ")
+            then Just ("Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: ")
             else Nothing
 
 |]
