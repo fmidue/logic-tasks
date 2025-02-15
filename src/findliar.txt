@@ -13,9 +13,11 @@ import Data.Data (Data)
 newtype Table = Table [(Maybe (PropFormula Char), [Maybe TruthValue])] deriving (Eq,Show)
 
 data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord,Data)
+allNamen :: [Namen]
+allNamen = [A,B,C]
 
 type Submission = (PropFormula Char,PropFormula Char,PropFormula Char,PropFormula Char,Table,[Namen])
-type TaskData = ([Text],([Namen],[Bool],[SynTree BinOp Char]))
+type TaskData = ([Text],([Bool],[SynTree BinOp Char]))
 
 
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
@@ -89,10 +91,9 @@ getTask = do
         dataSortedOnName = sortOn fst [x, y, z]
         (formulasSorted, hintsSorted) = unzip $ sortOn snd $ zip formulas hints
 
-        listOfLiars = map (fromChar . fst) $ filter (not . snd) dataSortedOnName
         solutionValues = map snd dataSortedOnName
 
-    pure ((hintsSorted, (listOfLiars, solutionValues, formulasSorted)),
+    pure ((hintsSorted, (solutionValues, formulasSorted)),
           checkers,
           getFormData form)
   where
@@ -197,8 +198,8 @@ generateTruthTable solutionValues =
      | i <- [0..7] ]]
 
 
-checkSemantics :: OutputCapable m => FilePath -> (a,([Namen],[Bool],[SynTree BinOp Char])) -> Submission -> Rated m
-checkSemantics _ (_,(lying,solutionValues,formulaParts)) (f1,f2,f3,f,Table xs,n) = do
+checkSemantics :: OutputCapable m => FilePath -> (a,([Bool],[SynTree BinOp Char])) -> Submission -> Rated m
+checkSemantics _ (_,(solutionValues,formulaParts)) (f1,f2,f3,f,Table xs,n) = do
   let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
@@ -212,7 +213,7 @@ checkSemantics _ (_,(lying,solutionValues,formulaParts)) (f1,f2,f3,f,Table xs,n)
   yesNo correctLast $ bothLangs
     "Spalte F der Wahrheitstafel ist korrekt?"
 
-  let correctNames = n == lying
+  let correctNames = n == listOfLiars
   yesNo correctNames $ bothLangs
     "Auswahl der Lügner ist korrekt?"
   let points = (if (and correctParts) then 0.4 else 0.0) +
@@ -223,8 +224,9 @@ checkSemantics _ (_,(lying,solutionValues,formulaParts)) (f1,f2,f3,f,Table xs,n)
   pure res
     where
       solutionFormula = foldr1 (Binary And) formulaParts
+      listOfLiars = (map fst) $ filter (not . snd) (zip allNamen solutionValues)
       columns = map snd xs
-      maybeAnswer = flip (++) (show lying) <$>
+      maybeAnswer = flip (++) (show listOfLiars) <$>
         if showSolution
             then Just ("Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: ")
             else Nothing
