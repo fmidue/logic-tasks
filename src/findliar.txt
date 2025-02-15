@@ -6,7 +6,7 @@ module Global where
 import Control.OutputCapable.Blocks
 import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
-import Data.Text (Text,pack)
+import Data.Text (Text, pack)
 import Data.Data (Data)
 
 
@@ -157,12 +157,11 @@ module Check (checkSemantics, checkSyntax) where
 import Control.Monad (when)
 import Control.OutputCapable.Blocks
 import Data.Containers.ListUtils (nubOrd)
-import Data.List     (intercalate, transpose)
+import Data.List     (transpose)
 import Data.Ratio    ((%))
 
 
 import LogicTasks.Formula (TruthValue(..), isSemanticEqual)
-import LogicTasks.Parsing (allSymbolParser)
 import Trees.Print (simplestDisplay)
 import Trees.Types (SynTree(..), PropFormula(..), BinOp(..), toSynTree)
 
@@ -296,7 +295,6 @@ import Formula.Parsing.Delayed (
   complainAboutMissingParenthesesIfNotFailingOn,
   )
 import ParsingHelpers          (fully)
-import Text.Parsec             (ParseError)
 import Trees.Parsing           ()
 import Trees.Types             (PropFormula(..))
 
