@@ -14,7 +14,7 @@ newtype Table = Table [(Maybe (PropFormula Char), [Maybe TruthValue])] deriving 
 
 data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord,Data)
 allNamen :: [Namen]
-allNamen = [A,B,C]
+allNamen = [minBound .. maxBound]
 
 type Submission = (PropFormula Char,PropFormula Char,PropFormula Char,PropFormula Char,Table,[Namen])
 type TaskData = ([Text],[Bool],[SynTree BinOp Char])
