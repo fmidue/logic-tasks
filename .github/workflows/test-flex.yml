@@ -7,20 +7,20 @@ env:
   script: src
 
 on:
-  workflow_run:
-    workflows: ["Haskell CI"]
-    types: completed
+  repository_dispatch:
+    types: [CI-Completed]
 
 permissions: read-all
 
 jobs:
   test_flex:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.sha }}
 
       - name: Install Dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
@@ -33,9 +33,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.tasks }}/root
-          key: ${{ hashFiles('stack.yaml') }}-${{ hashFiles(format('{0}/package.yaml', env.config)) }}
-          restore-keys: |
-            ${{ hashFiles('stack.yaml') }}
+          key: ${{ hashFiles('stack.yaml') }}-${{ hashFiles(format('{0}/package.yaml', env.config)) }}-${{ hashFiles('src/**/*.hs') }}
 
       - name: Checkout Setup Repository
         uses: actions/checkout@v4
@@ -93,6 +91,7 @@ jobs:
       - name: Link Comment
         uses: peter-evans/commit-comment@v3
         with:
+          sha: ${{ github.event.client_payload.sha }}
           body: |
             Changes in task folder or test-flex workflow. You may review the test results:
 
