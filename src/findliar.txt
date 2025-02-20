@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# language DeriveDataTypeable#-}
 
 module Global where
@@ -6,7 +7,7 @@ module Global where
 import Control.OutputCapable.Blocks
 import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import Data.Data (Data)
 
 
@@ -20,6 +21,15 @@ type Submission = (PropFormula Char,PropFormula Char,PropFormula Char,PropFormul
 type TaskData = ([Text],[Bool],[SynTree BinOp Char])
 
 
+
+bothLangs :: OutputCapable m => String -> LangM m
+bothLangs s = translate $ german s >> english s
+
+=============================================
+
+module TaskSettings where
+
+
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
 emptyColumns  = 4
 staticColumns = 3
@@ -31,11 +41,8 @@ showSolution :: Bool
 showSolution  = True
 
 
-
-bothLangs :: OutputCapable m => String -> LangM m
-bothLangs s = translate $ german s >> english s
-
 =============================================
+
 
 {-# language FlexibleContexts #-}
 {-# language OverloadedStrings #-}
@@ -75,6 +82,7 @@ import Yesod
 import Trees.Types (BinOp(..), SynTree(..))
 
 import Global
+import TaskSettings
 
 
 
@@ -106,11 +114,6 @@ getTask = do
            addCss formulaCss (tableForm emptyColumns rows ["A","B","C"] ["F"]) $$>
            formify (Nothing :: Maybe [Namen])
              [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
-
-    fromChar 'A' = A
-    fromChar 'B' = B
-    fromChar 'C' = C
-    fromChar  _  = error "invalid Name"
 
 
     formulaCss = [cassius|
@@ -149,7 +152,6 @@ checkers = [i|
 
 {-\# language ApplicativeDo \#-}
 {-\# language OverloadedStrings \#-}
-{-\# language TypeApplications \#-}
 
 
 module Check (checkSemantics, checkSyntax) where
@@ -182,7 +184,7 @@ checkSyntax _ _ (_,_,_,_,Table xs,_) = do
   pure ()
   where
     columns = map snd xs
-    atomicCols = take staticColumns columns
+    atomicCols = take #{staticColumns} columns
     atomicRows = filter (notElem Nothing) $ transpose atomicCols
 
 truthValuesToBinaryToIndex :: [Bool] -> Int
@@ -209,14 +211,14 @@ checkSemantics _ (_,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,n) = do
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
-  let correctLast = drop (staticColumns+emptyColumns) columns == generateTruthTable solutionValues
+  let correctLast = drop (#{staticColumns+emptyColumns}) columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
     "Spalte F der Wahrheitstafel ist korrekt?"
 
   let correctNames = n == listOfLiars
   yesNo correctNames $ bothLangs
     "Auswahl der Lügner ist korrekt?"
-  let points = (if (and correctParts) then 0.4 else 0.0) +
+  let points = (if and correctParts then 0.4 else 0.0) +
                (if correctFormula then 0.2 else 0.0) +
                (if correctLast then 0.2 else 0.0) +
                (if correctNames then 0.2 else 0.0)
@@ -224,10 +226,10 @@ checkSemantics _ (_,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,n) = do
   pure res
     where
       solutionFormula = foldr1 (Binary And) formulaParts
-      listOfLiars = (map fst) $ filter (not . snd) (zip allNamen solutionValues)
+      listOfLiars = map fst $ filter (not . snd) (zip allNamen solutionValues)
       columns = map snd xs
       maybeAnswer = flip (++) (show listOfLiars) <$>
-        if showSolution
+        if #{showSolution}
             then Just ("Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: ")
             else Nothing
 
@@ -258,7 +260,7 @@ description _ (hints,_,_) = do
        "Diese Studierenden sagen (jeweils) immer die Wahrheit oder lügen immer. " ++
        "Um die Zuverlässigkeit der Antworten zu überprüfen, fragt er die drei Studierenden, ob die anderen lügen, " ++
        "und erhält folgende Antworten:")
-    enumerateM (bothLangs . (++ ")") . show) (zip [1..] (map (bothLangs . unpack) hints))
+    enumerateM (bothLangs . (++ ")") . show) (zip [1 ::Int ..] (map (bothLangs . unpack) hints))
     paragraph $ bothLangs
       ("Übersetzen Sie die Hinweise und die Kombination dieser jeweils in eine aussagenlogische Formel. " ++
        "Geben Sie die Formeln in die entsprechend benannten Textfelder ein.")
@@ -303,6 +305,7 @@ import Trees.Types             (PropFormula(..))
 import qualified Formula.Parsing as FP
 
 import Global
+import TaskSettings
 
 
 instance Parse TruthValue where
