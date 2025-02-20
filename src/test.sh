@@ -12,7 +12,7 @@ fi
 
 base_name=$(basename "$1" | sed 's/\(.*\)\..*/\1/')
 pkg_path=$PWD/$2/pkgdb
-script_path="$(realpath "$(dirname "$0")")"
+script_path="$(realpath "../.github/actions/test-flex")"
 expect_script="${script_path}/runGhci.expect"
 mapfile -t files \
   < <(awk '/^\s*module/ && !/^\s*module +Check +/ {sub(/module /,"")sub(/ (where|\().*/,".hs"); print}' "$1")
