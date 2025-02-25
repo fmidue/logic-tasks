@@ -30,6 +30,16 @@ bothLangs s = translate $ german s >> english s
 module TaskSettings where
 
 
+import Control.OutputCapable.Blocks (
+  LangM,
+  OutputCapable,
+  indent,
+  refuse,
+  text,
+  )
+import Global                           (Namen)
+
+
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
 emptyColumns  = 4
 staticColumns = 3
@@ -40,6 +50,15 @@ rows          = 2^staticColumns
 showSolution :: Bool
 showSolution  = True
 
+
+validateSettings :: OutputCapable m => LangM m
+validateSettings
+  | emptyColumns < 3 = refuse $ indent $ text
+      "Die Anzahl der leeren Spalten ist kleiner als die Anzahl der Hinweise."
+  | totalColumns > 18 = refuse $ indent $ text $
+      "Die Tabelle enthält zu viele Spalten. " ++
+      "Das Eingabeformular kann bei über 18 Spalten nicht mehr korrekt angezeigt werden."
+  | otherwise = pure ()
 
 =============================================
 

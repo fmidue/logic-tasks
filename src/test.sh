@@ -21,6 +21,8 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 current_file=0
 
+mkdir -p "/tmp/flex-test"
+
 echo -e "${CYAN}Writing .hs files...${NC}"
 
 mkdir -p "${base_name}"
@@ -45,7 +47,7 @@ ghc_version="${temp%-*.conf*}"
 
 cd "$base_name" || exit 1
 expect "$expect_script" "$ghc_version" |
-  sed -e 's/.*\*\*\*/\*\*\*/g' -e '/GHCi, version/d' -e '/ghci> /d' -e '/Ok, [four,two]\+ modules loaded./d' |
+  sed -e 's/.*\*\*\*/\*\*\*/g' -e '/GHCi, version/d' -e '/ghci> /d' -e '/Ok, [five,two]\+ modules loaded./d' |
   ansi2html >ghc.html
 
 echo -e "${CYAN}writing Hlint report...${NC}"

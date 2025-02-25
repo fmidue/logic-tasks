@@ -5,6 +5,7 @@ env:
   tasks: src
   config: .github/actions/test-flex
   script: src
+  TERM: xterm
 
 on:
   repository_dispatch:
@@ -28,11 +29,21 @@ jobs:
           packages: zsh hlint expect colorized-logs
           version: 1.0
 
+      - uses: teatimeguest/setup-texlive-action@v2
+        with:
+          packages: |
+            scheme-basic
+            forest
+            preview
+            dvisvgm
+
       - name: Cache DB
         id: restore-cache-db
         uses: actions/cache@v3
         with:
-          path: ${{ env.tasks }}/root
+          path: |
+            ${{ env.tasks }}/root
+            haskell-template-setup/stack.yaml
           key: ${{ hashFiles('stack.yaml') }}-${{ hashFiles(format('{0}/package.yaml', env.config)) }}-${{ hashFiles('src/**/*.hs') }}
 
       - name: Checkout Setup Repository
@@ -75,8 +86,31 @@ jobs:
       - name: Run Test Script
         run: |
           set -ex
+          sudo cp haskell-template-setup/stack.yaml ${{ env.tasks }}
           cd ${{ env.tasks }}
-          find . -name '*.txt' -exec ../${{ env.script }}/test.sh {} root \;
+          mapfile -t files \
+            < <( find . -name '*.txt' )
+          task_amount=${#files[@]}
+          no_hint_tasks=0
+          for name in "${files[@]}"; do
+            bash ../${{ env.script }}/test.sh "$name" root
+            folder="$(basename "$name" .txt)"
+            hlint_removed=false
+            if grep -q "No hints" "$folder/hlint.html"; then
+              rm "$folder/hlint.html"
+              hlint_removed=true
+            fi
+            if [ $(grep -vw "Compiling" -c "$folder/ghc.html") -eq 51 ]; then
+              rm "$folder/ghc.html"
+              if $hlint_removed; then
+                rm "$folder/Check.hs"
+                no_hint_tasks=$(($no_hint_tasks+1))
+              fi
+            fi
+          done
+          if [ $task_amount -eq $no_hint_tasks ]; then
+            rm stack.yaml
+          fi
           set +ex
 
       - name: Upload artifact
@@ -84,15 +118,19 @@ jobs:
         id: upload-artifact
         with:
           name: reports
-          path: ${{ env.tasks }}/*/*.html
-          if-no-files-found: error
+          path: |
+            ${{ env.tasks }}/*/*.html
+            ${{ env.tasks }}/*/Check.hs
+            ${{ env.tasks }}/stack.yaml
+          if-no-files-found: ignore
           overwrite: true
 
       - name: Link Comment
+        if: ${{ steps.upload-artifact.outputs.artifact-url != '' }}
         uses: peter-evans/commit-comment@v3
         with:
           sha: ${{ github.event.client_payload.sha }}
           body: |
-            Changes in task folder or test-flex workflow. You may review the test results:
-
+            The flex-task test workflow reported issues or suggestions for the following commit:
+            __${{ github.event.client_payload.message }}__
             [Download Reports](${{ steps.upload-artifact.outputs.artifact-url }})
