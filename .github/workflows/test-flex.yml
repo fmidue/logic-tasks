@@ -29,7 +29,7 @@ jobs:
           packages: zsh hlint expect colorized-logs
           version: 1.0
 
-      - uses: teatimeguest/setup-texlive-action@v2
+      - uses: teatimeguest/setup-texlive-action@v3
         with:
           packages: |
             scheme-basic
@@ -60,10 +60,11 @@ jobs:
           sudo mv -f stack.yaml ./haskell-template-setup
           sudo mv -f ./${{ env.config }}/package.yaml ./haskell-template-setup
           cd haskell-template-setup
-          this_repo="https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          this_repo="https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           sed -i "/extra-deps/a\  - git: $this_repo\n    commit: ${{ github.event.client_payload.sha }}" stack.yaml
           sed -i "s@/autotool/default@$(realpath "$PWD"/../${{ env.tasks }}/root)@" env
           ./create.sh
+          sed -i "s/${{ secrets.GITHUB_TOKEN }}@\(.*\)/\1/" stack.yaml
           sudo mv root ../${{ env.tasks }}
           set +ex
 
