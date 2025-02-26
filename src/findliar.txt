@@ -345,12 +345,12 @@ makeTable headers values = Table $ zip allHeaders formattedTruthValues
 parseSubmission :: (Monad m, OutputCapable (ReportT o m)) => String -> LangM' (ReportT o m) Submission
 parseSubmission input =
   parseWithOrReport formParser reportWithFieldNumber input $>>= \((f1,f2,f3),f,headers,columns,names) ->
-    parseIt f1 $>>= \parsedf1 ->
-      parseIt f2 $>>= \parsedf2 ->
-        parseIt f3 $>>= \parsedf3 ->
-          parseIt f $>>= \parsedf ->
+    parseIt f1 $>>= \parsedF1 ->
+      parseIt f2 $>>= \parsedF2 ->
+        parseIt f3 $>>= \parsedF3 ->
+          parseIt f $>>= \parsedF ->
             traverse (traverse parseIt) headers $>>= \parsedHeaders ->
-              pure (parsedf1,parsedf2,parsedf3,parsedf, makeTable parsedHeaders columns, names)
+              pure (parsedF1,parsedF2,parsedF3,parsedF, makeTable parsedHeaders columns, names)
   where
     parseIt =
       parseWithFallback
