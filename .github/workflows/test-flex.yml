@@ -104,13 +104,13 @@ jobs:
             if [ $(grep -vw "Compiling" -c "$folder/ghc.html") -eq 51 ]; then
               rm "$folder/ghc.html"
               if $hlint_removed; then
-                rm "$folder/Check.hs"
+                rm -f "$folder/Check.hs"
                 no_hint_tasks=$(($no_hint_tasks+1))
               fi
             fi
           done
           if [ $task_amount -eq $no_hint_tasks ]; then
-            rm stack.yaml
+            rm -f stack.yaml
           fi
           set +ex
 
