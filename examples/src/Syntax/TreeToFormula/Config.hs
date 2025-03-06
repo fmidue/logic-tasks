@@ -10,7 +10,7 @@ import Tasks.TreeToFormula.Config (
   TreeToFormulaConfig(..),checkTreeToFormulaConfig,
   )
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(..))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
@@ -38,9 +38,14 @@ task02 = TreeToFormulaConfig
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
-  , extraHintsOnSemanticEquivalence = True
-  , extraHintsOnAssociativity = True
-  , extraText = Nothing
+  , extraText = Just (listToFM
+                        [ (German, "Es muss die exakte Formel des Syntaxbaums angegeben werden. " -- no-spell-check
+                                ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "  -- no-spell-check
+                                ++ "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        , (English, "The exact formula of the syntax tree must be given. "
+                                ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
+                                ++ "Do not try to use associativity in order to omit brackets in this task.")
+                        ])
   , printSolution = True
   , offerUnicodeInput = True
   }
@@ -66,9 +71,14 @@ task04 =  TreeToFormulaConfig
     , maxConsecutiveNegations = 3
     , minUniqueBinOperators = 2
     }
-  , extraHintsOnSemanticEquivalence = True
-  , extraHintsOnAssociativity = True
-  , extraText = Nothing
+  , extraText = Just (listToFM
+                        [ (German, "Es muss die exakte Formel des Syntaxbaums angegeben werden. "  -- no-spell-check
+                                ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "  -- no-spell-check
+                                ++ "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        , (English, "The exact formula of the syntax tree must be given. "
+                                ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
+                                ++ "Do not try to use associativity in order to omit brackets in this task.")
+                        ])
   , printSolution = True
   , offerUnicodeInput = False
   }

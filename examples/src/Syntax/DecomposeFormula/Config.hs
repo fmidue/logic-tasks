@@ -8,7 +8,7 @@ import Tasks.SynTree.Config (
 import Trees.Types (BinOp(..))
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(..))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
@@ -35,8 +35,10 @@ small = DecomposeFormulaConfig
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
-  , extraHintsOnAssociativity = True
-  , extraText = Nothing
+  , extraText = Just (listToFM
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        , (English, "Do not try to use associativity in order to omit brackets in this task.")
+                        ])
   , printSolution = True
   , offerUnicodeInput = False
   }
@@ -62,8 +64,10 @@ task05 = DecomposeFormulaConfig
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 3
     }
-  , extraHintsOnAssociativity = True
-  , extraText = Nothing
+  , extraText = Just (listToFM
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        , (English, "Do not try to use associativity in order to omit brackets in this task.")
+                        ])
   , printSolution = True
   , offerUnicodeInput = True
   }

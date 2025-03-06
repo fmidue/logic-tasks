@@ -28,7 +28,6 @@ data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bou
 data ComposeFormulaConfig = ComposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
     , treeDisplayModes :: (TreeDisplayMode, TreeDisplayMode)
-    , extraHintsOnAssociativity :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
@@ -47,7 +46,6 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
         ]
       }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
-    , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = False
     , offerUnicodeInput = False
@@ -76,7 +74,6 @@ data ComposeFormulaInst = ComposeFormulaInst
                , rightTree :: SynTree BinOp Char
                , leftTreeImage :: Maybe String
                , rightTreeImage :: Maybe String
-               , addExtraHintsOnAssociativity :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
                , unicodeAllowed :: Bool

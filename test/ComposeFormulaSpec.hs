@@ -29,7 +29,6 @@ validBoundsComposeFormulaConfig = do
   return ComposeFormulaConfig {
     syntaxTreeConfig,
     treeDisplayModes = (displayModeL, displayModeR),
-    extraHintsOnAssociativity = False,
     extraText = Nothing,
     printSolution = False,
     offerUnicodeInput = False

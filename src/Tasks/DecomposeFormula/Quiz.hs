@@ -24,7 +24,6 @@ generateDecomposeFormulaInst DecomposeFormulaConfig {..} = do
         length (nubOrd [lk, rk, mirrorTree lk, mirrorTree rk]) == 4
     return $ DecomposeFormulaInst
       { tree
-      , addExtraHintsOnAssociativity = extraHintsOnAssociativity
       , addText = extraText
       , showSolution = printSolution
       , unicodeAllowed = offerUnicodeInput
