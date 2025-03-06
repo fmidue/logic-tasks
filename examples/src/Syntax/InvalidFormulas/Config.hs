@@ -41,7 +41,7 @@ task01 = LegalPropositionConfig
   , illegals = 3
   , bracketFormulas = 0
   , extraText = Nothing
-  , printSolution = True
+  , printSolution = Just False
   }
 
 -- Weight 0.25
@@ -69,7 +69,7 @@ task17 = LegalPropositionConfig
   , illegals = 3
   , bracketFormulas = 1
   , extraText = Nothing
-  , printSolution = True
+  , printSolution = Just False
   }
 
 spec :: Spec

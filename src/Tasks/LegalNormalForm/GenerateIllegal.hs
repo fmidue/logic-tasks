@@ -18,12 +18,13 @@ import Test.QuickCheck.Gen (oneof)
 
 import Trees.Helpers (clauseToSynTree, collectLeaves, literalToSynTree, relabelShape, conToSynTree)
 import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators)
+import Tasks.LegalNormalForm.Config (ErrorReason(..))
 
-genIllegalCnfSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
+genIllegalCnfSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char, ErrorReason)
 genIllegalCnfSynTree =
   genIllegalSynTree genCnf genClause SetFormula.clauseSet SetFormula.literalSet clauseToSynTree And Or
 
-genIllegalDnfSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
+genIllegalDnfSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char, ErrorReason)
 genIllegalDnfSynTree =
   genIllegalSynTree genDnf genCon SetFormulaDnf.clauseSet SetFormulaDnf.literalSet conToSynTree Or And
 
@@ -47,7 +48,7 @@ genIllegalSynTree ::
     -> (Int,Int)
     -> [Char]
     -> Bool
-    -> Gen (SynTree BinOp Char)
+    -> Gen (SynTree BinOp Char, ErrorReason)
 -- jscpd:ignore-end
 genIllegalSynTree
   genF
@@ -69,10 +70,10 @@ genIllegalSynTree
      in if ifUseError'
         then do
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
-            firstSyntaxShape <- genIllegalFormulaShape charOpF charOpC allowArrowOperators (clauses - 1)
+            (firstSyntaxShape, errorReason) <- genIllegalFormulaShape charOpF charOpC allowArrowOperators (clauses - 1)
             clauseList <- toList . getC
               <$> genF (clauses, clauses) (minClauseLength, maxClauseLength) usedAtoms False
-            return (genIllegal firstSyntaxShape cToS clauseList)
+            return (genIllegal firstSyntaxShape cToS clauseList, errorReason)
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
             genWithOneIllegalClause
@@ -109,7 +110,7 @@ genWithOneIllegalClause ::
     -> [Char]
     -> Int
     -> Bool
-    -> Gen (SynTree BinOp Char)
+    -> Gen (SynTree BinOp Char, ErrorReason)
 genWithOneIllegalClause
   genF
   genS
@@ -124,12 +125,13 @@ genWithOneIllegalClause
   allowArrowOperators = do
         clauseList <- toList . getC <$>
           genF (ands, ands) (minClauseLength, maxClauseLength) usedAtoms False
-        illegalTree' <- illegalTree genS getL charOpC charOpF (minClauseLength, maxClauseLength) usedAtoms allowArrowOperators
+        (illegalTree', errorReason) <-
+          illegalTree genS getL charOpC charOpF (minClauseLength, maxClauseLength) usedAtoms allowArrowOperators
         let illLength = length (collectLeaves illegalTree')
             (first, second) = span (\x -> illLength >= size (getL x)) clauseList
             headTrees = map cToS first
             tailTrees = map cToS second
-        return (foldr1 (Binary And) (headTrees ++ (illegalTree' : tailTrees)))
+        return (foldr1 (Binary And) (headTrees ++ (illegalTree' : tailTrees)), OnClauseLevel errorReason)
 
 
 
@@ -155,12 +157,12 @@ illegalTree ::
     -> (Int,Int)
     -> [Char]
     -> Bool
-    -> Gen (SynTree BinOp Char)
+    -> Gen (SynTree BinOp Char, ErrorReason)
 illegalTree gen getLiterals charOpC fCharOpC (minClauseLength, maxClauseLength) usedAtoms allowArrowOperators = do
     treeLength <- choose (max 2 minClauseLength, maxClauseLength)
-    illegalSynTreeShape <- genIllegalShape charOpC fCharOpC True allowArrowOperators (treeLength - 1)
+    (illegalSynTreeShape, errorReason) <- genIllegalShape charOpC fCharOpC True allowArrowOperators (treeLength - 1)
     leaves <- toList . getLiterals <$> gen (treeLength,treeLength) usedAtoms
-    return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree)
+    return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree, errorReason)
 
 
 genIllegalShape ::
@@ -171,18 +173,18 @@ genIllegalShape ::
     -> Bool
     -> Bool
     -> Int
-    -> Gen (SynTree BinOp ())
+    -> Gen (SynTree BinOp (), ErrorReason)
 genIllegalShape _ _ _ _ 0 = error "impossible"
 genIllegalShape charOpC fCharOpC ifFirstLayer allowArrowOperators ors = do
     ifUseError <- frequency [(1, return True), (ors - 1, return False)]
     if ifUseError
     then  if allowArrowOperators
-          then oneof [ return (Not (legalShape charOpC ors))
+          then oneof [ return (Not (legalShape charOpC ors), IllegalNegation)
                      , genIllegalOperator (legalShape charOpC) (Equi : Impl : BackImpl : [fCharOpC | not ifFirstLayer]) ors
                      ]
           else  if ifFirstLayer
-                then return (Not (legalShape charOpC ors))
-                else oneof [ return (Not (legalShape charOpC ors))
+                then return (Not (legalShape charOpC ors), IllegalNegation)
+                else oneof [ return (Not (legalShape charOpC ors), IllegalNegation)
                            , genIllegalOperator (legalShape charOpC) [fCharOpC] ors
                            ]
     else genIllegalShapeInSubTree ors (genIllegalShape charOpC fCharOpC False allowArrowOperators) charOpC
@@ -196,16 +198,16 @@ genIllegalFormulaShape ::
     -- ^^ characterizing operator for Clause/Con
     -> Bool
     -> Int
-    -> Gen (SynTree BinOp ())
+    -> Gen (SynTree BinOp (), ErrorReason)
 genIllegalFormulaShape _ _ _ 0 = error "impossible"
-genIllegalFormulaShape charOpF charOpC True 1 = oneof [ return (Not (legalShape charOpF 1))
+genIllegalFormulaShape charOpF charOpC True 1 = oneof [ return (Not (legalShape charOpF 1), IllegalNegation)
                                   , genIllegalOperator (legalShape charOpF) (allBinaryOperators \\ [charOpF, charOpC]) 1
                                   ]
-genIllegalFormulaShape charOpF _ False 1 = return (Not (legalShape charOpF 1))
+genIllegalFormulaShape charOpF _ False 1 = return (Not (legalShape charOpF 1), IllegalNegation)
 genIllegalFormulaShape charOpF charOpC allowArrowOperators ands = do
     ifUseError <- frequency [(1, return True), (ands - 1, return False)]
     if ifUseError
-    then oneof [ return (Not (legalShape charOpF ands))
+    then oneof [ return (Not (legalShape charOpF ands), IllegalNegation)
                , genIllegalOperator (legalShape charOpF)
                    (if allowArrowOperators then allBinaryOperators \\ [charOpF] else [charOpC]) ands
                ]
@@ -213,19 +215,19 @@ genIllegalFormulaShape charOpF charOpC allowArrowOperators ands = do
 
 ------
 
-genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp ())) -> BinOp -> Gen (SynTree BinOp ())
+genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp (), ErrorReason)) -> BinOp -> Gen (SynTree BinOp (), ErrorReason)
 genIllegalShapeInSubTree amount illegalFunc operator = do
     operatorsIllegalSide <- choose (1, amount - 1)
     node <- elements [Binary operator, flip (Binary operator)]
-    illegalSubTree <- illegalFunc operatorsIllegalSide
-    return (node illegalSubTree (legalShape Or (amount - 1 - operatorsIllegalSide)))
+    (illegalSubTree, errorReason) <- illegalFunc operatorsIllegalSide
+    return (node illegalSubTree (legalShape Or (amount - 1 - operatorsIllegalSide)), errorReason)
 
-genIllegalOperator :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
+genIllegalOperator :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp (), ErrorReason)
 genIllegalOperator recF operators restOperators =
     do
         errorOperator <- elements operators
         leftOperators <- choose (0, restOperators - 1)
-        return (Binary errorOperator (recF leftOperators) (recF (restOperators - 1 - leftOperators)))
+        return (Binary errorOperator (recF leftOperators) (recF (restOperators - 1 - leftOperators)), IllegalOperator)
 
 
 
