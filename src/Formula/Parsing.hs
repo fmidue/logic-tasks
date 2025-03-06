@@ -393,3 +393,19 @@ instance Parse FormulaInst where
         f <- (parser :: Parser (SynTree BinOp Char))
         tokenSymbol "}"
         pure $ InstArbitrary f
+
+instance Parse DecideChoice where
+  parser = lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
+    where
+      parseCorrect = Correct <$
+          ( try (caseInsensitive "Richtig") -- no-spell-check
+        <|> caseInsensitive "Correct"
+          )
+      parseWrong = Wrong <$
+          ( try (caseInsensitive "Fehlerhaft") -- no-spell-check
+        <|> caseInsensitive "Wrong"
+          )
+      parseNoAnswer = NoAnswer <$
+          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort") -- no-spell-check
+        <|> (lexeme (caseInsensitive "No") <* caseInsensitive "answer")
+          )
