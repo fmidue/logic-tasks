@@ -27,7 +27,7 @@ import Trees.Parsing(formulaParse)
 import TestHelpers (deleteBrackets, doesNotRefuse)
 import Trees.Generate (genSynTree)
 import Formula.Parsing (Parse(parser))
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, Rated)
 import LogicTasks.Syntax.SimplestFormula (description, partialGrade', completeGrade')
 
 validBoundsSuperfluousBracketsConfig :: Gen SuperfluousBracketsConfig
