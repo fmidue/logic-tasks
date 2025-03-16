@@ -6,7 +6,7 @@ module LogicTasks.Syntax.SimplestFormula where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse, indent, translatedCode),
+  GenericOutputCapable (indent, translatedCode),
   LangM,
   OutputCapable,
   english,
@@ -15,11 +15,17 @@ import Control.OutputCapable.Blocks (
   translate,
   localise,
   translations,
+  MinimumThreshold (MinimumThreshold),
+  ArticleToUse (DefiniteArticle),
+  translations,
+  Rated,
+  reRefuse,
+  printSolutionAndAssertMinimum
   )
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
-
-import LogicTasks.Helpers (basicOpKey, example, extra, focus, instruct, reject, arrowsKey)
+import GHC.Real ((%))
+import LogicTasks.Helpers (basicOpKey, extra, focus, instruct, reject, arrowsKey)
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
@@ -31,6 +37,8 @@ import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaSymbolParser)
 import Trees.Parsing()
+import Control.Applicative (Alternative)
+import Trees.Print (simplestDisplay)
 
 
 
@@ -135,20 +143,28 @@ partialGrade' SuperfluousBracketsInst{..} f
     correctAtoms = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
-completeGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> Delayed FormulaAnswer -> Rated m
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
-completeGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
-completeGrade' inst sol
-    | show (fromJust (maybeForm sol)) /= simplestString inst = refuse $ do
-      instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
+completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
+completeGrade' inst solx
+  | show sol == simplestString inst = rate 1
+  | synTreeEq = reRefuse (rate percentage) (translate $ do
+    german ("Sie haben " ++ show superfluousBracketsSol ++ " überflüssige Klammer(n) in der Abgabe.")
+    english ("You left " ++ show superfluousBracketsSol ++ " superfluous bracket(s) in your submission."))
+  | otherwise = reRefuse (rate 0) (translate $ do
+    german ("Sie haben die Formel verändert.")
+    english "You changed the formula.")
 
-      when (showSolution inst) $ do
-        example (simplestString inst) $ do
-          english "The solution for this task is:"
-          german "Die Lösung für diese Aufgabe ist:"
-
-      pure ()
-    | otherwise = pure()
+  where
+    countBrackets = foldr (\c acc -> if c == '(' then acc + 1 else acc) 0
+    sol = fromJust (maybeForm solx)
+    synTreeSol = toSynTree sol
+    bracketsSol = countBrackets $ show sol
+    bracketsSolution = countBrackets $ simplestString inst
+    bracketsMax = countBrackets $ stringWithSuperfluousBrackets inst
+    superfluousBracketsSol = bracketsSol - bracketsSolution
+    superfluousBracketsSolution = bracketsMax - bracketsSolution
+    synTreeEq = simplestString inst == (simplestDisplay synTreeSol)
+    percentage = ((superfluousBracketsSolution - superfluousBracketsSol) % superfluousBracketsSolution)
+    rate = printSolutionAndAssertMinimum  (MinimumThreshold (1 % superfluousBracketsSolution)) DefiniteArticle (if showSolution inst then Just $ simplestString inst else Nothing)
