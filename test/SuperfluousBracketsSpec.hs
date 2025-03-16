@@ -117,6 +117,6 @@ spec = do
         it "should pass grading" $
           forAll validBoundsSuperfluousBracketsConfig $ \config ->
               forAll (generateSuperfluousBracketsInst config) $ \inst ->
-                doesNotRefuse (partialGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe) &&
-                 doesNotRefuse (completeGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe)
+                doesNotRefuse (partialGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: Rated Maybe) &&
+                 doesNotRefuse (completeGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: Rated Maybe)
 

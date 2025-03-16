@@ -153,7 +153,7 @@ completeGrade' inst solx
     german ("Sie haben " ++ show superfluousBracketsSol ++ " überflüssige Klammer(n) in der Abgabe.")
     english ("You left " ++ show superfluousBracketsSol ++ " superfluous bracket(s) in your submission."))
   | otherwise = reRefuse (rate 0) (translate $ do
-    german ("Sie haben die Formel verändert.")
+    german "Sie haben die Formel verändert."
     english "You changed the formula.")
 
   where
@@ -165,6 +165,6 @@ completeGrade' inst solx
     bracketsMax = countBrackets $ stringWithSuperfluousBrackets inst
     superfluousBracketsSol = bracketsSol - bracketsSolution
     superfluousBracketsSolution = bracketsMax - bracketsSolution
-    synTreeEq = simplestString inst == (simplestDisplay synTreeSol)
-    percentage = ((superfluousBracketsSolution - superfluousBracketsSol) % superfluousBracketsSolution)
+    synTreeEq = simplestString inst == simplestDisplay synTreeSol
+    percentage = (superfluousBracketsSolution - superfluousBracketsSol) % superfluousBracketsSolution
     rate = printSolutionAndAssertMinimum  (MinimumThreshold (1 % superfluousBracketsSolution)) DefiniteArticle (if showSolution inst then Just $ simplestString inst else Nothing)
