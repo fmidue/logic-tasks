@@ -1,6 +1,7 @@
 module Horn where
 
 import Trees.Types (BinOp(..), SynTree(..))
+import Trees.Helpers (collectLeaves)
 
 type Protocol = (Int, [(Int, Char)])
 
@@ -11,10 +12,9 @@ makeHornformula =
     _  -> foldr1 (Binary And) clauses
   where
     clauses =
-      [ Binary Impl (Leaf 'B') (Leaf 'A')
-      , Binary Impl (Leaf '1') (Leaf 'B')
-      , Binary Impl (Leaf 'B') (Leaf 'C')
-      , Binary Impl (Leaf 'C') (Leaf '0')
+      [ Binary Impl (Leaf 'A') (Leaf 'B')
+      , Binary Impl (Leaf '1') (Leaf 'A')
+      , Binary Impl (Binary And (Leaf 'A') (Leaf 'B')) (Leaf '0')
       ]
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
@@ -64,18 +64,13 @@ markNext :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
 markNext clauses = maybe (Just []) process (toBeMarked clauses)
   where
     process '0' = Nothing
-    process a   = Just $ map (mark a) clauses
+    process a   = Just $ map (delete . replace a) clauses
 
-    mark :: Char -> SynTree BinOp Char -> SynTree BinOp Char
-    mark x (Binary Impl (Binary And a b) c)
-      | a == Leaf '1' = Binary Impl b c
-      | b == Leaf '1' = Binary Impl a c
-      | otherwise = Binary Impl (Binary And (replace x a) (replace x b)) c
-    mark x (Binary Impl (Leaf '1') b) = Binary Impl (Leaf '1') (replace x b)
-    mark x (Binary Impl a b) = Binary Impl (replace x a) b
-    mark _ _ = error "should not happen"
+    replace x = fmap (\a -> if a == x then '1' else a)
 
-    replace z (Leaf y)
-          | z == y = Leaf '1'
-          | otherwise = Leaf y
-    replace _ _= error "help"
+    delete :: SynTree BinOp Char -> SynTree BinOp Char
+    delete (Binary Impl (Binary And a b) c)
+      | onlyOnes a = Binary Impl b c
+      | onlyOnes b = Binary Impl a c
+    delete tree = tree
+    onlyOnes = all (=='1') . collectLeaves
