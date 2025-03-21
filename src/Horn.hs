@@ -34,7 +34,7 @@ getFacts :: [SynTree BinOp Char] -> [Char]
 getFacts = map charFromFact . filter isFact
 
 findSolution :: SynTree BinOp Char -> (Bool, Protocol)
-findSolution formula = letsGo (markNext allClauses) p
+findSolution formula = startAlg (markNext allClauses) p
   where
     p = startProtocol facts
     facts = getFacts allClauses
@@ -46,14 +46,14 @@ findSolution formula = letsGo (markNext allClauses) p
     addStep :: Char -> Protocol -> Protocol
     addStep c (step, record) = (step+1, record ++ [(step+1,c)])
 
-    letsGo :: Maybe [SynTree BinOp Char] -> Protocol -> (Bool, Protocol)
-    letsGo Nothing protocol = (False, protocol)
-    letsGo (Just []) protocol = (True, protocol)
-    letsGo (Just cs) protocol =
+    startAlg :: Maybe [SynTree BinOp Char] -> Protocol -> (Bool, Protocol)
+    startAlg Nothing protocol = (False, protocol)
+    startAlg (Just []) protocol = (True, protocol)
+    startAlg (Just cs) protocol =
       let updatedProtocol = case toBeMarked cs of Nothing -> protocol
                                                   Just '0' -> protocol
                                                   Just c  -> addStep c protocol
-      in letsGo (markNext cs) updatedProtocol
+      in startAlg (markNext cs) updatedProtocol
 
 toBeMarked :: [SynTree BinOp Char] -> Maybe Char
 toBeMarked clauses = case getFacts clauses of
@@ -64,13 +64,13 @@ markNext :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
 markNext clauses = maybe (Just []) process (toBeMarked clauses)
   where
     process '0' = Nothing
-    process a   = Just $ map (delete . replace a) clauses
+    process a   = Just $ map (delConj . replace a) clauses
 
     replace x = fmap (\a -> if a == x then '1' else a)
 
-    delete :: SynTree BinOp Char -> SynTree BinOp Char
-    delete (Binary Impl (Binary And a b) c)
+    delConj :: SynTree BinOp Char -> SynTree BinOp Char
+    delConj (Binary Impl (Binary And a b) c)
       | onlyOnes a = Binary Impl b c
       | onlyOnes b = Binary Impl a c
-    delete tree = tree
+    delConj tree = tree
     onlyOnes = all (=='1') . collectLeaves
