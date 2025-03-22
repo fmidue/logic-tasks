@@ -37,3 +37,5 @@ spec = do
         ]) `shouldBe`
         (True, (2,[(1,'A'),(2,'B')]))
 
+
+--modellFromSolution (findSolution makeHornformula) (getAllAtomics makeHornformula)
