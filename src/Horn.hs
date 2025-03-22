@@ -6,16 +6,31 @@ import Trees.Helpers (collectLeaves)
 type Protocol = (Int, [(Int, Char)])
 
 makeHornformula :: SynTree BinOp Char
-makeHornformula =
-  case clauses of
-    [] -> error "Cannot build formula witch no clauses."
-    _  -> foldr1 (Binary And) clauses
+makeHornformula = foldr1 (Binary And) clauses
   where
     clauses =
       [ Binary Impl (Leaf 'A') (Leaf 'B')
       , Binary Impl (Leaf '1') (Leaf 'A')
       , Binary Impl (Binary And (Leaf 'A') (Leaf 'B')) (Leaf '0')
       ]
+
+isHornformulaI :: SynTree BinOp c -> Bool
+isHornformulaI =  all isHornclauseI . getClauses
+
+isHornclauseI :: SynTree BinOp c -> Bool
+isHornclauseI (Binary Impl a (Leaf _)) = case a of
+    Leaf _ -> True
+    (Binary And x y) -> isConj x && isConj y
+    _ -> False
+  where
+    isConj (Leaf _) = True
+    isConj (Binary And x y) = isConj x && isConj y
+    isConj _ = False
+isHornclauseI _ = False
+
+modellFromSolution :: (Bool, Protocol)  -> [Char] -> Maybe [(Char, Bool)]
+modellFromSolution (False,_) _ = Nothing
+modellFromSolution (True,(_,marked)) cs = Just $ (map (\(_,a) -> (a,True)) marked) ++ map (,False) cs
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
 getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses rightPart
@@ -34,9 +49,8 @@ getFacts :: [SynTree BinOp Char] -> [Char]
 getFacts = map charFromFact . filter isFact
 
 findSolution :: SynTree BinOp Char -> (Bool, Protocol)
-findSolution formula = startAlg (markNext allClauses) p
+findSolution formula = startAlg (markNext allClauses) (startProtocol facts)
   where
-    p = startProtocol facts
     facts = getFacts allClauses
     allClauses = getClauses formula
 
