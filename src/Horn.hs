@@ -1,5 +1,7 @@
 module Horn where
 
+import Data.Containers.ListUtils (nubOrd)
+
 import Trees.Types (BinOp(..), SynTree(..))
 import Trees.Helpers (collectLeaves)
 
@@ -28,9 +30,12 @@ isHornclauseI (Binary Impl a (Leaf _)) = case a of
     isConj _ = False
 isHornclauseI _ = False
 
-modellFromSolution :: (Bool, Protocol)  -> [Char] -> Maybe [(Char, Bool)]
-modellFromSolution (False,_) _ = Nothing
-modellFromSolution (True,(_,marked)) cs = Just $ (map (\(_,a) -> (a,True)) marked) ++ (map (,False) $ filter (\a -> notElem a (map snd marked)) cs)
+getAllAtomics :: SynTree BinOp Char -> [Char]
+getAllAtomics tree = nubOrd $ filter (`notElem` ['0','1']) (collectLeaves tree)
+
+modellFromSolution :: (Bool, Protocol)  -> [Char] -> [(Char, Bool)]
+modellFromSolution (False,_) _ = []
+modellFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++ map (,False) (filter (`notElem` map snd marked) cs)
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
 getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses rightPart
