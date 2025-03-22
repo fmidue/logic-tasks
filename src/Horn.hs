@@ -11,7 +11,7 @@ makeHornformula = foldr1 (Binary And) clauses
     clauses =
       [ Binary Impl (Leaf 'A') (Leaf 'B')
       , Binary Impl (Leaf '1') (Leaf 'A')
-      , Binary Impl (Binary And (Leaf 'A') (Leaf 'B')) (Leaf '0')
+      , Binary Impl (Binary And (Leaf 'A') (Leaf 'D')) (Leaf '0')
       ]
 
 isHornformulaI :: SynTree BinOp c -> Bool
@@ -30,7 +30,7 @@ isHornclauseI _ = False
 
 modellFromSolution :: (Bool, Protocol)  -> [Char] -> Maybe [(Char, Bool)]
 modellFromSolution (False,_) _ = Nothing
-modellFromSolution (True,(_,marked)) cs = Just $ (map (\(_,a) -> (a,True)) marked) ++ map (,False) cs
+modellFromSolution (True,(_,marked)) cs = Just $ (map (\(_,a) -> (a,True)) marked) ++ (map (,False) $ filter (\a -> notElem a (map snd marked)) cs)
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
 getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses rightPart
