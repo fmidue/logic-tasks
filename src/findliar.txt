@@ -37,7 +37,6 @@ import Control.OutputCapable.Blocks (
   refuse,
   text,
   )
-import Global                           (Namen)
 
 
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
@@ -98,7 +97,6 @@ import Numeric                 (showBin)
 import Test.QuickCheck.Gen
 import Yesod
 
-import Trees.Types (BinOp(..), SynTree(..))
 
 import Global
 import TaskSettings
@@ -184,7 +182,8 @@ import Data.Ratio    ((%))
 
 import LogicTasks.Formula (TruthValue(..), isSemanticEqual)
 import Trees.Print (simplestDisplay)
-import Trees.Types (SynTree(..), PropFormula(..), BinOp(..), toSynTree)
+import Trees.Types (SynTree(..), BinOp(..), toSynTree)
+
 
 import Global
 
@@ -267,7 +266,6 @@ import Control.OutputCapable.Blocks
 import LogicTasks.Keys (keyHeading, basicOpKey, arrowsKey)
 
 import Global
-import Trees.Types
 import Data.Text (Text, unpack)
 
 
