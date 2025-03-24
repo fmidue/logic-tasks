@@ -29,6 +29,14 @@ bothLangs s = translate $ german s >> english s
 
 module TaskSettings where
 
+import Control.OutputCapable.Blocks (
+  LangM,
+  OutputCapable,
+  indent,
+  refuse,
+  text,
+  )
+
 
 import Control.OutputCapable.Blocks (
   LangM,
@@ -46,8 +54,9 @@ staticColsEnd = 1
 totalColumns  = staticColumns + emptyColumns + staticColsEnd
 rows          = 2^staticColumns
 
-showSolution :: Bool
+showSolution, printFeedbackImmediately :: Bool
 showSolution  = True
+printFeedbackImmediately = True
 
 
 validateSettings :: OutputCapable m => LangM m
@@ -71,8 +80,7 @@ validateSettings
 module TaskData (getTask) where
 
 
-import Data.Char               (digitToInt)
-import Data.List               (transpose, sortOn)
+import Data.List               (sortOn)
 import Data.String             (fromString)
 import Data.String.Interpolate (i)
 import Data.Text               (Text)
@@ -93,7 +101,6 @@ import FlexTask.Types          (HtmlDict)
 import FindLiarTask
 import LogicTasks.Forms        (tableForm)
 import LogicTasks.Formula      (TruthValue(..))
-import Numeric                 (showBin)
 import Test.QuickCheck.Gen
 import Yesod
 
@@ -157,13 +164,6 @@ instance Formify [Namen] where
 
 
 
-startingTable :: [[Maybe TruthValue]]
-startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
-    transpose (pad . (`showBin` "") <$> [0..rows -1])
-  where pad s = replicate (staticColumns - length s) '0' ++ s
-
-
-
 checkers :: String
 checkers = [i|
 
@@ -175,32 +175,90 @@ module Check (checkSemantics, checkSyntax) where
 
 import Control.Monad (when)
 import Control.OutputCapable.Blocks
+import Data.Char     (digitToInt)
 import Data.Containers.ListUtils (nubOrd)
-import Data.List     (transpose)
+import Data.Foldable (toList)
+import Data.List     (transpose, intercalate)
+import Data.Maybe    (fromJust)
 import Data.Ratio    ((%))
+import Data.Text     (Text, unpack)
+import Numeric       (showBin)
 
-
-import LogicTasks.Formula (TruthValue(..), isSemanticEqual)
+import LogicTasks.Formula (
+  Formula(..),
+  TruthValue(..),
+  isSemanticEqual,
+  convert,
+  )
+import Trees.Formula ()
 import Trees.Print (simplestDisplay)
-import Trees.Types (SynTree(..), BinOp(..), toSynTree)
+import Trees.Types (
+  SynTree(..),
+  BinOp(..),
+  toSynTree
+  )
 
+import qualified SAT.MiniSat as Sat
 
 import Global
 
+startingTable :: [[Maybe TruthValue]]
+startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
+    transpose (pad . (`showBin` "") <$> [0..#{rows} -1])
+  where pad s = replicate (#{staticColumns} - length s) '0' ++ s
+
+toConfigInverted :: [Namen] -> [(Char,Bool)]
+toConfigInverted liars = map (\\x -> (nameMatch x,if x `elem` liars then False else True)) allNamen
+  where
+    nameMatch A = 'A'
+    nameMatch B = 'B'
+    nameMatch C = 'C'
+    nameMatch _ = error "not possible"
+
+printConfig :: [(Char,Bool)] -> String
+printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ (show (if b then 1 else 0))) config)
 
 
-checkSyntax :: OutputCapable m => FilePath -> a -> Submission -> LangM m
-checkSyntax _ _ (_,_,_,_,Table xs,_) = do
+feedbackCompareHints unmatchedHints identifiedLiars = do
+  indent $ bothLangs $
+    "Widerspruch gefunden: Die ausgewählten Lügner sind: " ++
+    show identifiedLiars ++ "." ++
+    " Das passt jedoch nicht zu dem Hinweis: " ++
+    (unpack (unmatchedHints!!0))
+
+feedbackCompareChosenLiars configFromLiars wrongLiars = do
+  indent $ bothLangs $
+    "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl passende Belegung ist: " ++
+    printConfig configFromLiars ++ "." ++
+    " Jedoch wertet die angegebene Teilformel: " ++
+    simplestDisplay (wrongLiars!!0) ++
+    " unter dieser Belegung zu 0 (falsch) aus."
+
+
+checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
+checkSyntax _ (hints,solutionValues,formulaParts) (f1,f2,f3,_,Table xs,identifiedLiars) = do
+
   when (nubOrd atomicRows /= atomicRows) $ refuse $ indent $ bothLangs $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
       "Es müssen alle Belegungen genau einmal vorkommen."
-  when (atomicCols == map reverse #{startingTable}) $ refuse $ indent $ bothLangs $
+  when (atomicCols == map reverse startingTable) $ refuse $ indent $ bothLangs $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
-  assertion (atomicCols == #{startingTable}) $ bothLangs
+  assertion (atomicCols == startingTable) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
+
+  let wrongLiars = [formula | formula <- (map toSynTree submittedParts), not (fromJust (evaluate configFromLiars formula))]
+  when (#{printFeedbackImmediately} && (not (null wrongLiars))) $
+    refuse $ feedbackCompareChosenLiars configFromLiars wrongLiars
+
+  let unmatchedHints = [hint | (formula, hint) <- (zip formulaParts hints), not (fromJust (evaluate configFromLiars formula))]
+  when (#{printFeedbackImmediately} && (not (null unmatchedHints))) $
+    refuse $ feedbackCompareHints unmatchedHints identifiedLiars
+
   pure ()
   where
+    configFromLiars = toConfigInverted identifiedLiars
+    submittedParts = [f1,f2,f3]
     columns = map snd xs
     atomicCols = take #{staticColumns} columns
     atomicRows = filter (notElem Nothing) $ transpose atomicCols
@@ -218,8 +276,8 @@ generateTruthTable solutionValues =
      | i <- [0..7] ]]
 
 
-checkSemantics :: OutputCapable m => FilePath -> (a,[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
-checkSemantics _ (_,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,n) = do
+checkSemantics :: OutputCapable m => FilePath -> ([Text],[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
+checkSemantics _ (hints,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,identifiedLiars) = do
   let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts [f1,f2,f3]
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
@@ -229,11 +287,19 @@ checkSemantics _ (_,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,n) = do
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
+  let unmatchedHints = [hint | (formula, hint) <- (zip formulaParts hints), not (fromJust (evaluate configFromLiars formula))]
+  when (not #{printFeedbackImmediately} && (not (null unmatchedHints))) $
+    feedbackCompareHints unmatchedHints identifiedLiars
+
+  let wrongLiars = [formula | formula <- (map toSynTree submittedParts), not (fromJust (evaluate configFromLiars formula))]
+  when (not #{printFeedbackImmediately} && (not (null wrongLiars))) $
+    feedbackCompareChosenLiars configFromLiars wrongLiars
+
   let correctLast = drop (#{staticColumns+emptyColumns}) columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
     "Spalte F der Wahrheitstafel ist korrekt?"
 
-  let correctNames = n == listOfLiars
+  let correctNames = identifiedLiars == listOfLiars
   yesNo correctNames $ bothLangs
     "Auswahl der Lügner ist korrekt?"
   let points = (if and correctParts then 0.4 else 0.0) +
@@ -243,6 +309,8 @@ checkSemantics _ (_,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,n) = do
   res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
   pure res
     where
+      configFromLiars = toConfigInverted identifiedLiars
+      submittedParts = [f1,f2,f3]
       solutionFormula = foldr1 (Binary And) formulaParts
       listOfLiars = map fst $ filter (not . snd) (zip allNamen solutionValues)
       columns = map snd xs
