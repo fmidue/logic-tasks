@@ -27,7 +27,7 @@ task08 = LegalNormalFormConfig
   , maxStringSize = 30
   , minStringSize = 12
   , allowArrowOperators = True
-  , printSolution = Just False
+  , printDetailedSolution = Just True
   , extraText = Nothing
   }
 
@@ -47,7 +47,7 @@ task09 = LegalNormalFormConfig
   , maxStringSize = 30
   , minStringSize = 12
   , allowArrowOperators = False
-  , printSolution = Just False
+  , printDetailedSolution = Just True
   , extraText = Nothing
   }
 
@@ -68,7 +68,7 @@ task18 = LegalNormalFormConfig
   , minStringSize = 12
   , allowArrowOperators = False
   , extraText = Nothing
-  , printSolution = Just False
+  , printDetailedSolution = Just True
   }
 
 spec :: Spec

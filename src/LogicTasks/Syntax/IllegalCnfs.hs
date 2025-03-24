@@ -120,9 +120,9 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
           english "The formula consists of one clause."
         CorrectAtomicClauses -> do
           german "liegt in korrekter Form vor. "
-          german "Die Klauseln verfügen hier nur über ein einzelnes Literal."
+          german "Die Klauseln verfügen hier jeweils nur über ein einzelnes Literal."
           english "is given in correct shape. "
-          english "The clauses consist of a single literal."
+          english "The clauses consist of a single literal each."
         Erroneous err -> do
           german "liegt nicht in korrekter Form vor. "
           english "is not given in correct shape. "

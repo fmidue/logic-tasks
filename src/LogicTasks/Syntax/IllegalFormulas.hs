@@ -118,7 +118,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
             german "ist korrekt geformt. "
             german "Der zugehörige Syntaxbaum sieht so aus:"
             english "is correctly formed. "
-            english "The associated syntax tree looks like this:"
+            english "The correspondign syntax tree looks like this:"
 
           image $=<< liftIO $ cacheTree (transferToPicture tree) path
 
@@ -132,17 +132,17 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
                 german "Die Anzahl an öffnenden und schließenden Klammern stimmt nicht überein."
                 english "The amount of opening and closing parentheses does not match."
               IllegalOperator -> do
-                german "Es werden zwei Teilformen falsch miteinander verknüpft."
+                german "Es werden zwei Teilformeln falsch miteinander verknüpft."
                 english "Two subformulas are combined incorrectly."
               IllegalOperand -> do
-                german "Nicht alle Operatoren verfügen über gültige Operanden."
-                english "Not all operators have valid operands."
+                german "Nicht alle Operatoren verfügen über gültige Teilformeln."
+                english "Not all operators have valid subformulas."
               MissingOperator -> do
                 german "Nicht alle Teilformen werden verknüpft."
                 english "There are uncombined subformulas."
               MissingOperand -> do
-                german "Nicht alle Operatoren verfügen über die korrekte Anzahl an Operanden."
-                english "Not all operators have the correct number of operands."
+                german "Nicht alle Operatoren verfügen über die korrekte Anzahl an Teilformeln."
+                english "Not all operators have the correct number of subformulas."
 
       pure ()
 

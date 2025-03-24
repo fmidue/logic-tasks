@@ -39,7 +39,7 @@ data LegalNormalFormConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
-    , printSolution :: Maybe Bool
+    , printDetailedSolution :: Maybe Bool
     , extraText :: Maybe (Map Language String)
   } deriving (Show,Generic)
 
@@ -57,7 +57,7 @@ defaultLegalNormalFormConfig =
   , maxStringSize = 35
   , minStringSize = 12
   , allowArrowOperators = True
-  , printSolution = Nothing
+  , printDetailedSolution = Nothing
   , extraText = Nothing
   }
 

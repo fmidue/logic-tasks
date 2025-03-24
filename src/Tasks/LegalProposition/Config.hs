@@ -36,7 +36,7 @@ data LegalPropositionConfig =
     , illegals :: Integer
     , bracketFormulas :: Integer
     , extraText :: Maybe (Map Language String)
-    , printSolution :: Maybe Bool
+    , printDetailedSolution :: Maybe Bool
     } deriving (Show,Generic)
 
 defaultLegalPropositionConfig :: LegalPropositionConfig
@@ -48,7 +48,7 @@ defaultLegalPropositionConfig =
     , illegals = 2
     , bracketFormulas = 1
     , extraText = Nothing
-    , printSolution = Nothing
+    , printDetailedSolution = Nothing
     }
 
 checkLegalPropositionConfig :: OutputCapable m => LegalPropositionConfig -> LangM m

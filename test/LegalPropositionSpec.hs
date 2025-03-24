@@ -43,7 +43,7 @@ validBoundsLegalPropositionConfig = do
             , illegals
             , bracketFormulas
             , extraText = Nothing
-            , printSolution = Nothing
+            , printDetailedSolution = Nothing
         }
 
 timeout :: Int

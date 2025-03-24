@@ -45,7 +45,7 @@ generateLegalPropositionInst LegalPropositionConfig  {..} = do
               (curry (\(i,(d,errorReason)) -> (i,maybe (Correct (treeList !! (i - 1))) Erroneous errorReason,d)))
               [1..]
               pseudoFormulas
-        , showSolution = printSolution
+        , showSolution = printDetailedSolution
         , addText = extraText
         }
 

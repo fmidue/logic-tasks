@@ -54,7 +54,7 @@ generateLegalNormalFormInst gen toSynTree genIllegal config@LegalNormalFormConfi
   return $
     LegalNormalFormInst
       { formulaInfos = zipWith (curry (\(i,(sd,info)) -> (i, info, simplestDisplay sd))) [1..] treeList ,
-        showSolution = printSolution,
+        showSolution = printDetailedSolution,
         addText = extraText
       }
 

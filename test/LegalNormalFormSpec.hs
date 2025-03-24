@@ -66,7 +66,7 @@ validBoundsLegalNormalFormConfig = do
           maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
           minStringSize = minClauseAmount * ((minClauseLength - 1) * 4 + 1),
           allowArrowOperators,
-          printSolution = Nothing,
+          printDetailedSolution = Nothing,
           extraText = Nothing
         }
 
@@ -100,7 +100,7 @@ invalidBoundsLegalCNF = do
           maxStringSize,
           minStringSize,
           allowArrowOperators = False,
-          printSolution = Nothing,
+          printDetailedSolution = Nothing,
           extraText = Nothing
         }
 
