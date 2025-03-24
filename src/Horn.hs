@@ -25,9 +25,10 @@ makeHornformula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
 makeHornformula spirit extra = do
     permutation <- shuffle spirit
     let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..]
-        clauses = withAdded ++ drop extra permutation
-        formula = fmap toLower $ foldr1 (Binary And) clauses
-    return (foldl (flip (uncurry replace)) formula (zip (getAllAtomics formula) ['A'..]))
+    clauses <- shuffle (withAdded ++ drop extra permutation)
+    let formula = fmap toLower $ foldr1 (Binary And) clauses
+    atomics <- shuffle (getAllAtomics formula)
+    return (foldl (flip (uncurry replace)) formula (zip atomics ['A'..]))
   where
     addClause (Binary Impl a b, x) = [Binary Impl a (Leaf x), Binary Impl (Leaf x) b]
     addClause _ = []
