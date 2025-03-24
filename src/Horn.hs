@@ -1,20 +1,36 @@
 module Horn where
 
+import Data.Char (toLower)
 import Data.Containers.ListUtils (nubOrd)
+import Test.QuickCheck.Gen
 
 import Trees.Types (BinOp(..), SynTree(..))
 import Trees.Helpers (collectLeaves)
 
 type Protocol = (Int, [(Int, Char)])
 
-makeHornformula :: SynTree BinOp Char
-makeHornformula = foldr1 (Binary And) clauses
+v1, v2 :: [SynTree BinOp Char]
+v1 =
+  [ Binary Impl (Leaf 'A') (Leaf 'B')
+  , Binary Impl (Leaf '1') (Leaf 'A')
+  , Binary Impl (Binary And (Leaf 'A') (Leaf 'D')) (Leaf '0')
+  ]
+v2 =
+  [ Binary Impl (Leaf 'A') (Leaf 'B')
+  , Binary Impl (Leaf '1') (Leaf 'A')
+  , Binary Impl (Binary And (Leaf 'A') (Leaf 'B')) (Leaf '0')
+  ]
+
+makeHornformula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
+makeHornformula spirit extra = do
+    permutation <- shuffle spirit
+    let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..]
+        clauses = withAdded ++ drop extra permutation
+        formula = fmap toLower $ foldr1 (Binary And) clauses
+    return (foldl (flip (uncurry replace)) formula (zip (getAllAtomics formula) ['A'..]))
   where
-    clauses =
-      [ Binary Impl (Leaf 'A') (Leaf 'B')
-      , Binary Impl (Leaf '1') (Leaf 'A')
-      , Binary Impl (Binary And (Leaf 'A') (Leaf 'D')) (Leaf '0')
-      ]
+    addClause (Binary Impl a b, x) = [Binary Impl a (Leaf x), Binary Impl (Leaf x) b]
+    addClause _ = []
 
 isHornformulaI :: SynTree BinOp c -> Bool
 isHornformulaI =  all isHornclauseI . getClauses
@@ -83,9 +99,7 @@ markNext :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
 markNext clauses = maybe (Just []) process (toBeMarked clauses)
   where
     process '0' = Nothing
-    process a   = Just $ map (delConj . replace a) clauses
-
-    replace x = fmap (\a -> if a == x then '1' else a)
+    process a   = Just $ map (delConj . replace a '1') clauses
 
     delConj :: SynTree BinOp Char -> SynTree BinOp Char
     delConj (Binary Impl (Binary And a b) c)
@@ -93,3 +107,6 @@ markNext clauses = maybe (Just []) process (toBeMarked clauses)
       | onlyOnes b = Binary Impl a c
     delConj tree = tree
     onlyOnes = all (=='1') . collectLeaves
+
+replace :: Eq a => a -> a -> SynTree BinOp a -> SynTree BinOp a
+replace x y = fmap (\a -> if a == x then y else a)
