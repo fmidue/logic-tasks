@@ -118,7 +118,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
             german "ist korrekt geformt. "
             german "Der zugehörige Syntaxbaum sieht so aus:"
             english "is correctly formed. "
-            english "The correspondign syntax tree looks like this:"
+            english "The corresponding syntax tree looks like this:"
 
           image $=<< liftIO $ cacheTree (transferToPicture tree) path
 
