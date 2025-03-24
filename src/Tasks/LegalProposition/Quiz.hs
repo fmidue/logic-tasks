@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 
 module Tasks.LegalProposition.Quiz (
     generateLegalPropositionInst,
@@ -9,13 +10,19 @@ import Data.Char (isLetter)
 import Test.QuickCheck (Gen, choose, suchThat, vectorOf)
 
 import Auxiliary (listNoDuplicate)
-import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst (..))
+import Tasks.LegalProposition.Config (
+  LegalPropositionConfig (..),
+  LegalPropositionInst (..),
+  PropErrorReason(..),
+  PropFormulaInfo (..),
+  )
 import Tasks.LegalProposition.PrintBracket (bracketDisplay)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Trees.Generate (genSynTree)
 import Trees.Helpers (similarExist)
 import Trees.Print (display)
 import Trees.Types (BinOp, SynTree)
+import Data.Bifunctor (Bifunctor(second))
 
 
 
@@ -31,24 +38,28 @@ generateLegalPropositionInst LegalPropositionConfig  {..} = do
         (fromIntegral bracketFormulas)
         (choose (1, fromIntegral formulas))
       `suchThat` (listNoDuplicate . (++ serialsOfWrong))
-    pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` noSimilarFormulas
+    pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` (noSimilarFormulas . map fst)
     return $ LegalPropositionInst
-        { pseudoFormulas = zipWith (\i t-> (pseudoFormulas !! (i - 1), if i `elem` serialsOfWrong then Nothing else Just t)) [1..] treeList
+        { formulaInfos =
+            zipWith
+              (curry (\(i,(d,errorReason)) -> (i,maybe (Correct (treeList !! (i - 1))) Erroneous errorReason,d)))
+              [1..]
+              pseudoFormulas
         , showSolution = printSolution
         , addText = extraText
         }
 
 
 
-genPseudoList :: [Int] -> [Int] -> [SynTree BinOp Char] -> Gen [String]
+genPseudoList :: [Int] -> [Int] -> [SynTree BinOp Char] -> Gen [(String, Maybe PropErrorReason)]
 genPseudoList serialsOfWrong serialsOfBracket trees =
     let pointedTrees = zip [1..] trees
     in
         mapM (\(point, tree) -> if point `elem` serialsOfWrong
-            then illegalDisplay tree
+            then second Just <$> illegalDisplay tree
             else if point `elem` serialsOfBracket
-                then bracketDisplay tree
-                else legalDisplay tree) pointedTrees
+                then (,Nothing) <$> bracketDisplay tree
+                else (,Nothing) <$> legalDisplay tree) pointedTrees
 
 
 

@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 module LogicTasks.Syntax.IllegalCnfs where
 
 
@@ -16,11 +17,25 @@ import Control.OutputCapable.Blocks (
   multipleChoiceSyntax,
   Language (..),
   localise,
+  reRefuse,
+  GenericOutputCapable (indent, code),
   )
 import Control.Monad (when)
 import Data.Map as Map (Map,fromAscList)
 import LogicTasks.Helpers
-import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
+import Tasks.LegalNormalForm.Config(
+  LegalNormalFormConfig(..),
+  LegalNormalFormInst(..),
+  checkLegalNormalFormConfig,
+  treeIsErroneous,
+  TreeInfo (..),
+  ErrorReason (..),
+  )
+import Data.Tuple.Extra (thd3)
+import Control.Applicative (Alternative)
+import Data.Foldable (for_)
+import Data.Maybe (fromMaybe, isJust)
+import Data.List.Extra (nubSort)
 
 
 
@@ -31,7 +46,7 @@ descriptionTemplate what inputHelp LegalNormalFormInst{..} = do
       english "Consider the following propositional logic formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
 
-    focus $ unlines $ indexed formulaStrings
+    focus $ unlines $ indexed $ map thd3 formulaInfos
 
     instruct $ do
       english $ "Which of these formulas are given in " ++ localise English what ++ "?"
@@ -73,15 +88,69 @@ start = []
 
 
 partialGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> LangM m
-partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length formulaStrings]
+partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length formulaInfos]
 
 
-completeGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> Rated m
-completeGrade LegalNormalFormInst{..} = multipleChoice DefiniteArticle what solutionDisplay (Map.fromAscList solution)
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => LegalNormalFormInst -> [Int] -> Rated m
+completeGrade LegalNormalFormInst{..} sol = reRefuse
+  (multipleChoice
+    DefiniteArticle
+    what
+    simpleSolutionDisplay
+    (Map.fromAscList solution)
+    sol)
+  $ when (hasWrongSolution && detailedSolution) $ indent $ do
+
+    instruct $ do
+      german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
+      english "The solution for this task looks like this:"
+
+    for_ formulaInfos $ \(i,info, formula) -> do
+
+      code (show i ++ ". " ++ formula)
+
+      instruct $ case info of
+        Correct -> do
+          german "liegt in korrekter Form vor."
+          english "is given in correct shape."
+        CorrectSingleClause -> do
+          german "liegt in korrekter Form vor. "
+          german "Es handelt sich hierbei um eine einzige Klausel."
+          english "is given in correct shape. "
+          english "The formula consists of one clause."
+        CorrectAtomicClauses -> do
+          german "liegt in korrekter Form vor. "
+          german "Die Klauseln verfügen hier nur über ein einzelnes Literal."
+          english "is given in correct shape. "
+          english "The clauses consist of a single literal."
+        Erroneous err -> do
+          german "liegt nicht in korrekter Form vor. "
+          english "is not given in correct shape. "
+          case err of
+            OnClauseLevel IllegalNegation -> do
+              german "Auf Klausel-Ebene findet eine illegale Negation statt."
+              english "There exists an illegal negation on clause level."
+            OnClauseLevel IllegalOperator -> do
+              german "Auf Klausel-Ebene existiert ein illegaler Operator."
+              english "There exists an illegal operator on clause level."
+            IllegalNegation -> do
+              german "Auf äußerster Ebene findet eine illegale Negation statt."
+              english "There exists an illegal negation on the outermost level."
+            IllegalOperator -> do
+              german "Auf äußerster Ebene existiert ein illegaler Operator."
+              english "There exists an illegal operator on the outermost level."
+            _ -> pure ()
+
+      pure ()
+
+    pure ()
   where
+    detailedSolution = fromMaybe False showSolution
     what = translations $ do
       german "Indizes"
       english "indices"
-    solutionDisplay | showSolution = Just $ show [ i | (i, True) <- solution ]
-                    | otherwise = Nothing
-    solution = map (\i -> (i, i `notElem` serialsOfWrong)) [1..length formulaStrings]
+    solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulaInfos
+    hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
+    simpleSolutionDisplay
+      | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]
+      | otherwise = Nothing
