@@ -47,7 +47,7 @@ small = ComposeFormulaConfig
   , offerUnicodeInput = False
   }
 
--- 2024: Weight 0.33
+-- 2024: Weight 0.3
 task03 :: ComposeFormulaConfig
 task03 = ComposeFormulaConfig
   { syntaxTreeConfig = SynTreeConfig

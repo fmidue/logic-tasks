@@ -17,7 +17,7 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.34
+-- 2024: Weight 0.3
 task02 :: TreeToFormulaConfig
 task02 = TreeToFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -50,7 +50,7 @@ task02 = TreeToFormulaConfig
   , offerUnicodeInput = True
   }
 
--- Weight 0.33
+-- 2023: Weight 0.33
 task04 :: TreeToFormulaConfig
 task04 =  TreeToFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -83,7 +83,7 @@ task04 =  TreeToFormulaConfig
   , offerUnicodeInput = False
   }
 
--- Weight 0.4
+-- 2023: Weight 0.4
 task10 :: TreeToFormulaConfig
 task10 = task04
 
