@@ -35,7 +35,6 @@ validBoundsDecomposeFormulaConfig = do
         , (Equi, 1)
         ]
     },
-    extraHintsOnAssociativity = False,
     extraText = Nothing,
     printSolution = False,
     offerUnicodeInput = False

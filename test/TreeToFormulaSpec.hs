@@ -18,8 +18,6 @@ validBoundsTreeToFormulaConfig = do
   syntaxTreeConfig <- validBoundsSynTreeConfig
   pure $ TreeToFormulaConfig
     { syntaxTreeConfig
-    , extraHintsOnSemanticEquivalence = True
-    , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = False
     , offerUnicodeInput = False
