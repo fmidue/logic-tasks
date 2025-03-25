@@ -147,24 +147,29 @@ completeGrade :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracket
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
 completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
-completeGrade' inst solx
+completeGrade' inst sol
   | show sol == simplestString inst = rate 1
   | synTreeEq = reRefuse (rate percentage) (translate $ do
-    german ("Sie haben " ++ show superfluousBracketsSol ++ " überflüssige Klammer(n) in der Abgabe.")
-    english ("You left " ++ show superfluousBracketsSol ++ " superfluous bracket(s) in your submission."))
+    german ("Sie haben " ++ show superfluousBracketsSubmission ++ " überflüssige Klammer(n) in der Abgabe.")
+    english ("You left " ++ show superfluousBracketsSubmission ++ " superfluous bracket(s) in your submission."))
   | otherwise = reRefuse (rate 0) (translate $ do
     german "Sie haben die Formel verändert."
     english "You changed the formula.")
 
   where
-    countBrackets = foldr (\c acc -> if c == '(' then acc + 1 else acc) 0
-    sol = fromJust (maybeForm solx)
-    synTreeSol = toSynTree sol
-    bracketsSol = countBrackets $ show sol
+    countBrackets :: String -> Integer
+    countBrackets = fromIntegral . length . filter (== '(')
+    submission = fromJust (maybeForm sol)
+    synTreeSubmission = toSynTree submission
+    bracketsSubmission = countBrackets $ show submission
     bracketsSolution = countBrackets $ simplestString inst
     bracketsMax = countBrackets $ stringWithSuperfluousBrackets inst
-    superfluousBracketsSol = bracketsSol - bracketsSolution
+    superfluousBracketsSubmission = bracketsSubmission - bracketsSolution
     superfluousBracketsSolution = bracketsMax - bracketsSolution
-    synTreeEq = simplestString inst == simplestDisplay synTreeSol
-    percentage = (superfluousBracketsSolution - superfluousBracketsSol) % superfluousBracketsSolution
-    rate = printSolutionAndAssertMinimum  (MinimumThreshold (1 % superfluousBracketsSolution)) DefiniteArticle (if showSolution inst then Just $ simplestString inst else Nothing)
+    synTreeEq = simplestString inst == simplestDisplay synTreeSubmission
+    percentage = (superfluousBracketsSolution - superfluousBracketsSubmission) % superfluousBracketsSolution
+    rate r = printSolutionAndAssertMinimum  
+      (MinimumThreshold (1 % superfluousBracketsSolution)) 
+      DefiniteArticle 
+      (if showSolution inst then Just $ simplestString inst else Nothing)
+      r
