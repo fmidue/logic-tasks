@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   )
 import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..))
 import qualified LogicTasks.Syntax.IllegalCnfs as IllegalCnfs
+import Control.Applicative (Alternative)
 
 
 
@@ -43,5 +44,5 @@ partialGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> LangM m
 partialGrade = IllegalCnfs.partialGrade
 
 
-completeGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> Rated m
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => LegalNormalFormInst -> [Int] -> Rated m
 completeGrade = IllegalCnfs.completeGrade
