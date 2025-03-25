@@ -1,5 +1,6 @@
 Autotool
 Bifunctor
+bimap
 cnf
 Cnf
 cnfs
@@ -48,6 +49,7 @@ snd
 subformula
 subformulas
 tabindex
+thd
 tupled
 UML
 uncurry
