@@ -29,6 +29,10 @@ bothLangs s = translate $ german s >> english s
 
 module TaskSettings where
 
+import Data.Char     (digitToInt)
+import Data.List     (transpose)
+import Numeric       (showBin)
+
 import Control.OutputCapable.Blocks (
   LangM,
   OutputCapable,
@@ -37,12 +41,20 @@ import Control.OutputCapable.Blocks (
   text,
   )
 
+import LogicTasks.Formula (TruthValue(..))
+
+
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
 emptyColumns  = 4
 staticColumns = 3
 staticColsEnd = 1
 totalColumns  = staticColumns + emptyColumns + staticColsEnd
 rows          = 2^staticColumns
+
+startingTable :: [[Maybe TruthValue]]
+startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
+    transpose (pad . (`showBin` "") <$> [0 .. rows - 1])
+  where pad s = replicate (staticColumns - length s) '0' ++ s
 
 showSolution, printFeedbackImmediately :: Bool
 showSolution  = True
@@ -164,13 +176,11 @@ module Check (checkSemantics, checkSyntax) where
 
 import Control.Monad (when)
 import Control.OutputCapable.Blocks
-import Data.Char     (digitToInt)
 import Data.Containers.ListUtils (nubOrd)
 import Data.List     (transpose, intercalate)
 import Data.Maybe    (fromJust)
 import Data.Ratio    ((%))
 import Data.Text     (Text, unpack)
-import Numeric       (showBin)
 
 import LogicTasks.Formula (
   Formula(..),
@@ -187,11 +197,6 @@ import Trees.Types (
 
 
 import Global
-
-startingTable :: [[Maybe TruthValue]]
-startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
-    transpose (pad . (`showBin` "") <$> [0..#{rows} -1 :: Int])
-  where pad s = replicate (#{staticColumns} - length s) '0' ++ s
 
 toConfigInverted :: [Namen] -> [(Char,Bool)]
 toConfigInverted liars = map (\\x -> (nameMatch x,not (x `elem` liars))) allNamen
@@ -227,10 +232,10 @@ checkSyntax _ (hints,_,formulaParts) (f1,f2,f3,_,Table xs,identifiedLiars) = do
   when (nubOrd atomicRows /= atomicRows) $ refuse $ indent $ bothLangs $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
       "Es müssen alle Belegungen genau einmal vorkommen."
-  when (atomicCols == map reverse startingTable) $ refuse $ indent $ bothLangs $
+  when (atomicCols == map reverse #{startingTable}) $ refuse $ indent $ bothLangs $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
-  assertion (atomicCols == startingTable) $ bothLangs
+  assertion (atomicCols == #{startingTable}) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
 
   let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
