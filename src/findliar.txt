@@ -199,12 +199,11 @@ toConfigInverted liars = map (\\x -> (nameMatch x,if x `elem` liars then False e
     nameMatch A = 'A'
     nameMatch B = 'B'
     nameMatch C = 'C'
-    nameMatch _ = error "not possible"
 
 printConfig :: [(Char,Bool)] -> String
 printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ (show (if b then 1 else 0))) config)
 
-
+feedbackCompareHints :: OutputCapable m => [Text] -> [Namen] -> LangM m
 feedbackCompareHints unmatchedHints identifiedLiars = do
   indent $ bothLangs $
     "Widerspruch gefunden: Die ausgewählten Lügner sind: " ++
@@ -212,6 +211,7 @@ feedbackCompareHints unmatchedHints identifiedLiars = do
     " Das passt jedoch nicht zu dem Hinweis: " ++
     (unpack (unmatchedHints!!0))
 
+feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> [SynTree BinOp Char] -> LangM m
 feedbackCompareChosenLiars configFromLiars wrongLiars = do
   indent $ bothLangs $
     "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl passende Belegung ist: " ++
@@ -222,7 +222,7 @@ feedbackCompareChosenLiars configFromLiars wrongLiars = do
 
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ (hints,solutionValues,formulaParts) (f1,f2,f3,_,Table xs,identifiedLiars) = do
+checkSyntax _ (hints,_,formulaParts) (f1,f2,f3,_,Table xs,identifiedLiars) = do
 
   when (nubOrd atomicRows /= atomicRows) $ refuse $ indent $ bothLangs $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
