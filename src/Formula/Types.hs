@@ -22,7 +22,9 @@ module Formula.Types
        , genClause
        , genCon
        , genCnf
+       , genCnfWithRatio
        , genDnf
+       , genDnfWithRatio
        , possibleAllocations
        , Formula(..)
        , ToSAT(..)
@@ -48,6 +50,8 @@ import Data.Typeable
 import GHC.Generics
 import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
+
+import GHC.Real ((%),Rational)
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
 
@@ -275,10 +279,18 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnf = genCnfWithRatio 2 2
+
+-- | Generates a random cnf satisfying the given bounds
+--   for the amount and the length of the contained clauses,
+--   as well as the ratio of negative literals.
+--   The used atomic formulas are drawn from the list of chars.
+--   The ratio must be between 0 and 1; otherwise, it will be ignored.
+genCnfWithRatio :: Rational -> Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
+genCnfWithRatio negLiteralRatio negLiteralSpread (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
+      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms) && checkNegLiteralRatio xs negLiteralRatio negLiteralSpread
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -418,13 +430,21 @@ instance Arbitrary Dnf where
 
 
 -- | Generates a random dnf satisfying the given bounds
+--   for the amount and the length of the contained conjunctions,
+--   as well as the ratio of negative literals.
+--   The used atomic formulas are drawn from the list of chars.
+--   The ratio must be between 0 and 1; otherwise, it will be ignored.
+genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnf = genDnfWithRatio 2 2
+
+-- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
-genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genDnfWithRatio :: Rational -> Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnfWithRatio negLiteralRatio negLiteralSpread (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
+      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms) && checkNegLiteralRatio xs negLiteralRatio negLiteralSpread
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -434,6 +454,36 @@ genDnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
             con <- genCon (minLen,maxLen) usedAtoms
             generateCons usedAtoms (Set.insert con set) num
 
+literalRatio' :: (Ord a, HasLiterals a) => Set a -> (Integer, Integer)
+literalRatio' = Set.foldr countContainer (0, 0)
+  where
+    countContainer container (negAcc, posAcc) =
+      Set.foldr countLiteral (negAcc, posAcc) (getLiterals container)
+
+    countLiteral (Positive _) (neg, pos) = (neg, pos + 1)
+    countLiteral (Negative _) (neg, pos) = (neg + 1, pos)
+
+test_dnf = (Set.fromList [Con (Set.fromList [Negative ('A'),Negative ('B')]),Con (Set.fromList [Negative ('C'),Negative ('B')])])
+
+literalRatio :: (Ord a, HasLiterals a) => Set a -> Rational
+literalRatio set = let (neg,pos) = literalRatio' set in (neg % (pos + neg))
+
+class HasLiterals a where
+  getLiterals :: a -> Set Literal
+
+instance HasLiterals Con where
+  getLiterals (Con ls) = ls
+
+instance HasLiterals Clause where
+  getLiterals (Clause ls) = ls
+
+checkNegLiteralRatio :: (Ord a, HasLiterals a) => Set a -> Rational -> Rational -> Bool
+checkNegLiteralRatio set ratio spread
+  | ratio < 0 || ratio > 1 = True
+  | v < ratio - spread * ratio = False
+  | v > ratio + spread * ratio = False
+  | otherwise = True
+  where v = literalRatio set
 
 ------------------------------------------------------------
 
