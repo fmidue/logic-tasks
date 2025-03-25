@@ -190,7 +190,7 @@ import Global
 
 startingTable :: [[Maybe TruthValue]]
 startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
-    transpose (pad . (`showBin` "") <$> [0..#{rows} -1])
+    transpose (pad . (`showBin` "") <$> [0..#{rows} -1 :: Int])
   where pad s = replicate (#{staticColumns} - length s) '0' ++ s
 
 toConfigInverted :: [Namen] -> [(Char,Bool)]
@@ -201,7 +201,7 @@ toConfigInverted liars = map (\\x -> (nameMatch x,if x `elem` liars then False e
     nameMatch C = 'C'
 
 printConfig :: [(Char,Bool)] -> String
-printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ (show (if b then 1 else 0))) config)
+printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ (show (if b then (1 :: Int) else (0 :: Int)))) config)
 
 feedbackCompareHints :: OutputCapable m => [Text] -> [Namen] -> LangM m
 feedbackCompareHints unmatchedHints identifiedLiars = do
