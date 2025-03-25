@@ -194,14 +194,14 @@ startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
   where pad s = replicate (#{staticColumns} - length s) '0' ++ s
 
 toConfigInverted :: [Namen] -> [(Char,Bool)]
-toConfigInverted liars = map (\\x -> (nameMatch x,if x `elem` liars then False else True)) allNamen
+toConfigInverted liars = map (\\x -> (nameMatch x,not (x `elem` liars))) allNamen
   where
     nameMatch A = 'A'
     nameMatch B = 'B'
     nameMatch C = 'C'
 
 printConfig :: [(Char,Bool)] -> String
-printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ (show (if b then (1 :: Int) else (0 :: Int)))) config)
+printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ show (if b then (1 :: Int) else (0 :: Int))) config)
 
 feedbackCompareHints :: OutputCapable m => [Text] -> [Namen] -> LangM m
 feedbackCompareHints unmatchedHints identifiedLiars = do
@@ -209,7 +209,7 @@ feedbackCompareHints unmatchedHints identifiedLiars = do
     "Widerspruch gefunden: Die ausgewählten Lügner sind: " ++
     show identifiedLiars ++ "." ++
     " Das passt jedoch nicht zu dem Hinweis: " ++
-    (unpack (unmatchedHints!!0))
+    unpack (unmatchedHints!!0)
 
 feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> [SynTree BinOp Char] -> LangM m
 feedbackCompareChosenLiars configFromLiars wrongLiars = do
@@ -233,12 +233,12 @@ checkSyntax _ (hints,_,formulaParts) (f1,f2,f3,_,Table xs,identifiedLiars) = do
   assertion (atomicCols == startingTable) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
 
-  let wrongLiars = [formula | formula <- (map toSynTree submittedParts), not (fromJust (evaluate configFromLiars formula))]
-  when (#{printFeedbackImmediately} && (not (null wrongLiars))) $
+  let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
+  when (#{printFeedbackImmediately} && not (null wrongLiars)) $
     refuse $ feedbackCompareChosenLiars configFromLiars wrongLiars
 
-  let unmatchedHints = [hint | (formula, hint) <- (zip formulaParts hints), not (fromJust (evaluate configFromLiars formula))]
-  when (#{printFeedbackImmediately} && (not (null unmatchedHints))) $
+  let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
+  when (#{printFeedbackImmediately} && not (null unmatchedHints)) $
     refuse $ feedbackCompareHints unmatchedHints identifiedLiars
 
   pure ()
@@ -269,16 +269,16 @@ checkSemantics _ (hints,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,identi
     "Aussagen sind korrekt übersetzt?"
 
   let correctFormula = isSemanticEqual (toSynTree f) solutionFormula ||
-                       (isSemanticEqual (toSynTree f) (foldr1 (Binary And) (map toSynTree [f1, f2, f3])))
+                       isSemanticEqual (toSynTree f) (foldr1 (Binary And) (map toSynTree [f1, f2, f3]))
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
-  let unmatchedHints = [hint | (formula, hint) <- (zip formulaParts hints), not (fromJust (evaluate configFromLiars formula))]
-  when (not #{printFeedbackImmediately} && (not (null unmatchedHints))) $
+  let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
+  when (not #{printFeedbackImmediately} && not (null unmatchedHints)) $
     feedbackCompareHints unmatchedHints identifiedLiars
 
-  let wrongLiars = [formula | formula <- (map toSynTree submittedParts), not (fromJust (evaluate configFromLiars formula))]
-  when (not #{printFeedbackImmediately} && (not (null wrongLiars))) $
+  let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
+  when (not #{printFeedbackImmediately} && not (null wrongLiars)) $
     feedbackCompareChosenLiars configFromLiars wrongLiars
 
   let correctLast = drop (#{staticColumns+emptyColumns}) columns == generateTruthTable solutionValues
