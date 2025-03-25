@@ -51,7 +51,7 @@ import GHC.Generics
 import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
 
-import GHC.Real ((%),Rational)
+import GHC.Real ((%))
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
 
@@ -462,8 +462,6 @@ literalRatio' = Set.foldr countContainer (0, 0)
 
     countLiteral (Positive _) (neg, pos) = (neg, pos + 1)
     countLiteral (Negative _) (neg, pos) = (neg + 1, pos)
-
-test_dnf = (Set.fromList [Con (Set.fromList [Negative ('A'),Negative ('B')]),Con (Set.fromList [Negative ('C'),Negative ('B')])])
 
 literalRatio :: (Ord a, HasLiterals a) => Set a -> Rational
 literalRatio set = let (neg,pos) = literalRatio' set in (neg % (pos + neg))
