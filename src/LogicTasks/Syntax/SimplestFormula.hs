@@ -168,8 +168,7 @@ completeGrade' inst sol
     superfluousBracketsSolution = bracketsMax - bracketsSolution
     synTreeEq = simplestString inst == simplestDisplay synTreeSubmission
     percentage = (superfluousBracketsSolution - superfluousBracketsSubmission) % superfluousBracketsSolution
-    rate r = printSolutionAndAssertMinimum  
-      (MinimumThreshold (1 % superfluousBracketsSolution)) 
-      DefiniteArticle 
+    rate = printSolutionAndAssertMinimum
+      (MinimumThreshold (1 % superfluousBracketsSolution))
+      DefiniteArticle
       (if showSolution inst then Just $ simplestString inst else Nothing)
-      r
