@@ -11,14 +11,16 @@ type Protocol = (Int, [(Int, Char)])
 
 v1, v2 :: [SynTree BinOp Char]
 v1 =
-  [ Binary Impl (Leaf 'A') (Leaf 'B')
-  , Binary Impl (Leaf '1') (Leaf 'A')
-  , Binary Impl (Binary And (Leaf 'A') (Leaf 'D')) (Leaf '0')
+  [ Binary Impl (Leaf 'B') (Leaf 'A')
+  , Binary Impl (Leaf '1') (Leaf 'B')
+  , Binary Impl (Leaf 'C') (Leaf 'A')
+  , Binary Impl (Leaf 'C') (Leaf '0')
   ]
 v2 =
   [ Binary Impl (Leaf 'A') (Leaf 'B')
   , Binary Impl (Leaf '1') (Leaf 'A')
-  , Binary Impl (Binary And (Leaf 'A') (Leaf 'B')) (Leaf '0')
+  , Binary Impl (Binary And (Leaf 'B') (Leaf 'A')) (Leaf '0')
+  , Binary Impl (Leaf 'D') (Leaf '0')
   ]
 
 makeHornformula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
@@ -26,7 +28,7 @@ makeHornformula spirit extra = do
     permutation <- shuffle spirit
     let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..]
     clauses <- shuffle (withAdded ++ drop extra permutation)
-    let formula = fmap toLower $ foldr1 (Binary And) clauses
+    let formula =  toLower <$> foldr1 (Binary And) clauses
     atomics <- shuffle (getAllAtomics formula)
     return (foldl (flip (uncurry replace)) formula (zip atomics ['A'..]))
   where
@@ -52,7 +54,8 @@ getAllAtomics tree = nubOrd $ filter (`notElem` ['0','1']) (collectLeaves tree)
 
 modellFromSolution :: (Bool, Protocol)  -> [Char] -> [(Char, Bool)]
 modellFromSolution (False,_) _ = []
-modellFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++ map (,False) (filter (`notElem` map snd marked) cs)
+modellFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
+    map (,False) (filter (`notElem` map snd marked) cs)
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
 getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses rightPart
