@@ -52,9 +52,9 @@ isHornclauseI _ = False
 getAllAtomics :: SynTree BinOp Char -> [Char]
 getAllAtomics tree = nubOrd $ filter (`notElem` ['0','1']) (collectLeaves tree)
 
-modellFromSolution :: (Bool, Protocol)  -> [Char] -> [(Char, Bool)]
-modellFromSolution (False,_) _ = []
-modellFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
+modelFromSolution :: (Bool, Protocol)  -> [Char] -> [(Char, Bool)]
+modelFromSolution (False,_) _ = []
+modelFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
     map (,False) (filter (`notElem` map snd marked) cs)
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
