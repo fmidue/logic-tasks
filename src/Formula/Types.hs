@@ -290,7 +290,7 @@ genCnfWithRatio :: Rational -> Rational -> (Int,Int) -> (Int,Int) -> [Char] -> B
 genCnfWithRatio negLiteralRatio negLiteralSpread (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
-      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms) 
+      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
       && checkNegLiteralRatio xs negLiteralRatio negLiteralSpread
     pure (Cnf cnf)
   where
