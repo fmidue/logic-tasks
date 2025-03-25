@@ -22,6 +22,7 @@ import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 import LogicTasks.Helpers (cacheIO, extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
+import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
@@ -109,6 +110,11 @@ completeGrade' path inst sol
           german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
+
+        when (isSemanticEqual treeAnswer correctTree) $
+          instruct $ do
+            english "This syntax tree is semantically equivalent to the original one, but not identical."
+            german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
 
         when (showSolution inst) $
           example (correct inst) $ do
