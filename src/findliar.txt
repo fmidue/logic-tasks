@@ -17,7 +17,7 @@ data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord,Data)
 allNamen :: [Namen]
 allNamen = [minBound .. maxBound]
 
-type Submission = (PropFormula Char,PropFormula Char,PropFormula Char,PropFormula Char,Table,[Namen])
+type Submission = ([PropFormula Char],PropFormula Char,Table,[Namen])
 type TaskData = ([Text],[Bool],[SynTree BinOp Char])
 
 
@@ -227,7 +227,7 @@ feedbackCompareChosenLiars configFromLiars wrongLiars = do
 
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ (hints,_,formulaParts) (f1,f2,f3,_,Table xs,identifiedLiars) = do
+checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars) = do
 
   when (nubOrd atomicRows /= atomicRows) $ refuse $ indent $ bothLangs $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
@@ -249,7 +249,6 @@ checkSyntax _ (hints,_,formulaParts) (f1,f2,f3,_,Table xs,identifiedLiars) = do
   pure ()
   where
     configFromLiars = toConfigInverted identifiedLiars
-    submittedParts = [f1,f2,f3]
     columns = map snd xs
     atomicCols = take #{staticColumns} columns
     atomicRows = filter (notElem Nothing) $ transpose atomicCols
@@ -268,13 +267,13 @@ generateTruthTable solutionValues =
 
 
 checkSemantics :: OutputCapable m => FilePath -> ([Text],[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
-checkSemantics _ (hints,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,identifiedLiars) = do
-  let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts [f1,f2,f3]
+checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,identifiedLiars) = do
+  let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts submittedParts
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
 
   let correctFormula = isSemanticEqual (toSynTree f) solutionFormula ||
-                       isSemanticEqual (toSynTree f) (foldr1 (Binary And) (map toSynTree [f1, f2, f3]))
+                       isSemanticEqual (toSynTree f) (foldr1 (Binary And) (map toSynTree submittedParts))
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
@@ -301,7 +300,6 @@ checkSemantics _ (hints,solutionValues,formulaParts) (f1,f2,f3,f,Table xs,identi
   pure res
     where
       configFromLiars = toConfigInverted identifiedLiars
-      submittedParts = [f1,f2,f3]
       solutionFormula = foldr1 (Binary And) formulaParts
       listOfLiars = map fst $ filter (not . snd) (zip allNamen solutionValues)
       columns = map snd xs
@@ -407,7 +405,7 @@ parseSubmission input =
         parseIt f3 $>>= \parsedF3 ->
           parseIt f $>>= \parsedF ->
             traverse (traverse parseIt) headers $>>= \parsedHeaders ->
-              pure (parsedF1,parsedF2,parsedF3,parsedF, makeTable parsedHeaders columns, names)
+              pure ([parsedF1,parsedF2,parsedF3],parsedF, makeTable parsedHeaders columns, names)
   where
     parseIt =
       parseWithFallback
