@@ -37,16 +37,6 @@ import Control.OutputCapable.Blocks (
   text,
   )
 
-
-import Control.OutputCapable.Blocks (
-  LangM,
-  OutputCapable,
-  indent,
-  refuse,
-  text,
-  )
-
-
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
 emptyColumns  = 4
 staticColumns = 3
@@ -100,7 +90,6 @@ import FlexTask.Generic.Form (
 import FlexTask.Types          (HtmlDict)
 import FindLiarTask
 import LogicTasks.Forms        (tableForm)
-import LogicTasks.Formula      (TruthValue(..))
 import Test.QuickCheck.Gen
 import Yesod
 
@@ -177,7 +166,6 @@ import Control.Monad (when)
 import Control.OutputCapable.Blocks
 import Data.Char     (digitToInt)
 import Data.Containers.ListUtils (nubOrd)
-import Data.Foldable (toList)
 import Data.List     (transpose, intercalate)
 import Data.Maybe    (fromJust)
 import Data.Ratio    ((%))
@@ -187,8 +175,7 @@ import Numeric       (showBin)
 import LogicTasks.Formula (
   Formula(..),
   TruthValue(..),
-  isSemanticEqual,
-  convert,
+  isSemanticEqual
   )
 import Trees.Formula ()
 import Trees.Print (simplestDisplay)
@@ -198,7 +185,6 @@ import Trees.Types (
   toSynTree
   )
 
-import qualified SAT.MiniSat as Sat
 
 import Global
 
