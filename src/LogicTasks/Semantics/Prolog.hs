@@ -21,7 +21,7 @@ import Data.Tuple (swap)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite, ClauseShape (HornClause), HornShape (Fact, Query), terms)
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), factClause, literals, opposite, procedureClause, ClauseShape (HornClause), HornShape (Fact, Query), terms)
 import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
@@ -143,12 +143,30 @@ verifyQuiz PrologConfig{..}
           german "Zu wenige Literale für diese Klausellänge."
           english "There are not enough literals available for this clause length."
 
+    | length usedPredicates > maxClauseLength =
+        refuse $ indent $ translate $ do
+          german "maxClauseLength ist größer als usedPredicates."
+          english "maxClauseLength is larger than usedPredicates."
+
     | null usedPredicates =
         refuse $ indent $ translate $ do
           german "Es wurden keine Literale angegeben."
           english "You did not specify which literals should be used."
 
-    | (firstClauseShape `elem` [HornClause Fact, HornClause Query]) && firstClauseShape == secondClauseShape =
+    | factClause `elem` [firstClauseShape, secondClauseShape] && minClauseLength > 1 =
+        refuse $ indent $ translate $ do
+          german "Die Klauselform 'Fakt' hat immer Länge 1. "
+          german "Das 'minClauseLength'-Parameter muss verringert werden."
+          english "A 'fact' clause always has length 1. "
+          english "Adjust the 'minClauseLength' parameter accordingly."
+    | procedureClause `elem` [firstClauseShape, secondClauseShape] && maxClauseLength < 2 =
+        refuse $ indent $ translate $ do
+          german "Die Klauselform 'Regel' hat mindestens Länge 2. "
+          german "Das 'maxClauseLength'-Parameter muss erhöht werden."
+          english "A 'procedure' clause always has at least length 2. "
+          english "Adjust the 'maxClauseLength' parameter accordingly."
+    | firstClauseShape `elem` [HornClause Fact, HornClause Query] &&
+      secondClauseShape `elem` [HornClause Fact, HornClause Query] =
         refuse $ indent $ translate $ do
           german "Mit diesen Klauselformen ist keine Resolution möglich."
           english "No resolution is possible with these clause forms."
