@@ -16,14 +16,14 @@ import Control.OutputCapable.Blocks (
 import Data.Maybe (fromJust, isNothing)
 import Data.List (delete)
 import Data.Set (difference, fromList, member, toList, union)
-import Test.QuickCheck (Gen, elements)
+import Test.QuickCheck (Gen, elements, suchThat)
 
 import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
-import Util (checkBaseConf, prevent, preventWithHint, tryGen)
+import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (when, unless)
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
 import Formula.Parsing (clauseFormulaParser, stepAnswerParser, clauseSetParser)
@@ -246,7 +246,7 @@ genResStepClause minClauseLength maxClauseLength usedAtoms = do
     clause1 <- genClause (minLen1,maxClauseLength-1) restAtoms
     let
       lits1 = literals clause1
-    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restAtoms) 100
+    clause2 <- genClause (minLen2,maxClauseLength-1) restAtoms `suchThat`
         (all (\lit -> opposite lit `notElem` lits1) .  literals)
     pure (clause2, resolveLit, lits1)
 
