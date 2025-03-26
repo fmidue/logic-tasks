@@ -1,13 +1,49 @@
+{-# language DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
+
 module MinMaxSpec where
 
 import Test.Hspec (Spec, describe, it, xit)
 import Control.OutputCapable.Blocks (LangM)
-import TestHelpers (doesNotRefuse)
-import Test.QuickCheck (forAll)
+import Test.QuickCheck (Gen, chooseAny, forAll)
 import qualified LogicTasks.Semantics.Max as Max (verifyQuiz, verifyStatic, genMaxInst, description, partialGrade', completeGrade')
 import qualified LogicTasks.Semantics.Min as Min (verifyQuiz, verifyStatic, genMinInst, description, partialGrade', completeGrade')
-import Config (dMinMaxConf, MaxInst (cnf), MinInst (dnf))
+import Config (
+  BaseConfig(..),
+  NormalFormConfig(..),
+  MinMaxConfig(..),
+  dMinMaxConf,
+  MaxInst (cnf),
+  MinInst (dnf),
+  )
 
+import FormulaSpec (validBoundsNormalFormParams)
+import TestHelpers (doesNotRefuse)
+
+
+
+validBoundsMinMaxConfig :: Gen MinMaxConfig
+validBoundsMinMaxConfig = do
+  ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedAtoms) <- validBoundsNormalFormParams
+  offerUnicodeInput <- chooseAny
+  printSolution <- chooseAny
+  pure $ MinMaxConfig
+    { normalFormConf = NormalFormConfig{
+          minClauseAmount,
+          maxClauseAmount,
+          baseConf = BaseConfig{
+              minClauseLength,
+              maxClauseLength,
+              usedAtoms
+          }
+      }
+    -- Restrictions on this lead to infinite loops.
+    -- A satisfying formula is frequently not found, even with large intervals.
+    , percentTrueEntries = Nothing
+    , printSolution
+    , extraText = Nothing
+    , offerUnicodeInput
+    }
 
 
 spec :: Spec
@@ -16,22 +52,30 @@ spec = do
     it "default config should pass config check" $
       doesNotRefuse (Max.verifyQuiz dMinMaxConf :: LangM Maybe) &&
       doesNotRefuse (Min.verifyQuiz dMinMaxConf :: LangM Maybe)
+    it "validBoundsMinMaxConfig should generate a valid config" $
+      forAll validBoundsMinMaxConfig $ \minMaxConfigConfig ->
+        doesNotRefuse (Max.verifyQuiz minMaxConfigConfig :: LangM Maybe) &&
+        doesNotRefuse (Min.verifyQuiz minMaxConfigConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject - Max" $
-      forAll (Max.genMaxInst dMinMaxConf) $ \inst ->
-        doesNotRefuse (Max.description inst :: LangM Maybe)
+      forAll validBoundsMinMaxConfig $ \config ->
+        forAll (Max.genMaxInst config) $ \inst ->
+          doesNotRefuse (Max.description inst :: LangM Maybe)
     it "should not reject - Min" $
-      forAll (Min.genMinInst dMinMaxConf) $ \inst ->
-        doesNotRefuse (Min.description inst :: LangM Maybe)
+      forAll validBoundsMinMaxConfig $ \config ->
+        forAll (Min.genMinInst config) $ \inst ->
+          doesNotRefuse (Min.description inst :: LangM Maybe)
   describe "generateInst" $ do
     it "should pass verifyStatic - Max" $
-      forAll (Max.genMaxInst dMinMaxConf) $ \inst ->
-        doesNotRefuse
-          (Max.verifyStatic inst :: LangM Maybe)
+      forAll validBoundsMinMaxConfig $ \config ->
+        forAll (Max.genMaxInst config) $ \inst ->
+          doesNotRefuse
+            (Max.verifyStatic inst :: LangM Maybe)
     it "should pass verifyStatic - Min" $
-      forAll (Min.genMinInst dMinMaxConf) $ \inst ->
-        doesNotRefuse
-          (Min.verifyStatic inst :: LangM Maybe)
+      forAll validBoundsMinMaxConfig $ \config ->
+        forAll (Min.genMinInst config) $ \inst ->
+          doesNotRefuse
+            (Min.verifyStatic inst :: LangM Maybe)
     xit "possible solution passes partialGrade - Max" $
       forAll (Max.genMaxInst dMinMaxConf) $ \inst ->
         doesNotRefuse
