@@ -44,7 +44,8 @@ module Formula.Types
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
-import Data.List(intercalate, delete, nub, transpose, (\\))
+import Data.List(intercalate, delete, nub, transpose, (\\), minimumBy)
+import Data.Ord(comparing)
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
@@ -279,19 +280,19 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf = genCnfWithRatio 2 2
+genCnf = genCnfWithRatio 2
 
 -- | Generates a random cnf satisfying the given bounds
 --   for the amount and the length of the contained clauses,
 --   as well as the ratio of negative literals.
 --   The used atomic formulas are drawn from the list of chars.
 --   The ratio must be between 0 and 1; otherwise, it will be ignored.
-genCnfWithRatio :: Rational -> Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnfWithRatio negLiteralRatio negLiteralSpread (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnfWithRatio :: Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
+genCnfWithRatio negLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && checkNegLiteralRatio xs negLiteralRatio negLiteralSpread
+      && checkNegLiteralRatio xs negLiteralRatio
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -436,17 +437,17 @@ instance Arbitrary Dnf where
 --   The used atomic formulas are drawn from the list of chars.
 --   The ratio must be between 0 and 1; otherwise, it will be ignored.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf = genDnfWithRatio 2 2
+genDnf = genDnfWithRatio 2
 
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
-genDnfWithRatio :: Rational -> Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnfWithRatio negLiteralRatio negLiteralSpread (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genDnfWithRatio :: Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnfWithRatio negLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && checkNegLiteralRatio xs negLiteralRatio negLiteralSpread
+      && checkNegLiteralRatio xs negLiteralRatio
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -456,17 +457,14 @@ genDnfWithRatio negLiteralRatio negLiteralSpread (minNum,maxNum) (minLen,maxLen)
             con <- genCon (minLen,maxLen) usedAtoms
             generateCons usedAtoms (Set.insert con set) num
 
-literalRatio' :: (Ord a, HasLiterals a) => Set a -> (Integer, Integer)
-literalRatio' = Set.foldr countContainer (0, 0)
+literalRatio :: (Ord a, HasLiterals a) => Set a -> (Integer, Integer)
+literalRatio = Set.foldr countContainer (0, 0)
   where
     countContainer container (negAcc, posAcc) =
       Set.foldr countLiteral (negAcc, posAcc) (getLiterals container)
 
     countLiteral (Positive _) (neg, pos) = (neg, pos + 1)
     countLiteral (Negative _) (neg, pos) = (neg + 1, pos)
-
-literalRatio :: (Ord a, HasLiterals a) => Set a -> Rational
-literalRatio set = let (neg,pos) = literalRatio' set in (neg % (pos + neg))
 
 class HasLiterals a where
   getLiterals :: a -> Set Literal
@@ -477,13 +475,22 @@ instance HasLiterals Con where
 instance HasLiterals Clause where
   getLiterals (Clause ls) = ls
 
-checkNegLiteralRatio :: (Ord a, HasLiterals a) => Set a -> Rational -> Rational -> Bool
-checkNegLiteralRatio set ratio spread
-  | ratio < 0 || ratio > 1 = True
-  | v < ratio - spread * ratio = False
-  | v > ratio + spread * ratio = False
-  | otherwise = True
-  where v = literalRatio set
+-- | Checks if the actual negative literal ratio matches the closest possible
+--   ratio (k/n) to the desired value, based on the total number of literals.
+--   This ensures that the condition is satisfiable for the given set size.
+checkNegLiteralRatio :: (Ord a, HasLiterals a) => Set a -> Rational -> Bool
+checkNegLiteralRatio set desiredRatio
+  | desiredRatio < 0 || desiredRatio > 1 = True
+  | snappedRatio == actualRatio = True
+  | otherwise = False
+  where 
+    (neg, pos) = literalRatio set
+    n = pos + neg
+    actualRatio = neg % n
+    possibleRatios = [n%n, (n-1)%n .. 0]
+    snappedRatio = nearestElement possibleRatios desiredRatio
+    nearestElement :: [Rational] -> Rational -> Rational
+    nearestElement xs target = minimumBy (comparing (abs . (target -))) xs
 
 ------------------------------------------------------------
 
