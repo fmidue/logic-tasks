@@ -33,7 +33,6 @@ import Util (
   preventWithHint,
   remove,
   withRatio,
-  tryGen,
   checkTruthValueRangeAndFormulaConf,
   formulaDependsOnAllAtoms
   )
@@ -55,9 +54,9 @@ genFillInst FillConfig{..} = do
       (FormulaArbitrary syntaxTreeConfig) ->
         InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
       (FormulaCnf cnfCfg) ->
-        tryGen (InstCnf <$> genCnf' cnfCfg) 100 $ withRatio percentTrueEntries'
+        InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
       (FormulaDnf dnfCfg) ->
-        tryGen (InstDnf <$> genDnf' dnfCfg) 100 $ withRatio percentTrueEntries'
+        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
 
     let
       entries = readEntries $ getTable formula
