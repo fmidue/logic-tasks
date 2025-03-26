@@ -14,7 +14,6 @@ import Control.OutputCapable.Blocks (
   translate,
   yesNo,
   )
-import Control.Monad.State (put, get, lift, evalStateT)
 import Control.Monad (when)
 import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
@@ -79,21 +78,6 @@ withRatio (lower,upper) form =
     percentage num = length tableEntries *num `div` 100
     upperBound = percentage upper
     lowerBound = percentage lower
-
-
-
-tryGen :: Gen a -> Int -> (a -> Bool) -> Gen a
-tryGen gen n b = evalStateT state 0
-  where
-    state = do
-       runs <- get
-       if runs > n
-         then error "Maximum amount of tries exceeded by generator!"
-         else do
-           res <- lift gen
-           if b res then pure res
-                    else do put (runs +1)
-                            state
 
 
 
