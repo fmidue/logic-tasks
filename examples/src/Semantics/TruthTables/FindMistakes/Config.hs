@@ -30,6 +30,7 @@ task10 = DecideConfig
                      }
                    , minClauseAmount = 3
                    , maxClauseAmount = 3
+                   , negLiteralRatio = 2
                    })
   , percentageOfChanged = 40
   , percentTrueEntries = Just (30,70)

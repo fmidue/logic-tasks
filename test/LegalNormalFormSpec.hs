@@ -57,7 +57,8 @@ validBoundsLegalNormalFormConfig = do
                 minClauseLength,
                 maxClauseLength,
                 usedAtoms
-            }
+            },
+            negLiteralRatio = 2
           },
           formulas,
           illegals,
@@ -91,7 +92,8 @@ invalidBoundsLegalCNF = do
                 minClauseLength,
                 maxClauseLength,
                 usedAtoms
-            }
+            },
+            negLiteralRatio = 2
           },
           formulas,
           illegals,

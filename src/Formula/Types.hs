@@ -483,7 +483,7 @@ checkNegLiteralRatio set desiredRatio
   | desiredRatio < 0 || desiredRatio > 1 = True
   | snappedRatio == actualRatio = True
   | otherwise = False
-  where 
+  where
     (neg, pos) = literalRatio set
     n = pos + neg
     actualRatio = neg % n
