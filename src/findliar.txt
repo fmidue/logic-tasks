@@ -198,7 +198,7 @@ import Trees.Types (
 import Global
 
 toConfigInverted :: [Namen] -> [(Char,Bool)]
-toConfigInverted liars = map (\\x -> (nameMatch x, notElem x liars)) allNamen
+toConfigInverted liars = map (\\x -> (nameMatch x,  x `notElem` liars)) allNamen
   where
     nameMatch A = 'A'
     nameMatch B = 'B'
@@ -293,7 +293,7 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
     hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
     [] -> pure ()
 
-  let correctLast = drop (#{staticColumns+emptyColumns}) columns == generateTruthTable solutionValues
+  let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
     "Spalte F der Wahrheitstafel ist korrekt?"
 
