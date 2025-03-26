@@ -10,7 +10,7 @@ import Trees.Types (BinOp(..))
 
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(..))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
@@ -39,13 +39,15 @@ small = ComposeFormulaConfig
     , minUniqueBinOperators = 2
     }
   , treeDisplayModes = (TreeDisplay, TreeDisplay)
-  , extraHintsOnAssociativity = True
-  , extraText = Nothing
+  , extraText = Just (listToFM
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        , (English, "Do not try to use associativity in order to omit brackets in this task.")
+                        ])
   , printSolution = True
   , offerUnicodeInput = False
   }
 
--- 2024: Weight 0.33
+-- 2024: Weight 0.3
 task03 :: ComposeFormulaConfig
 task03 = ComposeFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -67,8 +69,10 @@ task03 = ComposeFormulaConfig
     , minUniqueBinOperators = 2
     }
   , treeDisplayModes = (TreeDisplay, TreeDisplay)
-  , extraHintsOnAssociativity = False
-  , extraText = Nothing
+  , extraText = Just (listToFM
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        , (English, "Do not try to use associativity in order to omit brackets in this task.")
+                        ])
   , printSolution = True
   , offerUnicodeInput = True
   }

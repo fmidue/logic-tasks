@@ -10,7 +10,7 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 
--- Weight 0.33
+-- 2023: Weight 0.33
 task08 :: PickConfig
 task08 = PickConfig
   { formulaConfig =

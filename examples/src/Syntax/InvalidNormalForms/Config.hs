@@ -53,7 +53,7 @@ task09 = LegalNormalFormConfig
   , extraText = Nothing
   }
 
--- Weight 0.25
+-- 2023: Weight 0.25
 task18 :: LegalNormalFormConfig
 task18 = LegalNormalFormConfig
   { normalFormConfig = NormalFormConfig
