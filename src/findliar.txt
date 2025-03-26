@@ -282,13 +282,13 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
     "Gesamtformel ist korrekt?"
 
   let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
-  when (#{printFeedbackImmediately} && not (null wrongLiars)) $
+  when (#{not printFeedbackImmediately} && not (null wrongLiars)) $
     case wrongLiars of
     liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
     [] -> pure ()
 
   let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
-  when (#{printFeedbackImmediately} && not (null unmatchedHints)) $
+  when (#{not printFeedbackImmediately} && not (null unmatchedHints)) $
     case unmatchedHints of
     hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
     [] -> pure ()
