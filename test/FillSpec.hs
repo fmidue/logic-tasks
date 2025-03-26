@@ -41,6 +41,7 @@ validBoundsNormalFormConfig :: Gen NormalFormConfig
 validBoundsNormalFormConfig = do
   minClauseAmount <- choose (1, 5)
   maxClauseAmount <- choose (2, 10) `suchThat` \x -> minClauseAmount <= x
+  negLiteralRatio <- toRational <$> choose (0.0, 1.1 :: Double)
   baseConf <- validBoundsBaseConfig `suchThat` \bc ->
     minClauseAmount * minClauseLength bc >= length (usedAtoms bc) &&
     minClauseAmount <= 2 ^ length (usedAtoms bc) &&
@@ -49,6 +50,7 @@ validBoundsNormalFormConfig = do
     baseConf
   , minClauseAmount
   , maxClauseAmount
+  , negLiteralRatio
   }
 
 validBoundsFillConfig :: Gen FillConfig
