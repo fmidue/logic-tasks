@@ -96,6 +96,7 @@ import FlexTask.Generic.Form (
   Formify(..),
   formify,
   formifyInstanceMultiChoice,
+  list,
   single,
   buttonsEnum
   )
@@ -130,15 +131,13 @@ getTask = do
           checkers,
           getFormData form)
   where
-    form = formify (Nothing :: Maybe (String, String, String))
-             [[single "1) "],
-             [single "2) "],
-             [single "3) "]] $$>
-           formify (Nothing :: Maybe String)
-             [[single "Gesamtformel F="]] $$>
-           addCss formulaCss (tableForm emptyColumns rows ["A","B","C"] ["F"]) $$>
-           formify (Nothing :: Maybe [Namen])
-             [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
+    form = formify (Nothing :: Maybe [String])
+        [[list Vertical [ "1) ", "2) ", "3) "]]] $$>
+        formify (Nothing :: Maybe String)
+          [[single "Gesamtformel F="]] $$>
+        addCss formulaCss (tableForm emptyColumns rows ["A","B","C"] ["F"]) $$>
+        formify (Nothing :: Maybe [Namen])
+          [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
 
 
     formulaCss = [cassius|
@@ -199,7 +198,7 @@ import Trees.Types (
 import Global
 
 toConfigInverted :: [Namen] -> [(Char,Bool)]
-toConfigInverted liars = map (\\x -> (nameMatch x, x `notElem` liars)) allNamen
+toConfigInverted liars = map (\\x -> (nameMatch x, notElem x liars)) allNamen
   where
     nameMatch A = 'A'
     nameMatch B = 'B'
@@ -397,16 +396,15 @@ makeTable headers values = Table $ zip allHeaders formattedTruthValues
 
 parseSubmission :: (Monad m, OutputCapable (ReportT o m)) => String -> LangM' (ReportT o m) Submission
 parseSubmission input =
-  parseWithOrReport formParser reportWithFieldNumber input $>>= \((f1,f2,f3),f,headers,columns,names) ->
-    parseIt f1 $>>= \parsedF1 ->
-      parseIt f2 $>>= \parsedF2 ->
-        parseIt f3 $>>= \parsedF3 ->
-          parseIt f $>>= \parsedF ->
-            traverse (traverse parseIt) headers $>>= \parsedHeaders ->
-              pure ([parsedF1,parsedF2,parsedF3],parsedF, makeTable parsedHeaders columns, names)
+  parseWithOrReport formParser reportWithFieldNumber input $>>= \(fs, f, headers, columns, names) ->
+    traverse parseIt fs $>>= \parsedFs ->
+      parseIt f $>>= \parsedF ->
+        traverse (traverse parseIt) headers $>>= \parsedHeaders ->
+          pure (parsedFs, parsedF, makeTable parsedHeaders columns, names)
   where
     parseIt =
       parseWithFallback
         (fully FP.parser)
         (displayInputAnd complainAboutMissingParenthesesIfNotFailingOn)
         (fully FP.formulaSymbolParser)
+
