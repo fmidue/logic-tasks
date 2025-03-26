@@ -19,6 +19,7 @@ task08 = LegalNormalFormConfig
       { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 4
+    , negLiteralRatio = 2
     }
   , formulas = 8
   , illegals = 4
@@ -39,6 +40,7 @@ task09 = LegalNormalFormConfig
       { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 4
+    , negLiteralRatio = 2
     }
   , formulas = 8
   , illegals = 3
@@ -59,6 +61,7 @@ task18 = LegalNormalFormConfig
       { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 5
+    , negLiteralRatio = 2
     }
   , formulas = 8
   , illegals = 2
