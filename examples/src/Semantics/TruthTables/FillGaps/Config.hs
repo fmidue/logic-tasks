@@ -28,7 +28,7 @@ task07 = FillConfig
   , extraText = Nothing
   }
 
--- Weight 0.25
+-- 2023: Weight 0.25
 task20 :: FillConfig
 task20 = FillConfig
   { formulaConfig =
