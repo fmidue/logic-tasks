@@ -207,21 +207,21 @@ toConfigInverted liars = map (\\x -> (nameMatch x, notElem x liars)) allNamen
 printConfig :: [(Char,Bool)] -> String
 printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ show (if b then (1 :: Int) else (0 :: Int))) config)
 
-feedbackCompareHints :: OutputCapable m => [Text] -> [Namen] -> LangM m
-feedbackCompareHints unmatchedHints identifiedLiars = do
+feedbackCompareHints :: OutputCapable m => Text -> [Namen] -> LangM m
+feedbackCompareHints unmatchedHint identifiedLiars = do
   indent $ bothLangs $
     "Widerspruch gefunden: Die ausgewählten Lügner sind: " ++
     show identifiedLiars ++ "." ++
     " Das passt jedoch nicht zu dem Hinweis: " ++
-    unpack (unmatchedHints!!0)
+    unpack unmatchedHint
 
-feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> [SynTree BinOp Char] -> LangM m
-feedbackCompareChosenLiars configFromLiars wrongLiars = do
+feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> SynTree BinOp Char -> LangM m
+feedbackCompareChosenLiars configFromLiars wrongLiar = do
   indent $ bothLangs $
     "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl passende Belegung ist: " ++
     printConfig configFromLiars ++ "." ++
     " Jedoch wertet die angegebene Teilformel: " ++
-    simplestDisplay (wrongLiars!!0) ++
+    simplestDisplay wrongLiar ++
     " unter dieser Belegung zu 0 (falsch) aus."
 
 
@@ -240,11 +240,15 @@ checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars)
 
   let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
   when (#{printFeedbackImmediately} && not (null wrongLiars)) $
-    refuse $ feedbackCompareChosenLiars configFromLiars wrongLiars
+    case wrongLiars of
+    liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
+    [] -> pure ()
 
   let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
   when (#{printFeedbackImmediately} && not (null unmatchedHints)) $
-    refuse $ feedbackCompareHints unmatchedHints identifiedLiars
+    case unmatchedHints of
+    hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
+    [] -> pure ()
 
   pure ()
   where
@@ -277,13 +281,17 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
-  let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
-  when (not #{printFeedbackImmediately} && not (null unmatchedHints)) $
-    feedbackCompareHints unmatchedHints identifiedLiars
-
   let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
-  when (not #{printFeedbackImmediately} && not (null wrongLiars)) $
-    feedbackCompareChosenLiars configFromLiars wrongLiars
+  when (#{printFeedbackImmediately} && not (null wrongLiars)) $
+    case wrongLiars of
+    liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
+    [] -> pure ()
+
+  let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
+  when (#{printFeedbackImmediately} && not (null unmatchedHints)) $
+    case unmatchedHints of
+    hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
+    [] -> pure ()
 
   let correctLast = drop (#{staticColumns+emptyColumns}) columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
@@ -407,4 +415,3 @@ parseSubmission input =
         (fully FP.parser)
         (displayInputAnd complainAboutMissingParenthesesIfNotFailingOn)
         (fully FP.formulaSymbolParser)
-
