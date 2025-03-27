@@ -80,35 +80,50 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = normalFormCo
       = reject $ do
         english "The used atomic formulas cannot generate a clause with maxClauseLength."
         german "Die angegebenen atomaren Formeln können die maximale Klauselgröße nicht generieren."
-    | fromIntegral formulas >
-       (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
-       `div` (2 :: Integer) + 1
-      = reject $ do
-        english "Amount of formulas is too big and bears the risk of generating similar normal forms."
-        german "Anzahl an Formeln ist zu groß. Eine Formel könnte mehrfach generiert werden."
+    | fromIntegral formulas > maxFormulasBound = reject $ do
+        english "'formulas' is too high. This bears the risk of generating a formula multiple times. "
+        english $ "Reduce 'formulas' to at least " ++ show maxFormulasBound ++ ". "
+        english "Alternatively, the distance of minClauseLength and maxClauseLength and/or minClauseAmount and maxClauseAmount could be increased."
+        german "formulas ist zu groß. Eine Formel könnte mehrfach generiert werden. "
+        german $ "formulas muss auf mindestens " ++ show maxFormulasBound ++ " verringert werden. "
+        german "Stattdessen kann die Differenz zwischen minClauseLength und maxClauseLength und/oder minClauseAmount und maxClauseAmount erhöht werden."
     | maxClauseLength == 1 && maxClauseAmount == 1 = reject $ do
         english "Atomic formulas have no illegal forms."
         german "Atomare Formeln können nicht syntaktisch falsch sein."
-    | formulas - illegals <
-        (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
-      = reject $ do
-        english "The formulas used to generate special formula are not sufficient."
-        german "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
+    | formulas - illegals < amountNeededForSpecial = reject $ do
+        english "The amount of valid formulas is too small to allow for your choice of includeFormWithJustOneClause and includeFormWithJustOneLiteralPerClause. "
+        english $ "formulas - invalid should at least be " ++ show amountNeededForSpecial ++ "."
+        german "Die Anzahl korrekter Formeln ist zu niedrig für die getroffene Auswahl von includeFormWithJustOneClause und includeFormWithJustOneLiteralPerClause. "
+        german $ "formulas - invalid sollte mindestens " ++ show amountNeededForSpecial ++ " sein."
     | minClauseAmount > lengthBound (length usedAtoms) maxClauseLength
       = reject $ do
         english "minClauseAmount is too large. The generator cannot generate a normal form."
         german "minClauseAmount ist zu groß. Es kann keine passende Normalform geriert werden."
-    | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 4 + 1) = reject $ do
-        english "Cannot generate string with given minStringSize."
-        german "String kann mit gegebenem minStringSize nicht generiert werden."
-    | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
-        english "Cannot generate string with given maxStringSize."
-        german "String kann mit gegebenem maxStringSize nicht generiert werden."
+    | minStringSize < minStringSizeBound = reject $ do
+        english "Cannot generate string with given minStringSize. "
+        english $ "It needs to be raised to at least " ++ show minStringSizeBound ++ ". "
+        english "Alternatively, minClauseAmount and/or minClauseLength could be reduced."
+        german "String kann mit gegebenem minStringSize nicht generiert werden. "
+        german $ "Es muss auf mindestens " ++ show minStringSizeBound ++ " erhöht werden. "
+        german "Stattdessen kann minClauseAmount und/oder minClauseLength verringert werden."
+    | maxStringSize > maxStringSizeBound = reject $ do
+        english "Cannot generate string with given maxStringSize. "
+        english $ "It needs to be reduced to at least " ++ show maxStringSizeBound ++ ". "
+        english "Alternatively, maxClauseAmount and/or maxClauseLength could be increased."
+        german "String kann mit gegebenem maxStringSize nicht generiert werden. "
+        german $ "Es muss auf mindestens " ++ show maxStringSizeBound ++ " verringert werden. "
+        german "Stattdessen kann maxClauseAmount und/oder maxClauseLength erhöht werden."
     | otherwise = checkNormalFormConfig normalFormConf
   where
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
     boundsError = any (\(a,b) -> b < a)
       [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
+    amountNeededForSpecial = (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
+    maxFormulasBound =
+      (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer)) `div`
+      (2 :: Integer) + 1
+    minStringSizeBound = max 1 minClauseAmount * ((minClauseLength - 1) * 4 + 1)
+    maxStringSizeBound = maxClauseAmount * (maxClauseLength * 6 + 5)
 
 data TreeInfo = Correct | CorrectSingleClause | CorrectAtomicClauses | Erroneous ErrorReason
   deriving (Show, Generic)
