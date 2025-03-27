@@ -162,7 +162,7 @@ checkers = [i|
 
 module Check (checkSemantics, checkSyntax) where
 
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Control.OutputCapable.Blocks
 import Data.Containers.ListUtils (nubOrd)
 import Data.List     (transpose, intercalate)
@@ -227,13 +227,10 @@ checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars)
   assertion (atomicCols == theTable) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
 
-  let evaluated = not . fromJust . evaluate configFromLiars
-
   #{if printFeedbackImmediately then findContradictions else ""}
 
   pure ()
   where
-    configFromLiars = toConfigInverted identifiedLiars
     columns = map snd xs
     atomicCols = take #{staticColumns} columns
     atomicRows = filter (notElem Nothing) $ transpose atomicCols
@@ -252,7 +249,7 @@ generateTruthTable solutionValues =
 
 
 checkSemantics :: OutputCapable m => FilePath -> ([Text],[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
-checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,identifiedLiars) = do
+checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String},solutionValues,formulaParts) (submittedParts,f,Table xs,identifiedLiars) = do
   let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts submittedParts
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
@@ -278,7 +275,6 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
   res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
   pure res
     where
-      configFromLiars = toConfigInverted identifiedLiars
       solutionFormula = foldr1 (Binary And) formulaParts
       listOfLiars = map fst $ filter (not . snd) (zip allNamen solutionValues)
       columns = map snd xs
@@ -290,14 +286,16 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
 
     findContradictions :: String
     findContradictions = [i|
+  let configFromLiars = toConfigInverted identifiedLiars
+  let evaluated = not . fromJust . evaluate configFromLiars
   let wrongLiars = [formula | formula <- map toSynTree submittedParts, evaluated formula]
-  when (not (null wrongLiars)) $
+  unless (null wrongLiars) $
     case wrongLiars of
     liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
     [] -> pure ()
 
   let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, evaluated formula]
-  when (not (null unmatchedHints)) $
+  unless (null unmatchedHints) $
     case unmatchedHints of
     hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
     [] -> pure ()
