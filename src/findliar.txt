@@ -234,6 +234,7 @@ checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars)
     columns = map snd xs
     atomicCols = take #{staticColumns} columns
     atomicRows = filter (notElem Nothing) $ transpose atomicCols
+    submittedTrees = map toSynTree submittedParts
 
 truthValuesToBinaryToIndex :: [Bool] -> Int
 truthValuesToBinaryToIndex = foldl (\\acc value -> acc * 2 + if value then 1 else 0) 0
@@ -250,12 +251,12 @@ generateTruthTable solutionValues =
 
 checkSemantics :: OutputCapable m => FilePath -> ([Text],[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
 checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String},solutionValues,formulaParts) (submittedParts,f,Table xs,identifiedLiars) = do
-  let correctParts = zipWith (\\fSol g -> isSemanticEqual fSol (toSynTree g)) formulaParts submittedParts
+  let correctParts = zipWith isSemanticEqual formulaParts submittedTrees
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
 
   let correctFormula = isSemanticEqual (toSynTree f) solutionFormula ||
-                       isSemanticEqual (toSynTree f) (foldr1 (Binary And) (map toSynTree submittedParts))
+                       isSemanticEqual (toSynTree f) (foldr1 (Binary And) submittedTrees)
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
@@ -275,6 +276,7 @@ checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String}
   res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
   pure res
     where
+      submittedTrees = map toSynTree submittedParts
       solutionFormula = foldr1 (Binary And) formulaParts
       listOfLiars = map fst $ filter (not . snd) (zip allNamen solutionValues)
       columns = map snd xs
@@ -288,7 +290,8 @@ checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String}
     findContradictions = [i|
   let configFromLiars = toConfigInverted identifiedLiars
   let evaluated = not . fromJust . evaluate configFromLiars
-  let wrongLiars = [formula | formula <- map toSynTree submittedParts, evaluated formula]
+
+  let wrongLiars = [formula | formula <- submittedTrees, evaluated formula]
   unless (null wrongLiars) $
     case wrongLiars of
     liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
