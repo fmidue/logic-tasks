@@ -9,7 +9,7 @@ import GHC.Generics
 import Formula.Types
 import Formula.Util
 import Data.Map (Map)
-import Control.OutputCapable.Blocks (Language)
+import Control.OutputCapable.Blocks (Language (..))
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import qualified Trees.Types as ST (BinOp(..), SynTree(..))
 import Trees.Formula ()
@@ -59,7 +59,19 @@ instance Show StepAnswer where
   show (StepAnswer (Just (b,c))) = '(' : show b ++ ',' : ' ' : show c ++ ")"
   show _ = ""
 
+data DecideChoice
+  = Correct
+  | Wrong
+  | NoAnswer
+  deriving (Show,Ord,Eq,Enum,Bounded,Generic)
 
+showChoice :: Language -> DecideChoice -> String
+showChoice German Correct = "Richtig"         -- no-spell-check
+showChoice German Wrong = "Fehlerhaft"        -- no-spell-check
+showChoice German NoAnswer = "Keine Antwort"  -- no-spell-check
+showChoice English Correct = "Correct"
+showChoice English Wrong = "Wrong"
+showChoice English NoAnswer = "No answer"
 
 data PickInst = PickInst {
                  formulas :: [FormulaInst]

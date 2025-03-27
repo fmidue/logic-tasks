@@ -1,12 +1,13 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 
 module LogicTasks.Syntax.IllegalFormulas where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (code, image),
+  GenericOutputCapable (code, image, indent),
   LangM,
   OutputCapable,
   ($=<<),
@@ -20,17 +21,24 @@ import Control.OutputCapable.Blocks (
   multipleChoiceSyntax,
   )
 import Data.List.Extra (nubSort)
-import Data.Bifunctor (second)
 import LogicTasks.Helpers (example, extra, focus, indexed, instruct)
-import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
+import Tasks.LegalProposition.Config (
+  LegalPropositionInst(..),
+  LegalPropositionConfig(..),
+  checkLegalPropositionConfig,
+  propFormulaIsErroneous,
+  PropFormulaInfo (..),
+  PropErrorReason (..),
+  )
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
-import Data.Maybe (isJust, fromJust)
+import Data.Maybe (isJust, fromMaybe)
 import qualified Data.Map as Map (fromAscList)
 import Control.Applicative (Alternative)
+import Data.Tuple.Extra (thd3)
 
 
 
@@ -41,7 +49,7 @@ description inputHelp LegalPropositionInst{..} = do
       english "Consider the following propositional (pseudo) formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
 
-    focus $ unlines $ indexed $ map fst pseudoFormulas
+    focus $ unlines $ indexed $ map thd3 formulaInfos
 
     instruct $ do
       english "Some of these are syntactically wrong. Which of these formulas are correctly formed?"
@@ -77,10 +85,10 @@ start = []
 
 
 partialGrade :: OutputCapable m => LegalPropositionInst -> [Int] -> LangM m
-partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length pseudoFormulas]
+partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length formulaInfos]
 
 
-
+-- jscpd:ignore-start
 completeGrade
   :: (OutputCapable m, MonadIO m, Alternative m)
   => FilePath
@@ -88,28 +96,70 @@ completeGrade
   -> [Int]
   -> Rated m
 completeGrade path LegalPropositionInst{..} sol = reRefuse
-    (multipleChoice DefiniteArticle what solutionDisplay solution sol)
-    $ when (showSolution && wrongSolution) $ do
-      instruct $ do
-          english "The following syntax trees represent the well-formed formulas:"
-          german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
+  (multipleChoice
+    DefiniteArticle
+    what
+    simpleSolutionDisplay
+    (Map.fromAscList solution)
+    sol)
+  $ when (hasWrongSolution && detailedSolution) $ indent $ do
 
-      for_ correctEntries $ \(i,(pf,t)) -> do
-        code $ show i ++ ". " ++ pf
-        image $=<< liftIO $ cacheTree (transferToPicture (fromJust t)) path
-        pure ()
+    instruct $ do
+      german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
+      english "The solution for this task looks like this:"
+
+    for_ formulaInfos $ \(i,info, formula) -> do
+
+      code (show i ++ ". " ++ formula)
+
+      case info of
+        Correct tree -> do
+          instruct $ do
+            german "ist korrekt geformt. "
+            german "Der zugehörige Syntaxbaum sieht so aus:"
+            english "is correctly formed. "
+            english "The corresponding syntax tree looks like this:"
+
+          image $=<< liftIO $ cacheTree (transferToPicture tree) path
+
+          pure ()
+        Erroneous err -> do
+          instruct $ do
+            german "ist nicht korrekt geformt. "
+            english "is not correctly formed. "
+            case err of
+              IllegalParentheses -> do
+                german "Die Anzahl an öffnenden und schließenden Klammern stimmt nicht überein."
+                english "The amount of opening and closing parentheses does not match."
+              IllegalOperator -> do
+                german "Es werden zwei Teilformeln falsch miteinander verknüpft."
+                english "Two subformulas are combined incorrectly."
+              IllegalOperand -> do
+                german "Nicht alle Operatoren verfügen über gültige Teilformeln."
+                english "Not all operators have valid subformulas."
+              MissingOperator -> do
+                german "Nicht alle Teilformen werden verknüpft."
+                english "There are uncombined subformulas."
+              MissingOperand -> do
+                german "Nicht alle Operatoren verfügen über die korrekte Anzahl an Teilformeln."
+                english "Not all operators have the correct number of subformulas."
 
       pure ()
 
+    instruct $ do
+      german "Hinweis: Für manche Fehler gibt es auch andere Interpretationen."
+      english "Note: There are also other interpretations for some errors."
+
+    pure ()
 
     where
-      wrongSolution = nubSort sol /= serialsOfRight
-      pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas
-      correctEntries = filter (isJust . snd . snd) pseudoIndexed
-      serialsOfRight = map fst correctEntries
+      detailedSolution = fromMaybe False showSolution
       what = translations $ do
         german "Indizes"
         english "indices"
-      solutionDisplay | showSolution = Just $ show serialsOfRight
-                      | otherwise = Nothing
-      solution = Map.fromAscList $ map (second (isJust . snd)) pseudoIndexed
+      solution = map (\(i,info,_) -> (i, not (propFormulaIsErroneous info))) formulaInfos
+      hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
+      simpleSolutionDisplay
+        | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]
+        | otherwise = Nothing
+-- jscpd:ignore-end

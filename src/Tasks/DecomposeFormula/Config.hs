@@ -20,7 +20,6 @@ import LogicTasks.Helpers (reject)
 
 data DecomposeFormulaConfig = DecomposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
-    , extraHintsOnAssociativity :: Bool
     , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
@@ -38,7 +37,6 @@ defaultDecomposeFormulaConfig = DecomposeFormulaConfig
         , (Equi, 1)
         ]
       }
-    , extraHintsOnAssociativity = True
     , extraText = Nothing
     , printSolution = True
     , offerUnicodeInput = False
@@ -66,7 +64,6 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..
 
 data DecomposeFormulaInst = DecomposeFormulaInst
                { tree :: SynTree BinOp Char
-               , addExtraHintsOnAssociativity :: Bool
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
                , unicodeAllowed :: Bool

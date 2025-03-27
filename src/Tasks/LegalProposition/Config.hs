@@ -6,6 +6,9 @@
 module Tasks.LegalProposition.Config (
     LegalPropositionConfig (..),
     LegalPropositionInst (..),
+    PropFormulaInfo(..),
+    PropErrorReason(..),
+    propFormulaIsErroneous,
     checkLegalPropositionConfig,
     defaultLegalPropositionConfig,
     ) where
@@ -33,7 +36,7 @@ data LegalPropositionConfig =
     , illegals :: Integer
     , bracketFormulas :: Integer
     , extraText :: Maybe (Map Language String)
-    , printSolution :: Bool
+    , printDetailedSolution :: Maybe Bool
     } deriving (Show,Generic)
 
 defaultLegalPropositionConfig :: LegalPropositionConfig
@@ -45,7 +48,7 @@ defaultLegalPropositionConfig =
     , illegals = 2
     , bracketFormulas = 1
     , extraText = Nothing
-    , printSolution = False
+    , printDetailedSolution = Nothing
     }
 
 checkLegalPropositionConfig :: OutputCapable m => LegalPropositionConfig -> LangM m
@@ -80,12 +83,25 @@ checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeC
     | otherwise = pure()
     where availableOperators = Map.filter (> 0) binOpFrequencies
 
+data PropFormulaInfo = Correct (SynTree BinOp Char) | Erroneous PropErrorReason
+  deriving (Show, Generic)
 
+data PropErrorReason
+  = IllegalParentheses
+  | IllegalOperator
+  | IllegalOperand
+  | MissingOperator
+  | MissingOperand
+  deriving (Show, Generic)
+
+propFormulaIsErroneous :: PropFormulaInfo -> Bool
+propFormulaIsErroneous (Erroneous _) = True
+propFormulaIsErroneous _ = False
 
 data LegalPropositionInst =
     LegalPropositionInst
     {
-      pseudoFormulas :: [(String, Maybe (SynTree BinOp Char))]
-    , showSolution :: Bool
+      formulaInfos :: [(Int, PropFormulaInfo, String)]
+    , showSolution :: Maybe Bool
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

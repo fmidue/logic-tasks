@@ -10,7 +10,7 @@ module LogicTasks.Semantics.Decide where
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
-  Language,
+  Language (..),
   OutputCapable,
   english,
   german,
@@ -23,38 +23,24 @@ import Control.OutputCapable.Blocks (
   MinimumThreshold (MinimumThreshold),
   Punishment (Punishment),
   TargetedCorrect (TargetedCorrect),
-  multipleChoiceSyntax,
+  localise,
   )
-import Data.List.Extra ((\\), intercalate, nubSort)
+import Data.List.Extra ((\\), intercalate)
 import Data.Map (Map, fromList)
 import Test.QuickCheck (Gen, suchThat)
 
-import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
+import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..), DecideChoice (..), showChoice)
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable)
 import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
-import LogicTasks.Helpers (extra)
+import LogicTasks.Helpers (extra, reject)
 import Control.Monad (when)
 import Trees.Generate (genSynTree)
 import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
-import qualified Data.Map as Map (fromAscList)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
 
-
-
-data Choice
-  = Correct
-  | Wrong
-  | NoAnswer
-  deriving (Ord,Eq,Enum,Bounded)
-
-
-instance Show Choice where
-  show Correct  = "Richtig"       -- no-spell-check
-  show Wrong    = "Fehlerhaft"    -- no-spell-check
-  show NoAnswer = "Keine Antwort" -- no-spell-check
 
 
 genDecideInst :: DecideConfig -> Gen DecideInst
@@ -93,8 +79,8 @@ description withDropdowns DecideInst{..} = do
     pure ()
   paragraph $ do
     translate $ do
-      english "Find all faulty truth values in the last column of the following truth table."
-      german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzten Spalte der folgenden Wahrheitstafel."
+      english "Decide for each row of the truth table whether the truth value in the last column is correct or incorrect."
+      german "Entscheiden Sie für jede Tabellenzeile, ob der Wahrheitswert in der letzten Spalte der Wahrheitstafel korrekt oder fehlerhaft ist."
     indent $ code $ show (flipAt (getTable formula) changed)
     pure ()
   if withDropdowns
@@ -102,25 +88,42 @@ description withDropdowns DecideInst{..} = do
       paragraph $ do
         translate $ do
           english "For this, consider the repeated truth table below. "
-          english "Next to each row a selection menu with these three options (in German) is given:"
+          english "Next to each row a selection menu with these three options is given:"
           german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
           german "Neben jeder Zeile befindet sich ein Auswahlmenü mit diesen drei Optionen:"
-        code $ intercalate ", " $ map show [Correct,Wrong,NoAnswer]
+        translatedCode $ flip localise $ translations $ do
+          english $ intercalate ", " $ map (showChoice English) [Correct,Wrong,NoAnswer]
+          german $ intercalate ", " $ map (showChoice German) [Correct,Wrong,NoAnswer]
         translate $ do
           english "Choose the appropriate option for each row."
           german "Wählen Sie für jede Zeile die passende Option aus."
         pure ()
     else do
-      paragraph $ translate $ do
-        english "Give the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
-        german "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
-
-      paragraph $ indent $ do
+      paragraph $ do
         translate $ do
-          english "A solution attempt could look like this: "
-          german "Ein Lösungsversuch könnte so aussehen: "
-        code "[1,4,5]"
+          english "Give the solution as a list of decisions. "
+          english "A decision can be one of the following three options:"
+
+          german "Geben Sie die Lösung als eine Liste von Entscheidungen an. "
+          german "Als Entscheidung stehen Ihnen die folgenden drei Optionen zur Verfügung:"
+
+        translatedCode $ flip localise $ translations $ do
+          english $ intercalate ", " $ map (showChoice English) [Correct,Wrong,NoAnswer]
+          german $ intercalate ", " $ map (showChoice German) [Correct,Wrong,NoAnswer]
+
+        translate $ do
+          english "Make sure to assign a decision to each row. "
+          english "The n-th list element corresponds to the n-th row. "
+          english "A solution attempt for a table with four rows could look like this: "
+          german "Stellen Sie sicher, dass Sie jeder Zeile eine Entscheidung zuordnen. "
+          german "Das n-te Listenelement entspricht der n-ten Zeile. "
+          german "Ein Lösungsversuch für eine Tabelle mit vier Zeilen könnte so aussehen: "
+        translatedCode $ flip localise $ translations $ do
+          english $ "[" ++ intercalate ", " (map (showChoice English) [Correct,Correct,Wrong,NoAnswer]) ++ "]"
+          german $ "[" ++ intercalate ", " (map (showChoice German) [Correct,Correct,Wrong,NoAnswer]) ++ "]"
+
         pure ()
+
       pure ()
   extra addText
   pure ()
@@ -167,60 +170,49 @@ verifyQuiz DecideConfig{..}
 
 
 
-start :: [Int]
-start = []
+start :: [DecideChoice]
+start = replicate 4 NoAnswer
 
-partialGrade :: OutputCapable m =>  DecideInst -> [Int] -> LangM m
-partialGrade DecideInst{..} = multipleChoiceSyntax False [1..tableLen]
-    where
-      table = getTable formula
-      tableLen = length $ readEntries table
-
-
-completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> [Int] -> Rated m
-completeGrade DecideInst{..} sol = reRefuse
-  (withExtendedMultipleChoice
-    (fromIntegral tableLen)
-    (length changed)
-    what
-    solutionDisplay
-    solution
-    submission)
-  $ when (diff /= 0) $ translate $ do
-    german $ "In der Menge der unterschiedlichen Indizes " ++ ger ++ " falsch."
-    english $ "The set of unique indices contains " ++ eng
+partialGrade :: OutputCapable m =>  DecideInst -> [DecideChoice] -> LangM m
+partialGrade inst sol
+  | lengthDiff > 0 = reject $ do
+      german "Die Anzahl der Listenelemente stimmt nicht mit der Anzahl an Zeilen überein. "
+      german $ "Fügen Sie " ++ show lengthDiff ++ " weitere Listeneinträge hinzu."
+      english "The amount of list elements does not match the amount of table rows."
+      english $ "Add " ++ show lengthDiff ++ " more list entries."
+  | otherwise = pure ()
   where
-    nubSol = nubSort sol
-    diff = length $ filter (`notElem` changed) nubSol
-    (ger, eng) = if diff == 1
-      then ("ist 1 Index", "1 wrong index")
-      else ("sind " ++ show diff ++ " Indizes", show diff ++ " wrong indices") -- no-spell-check
-    what = translations $ do
-      german "Indizes"
-      english "indices"
-    solutionDisplay | showSolution = Just $ show changed
-                    | otherwise = Nothing
-    tableLen = length $ readEntries $ getTable formula
-    solution = Map.fromAscList $ map (,True) changed
-    submission = Map.fromAscList $ map (,True) nubSol
+    tableLen = length $ readEntries $ getTable $ formula inst
+    lengthDiff = tableLen - length sol
 
 
-completeGradeThreeChoices
+completeGrade
   :: (OutputCapable m,Alternative m, Monad m)
   => DecideInst
-  -> [Choice]
+  -> [DecideChoice]
   -> Rated m
-completeGradeThreeChoices DecideInst{..} sol = reRefuse
+completeGrade DecideInst{..} sol = reRefuse
   (withExtendedMultipleChoice
     (fromIntegral tableLen)
     tableLen
     what
-    solutionDisplay
+    Nothing
     (fromList $ answerListWrong ++ answerListCorrect)
     solMap
     )
     $ when (showSolution && not (all correctOption indexed && tableLen == length indexed)) $ indent $ do
-      translate $ do
+      paragraph $ do
+        translate $ do
+          english "The correct solution is:"
+          german "Die korrekte Lösung ist:"
+        translatedCode $ flip localise $ translations $ do
+          english $
+            "[" ++ intercalate ", " (map (\i -> showChoice English $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
+          german $
+            "[" ++ intercalate ", " (map (\i -> showChoice German $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
+        pure ()
+
+      paragraph $ translate $ do
         english "All of the above table rows given in the above list contain a wrong entry. "
         english "Every other row of the table contains a correct entry. "
         english "Please compare with the correct version of the table:"
@@ -244,10 +236,6 @@ completeGradeThreeChoices DecideInst{..} sol = reRefuse
       what = translations $ do
         german "Antworten"
         english "answers"
-
-      solutionDisplay
-        | showSolution = Just $ show changed
-        | otherwise    = Nothing
 
 
 withExtendedMultipleChoice

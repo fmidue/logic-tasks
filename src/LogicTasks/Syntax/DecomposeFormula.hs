@@ -50,10 +50,6 @@ description DecomposeFormulaInst{..} = do
       english "(You are allowed to add arbitrarily many additional pairs of brackets in the formula.)"
       german "(In der Formel dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    when addExtraHintsOnAssociativity $ instruct $ do
-        english "Remark: Do not try to use associativity in order to omit brackets in this task."
-        german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen."
-
     keyHeading
     basicOpKey unicodeAllowed
     arrowsKey

@@ -24,7 +24,7 @@ task14 =
     , offerUnicodeInput = True
     }
 
--- Weight 0.25
+-- 2023: Weight 0.25
 task13 :: StepConfig
 task13 = StepConfig
     { baseConf = BaseConfig
