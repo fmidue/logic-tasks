@@ -220,24 +220,16 @@ checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars)
   when (nubOrd atomicRows /= atomicRows) $ refuse $ indent $ bothLangs $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
       "Es müssen alle Belegungen genau einmal vorkommen."
-  let theTable = #{startingTable}
+  let theTable = #{startingTable} --ignore-length
   when (atomicCols == map reverse theTable) $ refuse $ indent $ bothLangs $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
   assertion (atomicCols == theTable) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
 
-  let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
-  when (#{printFeedbackImmediately} && not (null wrongLiars)) $
-    case wrongLiars of
-    liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
-    [] -> pure ()
+  let evaluated = not . fromJust . evaluate configFromLiars
 
-  let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
-  when (#{printFeedbackImmediately} && not (null unmatchedHints)) $
-    case unmatchedHints of
-    hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
-    [] -> pure ()
+  #{if printFeedbackImmediately then findContradictions else ""}
 
   pure ()
   where
@@ -270,17 +262,7 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
-  let wrongLiars = [formula | formula <- map toSynTree submittedParts, not (fromJust (evaluate configFromLiars formula))]
-  when (#{not printFeedbackImmediately} && not (null wrongLiars)) $
-    case wrongLiars of
-    liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
-    [] -> pure ()
-
-  let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, not (fromJust (evaluate configFromLiars formula))]
-  when (#{not printFeedbackImmediately} && not (null unmatchedHints)) $
-    case unmatchedHints of
-    hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
-    [] -> pure ()
+  #{if not printFeedbackImmediately then findContradictions else ""}
 
   let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
@@ -305,6 +287,21 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
 |]
   where
     solutionCode = [i|"Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: " ++ show listOfLiars|]
+
+    findContradictions :: String
+    findContradictions = [i|
+        let wrongLiars = [formula | formula <- map toSynTree submittedParts, evaluated formula]
+        when (not (null wrongLiars)) $
+          case wrongLiars of
+          liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
+          [] -> pure ()
+
+        let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, evaluated formula]
+        when (not (null unmatchedHints)) $
+          case unmatchedHints of
+          hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
+          [] -> pure ()
+    |]
 
 startingTable :: [[Maybe TruthValue]]
 startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
