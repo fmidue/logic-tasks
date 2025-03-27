@@ -27,7 +27,7 @@ task08 = LegalNormalFormConfig
   , maxStringSize = 30
   , minStringSize = 12
   , allowArrowOperators = True
-  , printSolution = True
+  , printDetailedSolution = Just True
   , extraText = Nothing
   }
 
@@ -47,11 +47,11 @@ task09 = LegalNormalFormConfig
   , maxStringSize = 30
   , minStringSize = 12
   , allowArrowOperators = False
-  , printSolution = True
+  , printDetailedSolution = Just True
   , extraText = Nothing
   }
 
--- Weight 0.25
+-- 2023: Weight 0.25
 task18 :: LegalNormalFormConfig
 task18 = LegalNormalFormConfig
   { normalFormConfig = NormalFormConfig
@@ -68,7 +68,7 @@ task18 = LegalNormalFormConfig
   , minStringSize = 12
   , allowArrowOperators = False
   , extraText = Nothing
-  , printSolution = True
+  , printDetailedSolution = Just True
   }
 
 spec :: Spec

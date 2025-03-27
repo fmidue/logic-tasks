@@ -6,7 +6,7 @@ module DecideSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
 import Control.OutputCapable.Blocks (LangM, Rated)
-import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..))
+import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig)
@@ -63,8 +63,16 @@ spec = do
     it "should pass grading with correct answer" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \inst ->
-          doesNotRefuse (partialGrade inst (changed inst) :: LangM Maybe) &&
-          doesNotRefuse (completeGrade inst (changed inst) :: Rated Maybe)
+          doesNotRefuse
+            (partialGrade
+              inst
+                [ if i `elem` changed inst then Wrong else Correct
+                | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: LangM Maybe) &&
+          doesNotRefuse
+            (completeGrade
+              inst
+                [ if i `elem` changed inst then Wrong else Correct
+                | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: Rated Maybe)
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->

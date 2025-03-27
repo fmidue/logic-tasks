@@ -16,7 +16,7 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.33
+-- 2024: Weight 0.3
 task01 :: LegalPropositionConfig
 task01 = LegalPropositionConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -41,10 +41,10 @@ task01 = LegalPropositionConfig
   , illegals = 3
   , bracketFormulas = 0
   , extraText = Nothing
-  , printSolution = True
+  , printDetailedSolution = Just True
   }
 
--- Weight 0.25
+-- 2023: Weight 0.25
 task17 :: LegalPropositionConfig
 task17 = LegalPropositionConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -69,7 +69,7 @@ task17 = LegalPropositionConfig
   , illegals = 3
   , bracketFormulas = 1
   , extraText = Nothing
-  , printSolution = True
+  , printDetailedSolution = Just True
   }
 
 spec :: Spec

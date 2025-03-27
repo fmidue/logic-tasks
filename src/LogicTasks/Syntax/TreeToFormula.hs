@@ -50,14 +50,6 @@ description path TreeToFormulaInst{..} = do
       english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    when addExtraHintsOnSemanticEquivalence $ instruct $ do
-      english "Remark: The exact formula of the syntax tree must be given. Other formulas that are semantically equivalent to this formula are incorrect solutions!"
-      german "Hinweis: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung!"
-
-    when addExtraHintsOnAssociativity $ instruct $ do
-      english "Remark: Do not try to use associativity in order to omit brackets in this task."
-      german "Hinweis: Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen."
-
     keyHeading
     basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
@@ -119,7 +111,7 @@ completeGrade' path inst sol
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
-        when (addExtraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer correctTree) $
+        when (isSemanticEqual treeAnswer correctTree) $
           instruct $ do
             english "This syntax tree is semantically equivalent to the original one, but not identical."
             german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
