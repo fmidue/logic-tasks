@@ -186,15 +186,15 @@ import Trees.Types (
 
 import Global
 
-toConfigInverted :: [Namen] -> [(Char,Bool)]
-toConfigInverted liars = map (\\x -> (nameMatch x,  x `notElem` liars)) allNamen
+toAllocationInverted :: [Namen] -> [(Char,Bool)]
+toAllocationInverted liars = map (\\x -> (nameMatch x,  x `notElem` liars)) allNamen
   where
     nameMatch A = 'A'
     nameMatch B = 'B'
     nameMatch C = 'C'
 
-printConfig :: [(Char,Bool)] -> String
-printConfig config =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ show (if b then (1 :: Int) else (0 :: Int))) config)
+printAllocation :: [(Char,Bool)] -> String
+printAllocation allocation =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ show (if b then (1 :: Int) else (0 :: Int))) allocation)
 
 feedbackCompareHints :: OutputCapable m => Text -> [Namen] -> LangM m
 feedbackCompareHints unmatchedHint identifiedLiars = do
@@ -205,10 +205,10 @@ feedbackCompareHints unmatchedHint identifiedLiars = do
     unpack unmatchedHint
 
 feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> SynTree BinOp Char -> LangM m
-feedbackCompareChosenLiars configFromLiars wrongLiar = do
+feedbackCompareChosenLiars allocationFromLiars wrongLiar = do
   indent $ bothLangs $
     "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl passende Belegung ist: " ++
-    printConfig configFromLiars ++ "." ++
+    printAllocation allocationFromLiars ++ "." ++
     " Jedoch wertet die angegebene Teilformel: " ++
     simplestDisplay wrongLiar ++
     " unter dieser Belegung zu 0 (falsch) aus."
@@ -288,18 +288,16 @@ checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String}
 
     findContradictions :: String
     findContradictions = [i|
-  let configFromLiars = toConfigInverted identifiedLiars
-  let evaluated = not . fromJust . evaluate configFromLiars
+  let allocationFromLiars = toAllocationInverted identifiedLiars
+  let evaluated = not . fromJust . evaluate allocationFromLiars
 
   let wrongLiars = [formula | formula <- submittedTrees, evaluated formula]
-  unless (null wrongLiars) $
-    case wrongLiars of
-    liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
+  case wrongLiars of
+    liar:_ -> refuse $ feedbackCompareChosenLiars allocationFromLiars liar
     [] -> pure ()
 
   let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, evaluated formula]
-  unless (null unmatchedHints) $
-    case unmatchedHints of
+  case unmatchedHints of
     hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
     [] -> pure ()
     |]
