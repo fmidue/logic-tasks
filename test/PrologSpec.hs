@@ -41,7 +41,8 @@ validBoundsPrologConfig = do
   maxClauseLength <- choose (minClauseLength, 5)
   predicateAmount <- choose (minClauseLength, maxClauseLength)
   usedPredicates <- vectorOf predicateAmount validBoundsPrologLiteral
-  (firstClauseShape, secondClauseShape) <- ((,) <$> validBoundsClauseShape <*> validBoundsClauseShape)
+  let clauseShape = validBoundsClauseShape `suchThat` shapeSuitsClauseBounds (minClauseLength, maxClauseLength)
+  (firstClauseShape, secondClauseShape) <- ((,) <$> clauseShape <*> clauseShape)
     `suchThat` \(f,s) -> not ((f `elem` [HornClause Fact, HornClause Query]) && f == s)
 
   return $ PrologConfig
@@ -54,6 +55,10 @@ validBoundsPrologConfig = do
     , secondClauseShape
     , useSetNotation = False
     }
+  where
+    shapeSuitsClauseBounds (minB, _) (HornClause Fact) = minB == 1
+    shapeSuitsClauseBounds (_, maxB) (HornClause Procedure) = maxB >= 2
+    shapeSuitsClauseBounds _ _ = True
 
 spec :: Spec
 spec = do
