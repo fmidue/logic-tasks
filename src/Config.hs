@@ -63,7 +63,7 @@ data DecideChoice
   = Correct
   | Wrong
   | NoAnswer
-  deriving (Show,Ord,Eq,Enum,Bounded)
+  deriving (Show,Ord,Eq,Enum,Bounded,Generic)
 
 showChoice :: Language -> DecideChoice -> String
 showChoice German Correct = "Richtig"         -- no-spell-check
