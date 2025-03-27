@@ -29,10 +29,6 @@ bothLangs s = translate $ german s >> english s
 
 module TaskSettings where
 
-import Data.Char     (digitToInt)
-import Data.List     (transpose)
-import Numeric       (showBin)
-
 import Control.OutputCapable.Blocks (
   LangM,
   OutputCapable,
@@ -41,8 +37,6 @@ import Control.OutputCapable.Blocks (
   text,
   )
 
-import LogicTasks.Formula (TruthValue(..))
-
 
 emptyColumns, staticColumns, staticColsEnd, totalColumns, rows :: Int
 emptyColumns  = 4
@@ -50,11 +44,6 @@ staticColumns = 3
 staticColsEnd = 1
 totalColumns  = staticColumns + emptyColumns + staticColsEnd
 rows          = 2^staticColumns
-
-startingTable :: [[Maybe TruthValue]]
-startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
-    transpose (pad . (`showBin` "") <$> [0 .. rows - 1])
-  where pad s = replicate (staticColumns - length s) '0' ++ s
 
 showSolution, printFeedbackImmediately :: Bool
 showSolution  = True
@@ -82,10 +71,15 @@ validateSettings
 module TaskData (getTask) where
 
 
-import Data.List               (sortOn)
+import Data.Char               (digitToInt)
+import Data.List               (sortOn, transpose)
 import Data.String             (fromString)
 import Data.String.Interpolate (i)
 import Data.Text               (Text)
+import Numeric                 (showBin)
+import Test.QuickCheck.Gen
+import Yesod
+
 import FlexTask.FormUtil (
   ($$>),
   addCss,
@@ -101,16 +95,13 @@ import FlexTask.Generic.Form (
   buttonsEnum
   )
 import FlexTask.Types          (HtmlDict)
+import LogicTasks.Formula (TruthValue(..))
 import FindLiarTask
 import LogicTasks.Forms        (tableForm)
-import Test.QuickCheck.Gen
-import Yesod
 
 
 import Global
 import TaskSettings
-
-
 
 
 instance MonadFail Gen where
@@ -161,8 +152,6 @@ getTask = do
 
 instance Formify [Namen] where
   formifyImplementation = formifyInstanceMultiChoice
-
-
 
 checkers :: String
 checkers = [i|
@@ -316,6 +305,12 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
 |]
   where
     solutionCode = [i|"Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: " ++ show listOfLiars|]
+
+startingTable :: [[Maybe TruthValue]]
+startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
+    transpose (pad . (`showBin` "") <$> [0 .. rows - 1])
+  where pad s = replicate (staticColumns - length s) '0' ++ s
+
 =============================================
 
 
