@@ -290,17 +290,17 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
 
     findContradictions :: String
     findContradictions = [i|
-        let wrongLiars = [formula | formula <- map toSynTree submittedParts, evaluated formula]
-        when (not (null wrongLiars)) $
-          case wrongLiars of
-          liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
-          [] -> pure ()
+  let wrongLiars = [formula | formula <- map toSynTree submittedParts, evaluated formula]
+  when (not (null wrongLiars)) $
+    case wrongLiars of
+    liar:_ -> refuse $ feedbackCompareChosenLiars configFromLiars liar
+    [] -> pure ()
 
-        let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, evaluated formula]
-        when (not (null unmatchedHints)) $
-          case unmatchedHints of
-          hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
-          [] -> pure ()
+  let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, evaluated formula]
+  when (not (null unmatchedHints)) $
+    case unmatchedHints of
+    hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
+    [] -> pure ()
     |]
 
 startingTable :: [[Maybe TruthValue]]
