@@ -23,8 +23,8 @@ v2 =
   , Binary Impl (Leaf 'D') (Leaf '0')
   ]
 
-makeHornformula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
-makeHornformula spirit extra = do
+makeHornFormula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
+makeHornFormula spirit extra = do
     permutation <- shuffle spirit
     let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..]
     clauses <- shuffle (withAdded ++ drop extra permutation)
@@ -35,11 +35,11 @@ makeHornformula spirit extra = do
     addClause (Binary Impl a b, x) = [Binary Impl a (Leaf x), Binary Impl (Leaf x) b]
     addClause _ = []
 
-isHornformulaI :: SynTree BinOp c -> Bool
-isHornformulaI =  all isHornclauseI . getClauses
+isHornFormulaI :: SynTree BinOp c -> Bool
+isHornFormulaI =  all isHornClauseI . getClauses
 
-isHornclauseI :: SynTree BinOp c -> Bool
-isHornclauseI (Binary Impl a (Leaf _)) = case a of
+isHornClauseI :: SynTree BinOp c -> Bool
+isHornClauseI (Binary Impl a (Leaf _)) = case a of
     Leaf _ -> True
     (Binary And x y) -> isConj x && isConj y
     _ -> False
@@ -47,12 +47,12 @@ isHornclauseI (Binary Impl a (Leaf _)) = case a of
     isConj (Leaf _) = True
     isConj (Binary And x y) = isConj x && isConj y
     isConj _ = False
-isHornclauseI _ = False
+isHornClauseI _ = False
 
 getAllAtomics :: SynTree BinOp Char -> [Char]
 getAllAtomics tree = nubOrd $ filter (`notElem` ['0','1']) (collectLeaves tree)
 
-modelFromSolution :: (Bool, Protocol)  -> [Char] -> [(Char, Bool)]
+modelFromSolution :: (Bool, Protocol) -> [Char] -> [(Char, Bool)]
 modelFromSolution (False,_) _ = []
 modelFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
     map (,False) (filter (`notElem` map snd marked) cs)
