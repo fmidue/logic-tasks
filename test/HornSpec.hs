@@ -36,6 +36,3 @@ spec = do
         , Binary Impl (Binary And (Leaf 'B') (Leaf 'C')) (Leaf '0')
         ]) `shouldBe`
         (True, (2,[(1,'A'),(2,'B')]))
-
-
---modellFromSolution (findSolution makeHornformula) (getAllAtomics makeHornformula)
