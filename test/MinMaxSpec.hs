@@ -35,7 +35,8 @@ validBoundsMinMaxConfig = do
               minClauseLength,
               maxClauseLength,
               usedAtoms
-          }
+          },
+          negLiteralRatio = 2
       }
     -- Restrictions on this lead to infinite loops.
     -- A satisfying formula is frequently not found, even with large intervals.

@@ -277,6 +277,7 @@ data NormalFormConfig = NormalFormConfig
     { baseConf:: BaseConfig
     , minClauseAmount :: Int
     , maxClauseAmount :: Int
+    , negLiteralRatio :: Rational -- between 0 and 1; otherwise, it will be ignored.
     } deriving (Typeable, Generic, Show)
 
 dNormalFormConf :: NormalFormConfig
@@ -284,6 +285,7 @@ dNormalFormConf = NormalFormConfig
     { baseConf = dBaseConf
     , minClauseAmount = 2
     , maxClauseAmount = 4
+    , negLiteralRatio = 2
     }
 
 

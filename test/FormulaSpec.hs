@@ -44,7 +44,7 @@ spec = do
   describe "genValidBoundsNormalFormParams" $
     it "should generate valid bounds" $
       withMaxSuccess 1000 $ forAll validBoundsNormalFormParams $ \((l1,u1),(l2,u2),cs) ->
-        ioProperty $ checkConfigWith German (NormalFormConfig (BaseConfig l2 u2 cs) l1 u1) checkNormalFormConfig
+        ioProperty $ checkConfigWith German (NormalFormConfig (BaseConfig l2 u2 cs) l1 u1 2) checkNormalFormConfig
 
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $
