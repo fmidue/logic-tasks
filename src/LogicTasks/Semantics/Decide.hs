@@ -88,7 +88,7 @@ description withDropdowns DecideInst{..} = do
       paragraph $ do
         translate $ do
           english "For this, consider the repeated truth table below. "
-          english "Next to each row a selection menu with these three options (in German) is given:"
+          english "Next to each row a selection menu with these three options is given:"
           german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
           german "Neben jeder Zeile befindet sich ein Auswahlmenü mit diesen drei Optionen:"
         translatedCode $ flip localise $ translations $ do
