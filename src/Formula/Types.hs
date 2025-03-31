@@ -56,8 +56,6 @@ import Numeric.SpecFunctions as Math (choose)
 
 -- import GHC.Real ((%))
 
-import Debug.Trace (trace)
-
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
 
 newtype TruthValue = TruthValue {truth :: Bool}
@@ -122,7 +120,7 @@ instance Read Literal where
 
 instance Formula Literal where
    literals lit = [lit]
-   
+
    duplicateLiterals lit = [lit]
 
    atomics (Positive x) = [x]
@@ -303,7 +301,7 @@ genCnfWithRatio posLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsi
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && genericWithRatio posLiteralRatio (Cnf xs) 
+      && genericWithRatio posLiteralRatio (Cnf xs)
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -688,7 +686,7 @@ genericWithRatio mode form =
         && val >= max (if lower == 0 then 0 else 1) lowerBound
   where
     (val, n, (lower,upper)) = case mode of
-      ByTruthValues bounds -> 
+      ByTruthValues bounds ->
         let
           tableEntries = getEntries (getTable form)
           trueEntries = filter (== Just True) tableEntries
@@ -696,7 +694,7 @@ genericWithRatio mode form =
       ByPositiveLiterals bounds ->
         let
           lit = duplicateLiterals form
-          posLiterals = filter (isPositive) lit
+          posLiterals = filter isPositive lit
         in (length posLiterals, length lit, bounds)
 
     percentage :: Int -> Int
