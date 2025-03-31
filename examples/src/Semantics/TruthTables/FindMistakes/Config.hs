@@ -15,6 +15,7 @@ import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
+
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
@@ -30,7 +31,7 @@ task10 = DecideConfig
                      }
                    , minClauseAmount = 3
                    , maxClauseAmount = 3
-                   , negLiteralRatio = 2
+                   , posLiteralRatio = (0,100)
                    })
   , percentageOfChanged = 40
   , percentTrueEntries = Just (30,70)

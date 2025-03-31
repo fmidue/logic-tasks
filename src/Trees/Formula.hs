@@ -13,6 +13,9 @@ instance Formula (SynTree BinOp Char) where
   literals (Not x) = literals x
   literals (Binary _ l r) = nubSort $ literals l ++ literals r
 
+  duplicateLiterals (Binary _ l r) = literals l ++ literals r
+  duplicateLiterals x = literals x
+
   atomics = nubSort . collectLeaves
 
   amount = fromIntegral . treeNodes

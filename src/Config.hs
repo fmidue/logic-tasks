@@ -32,6 +32,10 @@ instance Formula FormulaInst where
   literals (InstDnf d) = literals d
   literals (InstArbitrary t) = literals t
 
+  duplicateLiterals (InstCnf c) = duplicateLiterals c
+  duplicateLiterals (InstDnf d) = duplicateLiterals d
+  duplicateLiterals (InstArbitrary t) = duplicateLiterals t
+
   atomics (InstCnf c) = atomics c
   atomics (InstDnf d) = atomics d
   atomics (InstArbitrary t) = atomics t
@@ -277,7 +281,7 @@ data NormalFormConfig = NormalFormConfig
     { baseConf:: BaseConfig
     , minClauseAmount :: Int
     , maxClauseAmount :: Int
-    , negLiteralRatio :: Rational -- between 0 and 1; otherwise, it will be ignored.
+    , posLiteralRatio :: (Int, Int)
     } deriving (Typeable, Generic, Show)
 
 dNormalFormConf :: NormalFormConfig
@@ -285,7 +289,7 @@ dNormalFormConf = NormalFormConfig
     { baseConf = dBaseConf
     , minClauseAmount = 2
     , maxClauseAmount = 4
-    , negLiteralRatio = 2
+    , posLiteralRatio = (0,100)
     }
 
 

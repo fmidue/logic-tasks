@@ -26,13 +26,13 @@ import Test.QuickCheck(Gen, suchThat)
 
 import Config ( FillConfig(..), FillInst(..), FormulaInst (..), FormulaConfig (..))
 import Formula.Table (gapsAt, readEntries)
-import Formula.Types (TruthValue, availableLetter, atomics, getTable, truth)
+import Formula.Types (TruthValue, availableLetter, atomics, getTable, truth, genericWithRatio, RatioMode (ByTruthValues))
 import Util (
   isOutside,
   pairwiseCheck,
   preventWithHint,
   remove,
-  withRatio,
+  -- withRatio,
   checkTruthValueRangeAndFormulaConf,
   formulaDependsOnAllAtoms
   )
@@ -52,11 +52,11 @@ genFillInst FillConfig{..} = do
 
     formula <- flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
+        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` genericWithRatio (ByTruthValues percentTrueEntries')
       (FormulaCnf cnfCfg) ->
-        InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+        InstCnf <$> genCnf' cnfCfg `suchThat` genericWithRatio (ByTruthValues percentTrueEntries')
       (FormulaDnf dnfCfg) ->
-        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
+        InstDnf <$> genDnf' dnfCfg `suchThat` genericWithRatio (ByTruthValues percentTrueEntries')
 
     let
       entries = readEntries $ getTable formula

@@ -22,6 +22,7 @@ import TestHelpers (doesNotRefuse)
 
 
 
+
 validBoundsMinMaxConfig :: Gen MinMaxConfig
 validBoundsMinMaxConfig = do
   ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedAtoms) <- validBoundsNormalFormParams
@@ -36,7 +37,7 @@ validBoundsMinMaxConfig = do
               maxClauseLength,
               usedAtoms
           },
-          negLiteralRatio = 2
+          posLiteralRatio = (0,100)
       }
     -- Restrictions on this lead to infinite loops.
     -- A satisfying formula is frequently not found, even with large intervals.

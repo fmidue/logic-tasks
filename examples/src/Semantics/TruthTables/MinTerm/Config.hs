@@ -10,6 +10,7 @@ import LogicTasks.Util (checkNormalFormConfig)
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 
+
 -- Weight 0.2
 -- Type: Min
 unused03 :: MinMaxConfig
@@ -22,7 +23,7 @@ unused03 = MinMaxConfig
       }
     , minClauseAmount = 2
     , maxClauseAmount = 3
-    , negLiteralRatio = 2
+    , posLiteralRatio = (0,100)
     }
   , percentTrueEntries = Just (55, 70)
   , extraText = Nothing

@@ -37,6 +37,8 @@ module Formula.Types
        , ClauseShape(..)
        , HornShape(..)
        , anyClause, anyHornClause, factClause, procedureClause, queryClause
+       , RatioMode(ByPositiveLiterals,ByTruthValues)
+       , genericWithRatio
        ) where
 
 
@@ -44,25 +46,28 @@ module Formula.Types
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
-import Data.List(intercalate, delete, nub, transpose, (\\), minimumBy)
-import Data.Ord(comparing)
+import Data.List(intercalate, delete, nub, transpose, (\\)) -- minimumBy
+-- import Data.Ord(comparing)
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
 import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
 
-import GHC.Real ((%))
+-- import GHC.Real ((%))
+
+import Debug.Trace (trace)
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
 
 newtype TruthValue = TruthValue {truth :: Bool}
   deriving (Eq, Ord, Show, Typeable, Generic)
 
-
+data RatioMode = ByPositiveLiterals (Int, Int) |  ByTruthValues (Int, Int) deriving (Show)
 
 class Formula a where
     literals :: a -> [Literal]
+    duplicateLiterals :: a -> [Literal]
     atomics :: a -> [Char]
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
@@ -117,6 +122,8 @@ instance Read Literal where
 
 instance Formula Literal where
    literals lit = [lit]
+   
+   duplicateLiterals lit = [lit]
 
    atomics (Positive x) = [x]
    atomics (Negative x) = [x]
@@ -177,6 +184,8 @@ instance Show Clause where
 
 instance Formula Clause where
    literals (Clause set) = Set.toList set
+
+   duplicateLiterals (Clause set) = Set.toList set
 
    atomics (Clause set) = concat $ Set.toList $ Set.map atomics set
 
@@ -248,6 +257,8 @@ instance Show Cnf where
 instance Formula Cnf where
     literals (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
 
+    duplicateLiterals (Cnf set) = concatMap literals (Set.toList set)
+
     atomics (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
     amount (Cnf set) = Set.size set
@@ -280,19 +291,19 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf = genCnfWithRatio 2
+genCnf = genCnfWithRatio (ByPositiveLiterals (0,100))
 
 -- | Generates a random cnf satisfying the given bounds
 --   for the amount and the length of the contained clauses,
 --   as well as the ratio of negative literals.
 --   The used atomic formulas are drawn from the list of chars.
 --   The ratio must be between 0 and 1; otherwise, it will be ignored.
-genCnfWithRatio :: Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnfWithRatio negLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnfWithRatio :: RatioMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
+genCnfWithRatio posLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && checkNegLiteralRatio xs negLiteralRatio
+      && genericWithRatio posLiteralRatio (Cnf xs) 
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -336,6 +347,8 @@ instance Show Con where
 
 instance Formula Con where
    literals (Con set) = Set.toList set
+
+   duplicateLiterals (Con set) = Set.toList set
 
    atomics (Con set) = concat $ Set.toList $ Set.map atomics set
 
@@ -403,6 +416,8 @@ instance Show Dnf where
 instance Formula Dnf where
     literals (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
 
+    duplicateLiterals (Dnf set) = concatMap literals (Set.toList set)
+
     atomics (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
     amount (Dnf set) = Set.size set
@@ -437,17 +452,17 @@ instance Arbitrary Dnf where
 --   The used atomic formulas are drawn from the list of chars.
 --   The ratio must be between 0 and 1; otherwise, it will be ignored.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf = genDnfWithRatio 2
+genDnf = genDnfWithRatio (ByPositiveLiterals (0,100))
 
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
-genDnfWithRatio :: Rational -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnfWithRatio negLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genDnfWithRatio :: RatioMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnfWithRatio posLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && checkNegLiteralRatio xs negLiteralRatio
+      && genericWithRatio posLiteralRatio (Dnf xs)
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -457,40 +472,31 @@ genDnfWithRatio negLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsi
             con <- genCon (minLen,maxLen) usedAtoms
             generateCons usedAtoms (Set.insert con set) num
 
-literalRatio :: (Ord a, HasLiterals a) => Set a -> (Integer, Integer)
-literalRatio = Set.foldr countContainer (0, 0)
-  where
-    countContainer container (negAcc, posAcc) =
-      Set.foldr countLiteral (negAcc, posAcc) (getLiterals container)
+-- literalRatio :: (Ord a, Formula a) => Set a -> (Integer, Integer)
+-- literalRatio = Set.foldr countContainer (0, 0)
+--   where
+--     countContainer container (negAcc, posAcc) =
+--       foldr countLiteral (negAcc, posAcc) (literals container)
 
-    countLiteral (Positive _) (neg, pos) = (neg, pos + 1)
-    countLiteral (Negative _) (neg, pos) = (neg + 1, pos)
-
-class HasLiterals a where
-  getLiterals :: a -> Set Literal
-
-instance HasLiterals Con where
-  getLiterals (Con ls) = ls
-
-instance HasLiterals Clause where
-  getLiterals (Clause ls) = ls
+--     countLiteral (Positive _) (neg, pos) = (neg, pos + 1)
+--     countLiteral (Negative _) (neg, pos) = (neg + 1, pos)
 
 -- | Checks if the actual negative literal ratio matches the closest possible
 --   ratio (k/n) to the desired value, based on the total number of literals.
 --   This ensures that the condition is satisfiable for the given set size.
-checkNegLiteralRatio :: (Ord a, HasLiterals a) => Set a -> Rational -> Bool
-checkNegLiteralRatio set desiredRatio
-  | desiredRatio < 0 || desiredRatio > 1 = True
-  | snappedRatio == actualRatio = True
-  | otherwise = False
-  where
-    (neg, pos) = literalRatio set
-    n = pos + neg
-    actualRatio = neg % n
-    possibleRatios = [n%n, (n-1)%n .. 0]
-    snappedRatio = nearestElement possibleRatios desiredRatio
-    nearestElement :: [Rational] -> Rational -> Rational
-    nearestElement xs target = minimumBy (comparing (abs . (target -))) xs
+-- checkNegLiteralRatio :: (Ord a, Formula a) => Set a -> Rational -> Bool
+-- checkNegLiteralRatio set desiredRatio
+--   | desiredRatio < 0 || desiredRatio > 1 = True
+--   | snappedRatio == actualRatio = True
+--   | otherwise = False
+--   where
+--     (neg, pos) = literalRatio set
+--     n = pos + neg
+--     actualRatio = neg % n
+--     possibleRatios = [n%n, (n-1)%n .. 0]
+--     snappedRatio = nearestElement possibleRatios desiredRatio
+--     nearestElement :: [Rational] -> Rational -> Rational
+--     nearestElement xs target = minimumBy (comparing (abs . (target -))) xs
 
 ------------------------------------------------------------
 
@@ -674,3 +680,29 @@ lengthBound nLiterals maxLen =
   --   | n == minLen = 2^n * literalLength
   --   | n == literalLength = 2^n + lengthBound (n-1) literalLength (minLen,maxLen)
   --   | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)
+
+
+genericWithRatio :: Formula a => RatioMode -> a -> Bool
+genericWithRatio mode form =
+    val <= max upperBound (if upper == 0 then 0 else 1)
+        && val >= max (if lower == 0 then 0 else 1) lowerBound
+  where
+    (val, n, (lower,upper)) = case mode of
+      ByTruthValues bounds -> 
+        let
+          tableEntries = getEntries (getTable form)
+          trueEntries = filter (== Just True) tableEntries
+        in (length trueEntries, length tableEntries, bounds)
+      ByPositiveLiterals bounds ->
+        let
+          lit = duplicateLiterals form
+          posLiterals = filter (isPositive) lit
+        in (length posLiterals, length lit, bounds)
+
+    percentage :: Int -> Int
+    percentage num = n *num `div` 100
+    upperBound = percentage upper
+    lowerBound = percentage lower
+    isPositive (Negative _) = False
+    isPositive (Positive _) = True
+
