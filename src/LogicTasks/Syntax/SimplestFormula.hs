@@ -6,7 +6,7 @@ module LogicTasks.Syntax.SimplestFormula where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse, indent, translatedCode),
+  GenericOutputCapable (indent, translatedCode),
   LangM,
   OutputCapable,
   english,
@@ -15,11 +15,17 @@ import Control.OutputCapable.Blocks (
   translate,
   localise,
   translations,
+  MinimumThreshold (MinimumThreshold),
+  ArticleToUse (DefiniteArticle),
+  translations,
+  Rated,
+  reRefuse,
+  printSolutionAndAssertMinimum
   )
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
-
-import LogicTasks.Helpers (basicOpKey, example, extra, focus, instruct, reject, arrowsKey)
+import GHC.Real ((%))
+import LogicTasks.Helpers (basicOpKey, extra, focus, instruct, reject, arrowsKey)
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
@@ -30,7 +36,9 @@ import Trees.Types
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaSymbolParser)
+import Formula.Util (isSemanticEqual)
 import Trees.Parsing()
+import Control.Applicative (Alternative)
 
 
 
@@ -135,20 +143,48 @@ partialGrade' SuperfluousBracketsInst{..} f
     correctAtoms = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
-completeGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> Delayed FormulaAnswer -> Rated m
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
-completeGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
+completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
-    | show (fromJust (maybeForm sol)) /= simplestString inst = refuse $ do
-      instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
+  | show sol == simplestString inst = rate 1
+  | synTreeEq && noBracketIsMissing (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
+    german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
+    english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
+  | synTreeEq = reRefuse (rate 0) (translate $ do
+    german "Ihre Formel ist semantisch korrekt, aber Sie haben Vereinfachungen vorgenommen, die in diesem Kurs nicht betrachtet werden."
+    english "Your formula is semantically correct, but you applied simplifications that are not part of this course.")
+  | otherwise = reRefuse (rate 0) (translate $ do
+    german "Sie haben die Formel verändert."
+    english "You changed the formula.")
 
-      when (showSolution inst) $ do
-        example (simplestString inst) $ do
-          english "The solution for this task is:"
-          german "Die Lösung für diese Aufgabe ist:"
+  where
+    countBracketPairs :: String -> Integer
+    countBracketPairs = fromIntegral . length . filter (== '(')
+    noBracketIsMissing :: String -> String -> Bool
+    noBracketIsMissing [] [] = True
+    noBracketIsMissing _ [] = False
+    noBracketIsMissing [] (')' : ys) = noBracketIsMissing [] ys
+    noBracketIsMissing [] _ = False
+    noBracketIsMissing (x : xs) (y : ys)
+      | x == y = noBracketIsMissing xs ys
+      | y == '(' || y == ')' = noBracketIsMissing (x : xs) ys
+      | x == ' ' = noBracketIsMissing xs (y : ys)
+      | y == ' ' = noBracketIsMissing (x:xs) ys
+      |otherwise = False
 
-      pure ()
-    | otherwise = pure()
+    submission = fromJust (maybeForm sol)
+    synTreeSubmission = toSynTree submission
+    bracketPairsSubmission = countBracketPairs $ show submission
+    bracketPairsSolution = countBracketPairs $ simplestString inst
+    bracketPairsMax = countBracketPairs $ stringWithSuperfluousBrackets inst
+    superfluousBracketPairsSubmission = bracketPairsSubmission - bracketPairsSolution
+    superfluousBracketPairsTask = bracketPairsMax - bracketPairsSolution
+    synTreeEq = isSemanticEqual synTreeSubmission (tree inst)
+    percentage = (superfluousBracketPairsTask - superfluousBracketPairsSubmission) % superfluousBracketPairsTask
+    isSingular = superfluousBracketPairsSubmission  == 1
+    rate = printSolutionAndAssertMinimum
+      (MinimumThreshold (1 % superfluousBracketPairsTask))
+      DefiniteArticle
+      (if showSolution inst then Just $ simplestString inst else Nothing)
