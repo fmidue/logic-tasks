@@ -16,6 +16,7 @@ import Config (
   NormalFormConfig(..),
   dNormalFormConf
  )
+
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
 import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig)
@@ -49,6 +50,7 @@ validBoundsNormalFormConfig = do
     baseConf
   , minClauseAmount
   , maxClauseAmount
+  , posLiteralRatio = (0,100)
   }
 
 validBoundsFillConfig :: Gen FillConfig
