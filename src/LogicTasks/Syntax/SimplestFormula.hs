@@ -36,9 +36,9 @@ import Trees.Types
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaSymbolParser)
+import Formula.Util (isSemanticEqual)
 import Trees.Parsing()
 import Control.Applicative (Alternative)
-import Trees.Print (simplestDisplay)
 
 
 
@@ -149,26 +149,42 @@ completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
   | show sol == simplestString inst = rate 1
-  | synTreeEq = reRefuse (rate percentage) (translate $ do
-    german ("Sie haben " ++ show superfluousBracketsSubmission ++ " überflüssige Klammer(n) in der Abgabe.")
-    english ("You left " ++ show superfluousBracketsSubmission ++ " superfluous bracket(s) in your submission."))
+  | synTreeEq && noBracketIsMissing (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
+    german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
+    english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
+  | synTreeEq = reRefuse (rate 0) (translate $ do
+    german "Ihre Formel ist semantisch korrekt, aber Sie haben Vereinfachungen vorgenommen, die in diesem Kurs nicht betrachtet werden."
+    english "Your formula is semantically correct, but you applied simplifications that are not part of this course.")
   | otherwise = reRefuse (rate 0) (translate $ do
     german "Sie haben die Formel verändert."
     english "You changed the formula.")
 
   where
-    countBrackets :: String -> Integer
-    countBrackets = fromIntegral . length . filter (== '(')
+    countBracketPairs :: String -> Integer
+    countBracketPairs = fromIntegral . length . filter (== '(')
+    noBracketIsMissing :: String -> String -> Bool
+    noBracketIsMissing [] [] = True
+    noBracketIsMissing _ [] = False
+    noBracketIsMissing [] (')' : ys) = noBracketIsMissing [] ys
+    noBracketIsMissing [] _ = False
+    noBracketIsMissing (x : xs) (y : ys)
+      | x == y = noBracketIsMissing xs ys
+      | y == '(' || y == ')' = noBracketIsMissing (x : xs) ys
+      | x == ' ' = noBracketIsMissing xs (y : ys)
+      | y == ' ' = noBracketIsMissing (x:xs) ys
+      |otherwise = False
+
     submission = fromJust (maybeForm sol)
     synTreeSubmission = toSynTree submission
-    bracketsSubmission = countBrackets $ show submission
-    bracketsSolution = countBrackets $ simplestString inst
-    bracketsMax = countBrackets $ stringWithSuperfluousBrackets inst
-    superfluousBracketsSubmission = bracketsSubmission - bracketsSolution
-    superfluousBracketsSolution = bracketsMax - bracketsSolution
-    synTreeEq = simplestString inst == simplestDisplay synTreeSubmission
-    percentage = (superfluousBracketsSolution - superfluousBracketsSubmission) % superfluousBracketsSolution
+    bracketPairsSubmission = countBracketPairs $ show submission
+    bracketPairsSolution = countBracketPairs $ simplestString inst
+    bracketPairsMax = countBracketPairs $ stringWithSuperfluousBrackets inst
+    superfluousBracketPairsSubmission = bracketPairsSubmission - bracketPairsSolution
+    superfluousBracketPairsTask = bracketPairsMax - bracketPairsSolution
+    synTreeEq = isSemanticEqual synTreeSubmission (tree inst)
+    percentage = (superfluousBracketPairsTask - superfluousBracketPairsSubmission) % superfluousBracketPairsTask
+    isSingular = superfluousBracketPairsSubmission  == 1
     rate = printSolutionAndAssertMinimum
-      (MinimumThreshold (1 % superfluousBracketsSolution))
+      (MinimumThreshold (1 % superfluousBracketPairsTask))
       DefiniteArticle
       (if showSolution inst then Just $ simplestString inst else Nothing)
