@@ -1,10 +1,11 @@
 module Global where
 
 
+import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 
 
-type Submission = ([Int], String, String)
+type Submission = ([[Char]], String, [(Char,TruthValue)])
 type TaskData = SynTree BinOp Char
 
 =============================================
@@ -77,25 +78,14 @@ getTask = do
 
 
 form :: Rendered Widget
-form = formify (Nothing :: Maybe [Int]) fieldNames $$>
-    formify (Nothing :: Maybe (SingleChoiceSelection, SingleChoiceSelection))
+form = formify (Nothing :: Maybe [String]) fieldNames $$>
+    formify (Nothing :: Maybe (SingleChoiceSelection, String))
     [[ dropdown (fieldSettingsLabel Output)
         [ fromString "---"
         , fromString "erfüllbar"
         , fromString "unerfüllbar"
         ]
-    ,  dropdown (fieldSettingsLabel Model) --möchte ich hier ein Dropdown oder möchte ich [(Char,TruthValue)] schreiben lassen?
-        ([fromString "---"] ++
-        [ fromString "α(A)=0,α(B)=0,α(C)=0"
-        , fromString "α(A)=0,α(B)=0,α(C)=0"
-        , fromString "α(A)=0,α(B)=0,α(C)=1"
-        , fromString "α(A)=0,α(B)=1,α(C)=0"
-        , fromString "α(A)=0,α(B)=1,α(C)=1"
-        , fromString "α(A)=1,α(B)=0,α(C)=0"
-        , fromString "α(A)=1,α(B)=0,α(C)=1"
-        , fromString "α(A)=1,α(B)=1,α(C)=0"
-        , fromString "α(A)=1,α(B)=1,α(C)=1"
-        ])
+    , single (fieldSettingsLabel Model)
     ]]
 
   where
@@ -138,7 +128,7 @@ module Description (description) where
 import Control.OutputCapable.Blocks
 import Data.String.Interpolate (i)
 
-import Trees.Print (transferToPicture)
+import Trees.Print (simplestDisplay)
 
 import Global
 
@@ -148,7 +138,7 @@ description _ formula = do
   paragraph $ translate $ do
     german "Gegeben ist eine Hornformel, welche sich bereits in Implikationsschreibweise befindet:"
     english "A Horn formula is given, which is already in implicational form."
-  indent $ latex (transferToPicture formula)
+  indent $ latex (simplestDisplay formula)
   paragraph $ translate $ do
     german "Wenden Sie den Markierungsalgorithmus aus der Vorlesung auf die Formel an."
     english "Apply the marking algorithm from the lecture to the formula."
@@ -169,9 +159,20 @@ import Control.OutputCapable.Blocks (
   ReportT,
   OutputCapable,
   )
-import FlexTask.Generic.Parse  (formParser, parseWithOrReport, reportWithFieldNumber)
+import FlexTask.Generic.Parse  (
+  Parse(..),
+  escaped,
+  formParser,
+  parseWithOrReport,
+  reportWithFieldNumber
+)
+import qualified Formula.Parsing as FP
 
 import Global
+
+
+instance Parse TruthValue where
+  formParser = escaped FP.parser
 
 
 parseSubmission ::
