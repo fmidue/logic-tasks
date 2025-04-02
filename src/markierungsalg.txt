@@ -1,0 +1,181 @@
+module Global where
+
+
+import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+
+
+type Submission = ([Int], String, String)
+type TaskData = SynTree BinOp Char
+
+=============================================
+
+
+module TaskSettings where
+
+
+import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import Horn
+import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+
+
+-- v1, v2, custom list of clauses
+spirit :: [SynTree BinOp Char]
+spirit = v1
+
+extra :: Int
+extra = 0
+
+steps :: Int
+steps = 5
+
+validateSettings :: OutputCapable m => LangM m
+validateSettings = pure ()
+
+
+=============================================
+
+
+{-# language OverloadedStrings #-}
+{-# Language QuasiQuotes #-}
+
+module TaskData (getTask) where
+
+
+import Data.List (intercalate)
+import Data.String.Interpolate (i)
+import Data.String             (fromString)
+import Data.Text               (Text, pack)
+import Test.QuickCheck.Gen
+import Yesod                   (RenderMessage(..), fieldSettingsLabel)
+
+import FlexTask.FormUtil       (getFormData, ($$>))
+import FlexTask.Generic.Form
+import FlexTask.Types          (HtmlDict)
+import FlexTask.YesodConfig    (FlexForm, Rendered, Widget)
+import Horn
+
+import Global
+import TaskSettings
+
+
+data Label = Step Int | Output | Model
+
+
+instance RenderMessage a Label where
+  renderMessage _ ("de":_) (Step n) = pack ("Schritt " ++ show n ++ ":")
+  renderMessage _ ("de":_) Output   = "Ausgabe:"
+  renderMessage _ ("de":_) Model    = "Modell:"
+  renderMessage _ _        (Step n) = pack ("Step " ++ show n ++ ":")
+  renderMessage _ _        Output   = "Output:"
+  renderMessage _ _        Model    = "Model:"
+
+
+getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
+getTask = do
+    formula <- makeHornFormula spirit extra
+    pure (formula, checkers, getFormData form)
+
+
+form :: Rendered Widget
+form = formify (Nothing :: Maybe [Int]) fieldNames $$>
+    formify (Nothing :: Maybe (SingleChoiceSelection, SingleChoiceSelection))
+    [[ dropdown (fieldSettingsLabel Output)
+        [ fromString "---"
+        , fromString "erfüllbar"
+        , fromString "unerfüllbar"
+        ]
+    ,  dropdown (fieldSettingsLabel Model) --möchte ich hier ein Dropdown oder möchte ich [(Char,TruthValue)] schreiben lassen?
+        ([fromString "---"] ++
+        [ fromString "α(A)=0,α(B)=0,α(C)=0"
+        , fromString "α(A)=0,α(B)=0,α(C)=0"
+        , fromString "α(A)=0,α(B)=0,α(C)=1"
+        , fromString "α(A)=0,α(B)=1,α(C)=0"
+        , fromString "α(A)=0,α(B)=1,α(C)=1"
+        , fromString "α(A)=1,α(B)=0,α(C)=0"
+        , fromString "α(A)=1,α(B)=0,α(C)=1"
+        , fromString "α(A)=1,α(B)=1,α(C)=0"
+        , fromString "α(A)=1,α(B)=1,α(C)=1"
+        ])
+    ]]
+
+  where
+    fieldNames = [[list Vertical (map (\n -> fieldSettingsLabel (Step n)) [1..steps])]]
+
+
+checkers :: String
+checkers = [i|
+
+
+{-\# language ApplicativeDo \#-}
+
+module Check (checkSyntax, checkSemantics) where
+
+
+import Control.OutputCapable.Blocks
+
+import Global
+
+
+checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
+checkSyntax _ _ _  = pure ()
+
+
+checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
+checkSemantics _ _ _ = pure 1
+
+|]
+
+
+=============================================
+
+
+{-# Language ApplicativeDo #-}
+{-# Language QuasiQuotes #-}
+
+module Description (description) where
+
+
+import Control.OutputCapable.Blocks
+import Data.String.Interpolate (i)
+
+import Trees.Print (transferToPicture)
+
+import Global
+
+
+description :: OutputCapable m => FilePath -> TaskData -> LangM m
+description _ formula = do
+  paragraph $ translate $ do
+    german "Gegeben ist eine Hornformel, welche sich bereits in Implikationsschreibweise befindet:"
+    english "A Horn formula is given, which is already in implicational form."
+  indent $ latex (transferToPicture formula)
+  paragraph $ translate $ do
+    german "Wenden Sie den Markierungsalgorithmus aus der Vorlesung auf die Formel an."
+    english "Apply the marking algorithm from the lecture to the formula."
+  indent $ translate $ do
+    german "Vervollständigen Sie das Protokoll."
+    english "Complete the protocol."
+  pure ()
+
+
+=============================================
+
+
+module Parse (parseSubmission) where
+
+
+import Control.OutputCapable.Blocks (
+  LangM',
+  ReportT,
+  OutputCapable,
+  )
+import FlexTask.Generic.Parse  (formParser, parseWithOrReport, reportWithFieldNumber)
+
+import Global
+
+
+parseSubmission ::
+  (Monad m, OutputCapable (ReportT o m))
+  => String
+  -> LangM' (ReportT o m) Submission
+parseSubmission = parseWithOrReport formParser reportWithFieldNumber

@@ -7,7 +7,7 @@ import Test.QuickCheck.Gen
 import Trees.Types (BinOp(..), SynTree(..))
 import Trees.Helpers (collectLeaves)
 
-type Protocol = (Int, [(Int, Char)])
+type Protocol = (Int, [(Int, Char)]) --sollte nur [(Int,Char)] sein oder [(Int,[Char])] vllt besser das Zweite
 
 v1, v2 :: [SynTree BinOp Char]
 v1 =
@@ -52,7 +52,7 @@ isHornClauseI _ = False
 getAllAtomics :: SynTree BinOp Char -> [Char]
 getAllAtomics tree = nubOrd $ filter (`notElem` ['0','1']) (collectLeaves tree)
 
-modelFromSolution :: (Bool, Protocol) -> [Char] -> [(Char, Bool)]
+modelFromSolution :: (Bool, Protocol) -> [Char] -> [(Char, Bool)] -- doof, dass hier auch wieder die Formel verarbeitet werden muss, sollte in der Solution direkt vorkommen
 modelFromSolution (False,_) _ = []
 modelFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
     map (,False) (filter (`notElem` map snd marked) cs)
@@ -62,7 +62,7 @@ getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses r
 getClauses formula = [formula]
 
 isFact :: SynTree BinOp Char -> Bool
-isFact (Binary Impl (Leaf '1') (Leaf '1')) = False
+isFact (Binary Impl (Leaf '1') (Leaf '1')) = False -- ist das unerwartetes Verhalten? würde man 1=>1 als Fakt finden wollen oder erwarten, dass man es findet?
 isFact (Binary Impl (Leaf '1') (Leaf _)) = True
 isFact _ = False
 
@@ -80,7 +80,7 @@ findSolution formula = startAlg (markNext allClauses) (startProtocol facts)
     allClauses = getClauses formula
 
     startProtocol :: [Char] -> Protocol
-    startProtocol cs = (1, map (1,) cs)
+    startProtocol cs = (1, map (1,) cs) -- der aktuelle Schritt kann auch aus dem letzten Tupel entnommen werden
 
     addStep :: Char -> Protocol -> Protocol
     addStep c (step, record) = (step+1, record ++ [(step+1,c)])
@@ -103,7 +103,7 @@ markNext :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
 markNext clauses = maybe (Just []) process (toBeMarked clauses)
   where
     process '0' = Nothing
-    process a   = Just $ map (delConj . replace a '1') clauses
+    process a   = Just $ map (delConj . replace a '1') clauses -- 1 impliziert 1 clauses vielleicht löschen?
 
     delConj :: SynTree BinOp Char -> SynTree BinOp Char
     delConj (Binary Impl (Binary And a b) c)
