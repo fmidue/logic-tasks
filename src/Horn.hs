@@ -95,14 +95,14 @@ findSolution formula = startAlg (doStep allClauses) (startProtocol facts)
 
 toBeMarked :: [SynTree BinOp Char] -> Maybe Char
 toBeMarked clauses = case getFacts clauses of
-  []    -> Nothing
-  (x:_) -> Just x
+    []    -> Nothing
+    (x:_) -> Just x
 
 doStep :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
 doStep clauses = case toBeMarked clauses of
-  Nothing  -> Just []
-  Just '0' -> Nothing
-  Just a   -> Just $ simplify $ map (replace a '1') clauses
+    Nothing  -> Just []
+    Just '0' -> Nothing
+    Just a   -> Just $ simplify $ map (replace a '1') clauses
 
 replace :: Eq a => a -> a -> SynTree BinOp a -> SynTree BinOp a
 replace x y = fmap (\a -> if a == x then y else a)
