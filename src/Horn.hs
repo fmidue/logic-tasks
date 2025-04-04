@@ -62,7 +62,6 @@ getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses r
 getClauses formula = [formula]
 
 isFact :: SynTree BinOp Char -> Bool
-isFact (Binary Impl (Leaf '1') (Leaf '1')) = False -- ist das unerwartetes Verhalten? würde man 1=>1 als Fakt finden wollen oder erwarten, dass man es findet?
 isFact (Binary Impl (Leaf '1') (Leaf _)) = True
 isFact _ = False
 
@@ -74,7 +73,7 @@ getFacts :: [SynTree BinOp Char] -> [Char]
 getFacts = map charFromFact . filter isFact
 
 findSolution :: SynTree BinOp Char -> (Bool, Protocol)
-findSolution formula = startAlg (markNext allClauses) (startProtocol facts)
+findSolution formula = startAlg (doStep allClauses) (startProtocol facts)
   where
     facts = getFacts allClauses
     allClauses = getClauses formula
@@ -92,25 +91,32 @@ findSolution formula = startAlg (markNext allClauses) (startProtocol facts)
       let updatedProtocol = case toBeMarked cs of Nothing -> protocol
                                                   Just '0' -> protocol
                                                   Just c  -> addStep c protocol
-      in startAlg (markNext cs) updatedProtocol
+      in startAlg (doStep cs) updatedProtocol
 
 toBeMarked :: [SynTree BinOp Char] -> Maybe Char
 toBeMarked clauses = case getFacts clauses of
   []    -> Nothing
   (x:_) -> Just x
 
-markNext :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
-markNext clauses = maybe (Just []) process (toBeMarked clauses)
-  where
-    process '0' = Nothing
-    process a   = Just $ map (delConj . replace a '1') clauses -- 1 impliziert 1 clauses vielleicht löschen?
-
-    delConj :: SynTree BinOp Char -> SynTree BinOp Char
-    delConj (Binary Impl (Binary And a b) c)
-      | onlyOnes a = Binary Impl b c
-      | onlyOnes b = Binary Impl a c
-    delConj tree = tree
-    onlyOnes = all (=='1') . collectLeaves
+doStep :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
+doStep clauses = case toBeMarked clauses of
+  Nothing  -> Just []
+  Just '0' -> Nothing
+  Just a   -> Just $ simplify $ map (replace a '1') clauses
 
 replace :: Eq a => a -> a -> SynTree BinOp a -> SynTree BinOp a
 replace x y = fmap (\a -> if a == x then y else a)
+
+simplify :: [SynTree BinOp Char] -> [SynTree BinOp Char]
+simplify clauses = if appliedOnce == appliedTwice then appliedOnce else simplify appliedTwice
+  where
+    appliedOnce = concatMap removeOnes clauses
+    appliedTwice = concatMap removeOnes appliedOnce
+
+removeOnes :: SynTree BinOp Char -> [SynTree BinOp Char]
+removeOnes tree = case tree of
+    Binary Impl (Leaf '1') (Leaf '1')                -> []
+    Binary Impl (Binary And (Leaf '1') (Leaf '1')) b -> [Binary Impl (Leaf '1') b]
+    Binary Impl (Binary And (Leaf '1') a) b          -> [Binary Impl a b]
+    Binary Impl (Binary And a (Leaf '1')) b          -> [Binary Impl a b]
+    _                                                -> [tree]
