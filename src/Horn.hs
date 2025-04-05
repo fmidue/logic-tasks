@@ -7,7 +7,7 @@ import Test.QuickCheck.Gen
 import Trees.Types (BinOp(..), SynTree(..))
 import Trees.Helpers (collectLeaves)
 
-type Protocol = (Int, [(Int, Char)]) --sollte nur [(Int,Char)] sein oder [(Int,[Char])] vllt besser das Zweite
+type Protocol = [(Int,[Char])]
 
 v1, v2 :: [SynTree BinOp Char]
 v1 =
@@ -52,10 +52,10 @@ isHornClauseI _ = False
 getAllAtomics :: SynTree BinOp Char -> [Char]
 getAllAtomics tree = nubOrd $ filter (`notElem` ['0','1']) (collectLeaves tree)
 
-modelFromSolution :: (Bool, Protocol) -> [Char] -> [(Char, Bool)] -- doof, dass hier auch wieder die Formel verarbeitet werden muss, sollte in der Solution direkt vorkommen
-modelFromSolution (False,_) _ = []
-modelFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
-    map (,False) (filter (`notElem` map snd marked) cs)
+--modelFromSolution :: (Bool, Protocol) -> [Char] -> [(Char, Bool)] -- doof, dass hier auch wieder die Formel verarbeitet werden muss, sollte in der Solution direkt vorkommen
+--modelFromSolution (False,_) _ = []
+--modelFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
+--    map (,False) (filter (`notElem` map snd marked) cs)
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
 getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses rightPart
@@ -73,16 +73,15 @@ getFacts :: [SynTree BinOp Char] -> [Char]
 getFacts = map charFromFact . filter isFact
 
 findSolution :: SynTree BinOp Char -> (Bool, Protocol)
-findSolution formula = startAlg (doStep allClauses) (startProtocol facts)
+findSolution formula = startAlg (doStep allClauses) [(1,facts)]
   where
     facts = getFacts allClauses
     allClauses = getClauses formula
 
-    startProtocol :: [Char] -> Protocol
-    startProtocol cs = (1, map (1,) cs) -- der aktuelle Schritt kann auch aus dem letzten Tupel entnommen werden
-
     addStep :: Char -> Protocol -> Protocol
-    addStep c (step, record) = (step+1, record ++ [(step+1,c)])
+    addStep c protocol = protocol ++ [(step,[c])]
+      where
+        step = (\(prevStep,_) -> prevStep + 1) $ last protocol
 
     startAlg :: Maybe [SynTree BinOp Char] -> Protocol -> (Bool, Protocol)
     startAlg Nothing protocol = (False, protocol)
