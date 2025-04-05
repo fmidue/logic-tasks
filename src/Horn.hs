@@ -2,12 +2,16 @@ module Horn where
 
 import Data.Char (toLower)
 import Data.Containers.ListUtils (nubOrd)
+import Control.Monad (foldM)
 import Test.QuickCheck.Gen
 
 import Trees.Types (BinOp(..), SynTree(..))
 import Trees.Helpers (collectLeaves)
 
+
 type Protocol = [(Int,[Char])]
+type Allocation = [(Char,Bool)]
+
 
 v1, v2 :: [SynTree BinOp Char]
 v1 =
@@ -29,11 +33,12 @@ makeHornFormula spirit extra = do
     let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..]
     clauses <- shuffle (withAdded ++ drop extra permutation)
     let formula =  toLower <$> foldr1 (Binary And) clauses
-    atomics <- shuffle (getAllAtomics formula)
+    atomics <- shuffle (getAllAtomics clauses)
     return (foldl (flip (uncurry replace)) formula (zip atomics ['A'..]))
   where
     addClause (Binary Impl a b, x) = [Binary Impl a (Leaf x), Binary Impl (Leaf x) b]
     addClause _ = []
+
 
 isHornFormulaI :: SynTree BinOp c -> Bool
 isHornFormulaI =  all isHornClauseI . getClauses
@@ -49,13 +54,8 @@ isHornClauseI (Binary Impl a (Leaf _)) = case a of
     isConj _ = False
 isHornClauseI _ = False
 
-getAllAtomics :: SynTree BinOp Char -> [Char]
-getAllAtomics tree = nubOrd $ filter (`notElem` ['0','1']) (collectLeaves tree)
-
---modelFromSolution :: (Bool, Protocol) -> [Char] -> [(Char, Bool)] -- doof, dass hier auch wieder die Formel verarbeitet werden muss, sollte in der Solution direkt vorkommen
---modelFromSolution (False,_) _ = []
---modelFromSolution (True,(_,marked)) cs = map (\(_,a) -> (a,True)) marked ++
---    map (,False) (filter (`notElem` map snd marked) cs)
+getAllAtomics :: [SynTree BinOp Char] -> [Char]
+getAllAtomics clauses = nubOrd $ filter (`notElem` ['0','1']) (concatMap collectLeaves clauses)
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
 getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses rightPart
@@ -72,33 +72,40 @@ charFromFact _ = error "Cannot get Char from not a fact."
 getFacts :: [SynTree BinOp Char] -> [Char]
 getFacts = map charFromFact . filter isFact
 
-findSolution :: SynTree BinOp Char -> (Bool, Protocol)
-findSolution formula = startAlg (doStep allClauses) [(1,facts)]
+
+startAlgorithm :: SynTree BinOp Char -> (Protocol,Bool,Allocation)
+startAlgorithm formula = markingAlg modifiedClauses [(1,facts)]
   where
-    facts = getFacts allClauses
-    allClauses = getClauses formula
+    facts = getFacts clauses
+    clauses = getClauses formula
+    maybeModifiedClauses = foldM (\modClauses fact -> doStep modClauses (Just fact)) clauses facts --irgendwie doof dass es maybe ist
+    modifiedClauses = case maybeModifiedClauses of
+        Nothing         -> []
+        Just newClauses -> newClauses
 
-    addStep :: Char -> Protocol -> Protocol
-    addStep c protocol = protocol ++ [(step,[c])]
-      where
-        step = (\(prevStep,_) -> prevStep + 1) $ last protocol
+markingAlg :: [SynTree BinOp Char] -> Protocol -> (Protocol,Bool,Allocation)
+markingAlg clauses protocol = case doStep clauses markedNext of
+    Nothing         -> (protocol, False, [])
+    Just []         -> (protocol, True, model)
+    Just newClauses -> markingAlg newClauses (addStep markedNext protocol)
+  where
+    model = [] --todo
+    markedNext = nextToMark clauses
 
-    startAlg :: Maybe [SynTree BinOp Char] -> Protocol -> (Bool, Protocol)
-    startAlg Nothing protocol = (False, protocol)
-    startAlg (Just []) protocol = (True, protocol)
-    startAlg (Just cs) protocol =
-      let updatedProtocol = case toBeMarked cs of Nothing -> protocol
-                                                  Just '0' -> protocol
-                                                  Just c  -> addStep c protocol
-      in startAlg (doStep cs) updatedProtocol
+addStep :: Maybe Char -> Protocol -> Protocol
+addStep c protocol = case c of
+    Nothing      -> protocol --sollte eig nie sein ... hmm
+    Just marked  -> protocol ++ [(step,[marked])]
+  where
+    step = (\(prevStep,_) -> prevStep + 1) $ last protocol
 
-toBeMarked :: [SynTree BinOp Char] -> Maybe Char
-toBeMarked clauses = case getFacts clauses of
+nextToMark :: [SynTree BinOp Char] -> Maybe Char
+nextToMark clauses = case getFacts clauses of
     []    -> Nothing
     (x:_) -> Just x
 
-doStep :: [SynTree BinOp Char] -> Maybe [SynTree BinOp Char]
-doStep clauses = case toBeMarked clauses of
+doStep :: [SynTree BinOp Char] -> Maybe Char -> Maybe [SynTree BinOp Char] --müsste nicht maybe sein
+doStep clauses maybeFact = case maybeFact of
     Nothing  -> Just []
     Just '0' -> Nothing
     Just a   -> Just $ simplify $ map (replace a '1') clauses
