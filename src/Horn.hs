@@ -79,13 +79,14 @@ startAlgorithm formula = markingAlg modifiedClauses [(1,facts)]
     clauses = getClauses formula
     modifiedClauses = foldl doStep clauses facts
 
-markingAlg :: [SynTree BinOp Char] -> Protocol -> (Protocol,Bool,Allocation)
+markingAlg :: [SynTree BinOp Char] -> Protocol -> (Protocol,Bool,Allocation) -- wäre schön wenn sichtbar nachvollziehbar in Abh. von nextStep doStep und addStep passiert
 markingAlg clauses protocol = case nextStep clauses of
     Nothing                  -> (protocol, False, [])
     Just ([],_)              -> (protocol, True, model)
     Just (newClauses,marked) -> markingAlg newClauses $ addStep marked protocol
   where
-    model = [] --todo
+    trueAtoms = concatMap (\(_,cs) -> concatMap (\c -> [(c,True)]) cs) protocol
+    model = trueAtoms ++ concatMap (\c -> if notElem c (map (\(x,_) -> x)trueAtoms) then [(c,False)] else []) (getAllAtomics clauses)
 
 addStep :: Char -> Protocol -> Protocol
 addStep marked protocol = protocol ++ [(step,[marked])]
