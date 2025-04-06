@@ -2,7 +2,6 @@ module Horn where
 
 import Data.Char (toLower)
 import Data.Containers.ListUtils (nubOrd)
-import Control.Monad (foldM)
 import Test.QuickCheck.Gen
 
 import Trees.Types (BinOp(..), SynTree(..))
@@ -78,37 +77,34 @@ startAlgorithm formula = markingAlg modifiedClauses [(1,facts)]
   where
     facts = getFacts clauses
     clauses = getClauses formula
-    maybeModifiedClauses = foldM (\modClauses fact -> doStep modClauses (Just fact)) clauses facts --irgendwie doof dass es maybe ist
-    modifiedClauses = case maybeModifiedClauses of
-        Nothing         -> []
-        Just newClauses -> newClauses
+    modifiedClauses = foldl doStep clauses facts
 
 markingAlg :: [SynTree BinOp Char] -> Protocol -> (Protocol,Bool,Allocation)
-markingAlg clauses protocol = case doStep clauses markedNext of
-    Nothing         -> (protocol, False, [])
-    Just []         -> (protocol, True, model)
-    Just newClauses -> markingAlg newClauses (addStep markedNext protocol)
+markingAlg clauses protocol = case nextStep clauses of
+    Nothing                  -> (protocol, False, [])
+    Just ([],_)              -> (protocol, True, model)
+    Just (newClauses,marked) -> markingAlg newClauses $ addStep marked protocol
   where
     model = [] --todo
-    markedNext = nextToMark clauses
 
-addStep :: Maybe Char -> Protocol -> Protocol
-addStep c protocol = case c of
-    Nothing      -> protocol --sollte eig nie sein ... hmm
-    Just marked  -> protocol ++ [(step,[marked])]
+addStep :: Char -> Protocol -> Protocol
+addStep marked protocol = protocol ++ [(step,[marked])]
   where
-    step = (\(prevStep,_) -> prevStep + 1) $ last protocol
+    step = (\(prevStep,_) -> prevStep + 1) $ last protocol --auch doof
+
+nextStep :: [SynTree BinOp Char] -> Maybe ([SynTree BinOp Char],Char)
+nextStep clauses = case nextToMark clauses of
+    Nothing   -> Just ([],'1') --char wird später ignoriert, doof dass hier einer rein muss, aber maybe char ist auch keine lösung oder?
+    Just '0'  -> Nothing
+    Just fact -> Just $ (doStep clauses fact, fact)
 
 nextToMark :: [SynTree BinOp Char] -> Maybe Char
 nextToMark clauses = case getFacts clauses of
     []    -> Nothing
-    (x:_) -> Just x
+    (c:_) -> Just c
 
-doStep :: [SynTree BinOp Char] -> Maybe Char -> Maybe [SynTree BinOp Char] --müsste nicht maybe sein
-doStep clauses maybeFact = case maybeFact of
-    Nothing  -> Just []
-    Just '0' -> Nothing
-    Just a   -> Just $ simplify $ map (replace a '1') clauses
+doStep :: [SynTree BinOp Char] -> Char -> [SynTree BinOp Char]
+doStep clauses fact = simplify $ map (replace fact '1') clauses
 
 replace :: Eq a => a -> a -> SynTree BinOp a -> SynTree BinOp a
 replace x y = fmap (\a -> if a == x then y else a)
