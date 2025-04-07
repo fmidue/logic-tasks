@@ -54,7 +54,7 @@ isHornClauseI (Binary Impl a (Leaf _)) = case a of
 isHornClauseI _ = False
 
 getAllAtomics :: [SynTree BinOp Char] -> [Char]
-getAllAtomics clauses = nubOrd $ filter (`notElem` ['0','1']) (concatMap collectLeaves clauses)
+getAllAtomics clauses = nubOrd $ concatMap (filter (`notElem` ['0', '1']) . collectLeaves) clauses
 
 getClauses :: SynTree BinOp c -> [SynTree BinOp c]
 getClauses (Binary And leftPart rightPart) = getClauses leftPart ++ getClauses rightPart
@@ -86,7 +86,8 @@ markingAlg clauses protocol = case nextToMark clauses of
     Just fact -> markingAlg (doStep clauses fact) (addStep fact protocol)
   where
     trueAtoms = concatMap (\(_,cs) -> concatMap (\c -> [(c,True)]) cs) protocol
-    model = trueAtoms ++ concatMap (\c -> if notElem c (map (\(x,_) -> x)trueAtoms) then [(c,False)] else []) (getAllAtomics clauses)
+    model = trueAtoms ++
+        concatMap (\c -> if c `notElem` map fst trueAtoms then [(c,False)] else []) (getAllAtomics clauses)
 
 
 addStep :: Char -> Protocol -> Protocol
