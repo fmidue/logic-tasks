@@ -87,7 +87,7 @@ markingAlg clauses protocol = case nextToMark clauses of
   where
     trueAtoms = concatMap (\(_,cs) -> concatMap (\c -> [(c,True)]) cs) protocol
     model = trueAtoms ++
-        concatMap (\c -> if c `notElem` map fst trueAtoms then [(c,False)] else []) (getAllAtomics clauses)
+        concatMap (\c -> ([(c, False) | c `notElem` map fst trueAtoms])) (getAllAtomics clauses)
 
 
 addStep :: Char -> Protocol -> Protocol
