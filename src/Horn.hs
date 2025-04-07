@@ -79,25 +79,20 @@ startAlgorithm formula = markingAlg modifiedClauses [(1,facts)]
     clauses = getClauses formula
     modifiedClauses = foldl doStep clauses facts
 
-markingAlg :: [SynTree BinOp Char] -> Protocol -> (Protocol,Bool,Allocation) -- wäre schön wenn sichtbar nachvollziehbar in Abh. von nextStep doStep und addStep passiert
-markingAlg clauses protocol = case nextStep clauses of
-    Nothing                  -> (protocol, False, [])
-    Just ([],_)              -> (protocol, True, model)
-    Just (newClauses,marked) -> markingAlg newClauses $ addStep marked protocol
+markingAlg :: [SynTree BinOp Char] -> Protocol -> (Protocol,Bool,Allocation)
+markingAlg clauses protocol = case nextToMark clauses of
+    Nothing   -> (protocol, True, model)
+    Just '0'  -> (protocol, False, [])
+    Just fact -> markingAlg (doStep clauses fact) (addStep fact protocol)
   where
     trueAtoms = concatMap (\(_,cs) -> concatMap (\c -> [(c,True)]) cs) protocol
     model = trueAtoms ++ concatMap (\c -> if notElem c (map (\(x,_) -> x)trueAtoms) then [(c,False)] else []) (getAllAtomics clauses)
+
 
 addStep :: Char -> Protocol -> Protocol
 addStep marked protocol = protocol ++ [(step,[marked])]
   where
     step = (\(prevStep,_) -> prevStep + 1) $ last protocol --auch doof
-
-nextStep :: [SynTree BinOp Char] -> Maybe ([SynTree BinOp Char],Char)
-nextStep clauses = case nextToMark clauses of
-    Nothing   -> Just ([],'1') --char wird später ignoriert, doof dass hier einer rein muss, aber maybe char ist auch keine lösung oder?
-    Just '0'  -> Nothing
-    Just fact -> Just $ (doStep clauses fact, fact)
 
 nextToMark :: [SynTree BinOp Char] -> Maybe Char
 nextToMark clauses = case getFacts clauses of
