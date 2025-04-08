@@ -19,6 +19,8 @@ fmidue
 fno
 foldl
 foldr
+fsl
+fsr
 fst
 gdw
 GHC
@@ -35,11 +37,14 @@ Impls
 Leftarrow
 Leftrightarrow
 Leijen
+LTree
 maxterms
 minterms
 mopt
 MReport
 oneof
+osl
+osr
 parseable
 PLit
 println
