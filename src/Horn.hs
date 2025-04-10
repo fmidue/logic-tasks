@@ -31,9 +31,10 @@ makeHornFormula spirit extra = do
     permutation <- shuffle spirit
     let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..]
     clauses <- shuffle (withAdded ++ drop extra permutation)
-    let formula =  toLower <$> foldr1 (Binary And) clauses
-    atomics <- shuffle (getAllAtomics clauses)
-    return (foldl (flip (uncurry replace)) formula (zip atomics ['A'..]))
+    let lowerCaseClauses = map (fmap toLower) clauses
+    let formula = foldr1 (Binary And) lowerCaseClauses
+    atomics <- shuffle (getAllAtomics lowerCaseClauses)
+    return (foldl (flip (uncurry replace)) formula (zip atomics ['A'..'Z']))
   where
     addClause (Binary Impl a b, x) = [Binary Impl a (Leaf x), Binary Impl (Leaf x) b]
     addClause _ = []
@@ -93,7 +94,7 @@ markingAlg clauses protocol = case nextToMark clauses of
 addStep :: Char -> Protocol -> Protocol
 addStep marked protocol = protocol ++ [(step,[marked])]
   where
-    step = (\(prevStep,_) -> prevStep + 1) $ last protocol --auch doof
+    step = (\(prevStep,_) -> prevStep + 1) $ last protocol
 
 nextToMark :: [SynTree BinOp Char] -> Maybe Char
 nextToMark clauses = case getFacts clauses of
