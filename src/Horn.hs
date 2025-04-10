@@ -29,7 +29,7 @@ v2 =
 makeHornFormula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
 makeHornFormula spirit extra = do
     permutation <- shuffle spirit
-    let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..]
+    let withAdded = concatMap addClause $ zip (take extra permutation) ['M'..'Z']
     clauses <- shuffle (withAdded ++ drop extra permutation)
     let lowerCaseClauses = map (fmap toLower) clauses
     let formula = foldr1 (Binary And) lowerCaseClauses
