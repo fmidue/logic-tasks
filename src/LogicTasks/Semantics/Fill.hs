@@ -26,7 +26,7 @@ import Test.QuickCheck(Gen, suchThat)
 
 import Config ( FillConfig(..), FillInst(..), FormulaInst (..), FormulaConfig (..))
 import Formula.Table (gapsAt, readEntries)
-import Formula.Types (TruthValue, availableLetter, atomics, getTable, truth, genericWithRatio, RatioMode (ByTruthValues))
+import Formula.Types (TruthValue, availableLetter, atomics, getTable, truth, genericWithRatio, PercentRangeMode (ByTruthValues))
 import Util (
   isOutside,
   pairwiseCheck,

@@ -10,7 +10,6 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 
-
 -- 2023: Weight 0.33
 task08 :: PickConfig
 task08 = PickConfig
@@ -23,7 +22,7 @@ task08 = PickConfig
                     }
                   , minClauseAmount = 2
                   , maxClauseAmount = 2
-                  , posLiteralRatio = (0,100)
+                  , percentPosLiterals = (0,100)
                   })
   , amountOfOptions = 3
   , percentTrueEntries = Nothing
@@ -43,7 +42,7 @@ task11 = PickConfig
                      }
                    , minClauseAmount = 4
                    , maxClauseAmount = 4
-                   , posLiteralRatio = (0,100)
+                   , percentPosLiterals = (0,100)
                    })
   , amountOfOptions = 4
   , percentTrueEntries = Just (30,70)

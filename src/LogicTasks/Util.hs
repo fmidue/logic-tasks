@@ -11,7 +11,7 @@ module LogicTasks.Util
 
 import Util
 import Test.QuickCheck (Gen)
-import Formula.Types (Cnf, genCnfWithRatio, genDnfWithRatio, Dnf, RatioMode (ByPositiveLiterals))
+import Formula.Types (Cnf, genCnfWithRatio, genDnfWithRatio, Dnf, PercentRangeMode (ByPositiveLiterals))
 import Config (NormalFormConfig (..), BaseConfig(..), FormulaInst (..), FormulaConfig (..))
 import Trees.Print (simplestDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(minAmountOfUniqueAtoms, availableAtoms))
@@ -19,11 +19,11 @@ import Formula.Util (isEmptyCnf, hasEmptyClause, isEmptyDnf, hasEmptyCon)
 
 genCnf' :: NormalFormConfig -> Gen Cnf
 genCnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genCnfWithRatio (ByPositiveLiterals posLiteralRatio) (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
+  = genCnfWithRatio (ByPositiveLiterals percentPosLiterals) (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
 
 genDnf' :: NormalFormConfig -> Gen Dnf
 genDnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genDnfWithRatio (ByPositiveLiterals posLiteralRatio) (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
+  = genDnfWithRatio (ByPositiveLiterals percentPosLiterals) (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
 
 displayFormula :: FormulaInst -> String
 displayFormula (InstCnf c) = show c

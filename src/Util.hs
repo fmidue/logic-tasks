@@ -167,7 +167,24 @@ checkNormalFormConfig NormalFormConfig {..}
           german "Zu kurze Klauseln für gewünschte Anzahl an Klauseln."
           english "Clauses are to short for the desired number of clauses."
 
+    | low > high =
+        refuse $ indent $ translate $ do
+            german "Die untere Grenze für die Anzahl positiver Literale ist größer als die obere Grenze."
+            english "The lower bound for the number of positive literals is bigger than the higher bound."
+
+    | low < 0 || high > 100 =
+        refuse $ indent $ translate $ do
+            german "Das Intervall für die Anzahl positiver Literale ist außerhalb der Grenzen 0 und 100."
+            english "The Range for the number of positive literals is not in the bounds of 0 and 100."
+
+    | ceiling (fromIntegral (low * minClauseAmount * (minClauseLength baseConf)) / (100 :: Double)) >= (high * minClauseAmount * (minClauseLength baseConf)) `div` 100 =
+        refuse $ indent $ translate $ do
+            german "Es müssen mindestens zwei unterschiedliche Anzahlen positiver Literale möglich sein. Bitte vergrößern Sie das Intervall."
+            english "There must be at least two different possible numbers of positive literals. Please increase the range."
+
     | otherwise = checkBaseConf baseConf
+
+    where (low, high) = percentPosLiterals
 
 checkTruthValueRangeAndSynTreeConf :: OutputCapable m => (Int,Int) -> SynTreeConfig -> LangM m
 checkTruthValueRangeAndSynTreeConf range synTreeConfig = do

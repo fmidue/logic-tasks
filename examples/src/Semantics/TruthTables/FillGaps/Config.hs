@@ -9,7 +9,6 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 
-
 -- 2024: Weight 0.3
 task07 :: FillConfig
 task07 = FillConfig
@@ -22,7 +21,7 @@ task07 = FillConfig
                     }
                   , minClauseAmount = 3
                   , maxClauseAmount = 3
-                  , posLiteralRatio = (0,100)
+                  , percentPosLiterals = (0,100)
                   })
   , percentageOfGaps = 60
   , percentTrueEntries = Just (30, 70)
@@ -42,7 +41,7 @@ task20 = FillConfig
                      }
                    , minClauseAmount = 4
                    , maxClauseAmount = 4
-                   , posLiteralRatio = (0,100)
+                   , percentPosLiterals = (0,100)
                    })
   , percentageOfGaps = 40
   , percentTrueEntries = Just (35, 65)

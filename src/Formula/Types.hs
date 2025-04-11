@@ -37,7 +37,7 @@ module Formula.Types
        , ClauseShape(..)
        , HornShape(..)
        , anyClause, anyHornClause, factClause, procedureClause, queryClause
-       , RatioMode(ByPositiveLiterals,ByTruthValues)
+       , PercentRangeMode(ByPositiveLiterals,ByTruthValues)
        , genericWithRatio
        ) where
 
@@ -61,7 +61,7 @@ newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, M
 newtype TruthValue = TruthValue {truth :: Bool}
   deriving (Eq, Ord, Show, Typeable, Generic)
 
-data RatioMode = ByPositiveLiterals (Int, Int) |  ByTruthValues (Int, Int) deriving (Show)
+data PercentRangeMode = ByPositiveLiterals (Int, Int) |  ByTruthValues (Int, Int) deriving (Show)
 
 class Formula a where
     literals :: a -> [Literal]
@@ -296,12 +296,12 @@ genCnf = genCnfWithRatio (ByPositiveLiterals (0,100))
 --   as well as the ratio of negative literals.
 --   The used atomic formulas are drawn from the list of chars.
 --   The ratio must be between 0 and 1; otherwise, it will be ignored.
-genCnfWithRatio :: RatioMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnfWithRatio posLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnfWithRatio :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
+genCnfWithRatio percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && genericWithRatio posLiteralRatio (Cnf xs)
+      && genericWithRatio percentPosLiterals (Cnf xs)
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -455,12 +455,12 @@ genDnf = genDnfWithRatio (ByPositiveLiterals (0,100))
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
-genDnfWithRatio :: RatioMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnfWithRatio posLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genDnfWithRatio :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnfWithRatio percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && genericWithRatio posLiteralRatio (Dnf xs)
+      && genericWithRatio percentPosLiterals (Dnf xs)
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -469,32 +469,6 @@ genDnfWithRatio posLiteralRatio (minNum,maxNum) (minLen,maxLen) atoms enforceUsi
         | otherwise = do
             con <- genCon (minLen,maxLen) usedAtoms
             generateCons usedAtoms (Set.insert con set) num
-
--- literalRatio :: (Ord a, Formula a) => Set a -> (Integer, Integer)
--- literalRatio = Set.foldr countContainer (0, 0)
---   where
---     countContainer container (negAcc, posAcc) =
---       foldr countLiteral (negAcc, posAcc) (literals container)
-
---     countLiteral (Positive _) (neg, pos) = (neg, pos + 1)
---     countLiteral (Negative _) (neg, pos) = (neg + 1, pos)
-
--- | Checks if the actual negative literal ratio matches the closest possible
---   ratio (k/n) to the desired value, based on the total number of literals.
---   This ensures that the condition is satisfiable for the given set size.
--- checkNegLiteralRatio :: (Ord a, Formula a) => Set a -> Rational -> Bool
--- checkNegLiteralRatio set desiredRatio
---   | desiredRatio < 0 || desiredRatio > 1 = True
---   | snappedRatio == actualRatio = True
---   | otherwise = False
---   where
---     (neg, pos) = literalRatio set
---     n = pos + neg
---     actualRatio = neg % n
---     possibleRatios = [n%n, (n-1)%n .. 0]
---     snappedRatio = nearestElement possibleRatios desiredRatio
---     nearestElement :: [Rational] -> Rational -> Rational
---     nearestElement xs target = minimumBy (comparing (abs . (target -))) xs
 
 ------------------------------------------------------------
 
@@ -680,12 +654,12 @@ lengthBound nLiterals maxLen =
   --   | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)
 
 
-genericWithRatio :: Formula a => RatioMode -> a -> Bool
+genericWithRatio :: Formula a => PercentRangeMode -> a -> Bool
 genericWithRatio mode form =
-    val <= max upperBound (if upper == 0 then 0 else 1)
-        && val >= max (if lower == 0 then 0 else 1) lowerBound
+    posLiteralsNumber <= max upperBound (if upperLiteralNumberBound == 0 then 0 else 1)
+        && posLiteralsNumber >= max (if lowerLiteralNumberBound == 0 then 0 else 1) lowerBound
   where
-    (val, n, (lower,upper)) = case mode of
+    (posLiteralsNumber, totalLiteralsNumber, (lowerLiteralNumberBound,upperLiteralNumberBound)) = case mode of
       ByTruthValues bounds ->
         let
           tableEntries = getEntries (getTable form)
@@ -693,14 +667,12 @@ genericWithRatio mode form =
         in (length trueEntries, length tableEntries, bounds)
       ByPositiveLiterals bounds ->
         let
-          lit = duplicateLiterals form
-          posLiterals = filter isPositive lit
-        in (length posLiterals, length lit, bounds)
+          allLiterals = duplicateLiterals form
+          posLiterals = filter isPositive allLiterals
+        in (length posLiterals, length allLiterals, bounds)
 
-    percentage :: Int -> Int
-    percentage num = n *num `div` 100
-    upperBound = percentage upper
-    lowerBound = percentage lower
+    upperBound = totalLiteralsNumber *upperLiteralNumberBound `div` 100
+    lowerBound = ceiling $ (fromIntegral (totalLiteralsNumber* lowerLiteralNumberBound)) / (100 :: Double)
     isPositive (Negative _) = False
     isPositive (Positive _) = True
 
