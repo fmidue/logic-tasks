@@ -90,7 +90,7 @@ jobs:
           sudo cp haskell-template-setup/stack.yaml ${{ env.tasks }}
           cd ${{ env.tasks }}
           find . -name '*.txt' -exec bash ../${{ env.script }}/test.sh {} root \;
-          if [ $(find . -name "Check.hs" | wc -l) -eq 0 ]; then
+          if [ $(find . -name "Check.hs" -or -name "ghc.html" | wc -l) -eq 0 ]; then
             rm -f stack.yaml
           fi
           set +ex
