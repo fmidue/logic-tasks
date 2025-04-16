@@ -75,21 +75,21 @@ spec = do
     it "should return the empty conjunction when called with the empty list" $
       property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 [] True) isEmptyCnf
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
           let
             num = length (getClauses cnf')
           in
             num >= lowerNum && num <= upperNum
     it "should generate a random cnf formula with the correct clause length if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
          let
            sizes = map (length . literals) (getClauses cnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random cnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
           all (\c -> c `elem` atomics cnf') chars
 
@@ -97,20 +97,20 @@ spec = do
     it "should return the empty disjunction when called with the empty list" $
       property $ \bounds1 bounds2 -> forAll (genDnf bounds1 bounds2 [] True) isEmptyDnf
     it "should generate a random dnf formula with a correct amount of cons if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
           let
             num = length (getConjunctions dnf')
           in
             num >= lowerNum && num <= upperNum
     it "should generate a random dnf formula with the correct con length if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
          let
            sizes = map (length . literals) (getConjunctions dnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random dnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
           all (\c -> c `elem` atomics dnf') chars
