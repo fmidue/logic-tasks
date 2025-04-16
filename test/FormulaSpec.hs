@@ -20,7 +20,15 @@ validBoundsClause = do
     upper <- chooseInt (lower,upperBound)
     pure ((lower,upper),validChars)
 
+validBoundsPercentPosLiteral :: Int -> Gen (Int, Int)
+validBoundsPercentPosLiteral numLiterals = do
+    lowerNumberBarrier <- choose (0, numLiterals-1)
+    let lowPercentBarrier = floor ((fromIntegral lowerNumberBarrier / fromIntegral numLiterals) * 100)
+    let highPercentBarrier = ceiling ((fromIntegral (lowerNumberBarrier + 1) / fromIntegral numLiterals) * 100)
 
+    percentPosLiteralsLow <- choose (0, lowPercentBarrier)
+    percentPosLiteralsHigh <- choose (highPercentBarrier, 100)
+    pure (percentPosLiteralsLow,percentPosLiteralsHigh)
 
 validBoundsNormalFormParams :: Gen ((Int,Int),(Int,Int),[Char],(Int,Int))
 validBoundsNormalFormParams = do
@@ -33,12 +41,7 @@ validBoundsNormalFormParams = do
       else do
         maxNum <- chooseInt (minNum,upperBound)
         let numLiterals = minNum * minLen
-        lowerNumberBarrier <- choose (0, numLiterals-1)
-        let lowPercentBarrier = floor ((fromIntegral lowerNumberBarrier / fromIntegral numLiterals) * 100)
-        let highPercentBarrier = floor ((fromIntegral (lowerNumberBarrier + 1) / fromIntegral numLiterals) * 100)
-
-        percentPosLiteralsLow <- choose (0, lowPercentBarrier)
-        percentPosLiteralsHigh <- choose (highPercentBarrier, 100)
+        (percentPosLiteralsLow,percentPosLiteralsHigh) <- validBoundsPercentPosLiteral numLiterals
         pure ((minNum,maxNum),(minLen,maxLen),chars,(percentPosLiteralsLow,percentPosLiteralsHigh))
 
 spec :: Spec

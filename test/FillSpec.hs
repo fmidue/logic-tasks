@@ -20,6 +20,7 @@ import Config (
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
 import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig)
+import FormulaSpec (validBoundsPercentPosLiteral)
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
@@ -48,12 +49,7 @@ validBoundsNormalFormConfig = do
     minClauseAmount <= lengthBound (length (usedAtoms bc)) (maxClauseLength bc)
 
   let numLiterals = minClauseAmount * minClauseLength baseConf
-  lowerNumberBarrier <- choose (0, numLiterals-1)
-  let lowPercentBarrier = floor ((fromIntegral lowerNumberBarrier / fromIntegral numLiterals) * 100)
-  let highPercentBarrier = floor ((fromIntegral (lowerNumberBarrier + 1) / fromIntegral numLiterals) * 100)
-
-  percentPosLiteralsLow <- choose (0, lowPercentBarrier)
-  percentPosLiteralsHigh <- choose (highPercentBarrier, 100)
+  (percentPosLiteralsLow,percentPosLiteralsHigh) <- validBoundsPercentPosLiteral numLiterals
   pure $ NormalFormConfig {
     baseConf
   , minClauseAmount
