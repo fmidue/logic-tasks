@@ -672,7 +672,7 @@ genericWithRatio mode form =
         in (length posLiterals, length allLiterals, bounds)
 
     upperBound = totalLiteralsNumber *upperLiteralNumberBound `div` 100
-    lowerBound = ceiling $ (fromIntegral (totalLiteralsNumber* lowerLiteralNumberBound)) / (100 :: Double)
+    lowerBound = ceiling $ fromIntegral (totalLiteralsNumber* lowerLiteralNumberBound) / (100 :: Double)
     isPositive (Negative _) = False
     isPositive (Positive _) = True
 

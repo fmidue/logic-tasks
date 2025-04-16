@@ -22,7 +22,7 @@ validBoundsClause = do
 
 
 
-validBoundsNormalFormParams :: Gen ((Int,Int),(Int,Int),[Char])
+validBoundsNormalFormParams :: Gen ((Int,Int),(Int,Int),[Char],(Int,Int))
 validBoundsNormalFormParams = do
     ((minLen,maxLen),chars) <- validBoundsClause
     let lowerBound = (length chars `div` minLen) + 1
@@ -32,7 +32,14 @@ validBoundsNormalFormParams = do
       then validBoundsNormalFormParams
       else do
         maxNum <- chooseInt (minNum,upperBound)
-        pure ((minNum,maxNum),(minLen,maxLen),chars)
+        let numLiterals = minNum * minLen
+        lowerNumberBarrier <- choose (0, numLiterals-1)
+        let lowPercentBarrier = floor ((fromIntegral lowerNumberBarrier / fromIntegral numLiterals) * 100)
+        let highPercentBarrier = floor ((fromIntegral (lowerNumberBarrier + 1) / fromIntegral numLiterals) * 100)
+
+        percentPosLiteralsLow <- choose (0, lowPercentBarrier)
+        percentPosLiteralsHigh <- choose (highPercentBarrier, 100)
+        pure ((minNum,maxNum),(minLen,maxLen),chars,(percentPosLiteralsLow,percentPosLiteralsHigh))
 
 spec :: Spec
 spec = do
@@ -43,8 +50,8 @@ spec = do
 
   describe "genValidBoundsNormalFormParams" $
     it "should generate valid bounds" $
-      withMaxSuccess 1000 $ forAll validBoundsNormalFormParams $ \((l1,u1),(l2,u2),cs) ->
-        ioProperty $ checkConfigWith German (NormalFormConfig (BaseConfig l2 u2 cs) l1 u1 (0,100)) checkNormalFormConfig
+      withMaxSuccess 1000 $ forAll validBoundsNormalFormParams $ \((l1,u1),(l2,u2),cs,(ppl1,ppl2)) ->
+        ioProperty $ checkConfigWith German (NormalFormConfig (BaseConfig l2 u2 cs) l1 u1 (ppl1,ppl2)) checkNormalFormConfig
 
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $

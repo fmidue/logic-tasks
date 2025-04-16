@@ -177,9 +177,11 @@ checkNormalFormConfig NormalFormConfig {..}
             german "Das Intervall für die Anzahl positiver Literale ist außerhalb der Grenzen 0 und 100."
             english "The Range for the number of positive literals is not in the bounds of 0 and 100."
 
-    | ceiling (fromIntegral (low * minClauseAmount * (minClauseLength baseConf)) / (100 :: Double)) >= (high * minClauseAmount * (minClauseLength baseConf)) `div` 100 =
+    | ceiling (fromIntegral (low * minClauseAmount * minClauseLength baseConf) / (100 :: Double)) >=
+      (high * minClauseAmount * minClauseLength baseConf) `div` 100 =
         refuse $ indent $ translate $ do
-            german "Es müssen mindestens zwei unterschiedliche Anzahlen positiver Literale möglich sein. Bitte vergrößern Sie das Intervall."
+            german "Es müssen mindestens zwei unterschiedliche Anzahlen positiver Literale möglich sein. \
+            \Bitte vergrößern Sie das Intervall."
             english "There must be at least two different possible numbers of positive literals. Please increase the range."
 
     | otherwise = checkBaseConf baseConf

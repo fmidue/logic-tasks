@@ -19,11 +19,21 @@ import Formula.Util (isEmptyCnf, hasEmptyClause, isEmptyDnf, hasEmptyCon)
 
 genCnf' :: NormalFormConfig -> Gen Cnf
 genCnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genCnfWithRatio (ByPositiveLiterals percentPosLiterals) (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
+  = genCnfWithRatio
+    (ByPositiveLiterals percentPosLiterals)
+    (minClauseAmount,maxClauseAmount)
+    (minClauseLength, maxClauseLength)
+    usedAtoms
+    True
 
 genDnf' :: NormalFormConfig -> Gen Dnf
 genDnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genDnfWithRatio (ByPositiveLiterals percentPosLiterals) (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
+  = genDnfWithRatio
+    (ByPositiveLiterals percentPosLiterals)
+    (minClauseAmount,maxClauseAmount)
+    (minClauseLength, maxClauseLength)
+    usedAtoms
+    True
 
 displayFormula :: FormulaInst -> String
 displayFormula (InstCnf c) = show c

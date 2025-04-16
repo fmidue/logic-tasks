@@ -46,12 +46,12 @@ validBoundsNormalFormConfig = do
     minClauseAmount * minClauseLength bc >= length (usedAtoms bc) &&
     minClauseAmount <= 2 ^ length (usedAtoms bc) &&
     minClauseAmount <= lengthBound (length (usedAtoms bc)) (maxClauseLength bc)
-  
-  let numLiterals = minClauseAmount * (minClauseLength baseConf)
+
+  let numLiterals = minClauseAmount * minClauseLength baseConf
   lowerNumberBarrier <- choose (0, numLiterals-1)
   let lowPercentBarrier = floor ((fromIntegral lowerNumberBarrier / fromIntegral numLiterals) * 100)
   let highPercentBarrier = floor ((fromIntegral (lowerNumberBarrier + 1) / fromIntegral numLiterals) * 100)
-  
+
   percentPosLiteralsLow <- choose (0, lowPercentBarrier)
   percentPosLiteralsHigh <- choose (highPercentBarrier, 100)
   pure $ NormalFormConfig {
