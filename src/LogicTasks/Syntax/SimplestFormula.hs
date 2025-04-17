@@ -6,7 +6,7 @@ module LogicTasks.Syntax.SimplestFormula where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse, indent, translatedCode),
+  GenericOutputCapable (indent, translatedCode),
   LangM,
   OutputCapable,
   english,
@@ -15,11 +15,17 @@ import Control.OutputCapable.Blocks (
   translate,
   localise,
   translations,
+  MinimumThreshold (MinimumThreshold),
+  ArticleToUse (DefiniteArticle),
+  translations,
+  Rated,
+  reRefuse,
+  printSolutionAndAssertMinimum
   )
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
-
-import LogicTasks.Helpers (basicOpKey, example, extra, focus, instruct, reject, arrowsKey)
+import GHC.Real ((%))
+import LogicTasks.Helpers (basicOpKey, extra, focus, instruct, reject, arrowsKey)
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
@@ -30,7 +36,9 @@ import Trees.Types
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaSymbolParser)
+import Formula.Util (isSemanticEqual)
 import Trees.Parsing()
+import Control.Applicative (Alternative)
 
 
 
@@ -56,8 +64,8 @@ description SuperfluousBracketsInst{..} = do
     focus "¬¬A"
 
     instruct $ do
-      english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
-      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer aussagenlogischen Formel an."
+      english "Remove all unnecessary pairs of brackets in the given formula (regarding associativity not just concerning atomic formulas). Give your answer as a propositional logic formula."
+      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel (hinsichtlich Assoziativität nicht nur atomare Formeln betreffend). Geben Sie die Lösung in Form einer aussagenlogischen Formel an."
 
     paragraph $ indent $ do
       translate $ do
@@ -67,7 +75,7 @@ description SuperfluousBracketsInst{..} = do
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die ürsprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
+      german "Sie können dafür die ursprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
       english "You can copy the original formula into the submission field and remove unnecessary brackets, or start from scratch and use the following syntax:"
     basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
@@ -124,7 +132,7 @@ partialGrade' SuperfluousBracketsInst{..} f
 
     | opsNum < correctOpsNum =
       reject $ do
-        english "Your submission contains less logical operators than the original formula."
+        english "Your submission contains fewer logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
     | otherwise = pure()
@@ -135,20 +143,48 @@ partialGrade' SuperfluousBracketsInst{..} f
     correctAtoms = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
-completeGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> Delayed FormulaAnswer -> Rated m
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
-completeGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
+completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
-    | show (fromJust (maybeForm sol)) /= simplestString inst = refuse $ do
-      instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
+  | show sol == simplestString inst = rate 1
+  | synTreeEquivalent && noBracketIsMissing (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
+    german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
+    english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
+  | synTreeEquivalent = reRefuse (rate 0) (translate $ do
+    german "Ihre Formel ist semantisch äquivalent zur ursprünglich gegebenen, aber Sie haben nicht nur überflüssige Klammern entfernt."
+    english "Your formula is semantically equivalent to the original one, but you have not just removed superfluous brackets.")
+  | otherwise = reRefuse (rate 0) (translate $ do
+    german "Sie haben die Formel verändert."
+    english "You changed the formula.")
 
-      when (showSolution inst) $ do
-        example (simplestString inst) $ do
-          english "The solution for this task is:"
-          german "Die Lösung für diese Aufgabe ist:"
+  where
+    countBracketPairs :: String -> Integer
+    countBracketPairs = fromIntegral . length . filter (== '(')
+    noBracketIsMissing :: String -> String -> Bool
+    noBracketIsMissing [] [] = True
+    noBracketIsMissing _ [] = False
+    noBracketIsMissing [] (')' : ys) = noBracketIsMissing [] ys
+    noBracketIsMissing [] _ = False
+    noBracketIsMissing (x : xs) (y : ys)
+      | x == y = noBracketIsMissing xs ys
+      | y == '(' || y == ')' = noBracketIsMissing (x : xs) ys
+      | x == ' ' = noBracketIsMissing xs (y : ys)
+      | y == ' ' = noBracketIsMissing (x:xs) ys
+      |otherwise = False
 
-      pure ()
-    | otherwise = pure()
+    submission = fromJust (maybeForm sol)
+    synTreeSubmission = toSynTree submission
+    bracketPairsSubmission = countBracketPairs $ show submission
+    bracketPairsSolution = countBracketPairs $ simplestString inst
+    bracketPairsMax = countBracketPairs $ stringWithSuperfluousBrackets inst
+    superfluousBracketPairsSubmission = bracketPairsSubmission - bracketPairsSolution
+    superfluousBracketPairsTask = bracketPairsMax - bracketPairsSolution
+    synTreeEquivalent = isSemanticEqual synTreeSubmission (tree inst)
+    percentage = (superfluousBracketPairsTask - superfluousBracketPairsSubmission) % superfluousBracketPairsTask
+    isSingular = superfluousBracketPairsSubmission  == 1
+    rate = printSolutionAndAssertMinimum
+      (MinimumThreshold (1 % superfluousBracketPairsTask))
+      DefiniteArticle
+      (if showSolution inst then Just $ simplestString inst else Nothing)
