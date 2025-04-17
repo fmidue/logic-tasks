@@ -22,9 +22,9 @@ module Formula.Types
        , genClause
        , genCon
        , genCnf
-       , genCnfWithRatio
+       , genCnfWithPercentRange
        , genDnf
-       , genDnfWithRatio
+       , genDnfWithPercentRange
        , possibleAllocations
        , Formula(..)
        , ToSAT(..)
@@ -38,7 +38,7 @@ module Formula.Types
        , HornShape(..)
        , anyClause, anyHornClause, factClause, procedureClause, queryClause
        , PercentRangeMode(ByPositiveLiterals,ByTruthValues)
-       , genericWithRatio
+       , withPercentRange
        ) where
 
 
@@ -289,19 +289,19 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf = genCnfWithRatio (ByPositiveLiterals (0,100))
+genCnf = genCnfWithPercentRange (ByPositiveLiterals (0,100))
 
 -- | Generates a random cnf satisfying the given bounds
 --   for the amount and the length of the contained clauses,
 --   as well as the ratio of negative literals.
 --   The used atomic formulas are drawn from the list of chars.
 --   The ratio must be between 0 and 1; otherwise, it will be ignored.
-genCnfWithRatio :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnfWithRatio percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
+genCnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && genericWithRatio percentPosLiterals (Cnf xs)
+      && withPercentRange percentPosLiterals (Cnf xs)
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -450,17 +450,17 @@ instance Arbitrary Dnf where
 --   The used atomic formulas are drawn from the list of chars.
 --   The ratio must be between 0 and 1; otherwise, it will be ignored.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf = genDnfWithRatio (ByPositiveLiterals (0,100))
+genDnf = genDnfWithPercentRange (ByPositiveLiterals (0,100))
 
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
-genDnfWithRatio :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnfWithRatio percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genDnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && genericWithRatio percentPosLiterals (Dnf xs)
+      && withPercentRange percentPosLiterals (Dnf xs)
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -654,8 +654,8 @@ lengthBound nLiterals maxLen =
   --   | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)
 
 
-genericWithRatio :: Formula a => PercentRangeMode -> a -> Bool
-genericWithRatio mode form =
+withPercentRange :: Formula a => PercentRangeMode -> a -> Bool
+withPercentRange mode form =
     posLiteralsNumber <= max upperBound (if upperLiteralNumberBound == 0 then 0 else 1)
         && posLiteralsNumber >= max (if lowerLiteralNumberBound == 0 then 0 else 1) lowerBound
   where
