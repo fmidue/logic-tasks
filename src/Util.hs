@@ -19,7 +19,7 @@ import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), FormulaInst (..))
-import Formula.Types (Formula, lengthBound, PercentRangeMode (ByTruthValues))
+import Formula.Types (Formula, lengthBound, PercentRangeMode (ByTruthValues), withPercentRange)
 -- import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig, checkSynTreeConfig)
 import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
