@@ -38,10 +38,7 @@ task06 = SuperfluousBracketsConfig
     , minUniqueBinOperators = 2
     }
   , superfluousBracketPairs = 3
-  , extraText = Just (listToFM
-                       [(German, "Hinweis: Es sollen ALLE nicht nötigen Klammern entfernt werden. Nicht nur die wegen Assoziativität überflüssigen!"),  {- german -}
-                        (English,"Hint: You need to remove ALL unnecessary pairs of brackets. Not just the ones that are not needed due to associativity.")
-                       ])
+  , extraText = Nothing
   , printSolution = True
   , offerUnicodeInput = True
   }
@@ -69,10 +66,7 @@ task05 = SuperfluousBracketsConfig
     , minUniqueBinOperators = 3
     }
   , superfluousBracketPairs = 4
-  , extraText = Just (listToFM
-                       [(German, "Hinweis: Es sollen ALLE nicht nötigen Klammern entfernt werden. Nicht nur die wegen Assoziativität überflüssigen!"), {- german -}
-                        (English, "Hint: You need to remove ALL unnecessary pairs of brackets. Not just the ones that are not needed due to associativity.")
-                       ])
+  , extraText = Nothing
   , printSolution = True
   , offerUnicodeInput = False
   }
