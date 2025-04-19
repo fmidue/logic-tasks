@@ -281,7 +281,7 @@ data NormalFormConfig = NormalFormConfig
     { baseConf:: BaseConfig
     , minClauseAmount :: Int
     , maxClauseAmount :: Int
-    , posLiteralRatio :: (Int, Int)
+    , percentPosLiterals :: (Int, Int)
     } deriving (Typeable, Generic, Show)
 
 dNormalFormConf :: NormalFormConfig
@@ -289,7 +289,7 @@ dNormalFormConf = NormalFormConfig
     { baseConf = dBaseConf
     , minClauseAmount = 2
     , maxClauseAmount = 4
-    , posLiteralRatio = (0,100)
+    , percentPosLiterals = (0,25)
     }
 
 

@@ -20,9 +20,17 @@ validBoundsClause = do
     upper <- chooseInt (lower,upperBound)
     pure ((lower,upper),validChars)
 
+validBoundsPercentPosLiteral :: Int -> Gen (Int, Int)
+validBoundsPercentPosLiteral numLiterals = do
+    lowerNumberBarrier <- choose (0, numLiterals-1)
+    let lowPercentBarrier = floor ((fromIntegral lowerNumberBarrier / fromIntegral numLiterals) * 100)
+    let highPercentBarrier = ceiling ((fromIntegral (lowerNumberBarrier + 1) / fromIntegral numLiterals) * 100)
 
+    percentPosLiteralsLow <- choose (0, lowPercentBarrier)
+    percentPosLiteralsHigh <- choose (highPercentBarrier, 100)
+    pure (percentPosLiteralsLow,percentPosLiteralsHigh)
 
-validBoundsNormalFormParams :: Gen ((Int,Int),(Int,Int),[Char])
+validBoundsNormalFormParams :: Gen ((Int,Int),(Int,Int),[Char],(Int,Int))
 validBoundsNormalFormParams = do
     ((minLen,maxLen),chars) <- validBoundsClause
     let lowerBound = (length chars `div` minLen) + 1
@@ -32,7 +40,9 @@ validBoundsNormalFormParams = do
       then validBoundsNormalFormParams
       else do
         maxNum <- chooseInt (minNum,upperBound)
-        pure ((minNum,maxNum),(minLen,maxLen),chars)
+        let numLiterals = minNum * minLen
+        (percentPosLiteralsLow,percentPosLiteralsHigh) <- validBoundsPercentPosLiteral numLiterals
+        pure ((minNum,maxNum),(minLen,maxLen),chars,(percentPosLiteralsLow,percentPosLiteralsHigh))
 
 spec :: Spec
 spec = do
@@ -43,8 +53,8 @@ spec = do
 
   describe "genValidBoundsNormalFormParams" $
     it "should generate valid bounds" $
-      withMaxSuccess 1000 $ forAll validBoundsNormalFormParams $ \((l1,u1),(l2,u2),cs) ->
-        ioProperty $ checkConfigWith German (NormalFormConfig (BaseConfig l2 u2 cs) l1 u1 (0,100)) checkNormalFormConfig
+      withMaxSuccess 1000 $ forAll validBoundsNormalFormParams $ \((l1,u1),(l2,u2),cs,(ppl1,ppl2)) ->
+        ioProperty $ checkConfigWith German (NormalFormConfig (BaseConfig l2 u2 cs) l1 u1 (ppl1,ppl2)) checkNormalFormConfig
 
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $
@@ -68,21 +78,21 @@ spec = do
     it "should return the empty conjunction when called with the empty list" $
       property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 [] True) isEmptyCnf
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
           let
             num = length (getClauses cnf')
           in
             num >= lowerNum && num <= upperNum
     it "should generate a random cnf formula with the correct clause length if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
          let
            sizes = map (length . literals) (getClauses cnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random cnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
           all (\c -> c `elem` atomics cnf') chars
 
@@ -90,20 +100,20 @@ spec = do
     it "should return the empty disjunction when called with the empty list" $
       property $ \bounds1 bounds2 -> forAll (genDnf bounds1 bounds2 [] True) isEmptyDnf
     it "should generate a random dnf formula with a correct amount of cons if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
           let
             num = length (getConjunctions dnf')
           in
             num >= lowerNum && num <= upperNum
     it "should generate a random dnf formula with the correct con length if given valid parameters" $
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
          let
            sizes = map (length . literals) (getConjunctions dnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random dnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
-      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
+      forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars,(_,_)) ->
         forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
           all (\c -> c `elem` atomics dnf') chars

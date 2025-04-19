@@ -11,7 +11,6 @@ import Test.Hspec
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 
-
 -- 2024: Weight 0.25, used for CNFs
 task08 :: LegalNormalFormConfig
 task08 = LegalNormalFormConfig
@@ -20,7 +19,7 @@ task08 = LegalNormalFormConfig
       { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 4
-    , posLiteralRatio = (0,100)
+    , percentPosLiterals = (0,100)
     }
   , formulas = 8
   , illegals = 4
@@ -41,7 +40,7 @@ task09 = LegalNormalFormConfig
       { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 4
-    , posLiteralRatio = (0,100)
+    , percentPosLiterals = (0,100)
     }
   , formulas = 8
   , illegals = 3
@@ -62,7 +61,7 @@ task18 = LegalNormalFormConfig
       { minClauseLength = 2, maxClauseLength = 4, usedAtoms = "ABCD" }
     , minClauseAmount = 2
     , maxClauseAmount = 5
-    , posLiteralRatio = (0,100)
+    , percentPosLiterals = (0,100)
     }
   , formulas = 8
   , illegals = 2
