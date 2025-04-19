@@ -22,6 +22,7 @@ task08 = PickConfig
                     }
                   , minClauseAmount = 2
                   , maxClauseAmount = 2
+                  , percentPosLiterals = (0,100)
                   })
   , amountOfOptions = 3
   , percentTrueEntries = Nothing
@@ -41,6 +42,7 @@ task11 = PickConfig
                      }
                    , minClauseAmount = 4
                    , maxClauseAmount = 4
+                   , percentPosLiterals = (0,100)
                    })
   , amountOfOptions = 4
   , percentTrueEntries = Just (30,70)
