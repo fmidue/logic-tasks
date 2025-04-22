@@ -2,7 +2,7 @@ module Global where
 
 
 import LogicTasks.Formula (TruthValue(..))
-import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+import Trees.Types (SynTree(..), BinOp(..))
 import FlexTask.Generic.Form
 
 newtype CharAnswer = CharAnswer { unCharAnswer :: [Char]}
@@ -19,7 +19,7 @@ module TaskSettings where
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 import Horn
-import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+import Trees.Types (SynTree(..), BinOp(..))
 
 
 -- v1, v2, custom list of clauses
@@ -45,7 +45,6 @@ validateSettings = pure ()
 module TaskData (getTask) where
 
 
-import Data.List (intercalate)
 import Data.String.Interpolate (i)
 import Data.String             (fromString)
 import Data.Text               (Text, pack)
@@ -55,7 +54,7 @@ import Yesod                   (RenderMessage(..), SomeMessage(..), fieldSetting
 import FlexTask.FormUtil       (getFormData, ($$>))
 import FlexTask.Generic.Form
 import FlexTask.Types          (HtmlDict)
-import FlexTask.YesodConfig    (FlexForm, Rendered, Widget)
+import FlexTask.YesodConfig    (Rendered, Widget)
 import Horn
 
 import Global
@@ -131,7 +130,6 @@ module Description (description) where
 
 
 import Control.OutputCapable.Blocks
-import Data.String.Interpolate (i)
 
 import Trees.Print (simplestDisplay)
 
@@ -210,7 +208,7 @@ instance Parse [(Char,TruthValue)] where
         spaces
         c <- satisfy (`elem` ['A'..'Z'])
         spaces
-        char ':'
+        _ <- char ':'
         spaces
         t <- P.parser
         spaces
