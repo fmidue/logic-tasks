@@ -3,10 +3,13 @@ module Global where
 
 import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+import FlexTask.Generic.Form
 
+newtype CharAnswer = CharAnswer { unCharAnswer :: [Char]}
 
-type Submission = ([[Char]], String, [(Char,TruthValue)])
+type Submission = ([CharAnswer], SingleChoiceSelection, [(Char,TruthValue)])
 type TaskData = SynTree BinOp Char
+
 
 =============================================
 
@@ -47,7 +50,7 @@ import Data.String.Interpolate (i)
 import Data.String             (fromString)
 import Data.Text               (Text, pack)
 import Test.QuickCheck.Gen
-import Yesod                   (RenderMessage(..), fieldSettingsLabel)
+import Yesod                   (RenderMessage(..), SomeMessage(..), fieldSettingsLabel)
 
 import FlexTask.FormUtil       (getFormData, ($$>))
 import FlexTask.Generic.Form
@@ -59,16 +62,19 @@ import Global
 import TaskSettings
 
 
-data Label = Step Int | Output | Model
-
+data Label = Step Int | Output | Model | Satisfiable | Unsatisfiable
 
 instance RenderMessage a Label where
-  renderMessage _ ("de":_) (Step n) = pack ("Schritt " ++ show n ++ ":")
-  renderMessage _ ("de":_) Output   = "Ausgabe:"
-  renderMessage _ ("de":_) Model    = "Modell:"
-  renderMessage _ _        (Step n) = pack ("Step " ++ show n ++ ":")
-  renderMessage _ _        Output   = "Output:"
-  renderMessage _ _        Model    = "Model:"
+  renderMessage _ ("de":_) (Step n)      = pack ("Schritt " ++ show n ++ ":")
+  renderMessage _ ("de":_) Output        = "Ausgabe:"
+  renderMessage _ ("de":_) Model         = "Modell:"
+  renderMessage _ ("de":_) Satisfiable   = "erfüllbar"
+  renderMessage _ ("de":_) Unsatisfiable = "unerfüllbar"
+  renderMessage _ _        (Step n)      = pack ("Step " ++ show n ++ ":")
+  renderMessage _ _        Output        = "Output:"
+  renderMessage _ _        Model         = "Model:"
+  renderMessage _ _        Satisfiable   = "satisfiable"
+  renderMessage _ _        Unsatisfiable = "unsatisfiable"
 
 
 getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
@@ -82,8 +88,8 @@ form = formify (Nothing :: Maybe [String]) fieldNames $$>
     formify (Nothing :: Maybe (SingleChoiceSelection, String))
     [[ dropdown (fieldSettingsLabel Output)
         [ fromString "---"
-        , fromString "erfüllbar"
-        , fromString "unerfüllbar"
+        , SomeMessage Satisfiable
+        , SomeMessage Unsatisfiable
         ]
     , single (fieldSettingsLabel Model)
     ]]
@@ -167,6 +173,34 @@ import FlexTask.Generic.Parse  (
   )
 
 import Global
+import Text.Parsec
+import qualified LogicTasks.Parsing as P
+import LogicTasks.Formula (TruthValue(..))
+
+
+instance Parse CharAnswer where
+  formParser = escaped $  do
+    result <- (do spaces
+                  c <- satisfy (`elem` ['A'..'Z'])
+                  spaces
+                  pure c
+              ) `sepBy` char ','
+    pure $ CharAnswer result
+
+instance Parse [(Char,TruthValue)] where
+  formParser = escaped $ do
+    result <- tupleParser `sepBy` char ','
+    pure result
+    where
+      tupleParser = do
+        spaces
+        c <- satisfy (`elem` ['A'..'Z'])
+        spaces
+        char ':'
+        spaces
+        t <- P.parser
+        spaces
+        pure (c,t)
 
 
 parseSubmission ::
