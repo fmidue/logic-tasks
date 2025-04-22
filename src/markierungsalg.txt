@@ -162,7 +162,7 @@ description _ formula = do
       german "Beispiel für die Angabe eines Modells:"
   code "A:1, B:0"
   paragraph $ translate $ do
-    german "Hinweis, dass mehr Schrittfelder als nötig ggf."
+    german "Hinweis, dass mehr Schrittfelder als nötig da sein könnten."
     english "todo"
   pure ()
 
