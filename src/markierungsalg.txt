@@ -149,7 +149,7 @@ description _ formula = do
     german "Vervollständigen Sie das Protokoll."
     english "Complete the protocol."
   paragraph $ translate $ do
-      english "Use the the following notations:"
+      english "Use the following notations:"
       german "Beachten Sie die folgenden Schreibweisen:"
   indent $ translate $ do
       english "Example of a listing of the statements marked in a step:"
