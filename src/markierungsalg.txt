@@ -174,8 +174,8 @@ description _ formula = do
       german "Beispiel für die Angabe eines Modells:"
   code "A:1, B:0"
   paragraph $ translate $ do
-    german "Hinweis, dass mehr Schrittfelder als nötig da sein könnten."
-    english "todo"
+    german "Eingabefelder, die für die Lösung nicht erforderlich sind, können freigelassen werden."
+    english "You can leave input fields blank if they’re not needed for the solution."
   pure ()
 
 
