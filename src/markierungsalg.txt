@@ -5,7 +5,7 @@ import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import FlexTask.Generic.Form
 
-newtype CharAnswer = CharAnswer { unCharAnswer :: [Char]}
+newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]}
 
 type Submission = ([CharAnswer], SingleChoiceSelection, [(Char,TruthValue)])
 type TaskData = SynTree BinOp Char
@@ -30,7 +30,7 @@ extra :: Int
 extra = 0
 
 steps :: Int
-steps = 2
+steps = 3
 
 validateSettings :: OutputCapable m => LangM m
 validateSettings = pure ()
@@ -83,7 +83,7 @@ getTask = do
 
 
 form :: Rendered Widget
-form = formify (Nothing :: Maybe [String]) fieldNames $$>
+form = formify (Nothing :: Maybe [Maybe String]) fieldNames $$>
     formify (Nothing :: Maybe (SingleChoiceSelection, String))
     [[ dropdown (fieldSettingsLabel Output)
         [ fromString "---"
@@ -123,7 +123,7 @@ checkSyntax _ _ _  = pure ()
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ formula (steps, output, model) = do
     let (correctSteps, correctOutput, correctModel) = startAlgorithm formula
-    yesNo (correctSteps == zip [1..] (map unCharAnswer steps)) $ translate $ do
+    yesNo (correctSteps == zip [1..] (filter (/= "") (map unCharAnswer steps))) $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
     yesNo (Just (if correctOutput then 2 else 3) == getAnswer output) $ translate $ do
@@ -205,12 +205,13 @@ import LogicTasks.Formula (TruthValue(..))
 
 
 instance Parse CharAnswer where
-  formParser = escaped $  do
-    result <- (do spaces
-                  c <- satisfy (`elem` ['A'..'Z'])
-                  spaces
-                  pure c
-              ) `sepBy` char ','
+  formParser = escaped $ do
+    result <- ( try (string "None" *> pure "") <|>
+          (do spaces
+              c <- satisfy (`elem` ['A'..'Z'])
+              spaces
+              pure c
+           ) `sepBy` char ',' )
     pure $ CharAnswer result
 
 instance Parse [(Char,TruthValue)] where
