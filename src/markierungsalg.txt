@@ -202,17 +202,19 @@ import Global
 import Text.Parsec
 import qualified LogicTasks.Parsing as P
 import LogicTasks.Formula (TruthValue(..))
+import Data.Functor (($>))
 
 
 instance Parse CharAnswer where
-  formParser = escaped $ do
-    result <- ( try (string "None" *> pure "") <|>
-          (do spaces
-              c <- satisfy (`elem` ['A'..'Z'])
-              spaces
-              pure c
-           ) `sepBy` char ',' )
-    pure $ CharAnswer result
+  formParser = escaped $ do CharAnswer
+     <$>
+       (try (string "None" $> "")
+          <|>
+            (do spaces
+                c <- satisfy (`elem` ['A' .. 'Z'])
+                spaces
+                pure c)
+              `sepBy` char ',')
 
 instance Parse [(Char,TruthValue)] where
   formParser = escaped $ do
