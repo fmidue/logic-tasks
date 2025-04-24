@@ -30,7 +30,7 @@ extra :: Int
 extra = 0
 
 steps :: Int
-steps = 5
+steps = 2
 
 validateSettings :: OutputCapable m => LangM m
 validateSettings = pure ()
@@ -55,7 +55,7 @@ import FlexTask.FormUtil       (getFormData, ($$>))
 import FlexTask.Generic.Form
 import FlexTask.Types          (HtmlDict)
 import FlexTask.YesodConfig    (Rendered, Widget)
-import Horn
+import Horn                    (makeHornFormula)
 
 import Global
 import TaskSettings
@@ -105,8 +105,13 @@ checkers = [i|
 
 module Check (checkSyntax, checkSemantics) where
 
+import Data.List (sort)
+import Data.Tuple.Extra (second)
 
 import Control.OutputCapable.Blocks
+import FlexTask.Generic.Form (getAnswer)
+import Horn
+import LogicTasks.Formula (TruthValue(..))
 
 import Global
 
@@ -116,10 +121,19 @@ checkSyntax _ _ _  = pure ()
 
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
-checkSemantics _ _ _ = pure 1
-
+checkSemantics _ formula (steps, output, model) = do
+    let (correctSteps, correctOutput, correctModel) = startAlgorithm formula
+    yesNo (correctSteps == zip [1..] (map unCharAnswer steps)) $ translate $ do
+        german "Schritte richtig?"
+        english "Steps correct?"
+    yesNo (Just (if correctOutput then 2 else 3) == getAnswer output) $ translate $ do
+        german "Ausgabe richtig?"
+        english "Output correct?"
+    yesNo (sort correctModel == sort (map (second truth) model)) $ translate $ do
+        german "Modell richtig?"
+        english "Model correct?"
+    pure 1
 |]
-
 
 =============================================
 
