@@ -105,6 +105,7 @@ checkers = [i|
 
 module Check (checkSyntax, checkSemantics) where
 
+
 import Data.List (sort)
 import Data.Tuple.Extra (second)
 
@@ -185,6 +186,9 @@ description _ formula = do
 module Parse (parseSubmission) where
 
 
+import Data.Functor (($>))
+import Text.Parsec
+
 import Control.OutputCapable.Blocks (
   LangM',
   ReportT,
@@ -197,12 +201,12 @@ import FlexTask.Generic.Parse  (
   parseWithOrReport,
   reportWithFieldNumber
   )
+import LogicTasks.Formula (TruthValue(..))
+
+import qualified LogicTasks.Parsing as P
+
 
 import Global
-import Text.Parsec
-import qualified LogicTasks.Parsing as P
-import LogicTasks.Formula (TruthValue(..))
-import Data.Functor (($>))
 
 
 instance Parse CharAnswer where
