@@ -84,7 +84,7 @@ getTask = do
 
 form :: Rendered Widget
 form = formify (Nothing :: Maybe [Maybe String]) fieldNames $$>
-    formify (Nothing :: Maybe (SingleChoiceSelection, String))
+    formify (Nothing :: Maybe (SingleChoiceSelection, Maybe String))
     [[ dropdown (fieldSettingsLabel Output)
         [ fromString "---"
         , SomeMessage Satisfiable
@@ -218,7 +218,7 @@ instance Parse CharAnswer where
 
 instance Parse [(Char,TruthValue)] where
   formParser = escaped $ do
-    result <- tupleParser `sepBy` char ','
+    result <- try (string "None" $> []) <|> tupleParser `sepBy` char ','
     pure result
     where
       tupleParser = do
