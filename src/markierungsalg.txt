@@ -8,7 +8,7 @@ import FlexTask.Generic.Form
 newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]} deriving (Eq, Show)
 
 type Submission = ([      Maybe CharAnswer], SingleChoiceSelection, Maybe [(Char,TruthValue)])
-type Solution   = ([(Int, [Char])         ], Bool,                        [(Char,Bool)])
+type Solution   = ([(Int, [Char])         ], Bool,                        [(Char,Bool)      ])
 
 type TaskData = (SynTree BinOp Char, Solution)
 
@@ -109,7 +109,7 @@ module Check (checkSyntax, checkSemantics) where
 
 
 import Data.List (sort)
-import Data.Maybe (isJust, catMaybes, fromMaybe)
+import Data.Maybe (isNothing, catMaybes, fromMaybe)
 import Data.Tuple.Extra (second)
 
 import Control.Monad (when)
@@ -122,10 +122,14 @@ import Global
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ _ (steps, output, model) = do
-   yesNo (any isJust steps) $ translate $ do
-        german $ show steps
-        english "Steps correct?"
-
+    when (getAnswer output == Just 1) $ refuse $ indent $ translate $ do
+        german "Wähle eine mögliche Ausgabe für den Algorithmus aus."
+        english "Select an output option."
+    when (all isNothing steps && isNothing model) $
+        refuse $ indent $ translate $ do
+            german "Es dürfen nicht alle Texteingabefelder leer sein."
+            english "Not all text input fields may be left blank."
+    pure ()
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
