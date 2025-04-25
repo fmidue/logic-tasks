@@ -5,11 +5,12 @@ import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import FlexTask.Generic.Form
 
-newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]}
+newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]} deriving (Eq, Show)
 
-type Submission = ([CharAnswer], SingleChoiceSelection, [(Char,TruthValue)])
-type TaskData = SynTree BinOp Char
+type Submission = ([      Maybe CharAnswer], SingleChoiceSelection, Maybe [(Char,TruthValue)])
+type Solution   = ([(Int, [Char])         ], Bool,                        [(Char,Bool)])
 
+type TaskData = (SynTree BinOp Char, Solution)
 
 =============================================
 
@@ -55,7 +56,7 @@ import FlexTask.FormUtil       (getFormData, ($$>))
 import FlexTask.Generic.Form
 import FlexTask.Types          (HtmlDict)
 import FlexTask.YesodConfig    (Rendered, Widget)
-import Horn                    (makeHornFormula)
+import Horn                    (makeHornFormula, startAlgorithm)
 
 import Global
 import TaskSettings
@@ -79,7 +80,8 @@ instance RenderMessage a Label where
 getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
 getTask = do
     formula <- makeHornFormula spirit extra
-    pure (formula, checkers, getFormData form)
+    let solution = startAlgorithm formula
+    pure ((formula,solution), checkers, getFormData form)
 
 
 form :: Rendered Widget
@@ -107,8 +109,10 @@ module Check (checkSyntax, checkSemantics) where
 
 
 import Data.List (sort)
+import Data.Maybe (isJust, catMaybes, fromMaybe)
 import Data.Tuple.Extra (second)
 
+import Control.Monad (when)
 import Control.OutputCapable.Blocks
 import FlexTask.Generic.Form (getAnswer)
 import Horn
@@ -116,21 +120,22 @@ import LogicTasks.Formula (TruthValue(..))
 
 import Global
 
-
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ _ _  = pure ()
+checkSyntax _ _ (steps, output, model) = do
+   yesNo (any isJust steps) $ translate $ do
+        german $ show steps
+        english "Steps correct?"
 
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
-checkSemantics _ formula (steps, output, model) = do
-    let (correctSteps, correctOutput, correctModel) = startAlgorithm formula
-    yesNo (correctSteps == zip [1..] (filter (/= "") (map unCharAnswer steps))) $ translate $ do
+checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
+    yesNo (correctSteps == zip [1..] (map unCharAnswer (catMaybes steps))) $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
     yesNo (Just (if correctOutput then 2 else 3) == getAnswer output) $ translate $ do
         german "Ausgabe richtig?"
         english "Output correct?"
-    yesNo (sort correctModel == sort (map (second truth) model)) $ translate $ do
+    yesNo (sort correctModel == sort (map (second truth) (fromMaybe [] model))) $ translate $ do
         german "Modell richtig?"
         english "Model correct?"
     pure 1
@@ -152,7 +157,7 @@ import Global
 
 
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
-description _ formula = do
+description _ (formula,_) = do
   paragraph $ translate $ do
     german "Gegeben ist eine Hornformel, welche sich bereits in Implikationsschreibweise befindet:"
     english "A Horn formula is given, which is already in implicational form."
@@ -211,18 +216,14 @@ import Global
 
 instance Parse CharAnswer where
   formParser = escaped $ do CharAnswer
-     <$>
-       (try (string "None" $> "")
-          <|>
-            (do spaces
+     <$>    (do spaces
                 c <- satisfy (`elem` ['A' .. 'Z'])
                 spaces
-                pure c)
-              `sepBy` char ',')
+                pure c) `sepBy` char ','
 
 instance Parse [(Char,TruthValue)] where
   formParser = escaped $ do
-    result <- try (string "None" $> []) <|> tupleParser `sepBy` char ','
+    result <- tupleParser `sepBy` char ','
     pure result
     where
       tupleParser = do
