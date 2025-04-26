@@ -24,12 +24,12 @@ import Control.OutputCapable.Blocks
 import Horn
 import Trees.Types (SynTree(..), BinOp(..))
 
+
 atomics :: [Char]
 atomics = getAllAtomics spirit
 
 steps :: Int
 steps =  length atomics + extra
-
 
 {- - - configuration constants - - -}
 
@@ -80,16 +80,16 @@ import TaskSettings
 data Label = Step Int | Output | Model | Satisfiable | Unsatisfiable
 
 instance RenderMessage a Label where
-  renderMessage _ ("de":_) (Step n)      = pack ("Schritt " ++ show n ++ ":")
-  renderMessage _ ("de":_) Output        = "Ausgabe:"
-  renderMessage _ ("de":_) Model         = "Modell:"
-  renderMessage _ ("de":_) Satisfiable   = "erfüllbar"
-  renderMessage _ ("de":_) Unsatisfiable = "unerfüllbar"
-  renderMessage _ _        (Step n)      = pack ("Step " ++ show n ++ ":")
-  renderMessage _ _        Output        = "Output:"
-  renderMessage _ _        Model         = "Model:"
-  renderMessage _ _        Satisfiable   = "satisfiable"
-  renderMessage _ _        Unsatisfiable = "unsatisfiable"
+    renderMessage _ ("de":_) (Step n)      = pack ("Schritt " ++ show n ++ ":")
+    renderMessage _ ("de":_) Output        = "Ausgabe:"
+    renderMessage _ ("de":_) Model         = "Modell:"
+    renderMessage _ ("de":_) Satisfiable   = "erfüllbar"
+    renderMessage _ ("de":_) Unsatisfiable = "unerfüllbar"
+    renderMessage _ _        (Step n)      = pack ("Step " ++ show n ++ ":")
+    renderMessage _ _        Output        = "Output:"
+    renderMessage _ _        Model         = "Model:"
+    renderMessage _ _        Satisfiable   = "satisfiable"
+    renderMessage _ _        Unsatisfiable = "unsatisfiable"
 
 
 getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
@@ -206,31 +206,31 @@ import Global
 
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
 description _ (formula,_) = do
-  paragraph $ translate $ do
-    german "Gegeben ist eine Hornformel, welche sich bereits in Implikationsschreibweise befindet:"
-    english "A Horn formula is given, which is already in implicational form."
-  indent $ latex (simplestDisplay formula)
-  paragraph $ translate $ do
-    german "Wenden Sie den Markierungsalgorithmus aus der Vorlesung auf die Formel an."
-    english "Apply the marking algorithm from the lecture to the formula."
-  indent $ translate $ do
-    german "Vervollständigen Sie das Protokoll."
-    english "Complete the protocol."
-  paragraph $ translate $ do
-      english "Use the following notations:"
-      german "Beachten Sie die folgenden Schreibweisen:"
-  indent $ translate $ do
-      english "Example of a listing of the statements marked in a step:"
-      german "Beispiel für die Angabe der in einem Schritt markierten Aussagen:"
-  code "A, B"
-  indent $ translate $ do
-      english "Example of a Model:"
-      german "Beispiel für die Angabe eines Modells:"
-  code "A:1, B:0"
-  paragraph $ translate $ do
-    german "Eingabefelder, die für die Lösung nicht erforderlich sind, können freigelassen werden."
-    english "You can leave input fields blank if they’re not needed for the solution."
-  pure ()
+    paragraph $ translate $ do
+        german "Gegeben ist eine Hornformel, welche sich bereits in Implikationsschreibweise befindet:"
+        english "A Horn formula is given, which is already in implicational form."
+    indent $ latex (simplestDisplay formula)
+    paragraph $ translate $ do
+        german "Wenden Sie den Markierungsalgorithmus aus der Vorlesung auf die Formel an."
+        english "Apply the marking algorithm from the lecture to the formula."
+    indent $ translate $ do
+        german "Vervollständigen Sie das Protokoll."
+        english "Complete the protocol."
+    paragraph $ translate $ do
+        english "Use the following notations:"
+        german "Beachten Sie die folgenden Schreibweisen:"
+    indent $ translate $ do
+        english "Example of a listing of the statements marked in a step:"
+        german "Beispiel für die Angabe der in einem Schritt markierten Aussagen:"
+    code "A, B"
+    indent $ translate $ do
+        english "Example of a Model:"
+        german "Beispiel für die Angabe eines Modells:"
+    code "A:1, B:0"
+    paragraph $ translate $ do
+        german "Eingabefelder, die für die Lösung nicht erforderlich sind, können freigelassen werden."
+        english "You can leave input fields blank if they’re not needed for the solution."
+    pure ()
 
 
 =============================================
