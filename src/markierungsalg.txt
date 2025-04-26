@@ -120,7 +120,6 @@ import LogicTasks.Formula (TruthValue(..))
 
 import Global
 
-checking condition msg = when condition $ refuse $ indent $ translate msg
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ (formula,_) (steps, output, model) = do
@@ -138,34 +137,35 @@ checkSyntax _ (formula,_) (steps, output, model) = do
                 "Die Formel sei unerfüllbar, dennoch wurde eine erfüllende Belegung (Modell) angegeben."
             english $ "Contradiction found: " ++
                 "The formula is said to be unsatisfiable, yet a satisfying assignment (model) was provided."
-    checking (isJust model && (sort $ map fst $ fromJust model) /= allAtomics) $ do
+    checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
             german "Im Modell muss jede atomare Teilformel genau einmal vorkommen."
             english "The model must contain each atomic subformula exactly once."
-    checking (isJust (head steps) && (getFacts clauses) /= (unCharAnswer $ fromJust $ head steps)) $ do
+    checking (isJust (head steps) && getFacts clauses /= unCharAnswer (fromJust $ head steps)) $ do
             german "Im ersten Schritt müssen alle Fakten markiert werden."
             english "In the first step, all facts must be marked."
     checking (any ((> 1) . length) (drop 1 marked)) $ do
             german "Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
-            english $ "Apart from step 1, exactly one statement may be marked in each step."
-    checking (((sort $ concat marked) \\\\ allAtomics) /= []) $ do
+            english "Apart from step 1, exactly one statement may be marked in each step."
+    checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
         german $ "Markiert werden können nur jene atomare Aussagen, " ++
             "welche in der Formel vorkommen und nicht bereits markiert worden sind."
         english "Only those atomic statements that occur in the formula and are not yet marked can be marked."
     pure ()
   where
+    checking condition msg = when condition $ refuse $ indent $ translate msg
     clauses = getClauses formula
     allAtomics = sort $ getAllAtomics clauses
     marked = map unCharAnswer $ catMaybes steps
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
-checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
+checkSemantics _ (_, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
     yesNo (correctSteps == zip [1..] (map unCharAnswer (catMaybes steps))) $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
     yesNo (Just (if correctOutput then 2 else 3) == getAnswer output) $ translate $ do
         german "Ausgabe richtig?"
         english "Output correct?"
-    yesNo (sort correctModel == sort (map (second truth) (fromMaybe [] model))) $ translate $ do
+    yesNo (sort correctModel == sort (maybe [] (map (second truth)) model)) $ translate $ do
         german "Modell richtig?"
         english "Model correct?"
     pure 1
@@ -221,7 +221,6 @@ description _ (formula,_) = do
 module Parse (parseSubmission) where
 
 
-import Data.Functor (($>))
 import Text.Parsec
 
 import Control.OutputCapable.Blocks (
