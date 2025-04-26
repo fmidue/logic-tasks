@@ -104,6 +104,7 @@ checkers = [i|
 
 
 {-\# language ApplicativeDo \#-}
+{-\# LANGUAGE LambdaCase \#-}
 
 module Check (checkSyntax, checkSemantics) where
 
@@ -140,7 +141,9 @@ checkSyntax _ (formula,_) (steps, output, model) = do
     checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
             german "Im Modell muss jede atomare Teilformel genau einmal vorkommen."
             english "The model must contain each atomic subformula exactly once."
-    checking (isJust (head steps) && getFacts clauses /= unCharAnswer (fromJust $ head steps)) $ do
+    checking ((\\case
+        (Just step : _) -> getFacts clauses /= unCharAnswer step
+        _               -> False) steps) $ do
             german "Im ersten Schritt müssen alle Fakten markiert werden."
             english "In the first step, all facts must be marked."
     checking (any ((> 1) . length) (drop 1 marked)) $ do
