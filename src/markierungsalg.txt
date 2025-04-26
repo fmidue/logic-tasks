@@ -109,7 +109,7 @@ module Check (checkSyntax, checkSemantics) where
 
 
 import Data.List (sort, (\\\\))
-import Data.Maybe (fromJust, isJust, isNothing, catMaybes, fromMaybe)
+import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
 import Data.Tuple.Extra (second)
 
 import Control.Monad (when)
