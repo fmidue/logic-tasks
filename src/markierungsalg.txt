@@ -18,24 +18,39 @@ type TaskData = (SynTree BinOp Char, Solution)
 module TaskSettings where
 
 
-import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import Data.List ((\\))
+
+import Control.OutputCapable.Blocks
 import Horn
 import Trees.Types (SynTree(..), BinOp(..))
 
+atomics :: [Char]
+atomics = getAllAtomics spirit
+
+steps :: Int
+steps =  length atomics + extra
+
+
+{- - - configuration constants - - -}
 
 -- v1, v2, custom list of clauses
 spirit :: [SynTree BinOp Char]
 spirit = v1
 
 extra :: Int
-extra = 0
+extra = 2
 
-steps :: Int
-steps = 3
+{- - - - - - - - - - - - - - - - - -}
 
 validateSettings :: OutputCapable m => LangM m
-validateSettings = pure ()
-
+validateSettings
+    | extra > length atomics = refuse $ indent $ text $
+        "Es können nur so viele extra Klauseln hinzugefügt werden, " ++
+            "wie in spirit bereits enthalten sind."
+    | (atomics \\ ['A' .. 'L']) /= [] = refuse $ indent $ text $
+        "Es dürfen nur Buchstaben aus dem Intervall ['A' .. 'L'], " ++
+            "für die atomaren Aussagen verwendet werden."
+    | otherwise = pure ()
 
 =============================================
 
