@@ -127,7 +127,8 @@ checkers = [i|
 module Check (checkSyntax, checkSemantics) where
 
 
-import Data.List (sort, (\\\\))
+import Data.Foldable (traverse_)
+import Data.List (intersperse, intercalate, sort, (\\\\))
 import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
 import Data.Ratio ((%))
 import Data.Tuple.Extra (second)
@@ -137,6 +138,8 @@ import Control.OutputCapable.Blocks
 import FlexTask.Generic.Form (getAnswer)
 import Horn
 import LogicTasks.Formula (TruthValue(..))
+
+import qualified Data.List.Extra as List (replace)
 
 import Global
 
@@ -152,6 +155,37 @@ checkSyntax _ (formula,_) (steps, output, model) = do
     checking (getAnswer output == Just 1) $ do
         german "Es muss eine Ausgabe für den Algorithmus ausgewählt werden."
         english "An output option needs to be selected."
+    checking (getAnswer output == Just 3 && isJust model) $ do
+        german $ "Widerspruch gefunden: " ++
+            "Die Formel sei unerfüllbar, dennoch wurde eine erfüllende Belegung (Modell) angegeben."
+        english $ "Contradiction found: " ++
+            "The formula is said to be unsatisfiable, yet a satisfying assignment (model) was provided."
+
+    paragraph $ translate $ do
+        german "Die Einsendung wird interpretiert als:"
+        english "The submission is interpreted as:"
+    paragraph $ indent $ latex $ foldl (\\acc (i,c) -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
+        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (\\c -> (i,c)) s) stepsSubmitted
+    paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
+        german $  "Schritt " ++ show i ++ ": " ++ (intersperse ',' c) ++ "\\n"
+        english $ "Step " ++ show i ++ ": " ++ (intersperse ',' c) ++ "\\n") stepsSubmitted
+
+    paragraph $ do
+        indent $ translate $ do
+            german (case (getAnswer output) of
+                Just 3 -> "\\"unerfüllbar\\""
+                Just 2 -> "\\"erfüllbar\\", mit"
+                _      -> "")
+            english (case (getAnswer output) of
+                Just 3 -> "\\"unsatisfiable\\""
+                Just 2 -> "\\"satisfiable\\", mit"
+                _      -> "")
+        case model of
+            Nothing -> pure ()
+            Just m  -> indent $ latex $ intercalate ",\\\\ " $
+                map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum $ truth w)) m
+        pure ()
+
     checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
         german $ "Markiert werden können nur jene atomare Aussagen, " ++
             "welche in der Formel vorkommen und nicht bereits markiert worden sind."
@@ -167,21 +201,18 @@ checkSyntax _ (formula,_) (steps, output, model) = do
     checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
         german "Im Modell muss jede atomare Teilformel genau einmal vorkommen."
         english "The model must contain each atomic subformula exactly once."
-    checking (getAnswer output == Just 3 && isJust model) $ do
-        german $ "Widerspruch gefunden: " ++
-            "Die Formel sei unerfüllbar, dennoch wurde eine erfüllende Belegung (Modell) angegeben."
-        english $ "Contradiction found: " ++
-            "The formula is said to be unsatisfiable, yet a satisfying assignment (model) was provided."
     pure ()
   where
     checking condition msg = when condition $ refuse $ indent $ translate msg
     clauses = getClauses formula
     allAtomics = sort $ getAllAtomics clauses
     marked = map unCharAnswer $ catMaybes steps
+    stepsSubmitted = zip [1..] (map unCharAnswer (catMaybes steps))
+
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
-checkSemantics _ (_, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
-    let stepsCorrect = correctSteps == zip [1..] (map unCharAnswer (catMaybes steps))
+checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
+    let stepsCorrect = correctSteps == stepsSubmitted
     yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
@@ -200,10 +231,10 @@ checkSemantics _ (_, (correctSteps, correctOutput, correctModel)) (steps, output
     pure res
   where
     maybeAnswer = if #{showSolution} then (Just "Lösung steht hier") else Nothing
+    stepsSubmitted = zip [1..] (map unCharAnswer (catMaybes steps))
 |]
 
 =============================================
-
 
 {-# Language ApplicativeDo #-}
 
