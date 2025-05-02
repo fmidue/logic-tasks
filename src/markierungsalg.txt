@@ -138,6 +138,7 @@ import Control.OutputCapable.Blocks
 import FlexTask.Generic.Form (getAnswer)
 import Horn
 import LogicTasks.Formula (TruthValue(..))
+import Trees.Print (simplestDisplay)
 
 import qualified Data.List.Extra as List (replace)
 
@@ -165,18 +166,18 @@ checkSyntax _ (formula,_) (steps, output, model) = do
         german "Die Einsendung wird interpretiert als:"
         english "The submission is interpreted as:"
     paragraph $ indent $ latex $ foldl (\\acc (i,c) -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
-        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (\\c -> (i,c)) s) stepsSubmitted
+        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) stepsSubmitted
     paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
-        german $  "Schritt " ++ show i ++ ": " ++ (intersperse ',' c) ++ "\\n"
-        english $ "Step " ++ show i ++ ": " ++ (intersperse ',' c) ++ "\\n") stepsSubmitted
+        german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
+        english $ "Step " ++ show i ++ ": " ++ intersperse ',' c) ++ "\\n" stepsSubmitted
 
     paragraph $ do
         indent $ translate $ do
-            german (case (getAnswer output) of
+            german (case getAnswer output of
                 Just 3 -> "\\"unerfüllbar\\""
                 Just 2 -> "\\"erfüllbar\\", mit"
                 _      -> "")
-            english (case (getAnswer output) of
+            english (case getAnswer output of
                 Just 3 -> "\\"unsatisfiable\\""
                 Just 2 -> "\\"satisfiable\\", mit"
                 _      -> "")
