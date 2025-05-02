@@ -38,7 +38,10 @@ spirit :: [SynTree BinOp Char]
 spirit = v1
 
 extra :: Int
-extra = 2
+extra = 0
+
+showSolution :: Bool
+showSolution = True
 
 {- - - - - - - - - - - - - - - - - -}
 
@@ -126,6 +129,7 @@ module Check (checkSyntax, checkSemantics) where
 
 import Data.List (sort, (\\\\))
 import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
+import Data.Ratio ((%))
 import Data.Tuple.Extra (second)
 
 import Control.Monad (when)
@@ -139,35 +143,35 @@ import Global
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ (formula,_) (steps, output, model) = do
+    checking (all isNothing steps && isNothing model) $ do
+        german "Es dürfen nicht alle Texteingabefelder leer sein."
+        english "Not all text input fields may be left blank."
+    checking (any isJust (dropWhile isJust steps)) $ do
+        german "Es dürfen keine Schritte übersprungen werden."
+        english "Steps cannot be skipped."
     checking (getAnswer output == Just 1) $ do
         german "Es muss eine Ausgabe für den Algorithmus ausgewählt werden."
         english "An output option needs to be selected."
-    checking (all isNothing steps && isNothing model) $ do
-            german "Es dürfen nicht alle Texteingabefelder leer sein."
-            english "Not all text input fields may be left blank."
-    checking (any isJust (dropWhile isJust steps)) $ do
-            german "Es dürfen keine Schritte übersprungen werden."
-            english "Steps cannot be skipped."
-    checking (getAnswer output == Just 3 && isJust model) $ do
-            german $ "Widerspruch gefunden: " ++
-                "Die Formel sei unerfüllbar, dennoch wurde eine erfüllende Belegung (Modell) angegeben."
-            english $ "Contradiction found: " ++
-                "The formula is said to be unsatisfiable, yet a satisfying assignment (model) was provided."
-    checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
-            german "Im Modell muss jede atomare Teilformel genau einmal vorkommen."
-            english "The model must contain each atomic subformula exactly once."
+    checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
+        german $ "Markiert werden können nur jene atomare Aussagen, " ++
+            "welche in der Formel vorkommen und nicht bereits markiert worden sind."
+        english "Only those atomic statements that occur in the formula and are not yet marked can be marked."
+    checking (any ((> 1) . length) (drop 1 marked)) $ do
+        german "Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
+        english "Apart from step 1, exactly one statement may be marked in each step."
     checking ((\\case
         (Just step : _) -> getFacts clauses /= unCharAnswer step
         _               -> False) steps) $ do
             german "Im ersten Schritt müssen alle Fakten markiert werden."
             english "In the first step, all facts must be marked."
-    checking (any ((> 1) . length) (drop 1 marked)) $ do
-            german "Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
-            english "Apart from step 1, exactly one statement may be marked in each step."
-    checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
-        german $ "Markiert werden können nur jene atomare Aussagen, " ++
-            "welche in der Formel vorkommen und nicht bereits markiert worden sind."
-        english "Only those atomic statements that occur in the formula and are not yet marked can be marked."
+    checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
+        german "Im Modell muss jede atomare Teilformel genau einmal vorkommen."
+        english "The model must contain each atomic subformula exactly once."
+    checking (getAnswer output == Just 3 && isJust model) $ do
+        german $ "Widerspruch gefunden: " ++
+            "Die Formel sei unerfüllbar, dennoch wurde eine erfüllende Belegung (Modell) angegeben."
+        english $ "Contradiction found: " ++
+            "The formula is said to be unsatisfiable, yet a satisfying assignment (model) was provided."
     pure ()
   where
     checking condition msg = when condition $ refuse $ indent $ translate msg
@@ -177,16 +181,25 @@ checkSyntax _ (formula,_) (steps, output, model) = do
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ (_, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
-    yesNo (correctSteps == zip [1..] (map unCharAnswer (catMaybes steps))) $ translate $ do
+    let stepsCorrect = correctSteps == zip [1..] (map unCharAnswer (catMaybes steps))
+    yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
-    yesNo (Just (if correctOutput then 2 else 3) == getAnswer output) $ translate $ do
+    let outputCorrect = Just (if correctOutput then 2 else 3) == getAnswer output
+    yesNo outputCorrect $ translate $ do
         german "Ausgabe richtig?"
         english "Output correct?"
-    yesNo (sort correctModel == sort (maybe [] (map (second truth)) model)) $ translate $ do
+    let modelCorrect = sort correctModel == sort (maybe [] (map (second truth)) model)
+    yesNo modelCorrect $ translate $ do
         german "Modell richtig?"
         english "Model correct?"
-    pure 1
+    let points = (if stepsCorrect then 0.4 else 0.0) +
+                 (if outputCorrect then 0.2 else 0.0) +
+                 (if modelCorrect then 0.4 else 0.0)
+    res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
+    pure res
+  where
+    maybeAnswer = if #{showSolution} then (Just "Lösung steht hier") else Nothing
 |]
 
 =============================================
