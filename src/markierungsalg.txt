@@ -169,7 +169,7 @@ checkSyntax _ (formula,_) (steps, output, model) = do
         (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) stepsSubmitted
     paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
         german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
-        english $ "Step " ++ show i ++ ": " ++ intersperse ',' c) ++ "\\n" stepsSubmitted
+        english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") stepsSubmitted
 
     paragraph $ do
         indent $ translate $ do
