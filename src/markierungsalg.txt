@@ -188,20 +188,20 @@ checkSyntax _ (formula,_) (steps, output, model) = do
         pure ()
 
     checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
-        german $ "Markiert werden können nur jene atomare Aussagen, " ++
+        german $ "Hinweis: Markiert werden können nur jene atomare Aussagen, " ++
             "welche in der Formel vorkommen und nicht bereits markiert worden sind."
-        english "Only those atomic statements that occur in the formula and are not yet marked can be marked."
+        english "Hint: Only those atomic statements that occur in the formula and are not yet marked can be marked."
     checking (any ((> 1) . length) (drop 1 marked)) $ do
-        german "Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
-        english "Apart from step 1, exactly one statement may be marked in each step."
+        german "Hinweis: Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
+        english "Hint: Apart from step 1, exactly one statement may be marked in each step."
     checking ((\\case
         (Just step : _) -> getFacts clauses /= unCharAnswer step
         _               -> False) steps) $ do
-            german "Im ersten Schritt müssen alle Fakten markiert werden."
-            english "In the first step, all facts must be marked."
+            german "Hinweis: Im ersten Schritt müssen alle Fakten markiert werden."
+            english "Hint: In the first step, all facts must be marked."
     checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
-        german "Im Modell muss jede atomare Teilformel genau einmal vorkommen."
-        english "The model must contain each atomic subformula exactly once."
+        german "Hinweis: Im Modell muss jede atomare Teilformel genau einmal vorkommen."
+        english "Hint: The model must contain each atomic subformula exactly once."
     pure ()
   where
     checking condition msg = when condition $ refuse $ indent $ translate msg
