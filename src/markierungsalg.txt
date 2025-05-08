@@ -241,12 +241,8 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
             english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") correctSteps
         paragraph $ do
             indent $ translate $ do
-                german (case correctOutput of
-                    False -> "\\"unerfüllbar\\""
-                    True  -> "\\"erfüllbar\\", mit")
-                english (case correctOutput of
-                    False-> "\\"unsatisfiable\\""
-                    True -> "\\"satisfiable\\", mit")
+                german $ if correctOutput then "\\"erfüllbar\\", mit" else "\\"unerfüllbar\\""
+                english $ if correctOutput then "\\"satisfiable\\", mit" else "\\"unsatisfiable\\""
             case correctModel of
                 [] -> pure ()
                 m  -> indent $ latex $ intercalate ",\\\\ " $
