@@ -43,6 +43,8 @@ extra = 0
 showSolution :: Bool
 showSolution = True
 
+minimumPoints = 0.25
+
 {- - - - - - - - - - - - - - - - - -}
 
 validateSettings :: OutputCapable m => LangM m
@@ -130,10 +132,9 @@ module Check (checkSyntax, checkSemantics) where
 import Data.Foldable (traverse_)
 import Data.List (intersperse, intercalate, sort, (\\\\))
 import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
-import Data.Ratio ((%))
 import Data.Tuple.Extra (second)
 
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Control.OutputCapable.Blocks
 import FlexTask.Generic.Form (getAnswer)
 import Horn
@@ -170,7 +171,6 @@ checkSyntax _ (formula,_) (steps, output, model) = do
     paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
         german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
         english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") stepsSubmitted
-
     paragraph $ do
         indent $ translate $ do
             german (case getAnswer output of
@@ -228,10 +228,34 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
     let points = (if stepsCorrect then 0.4 else 0.0) +
                  (if outputCorrect then 0.2 else 0.0) +
                  (if modelCorrect then 0.4 else 0.0)
-    res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
-    pure res
+
+    when (#{showSolution} && points /= 1) $ paragraph $ translate $ do
+        english "The correct solution is:"
+        german "Die korrekte Lösung ist:"
+    paragraph $ indent $ latex $ foldl (\\acc (i,c) -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
+        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) correctSteps
+    paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
+        german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
+        english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") correctSteps
+    paragraph $ do
+        indent $ translate $ do
+            german (case correctOutput of
+                False -> "\\"unerfüllbar\\""
+                True  -> "\\"erfüllbar\\", mit"
+                _     -> "")
+            english (case correctOutput of
+                False-> "\\"unsatisfiable\\""
+                True -> "\\"satisfiable\\", mit"
+                _    -> "")
+        case correctModel of
+            [] -> pure ()
+            m  -> indent $ latex $ intercalate ",\\\\ " $
+                map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)) (sort m)
+        pure ()
+
+    unless (points >= #{minimumPoints}) $ refuse $ pure ()
+    return points
   where
-    maybeAnswer = if #{showSolution} then (Just "Lösung steht hier") else Nothing
     stepsSubmitted = zip [1..] (map unCharAnswer (catMaybes steps))
 |]
 
