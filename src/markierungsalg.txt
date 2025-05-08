@@ -230,26 +230,28 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
                  (if outputCorrect then 0.2 else 0.0) +
                  (if modelCorrect then 0.4 else 0.0)
 
-    when (#{showSolution} && points /= 1) $ paragraph $ translate $ do
-        english "The correct solution is:"
-        german "Die korrekte Lösung ist:"
-    paragraph $ indent $ latex $ foldl (\\acc (i,c) -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
-        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) correctSteps
-    paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
-        german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
-        english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") correctSteps
-    paragraph $ do
-        indent $ translate $ do
-            german (case correctOutput of
-                False -> "\\"unerfüllbar\\""
-                True  -> "\\"erfüllbar\\", mit")
-            english (case correctOutput of
-                False-> "\\"unsatisfiable\\""
-                True -> "\\"satisfiable\\", mit")
-        case correctModel of
-            [] -> pure ()
-            m  -> indent $ latex $ intercalate ",\\\\ " $
-                map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)) (sort m)
+    when (#{showSolution} && points /= 1) $ paragraph $ do
+        translate $ do
+            english "The correct solution is:"
+            german "Die korrekte Lösung ist:"
+        paragraph $ indent $ latex $ foldl (\\acc (i,c) -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
+            (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) correctSteps
+        paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
+            german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
+            english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") correctSteps
+        paragraph $ do
+            indent $ translate $ do
+                german (case correctOutput of
+                    False -> "\\"unerfüllbar\\""
+                    True  -> "\\"erfüllbar\\", mit")
+                english (case correctOutput of
+                    False-> "\\"unsatisfiable\\""
+                    True -> "\\"satisfiable\\", mit")
+            case correctModel of
+                [] -> pure ()
+                m  -> indent $ latex $ intercalate ",\\\\ " $
+                    map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)) (sort m)
+            pure ()
         pure ()
 
     unless (points >= #{minimumPoints}) $ refuse $ pure ()
