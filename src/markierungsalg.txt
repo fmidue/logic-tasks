@@ -43,6 +43,7 @@ extra = 0
 showSolution :: Bool
 showSolution = True
 
+minimumPoints :: Double
 minimumPoints = 0.25
 
 {- - - - - - - - - - - - - - - - - -}
@@ -241,12 +242,10 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
         indent $ translate $ do
             german (case correctOutput of
                 False -> "\\"unerfüllbar\\""
-                True  -> "\\"erfüllbar\\", mit"
-                _     -> "")
+                True  -> "\\"erfüllbar\\", mit")
             english (case correctOutput of
                 False-> "\\"unsatisfiable\\""
-                True -> "\\"satisfiable\\", mit"
-                _    -> "")
+                True -> "\\"satisfiable\\", mit")
         case correctModel of
             [] -> pure ()
             m  -> indent $ latex $ intercalate ",\\\\ " $
