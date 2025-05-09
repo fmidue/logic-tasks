@@ -40,8 +40,9 @@ spirit = v1
 extra :: Int
 extra = 0
 
-showSolution :: Bool
+showSolution, printFeedbackImmediately :: Bool
 showSolution = True
+printFeedbackImmediately = True
 
 minimumPoints :: Double
 minimumPoints = 0.25
@@ -132,20 +133,34 @@ module Check (checkSyntax, checkSemantics) where
 
 import Data.Foldable (traverse_)
 import Data.List (intersperse, intercalate, sort, (\\\\))
+import Data.Map (Map)
 import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
 import Data.Tuple.Extra (second)
 
 import Control.Monad (unless, when)
+import Control.Monad.State (State)
 import Control.OutputCapable.Blocks
 import FlexTask.Generic.Form (getAnswer)
 import Horn
 import LogicTasks.Formula (TruthValue(..))
+import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Print (simplestDisplay)
 
 import qualified Data.List.Extra as List (replace)
 
 import Global
 
+checking :: OutputCapable m => Bool -> State (Map Language String) () -> LangM m
+checking condition msg = when condition $ refuse $ indent $ translate msg
+
+buildLatex :: OutputCapable m => SynTree BinOp Char -> [(Int, [Char])] -> LangM m
+buildLatex formula steps = do
+    paragraph $ indent $ latex $ foldr (\\(i,c) acc -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
+        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) steps
+    paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
+        german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
+        english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") steps
+    pure ()
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ (formula,_) (steps, output, model) = do
@@ -167,11 +182,8 @@ checkSyntax _ (formula,_) (steps, output, model) = do
     paragraph $ translate $ do
         german "Die Einsendung wird interpretiert als:"
         english "The submission is interpreted as:"
-    paragraph $ indent $ latex $ foldl (\\acc (i,c) -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
-        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) stepsSubmitted
-    paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
-        german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
-        english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") stepsSubmitted
+    buildLatex formula stepsSubmitted
+
     paragraph $ do
         indent $ translate $ do
             german (case getAnswer output of
@@ -187,28 +199,10 @@ checkSyntax _ (formula,_) (steps, output, model) = do
             Just m  -> indent $ latex $ intercalate ",\\\\ " $
                 map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum $ truth w)) m
         pure ()
+    #{if printFeedbackImmediately then feedbackCode else ""}
 
-    checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
-        german $ "Hinweis: Markiert werden können nur jene atomare Aussagen, " ++
-            "welche in der Formel vorkommen und nicht bereits markiert worden sind."
-        english "Hint: Only those atomic statements that occur in the formula and are not yet marked can be marked."
-    checking (any ((> 1) . length) (drop 1 marked)) $ do
-        german "Hinweis: Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
-        english "Hint: Apart from step 1, exactly one statement may be marked in each step."
-    checking ((\\case
-        (Just step : _) -> getFacts clauses /= unCharAnswer step
-        _               -> False) steps) $ do
-            german "Hinweis: Im ersten Schritt müssen alle Fakten markiert werden."
-            english "Hint: In the first step, all facts must be marked."
-    checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
-        german "Hinweis: Im Modell muss jede atomare Teilformel genau einmal vorkommen."
-        english "Hint: The model must contain each atomic subformula exactly once."
     pure ()
   where
-    checking condition msg = when condition $ refuse $ indent $ translate msg
-    clauses = getClauses formula
-    allAtomics = sort $ getAllAtomics clauses
-    marked = map unCharAnswer $ catMaybes steps
     stepsSubmitted = zip [1..] (map unCharAnswer (catMaybes steps))
 
 
@@ -229,16 +223,44 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
     let points = (if stepsCorrect then 0.4 else 0.0) +
                  (if outputCorrect then 0.2 else 0.0) +
                  (if modelCorrect then 0.4 else 0.0)
+    #{if showSolution then solutionCode else ""}
+    #{if printFeedbackImmediately then "" else feedbackCode}
 
-    when (#{showSolution} && points /= 1) $ paragraph $ do
+    unless (points >= #{minimumPoints}) $ refuse $ pure ()
+    return points
+  where
+    stepsSubmitted = zip [1 :: Int ..] (map unCharAnswer (catMaybes steps))
+|]
+  where
+    feedbackCode :: String
+    feedbackCode = [i|
+    let marked = map unCharAnswer $ catMaybes steps
+        clauses = getClauses formula
+        allAtomics = sort $ getAllAtomics clauses
+    checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
+        german $ "Hinweis: Markiert werden können nur jene atomare Aussagen, " ++
+            "welche in der Formel vorkommen und nicht bereits markiert worden sind."
+        english "Hint: Only those atomic statements that occur in the formula and are not yet marked can be marked."
+    checking (any ((> 1) . length) (drop 1 marked)) $ do
+        german "Hinweis: Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
+        english "Hint: Apart from step 1, exactly one statement may be marked in each step."
+    checking ((\\case
+        (Just step : _) -> getFacts clauses /= unCharAnswer step
+        _               -> False) steps) $ do
+            german "Hinweis: Im ersten Schritt müssen alle Fakten markiert werden."
+            english "Hint: In the first step, all facts must be marked."
+    checking (isJust model && sort (map fst $ fromJust model) /= allAtomics) $ do
+        german "Hinweis: Im Modell muss jede atomare Teilformel genau einmal vorkommen."
+        english "Hint: The model must contain each atomic subformula exactly once."
+    |]
+
+    solutionCode :: String
+    solutionCode = [i|
+    when (points /= 1) $ paragraph $ do
         translate $ do
             english "The correct solution is:"
             german "Die korrekte Lösung ist:"
-        paragraph $ indent $ latex $ foldl (\\acc (i,c) -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
-            (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) correctSteps
-        paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
-            german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
-            english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") correctSteps
+        buildLatex formula correctSteps
         paragraph $ do
             indent $ translate $ do
                 german $ if correctOutput then "\\"erfüllbar\\", mit" else "\\"unerfüllbar\\""
@@ -249,11 +271,6 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
                     map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)) (sort m)
             pure ()
         pure ()
-
-    unless (points >= #{minimumPoints}) $ refuse $ pure ()
-    return points
-  where
-    stepsSubmitted = zip [1..] (map unCharAnswer (catMaybes steps))
 |]
 
 =============================================
