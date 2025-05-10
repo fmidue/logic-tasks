@@ -107,18 +107,15 @@ getTask = do
 
 
 form :: Rendered Widget
-form = formify (Nothing :: Maybe [Maybe String]) fieldNames $$>
-    formify (Nothing :: Maybe (SingleChoiceSelection, Maybe String))
-    [[ dropdown (fieldSettingsLabel Output)
-        [ fromString "---"
+form = formify (Nothing :: Maybe ([Maybe String], SingleChoiceSelection, Maybe String))
+    [ [ list Vertical (map (fieldSettingsLabel . Step) [1..steps])]
+    , [ dropdown (fieldSettingsLabel Output)
+        [ "---"
         , SomeMessage Satisfiable
         , SomeMessage Unsatisfiable
         ]
     , single (fieldSettingsLabel Model)
     ]]
-
-  where
-    fieldNames = [[list Vertical (map (fieldSettingsLabel . Step) [1..steps])]]
 
 
 checkers :: String
