@@ -69,12 +69,11 @@ module TaskData (getTask) where
 
 
 import Data.String.Interpolate (i)
-import Data.String             (fromString)
 import Data.Text               (Text, pack)
 import Test.QuickCheck.Gen
 import Yesod                   (RenderMessage(..), SomeMessage(..), fieldSettingsLabel)
 
-import FlexTask.FormUtil       (getFormData, ($$>))
+import FlexTask.FormUtil       (getFormData)
 import FlexTask.Generic.Form
 import FlexTask.Types          (HtmlDict)
 import FlexTask.YesodConfig    (Rendered, Widget)
