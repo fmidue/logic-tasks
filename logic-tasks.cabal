@@ -119,6 +119,7 @@ test-suite src-test
       FormulaSpec
       LegalNormalFormSpec
       LegalPropositionSpec
+      LiberalParserSpec
       MinMaxSpec
       ParsingSpec
       PickSpec
