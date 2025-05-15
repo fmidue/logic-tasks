@@ -60,7 +60,7 @@ jobs:
           sudo mv -f stack.yaml ./haskell-template-setup
           sudo mv -f ./${{ env.config }}/package.yaml ./haskell-template-setup
           cd haskell-template-setup
-          this_repo="https://git@github.com/${{ github.repository }}"
+          this_repo="git@github.com:${{ github.repository }}.git"
           sed -i "/extra-deps/a\  - git: $this_repo\n    commit: ${{ github.event.client_payload.sha }}" stack.yaml
           sed -i "s@/autotool/default@$(realpath "$PWD"/../${{ env.tasks }}/root)@" env
           eval "$(ssh-agent -s)"
