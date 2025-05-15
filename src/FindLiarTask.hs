@@ -37,6 +37,6 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
     pz = Binary Equi (Leaf zn) $ (if xn > yn then flip else id) (Binary (if zw then Or else And)) zXnOrNotXn zYnOrNotYn
 
     hints = [hx, hy, hz]
-    hx = [i|#{xn} sagt: "#{yn}#{if isNot xYnOrNotYn then " lügt" else " sagt die Wahrheit"::String}."|]
-    hy = [i|#{yn} sagt: "#{zn}#{if isNot yZnOrNotZn then " lügt" else " sagt die Wahrheit"::String}."|]
+    hx = [i|#{xn} sagt: "#{yn}#{if isNot xYnOrNotYn then " lügt" else " sagt die Wahrheit" :: String}."|]
+    hy = [i|#{yn} sagt: "#{zn}#{if isNot yZnOrNotZn then " lügt" else " sagt die Wahrheit" :: String}."|]
     hz = hintFromFormula pz
