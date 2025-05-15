@@ -23,7 +23,7 @@ rollSettings = do
     pure (a,b,c)
   showSolution <- chooseAny
   printFeedbackImmediately <- chooseAny
-  pure $ Settings { 
+  pure $ Settings {
     emptyColumns,
     staticColumns,
     staticColsEnd,

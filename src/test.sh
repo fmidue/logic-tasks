@@ -81,7 +81,7 @@ cd "$base_name" || exit 1
 echo -e "${CYAN}Writing Hlint report on static files...${NC}"
 hlint . --report="hlint.html" -q --hint="${script_path}/.hlint.yaml"
 if grep -q "No hints" "hlint.html"; then
-  rm  "hlint.html"
+  rm "hlint.html"
   echo -e "${GREEN}No Suggestions!\n${NC}"
 else
   hlint_hints=true
