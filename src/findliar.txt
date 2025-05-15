@@ -249,7 +249,7 @@ generateTruthTable solutionValues =
 
 
 checkSemantics :: OutputCapable m => FilePath -> ([Text],[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
-checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String},solutionValues,formulaParts) (submittedParts,f,Table xs,identifiedLiars) = do
+checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,identifiedLiars) = do
   let correctParts = zipWith isSemanticEqual formulaParts submittedTrees
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
