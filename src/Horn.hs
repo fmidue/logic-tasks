@@ -74,7 +74,7 @@ getFacts = map charFromFact . filter isFact
 
 
 startAlgorithm :: SynTree BinOp Char -> (Protocol,Bool,Allocation)
-startAlgorithm formula = markingAlg modifiedClauses [(1, facts) | not (null facts)]
+startAlgorithm formula = markingAlg modifiedClauses [(1, facts) | notNull facts]
   where
     facts = getFacts clauses
     clauses = getClauses formula

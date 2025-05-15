@@ -194,7 +194,7 @@ toAllocationInverted liars = map (\\x -> (nameMatch x,  x `notElem` liars)) allN
     nameMatch C = 'C'
 
 printAllocation :: [(Char,Bool)] -> String
-printAllocation allocation =  intercalate ", " (map (\\(a,b) -> [a] ++ "=" ++ show (if b then (1 :: Int) else (0 :: Int))) allocation)
+printAllocation =  intercalate ", " . map (\\(a,b) -> [a] ++ "=" ++ show (if b then (1 :: Int) else (0 :: Int)))
 
 feedbackCompareHints :: OutputCapable m => Text -> [Namen] -> LangM m
 feedbackCompareHints unmatchedHint identifiedLiars = do
