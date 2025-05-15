@@ -189,7 +189,7 @@ checkSyntax _ (formula,_) (steps, output, model) = do
                 _      -> "")
             english (case getAnswer output of
                 Just 3 -> "\\"unsatisfiable\\""
-                Just 2 -> "\\"satisfiable\\", mit"
+                Just 2 -> "\\"satisfiable\\", with"
                 _      -> "")
         case model of
             Nothing -> pure ()
