@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wwarn=x-partial #-}
+{-# language DeriveDataTypeable #-}
 {-# language DeriveGeneric #-}
 {-# language DuplicateRecordFields #-}
 
@@ -42,6 +43,7 @@ module Formula.Types
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
+import Data.Data (Data)
 import Data.List(intercalate, delete, nub, transpose, (\\))
 import Data.Set (Set,empty)
 import Data.Typeable
@@ -49,7 +51,9 @@ import GHC.Generics
 import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
 
-newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
+newtype ResStep = Res {
+  trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))
+  } deriving (Show,Data)
 
 newtype TruthValue = TruthValue {truth :: Bool}
   deriving (Eq, Ord, Show, Typeable, Generic)
@@ -88,6 +92,7 @@ data Literal
       ( Eq -- ^ derived
       , Typeable -- ^ derived
       , Generic -- ^ derived
+      , Data -- ^ derived
       )
 
 
@@ -148,7 +153,7 @@ opposite (Negative l) = Positive l
 
 -- | A datatype representing a clause
 newtype Clause = Clause { literalSet :: Set Literal}
-    deriving (Eq,Typeable,Generic)
+    deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -211,7 +216,7 @@ type Allocation = [(Char, Bool)]
 
 -- | A datatype representing a formula in conjunctive normal form.
 newtype Cnf = Cnf { clauseSet :: Set Clause}
-     deriving (Eq,Typeable,Generic)
+     deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -296,7 +301,7 @@ genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
 
 -- | A datatype representing a conjunction
 newtype Con = Con { literalSet :: Set Literal}
-    deriving (Eq,Typeable,Generic)
+    deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -356,7 +361,7 @@ genCon (minLength,maxLength) atoms = do
 
 -- | A datatype representing a formula in disjunctive normal form.
 newtype Dnf = Dnf { clauseSet :: Set Con}
-     deriving (Eq,Typeable,Generic)
+     deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -525,7 +530,7 @@ data PrologLiteral = PrologLiteral
     { polarity :: Bool
     , name :: String
     , constants :: [String]
-    } deriving (Eq,Typeable,Generic)
+    } deriving (Eq,Typeable,Generic,Data)
 
 positivePLit :: String -> [String] -> PrologLiteral
 positivePLit = PrologLiteral True
@@ -551,7 +556,8 @@ instance Show PrologLiteral where
 ---------------------------------------------------------------------------------
 
 
-newtype PrologClause = PrologClause {pLiterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic)
+newtype PrologClause = PrologClause {pLiterals :: Set PrologLiteral}
+  deriving (Eq,Typeable,Generic,Data)
 
 
 

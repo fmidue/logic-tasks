@@ -1,9 +1,11 @@
+{-# language DeriveDataTypeable #-}
 {-# language DeriveGeneric #-}
 {-# language DuplicateRecordFields #-}
 
 module Config where
 
 
+import Data.Data (Data)
 import Data.Typeable
 import GHC.Generics
 import Formula.Types
@@ -25,7 +27,7 @@ data FormulaInst
   = InstCnf Cnf
   | InstDnf Dnf
   | InstArbitrary (ST.SynTree ST.BinOp Char)
-  deriving (Show,Eq,Generic)
+  deriving (Show,Eq,Generic,Data)
 
 instance Formula FormulaInst where
   literals (InstCnf c) = literals c
@@ -79,7 +81,7 @@ data PickInst = PickInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Show, Eq)
+               deriving (Typeable, Generic, Data, Show, Eq)
 
 dPickInst :: PickInst
 dPickInst =  PickInst
@@ -97,7 +99,7 @@ data MaxInst = MaxInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
+               deriving (Show, Typeable, Generic, Data)
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
@@ -116,7 +118,7 @@ data MinInst = MinInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
+               deriving (Show, Typeable, Generic, Data)
 
 dMinInst :: MinInst
 dMinInst =  MinInst
@@ -135,7 +137,7 @@ data FillInst = FillInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Show)
+               deriving (Typeable, Generic, Data, Show)
 
 dFillInst :: FillInst
 dFillInst =  FillInst
@@ -154,7 +156,7 @@ data DecideInst = DecideInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Show)
+               deriving (Typeable, Generic, Data, Show)
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
@@ -175,7 +177,7 @@ data StepInst = StepInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
+               deriving (Show, Typeable, Data, Generic)
 
 dStepInst :: StepInst
 dStepInst =  StepInst
@@ -199,7 +201,7 @@ data ResolutionInst = ResolutionInst {
                , addText    :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic, Show)
+               deriving (Typeable, Generic, Data, Show)
 
 dResInst :: ResolutionInst
 dResInst = let
@@ -241,7 +243,7 @@ data PrologInst = PrologInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Show, Typeable, Generic)
+               deriving (Show, Typeable, Data, Generic)
 
 
 dPrologInst :: PrologInst
