@@ -2,6 +2,7 @@ module Horn where
 
 import Data.Char (toLower)
 import Data.Containers.ListUtils (nubOrd)
+import Data.List.Extra (notNull)
 import Test.QuickCheck.Gen
 
 import Trees.Types (BinOp(..), SynTree(..))
