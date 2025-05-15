@@ -227,14 +227,13 @@ checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars)
   assertion (atomicCols == theTable) $ bothLangs
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
 
-  #{if printFeedbackImmediately then findContradictions else ""}
+  #{if printFeedbackImmediately then findContradictions "map toSynTree submittedParts" else ""}
 
   pure ()
   where
     columns = map snd xs
     atomicCols = take #{staticColumns} columns
     atomicRows = filter (notElem Nothing) $ transpose atomicCols
-    submittedTrees = map toSynTree submittedParts
 
 truthValuesToBinaryToIndex :: [Bool] -> Int
 truthValuesToBinaryToIndex = foldl (\\acc value -> acc * 2 + if value then 1 else 0) 0
@@ -260,7 +259,7 @@ checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String}
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
-  #{if not printFeedbackImmediately then findContradictions else ""}
+  #{if not printFeedbackImmediately then findContradictions "submittedTrees" else ""}
 
   let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
   yesNo correctLast $ bothLangs
@@ -286,12 +285,12 @@ checkSemantics _ (#{if printFeedbackImmediately then "_" else "hints" :: String}
   where
     solutionCode = [i|"Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: " ++ show listOfLiars|]
 
-    findContradictions :: String
-    findContradictions = [i|
+    findContradictions :: String -> String
+    findContradictions submittedTrees = [i|
   let allocationFromLiars = toAllocationInverted identifiedLiars
   let evaluated = not . fromJust . evaluate allocationFromLiars
 
-  let wrongLiars = [formula | formula <- submittedTrees, evaluated formula]
+  let wrongLiars = [formula | formula <- #{submittedTrees}, evaluated formula]
   case wrongLiars of
     liar:_ -> refuse $ feedbackCompareChosenLiars allocationFromLiars liar
     [] -> pure ()
