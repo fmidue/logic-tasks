@@ -60,11 +60,12 @@ jobs:
           sudo mv -f stack.yaml ./haskell-template-setup
           sudo mv -f ./${{ env.config }}/package.yaml ./haskell-template-setup
           cd haskell-template-setup
-          this_repo="https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          this_repo="https://git@github.com/${{ github.repository }}"
           sed -i "/extra-deps/a\  - git: $this_repo\n    commit: ${{ github.event.client_payload.sha }}" stack.yaml
           sed -i "s@/autotool/default@$(realpath "$PWD"/../${{ env.tasks }}/root)@" env
+          eval "$(ssh-agent -s)"
+          ssh-add <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
           ./create.sh
-          sed -i "s/oauth2:${{ secrets.GITHUB_TOKEN }}@\(.*\)/\1/" stack.yaml
           sudo mv root ../${{ env.tasks }}
           set +ex
 
@@ -89,7 +90,9 @@ jobs:
           set -ex
           sudo cp haskell-template-setup/stack.yaml ${{ env.tasks }}
           cd ${{ env.tasks }}
-          find . -name '*.txt' -exec bash ../${{ env.script }}/test.sh {} root \;
+          for file in $(find . -name '*.txt' -and -not -path "./root/*"); do
+            ../${{ env.script }}/test.sh $file root ${{ env.settings-gens }}/$(basename $file .txt).hs
+          done
           if [ $(find . -name "Check.hs" -or -name "ghc.html" | wc -l) -eq 0 ]; then
             rm -f stack.yaml
           fi
@@ -101,9 +104,11 @@ jobs:
         with:
           name: reports
           path: |
-            ${{ env.tasks }}/*/*.html
-            ${{ env.tasks }}/*/Check.hs
+            ${{ env.tasks }}/*/*/*.html
+            ${{ env.tasks }}/*/*/settings.txt
+            ${{ env.tasks }}/*/*/Check.hs
             ${{ env.tasks }}/stack.yaml
+            ${{ env.tasks }}/*/hlint.html
           if-no-files-found: ignore
           overwrite: true
 
