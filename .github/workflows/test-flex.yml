@@ -5,6 +5,7 @@ env:
   tasks: src
   config: .github/actions/test-flex
   script: src
+  settings-gens: settings-gens
   TERM: xterm
 
 on:
