@@ -19,6 +19,7 @@ fmidue
 fno
 foldl
 foldr
+formify
 fst
 gdw
 GHC

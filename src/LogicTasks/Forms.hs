@@ -118,17 +118,17 @@ data Label = Step | First | Second | Resolvent
 
 instance RenderMessage FlexForm Label where
   renderMessage _   ("en":_) Step      = "Step"
-  renderMessage _   _        Step      = "Schritt"
+  renderMessage _   _        Step      = "Schritt" -- no-spell-check
   renderMessage _   ("en":_) First     = "First Clause"
-  renderMessage _   _        First     = "Erste Klausel"
+  renderMessage _   _        First     = "Erste Klausel" -- no-spell-check
   renderMessage _   ("en":_) Second    = "Second Clause"
-  renderMessage _   _        Second    = "Zweite Klausel"
+  renderMessage _   _        Second    = "Zweite Klausel" -- no-spell-check
   renderMessage _   _        Resolvent = "Resolvent"
 
 
 
 {- |
-Form for multifield full resolution input.
+Form for full resolution with multiple input fields.
 Allows for prefilling rows by supplying a list of values.
 The list may be shorter than the amount of steps.
 In that case, everything afterwards is left empty. (Filled up with triples of Nothing)
