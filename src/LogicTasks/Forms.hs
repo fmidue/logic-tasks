@@ -1,23 +1,38 @@
 {-# language FlexibleContexts #-}
+{-# language FlexibleInstances #-}
+{-# language MultiParamTypeClasses #-}
 {-# language OverloadedStrings #-}
 {-# language QuasiQuotes #-}
 {-# language RecordWildCards #-}
 {-# language TypeApplications #-}
 
-module LogicTasks.Forms where
+module LogicTasks.Forms (
+  tableForm,
+  fullResolutionForm
+  ) where
 
 
 import Control.Monad.Reader             (reader)
 import Data.List                        (transpose)
+import Data.Maybe                       (isNothing)
 import Data.Text                        (Text, pack)
+import FlexTask.Generic.Form (
+  formifyComponentsFlat,
+  single,
+  Hidden(..)
+  )
 import FlexTask.FormUtil (
   addAttribute,
   addCss,
+  addCssClass,
   addNameAndCssClass,
+  readOnly,
   )
-import FlexTask.YesodConfig             (Rendered, Widget)
+import FlexTask.YesodConfig             (FlexForm, Rendered, Widget)
 import Yesod (
+  RenderMessage(..),
   cassius,
+  fieldSettingsLabel,
   fvInput,
   mopt,
   textField,
@@ -95,4 +110,102 @@ tableForm emptyColumns rows staticStart staticEnd =
 
       table tr th:nth-child(n+14)
         width: 10%
+    |]
+
+
+data Label = Step | First | Second | Resolvent
+
+
+instance RenderMessage FlexForm Label where
+  renderMessage _   ("en":_) Step      = "Step"
+  renderMessage _   _        Step      = "Schritt"
+  renderMessage _   ("en":_) First     = "First Clause"
+  renderMessage _   _        First     = "Erste Klausel"
+  renderMessage _   ("en":_) Second    = "Second Clause"
+  renderMessage _   _        Second    = "Zweite Klausel"
+  renderMessage _   _        Resolvent = "Resolvent"
+
+
+
+{- |
+Form for multifield full resolution input.
+Allows for prefilling rows by supplying a list of values.
+The list may be shorter than the amount of steps.
+In that case, everything afterwards is left empty. (Filled up with triples of Nothing)
+-}
+fullResolutionForm
+  :: Int -- ^ amount of input rows
+  -> [String] -- ^ pool of clauses for resolution
+  -> [(Maybe String, Maybe String, Maybe String)] -- ^ list of values to prefill rows with
+  -> Rendered Widget
+fullResolutionForm steps clauseStrings prefilledFields = addCss css $ do
+  forms <- traverse
+            (\(x,(val1,val2,val3)) -> formifyComponentsFlat
+              (Just (val1 ,val2, val3, Hidden x))
+              [ fSettings val1 First
+              , fSettings val2 Second
+              , fSettings val3 Resolvent
+              , single $ fieldSettingsLabel $ "= " <> pack (show x)
+              ]
+            )
+            $ zip rowIndices rowDefaults
+  reader $ \extra -> do
+    (fields,formRows) <- unzip <$> sequence forms
+    pure (concat fields, html extra formRows)
+  where
+    indexZip xs = zip xs [1 :: Int ..]
+    firstFreeIndex = length clauseStrings +1
+    rowIndices = [firstFreeIndex .. firstFreeIndex + steps]
+    rowDefaults = prefilledFields ++ replicate
+      (length rowIndices - length prefilledFields)
+      (Nothing,Nothing,Nothing)
+    inputClass = "clause-input"
+    fSettings x = single . addCssClass inputClass .
+      (if isNothing x then id else readOnly) . fieldSettingsLabel
+
+    html token widgets = [whamlet|
+      #{token}
+      <div .grid-container>
+        $forall (clause, givenIndex) <- indexZip clauseStrings
+          <span .flex-form-span .disabled-clauses>
+            <input type=text value="#{clause}" .#{inputClass} disabled>
+          <span .flex-form-span>
+            <p .static-num>
+              = #{givenIndex}
+        $forall (inputs,step) <- indexZip widgets
+          <p .step-counter>
+            _{Step} #{step}:
+          $forall widget <- inputs
+            ^{widget}
+    |]
+
+    css = [cassius|
+      .#{inputClass}
+        width:70%
+        margin-left:1em
+
+      .flex-form-span > label
+        display:block
+
+      .grid-container > p, .grid-container > label, .static-num
+        font-weight:bold
+
+      .grid-container
+        display:grid
+        grid-template-columns: 0.6fr 1.4fr 1.4fr 1.4fr 0.2fr
+        justify-items:center
+        align-items:end
+        column-gap: 0.5em
+        row-gap: 2em
+
+      .flex-form-span
+        width:75%
+
+      .disabled-clauses
+        grid-column-start: 4
+        align-self: start
+
+      .flex-form-span:has(input[type="hidden"])
+        display:flex
+        align-items: center
     |]
