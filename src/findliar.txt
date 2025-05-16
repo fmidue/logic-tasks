@@ -17,10 +17,18 @@ data Namen = A | B | C deriving (Eq,Enum,Bounded,Show,Ord,Data)
 allNamen :: [Namen]
 allNamen = [minBound .. maxBound]
 
-type Submission = ([PropFormula Char],PropFormula Char,Table,[Namen])
-type TaskData = ([Text],[Bool],[SynTree BinOp Char])
+data Submission = Submission {
+  submittedParts :: [PropFormula Char],
+  submittedFormula :: PropFormula Char,
+  submittedTable :: Table,
+  identifiedLiars :: [Namen]
+  }
 
-
+data TaskData = TaskData {
+  hints          :: [Text],
+  solutionValues :: [Bool],
+  formulaParts   :: [SynTree BinOp Char]
+  } deriving (Data)
 
 bothLangs :: OutputCapable m => String -> LangM m
 bothLangs s = translate $ german s >> english s
@@ -63,6 +71,7 @@ validateSettings
 
 
 {-# language FlexibleContexts #-}
+{-# language NamedFieldPuns #-}
 {-# language OverloadedStrings #-}
 {-# language QuasiQuotes #-}
 {-# language RecordWildCards #-}
@@ -111,14 +120,14 @@ instance MonadFail Gen where
 getTask :: Gen (TaskData, String, IO ([Text], HtmlDict))
 getTask = do
     d@(x, y, z, _) <- taskData
-    let (formulas, hints) = makeHintsAndFormula d
+    let (formulas, unsortedHints) = makeHintsAndFormula d
 
         dataSortedOnName = sortOn fst [x, y, z]
-        (formulasSorted, hintsSorted) = unzip $ sortOn snd $ zip formulas hints
+        (formulaParts, hints) = unzip $ sortOn snd $ zip formulas unsortedHints
 
         solutionValues = map snd dataSortedOnName
 
-    pure ((hintsSorted, solutionValues, formulasSorted),
+    pure (TaskData {hints, solutionValues, formulaParts},
           checkers,
           getFormData form)
   where
@@ -156,9 +165,10 @@ instance Formify [Namen] where
 checkers :: String
 checkers = [i|
 
+{-\# OPTIONS_GHC -Wno-unused-record-wildcards \#-}
 {-\# language ApplicativeDo \#-}
 {-\# language OverloadedStrings \#-}
-
+{-\# language RecordWildCards \#-}
 
 module Check (checkSemantics, checkSyntax) where
 
@@ -215,7 +225,7 @@ feedbackCompareChosenLiars allocationFromLiars wrongLiar = do
 
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars) = do
+checkSyntax _ TaskData{..} Submission{..} = do
 
   when (nubOrd atomicRows /= atomicRows) $ refuse $ indent $ bothLangs $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
@@ -231,6 +241,7 @@ checkSyntax _ (hints,_,formulaParts) (submittedParts,_,Table xs,identifiedLiars)
 
   pure ()
   where
+    Table xs = submittedTable
     columns = map snd xs
     atomicCols = take #{staticColumns} columns
     atomicRows = filter (notElem Nothing) $ transpose atomicCols
@@ -248,14 +259,14 @@ generateTruthTable solutionValues =
      | i <- [0..7] ]]
 
 
-checkSemantics :: OutputCapable m => FilePath -> ([Text],[Bool],[SynTree BinOp Char]) -> Submission -> Rated m
-checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,identifiedLiars) = do
+checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
+checkSemantics _ TaskData{..} Submission{..} = do
   let correctParts = zipWith isSemanticEqual formulaParts submittedTrees
   yesNo (and correctParts) $ bothLangs
     "Aussagen sind korrekt übersetzt?"
 
-  let correctFormula = isSemanticEqual (toSynTree f) solutionFormula ||
-                       isSemanticEqual (toSynTree f) (foldr1 (Binary And) submittedTrees)
+  let correctFormula = isSemanticEqual (toSynTree submittedFormula) solutionFormula ||
+                       isSemanticEqual (toSynTree submittedFormula) (foldr1 (Binary And) submittedTrees)
   yesNo correctFormula $ bothLangs
     "Gesamtformel ist korrekt?"
 
@@ -275,6 +286,7 @@ checkSemantics _ (hints,solutionValues,formulaParts) (submittedParts,f,Table xs,
   res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
   pure res
     where
+      Table xs = submittedTable
       submittedTrees = map toSynTree submittedParts
       solutionFormula = foldr1 (Binary And) formulaParts
       listOfLiars = map fst $ filter (not . snd) (zip allNamen solutionValues)
@@ -310,6 +322,7 @@ startingTable = map (Just . TruthValue . toEnum . digitToInt) <$>
 
 
 {-# Language ApplicativeDo #-}
+{-# Language RecordWildCards #-}
 
 module Description (description) where
 
@@ -318,11 +331,11 @@ import Control.OutputCapable.Blocks
 import LogicTasks.Keys (keyHeading, basicOpKey, arrowsKey)
 
 import Global
-import Data.Text (Text, unpack)
+import Data.Text (unpack)
 
 
-description :: OutputCapable m => FilePath -> ([Text],a,b) -> LangM m
-description _ (hints,_,_) = do
+description :: OutputCapable m => FilePath -> TaskData -> LangM m
+description _ TaskData{..} = do
     paragraph $ bothLangs
       ("Ein Logiker irrt auf dem Campus herum, um seinen Hörsaal zu finden. " ++
        "Er fragt drei Studierende (mit den ausgefallenen Namen A, B, C), wo er den Raum LB 107 finden kann. " ++
@@ -347,6 +360,7 @@ description _ (hints,_,_) = do
 
 
 =============================================
+{-# language NamedFieldPuns #-}
 
 module Parse (parseSubmission) where
 
@@ -394,11 +408,16 @@ makeTable headers values = Table $ zip allHeaders formattedTruthValues
 
 parseSubmission :: (Monad m, OutputCapable (ReportT o m)) => String -> LangM' (ReportT o m) Submission
 parseSubmission input =
-  parseWithOrReport formParser reportWithFieldNumber input $>>= \(fs, f, headers, columns, names) ->
-    traverse parseIt fs $>>= \parsedFs ->
-      parseIt f $>>= \parsedF ->
+  parseWithOrReport formParser reportWithFieldNumber input $>>= \(fs, f, headers, columns, identifiedLiars) ->
+    traverse parseIt fs $>>= \submittedParts ->
+      parseIt f $>>= \submittedFormula ->
         traverse (traverse parseIt) headers $>>= \parsedHeaders ->
-          pure (parsedFs, parsedF, makeTable parsedHeaders columns, names)
+          pure $ Submission {
+            submittedParts,
+            submittedFormula,
+            submittedTable = makeTable parsedHeaders columns,
+            identifiedLiars
+            }
   where
     parseIt =
       parseWithFallback
