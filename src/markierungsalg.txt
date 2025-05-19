@@ -236,10 +236,10 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
     checking ((sort (concat marked) \\\\ allAtomics) /= []) $ do
         german $ "Hinweis: Markiert werden können nur jene atomare Aussagen, " ++
             "welche in der Formel vorkommen und nicht bereits markiert worden sind."
-        english "Hint: Only those atomic statements that occur in the formula and are not yet marked can be marked."
+        english "Hint: Only those atomic propositions that occur in the formula and are not yet marked can be marked."
     checking (any ((> 1) . length) (drop 1 marked)) $ do
         german "Hinweis: Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
-        english "Hint: Apart from step 1, exactly one statement may be marked in each step."
+        english "Hint: Apart from step 1, exactly one proposition may be marked in each step."
     checking ((\\case
         (Just step : _) -> getFacts clauses /= unCharAnswer step
         _               -> False) steps) $ do
@@ -299,7 +299,7 @@ description _ (formula,_) = do
         english "Use the following notations:"
         german "Beachten Sie die folgenden Schreibweisen:"
     indent $ translate $ do
-        english "Example of a listing of the statements marked in a step:"
+        english "Example of a listing of the propositions marked in a step:"
         german "Beispiel für die Angabe der in einem Schritt markierten Aussagen:"
     code "A, B"
     indent $ translate $ do
