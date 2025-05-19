@@ -1,0 +1,180 @@
+{-# Language PackageImports #-}
+
+module Global where
+
+import "logic-tasks" Config (StepInst(..))
+import Data.Set (fromList)
+import Formula.Types (Clause(..), Literal(..))
+
+
+type Submission = Int
+type TaskData = StepInst
+
+=============================================
+
+module TaskSettings where
+
+
+import Control.OutputCapable.Blocks (LangM, OutputCapable)
+
+
+validateSettings :: OutputCapable m => LangM m
+validateSettings = pure ()
+
+=============================================
+
+{-# Language OverloadedStrings #-}
+{-# Language QuasiQuotes #-}
+{-# Language PackageImports #-}
+
+module TaskData (getTask) where
+
+import LogicTasks.Semantics.Step (genStepInst)
+import "logic-tasks" Config (dStepConf, StepInst(..))
+
+import FlexTask.FormUtil       (getFormData)
+import FlexTask.Generic.Form
+import FlexTask.Types          (HtmlDict)
+import FlexTask.YesodConfig    (Rendered, Widget)
+import Data.String.Interpolate (i)
+import Data.Text               (Text)
+import Test.QuickCheck.Gen
+import Yesod                   (RenderMessage(..), fieldSettingsLabel)
+
+import Global
+
+
+getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
+getTask = do
+    resInst <- genStepInst dStepConf
+    pure (resInst, checkers, getFormData form)
+
+
+form :: Rendered Widget
+form = formify (Nothing :: Maybe Submission) [[single "hi"]]
+
+checkers :: String
+checkers = [i|
+
+
+{-\# language ApplicativeDo \#-}
+
+module Check (checkSyntax, checkSemantics) where
+
+
+import Control.OutputCapable.Blocks
+
+import Global
+
+
+checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
+checkSyntax _ _ _  = pure ()
+
+
+checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
+checkSemantics _ _ _ =
+      pure 1.0
+
+|]
+
+=============================================
+
+
+{-# Language ApplicativeDo #-}
+{-# Language QuasiQuotes #-}
+{-# Language PackageImports #-}
+
+
+module Description (description) where
+
+import "logic-tasks" Config (StepInst(..))
+import LogicTasks.Semantics.Step (showClause)
+import LogicTasks.Keys
+
+import Control.OutputCapable.Blocks
+import Control.Monad (when, unless)
+import Data.String.Interpolate                   (i)
+
+import Global
+
+
+description :: OutputCapable m => FilePath -> TaskData -> LangM m
+description _ taskData = do
+    paragraph $ do
+        translate $ do
+            german "Betrachten Sie diese Resolvente, als das Ergebnis eines Resolutionsschritts:"
+            english "Consider this resolvent as a result of a resolution step:"
+        indent $ code $ show' (snd (solution taskData))
+        translate $ do
+            german "Eine der zur Resolution verwendeten Klauseln ist:"
+            english "One of the clauses used for the resolution is:"
+        indent $ code $ show' (clause1 taskData)
+        pure ()
+    paragraph $ indent $ translate $ do
+        german $ "Geben Sie eine mögliche zweite Klausel an, " ++
+            "sodass die Resolvente durch Resolution der beiden Klauseln entsteht."
+        english "Provide a possible second clause such that the resolvent results from resolving the two clauses."
+
+    keyHeading
+    negationKey unicodeAllowed'
+    unless usesSetNotation' (orKey unicodeAllowed')
+
+    when usesSetNotation' $ paragraph $ indent $ do
+        translate $ do
+            german "Nicht-leere Klausel:"
+            english "Non-empty clause:"
+        code "{ ... }"
+        pure ()
+
+    when usesSetNotation' $ paragraph $ indent $ do
+        translate $ do
+            german "Nutzen Sie zur Angabe der Klausel die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+            english "Specify the clause using set notation! A valid solution could look like this: "
+        translatedCode $ flip localise $ translations setExample
+        pure ()
+
+    unless usesSetNotation' $ paragraph $ indent $ do
+        translate $ do
+            german "Nutzen Sie zur Angabe der Klausel eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+            english "Specify the clause using a formula! A valid solution could look like this: "
+        translatedCode $ flip localise $ translations exampleCode
+        pure ()
+
+    pure ()
+
+  where
+    usesSetNotation' = (usesSetNotation taskData)
+    unicodeAllowed' = (unicodeAllowed taskData)
+    show' = showClause usesSetNotation'
+
+    setExample = do
+        german $ if unicodeAllowed' then "{¬B, C}" else "{nicht B, C}"
+        english $ if unicodeAllowed' then "{¬B, C}" else "{not B, C}"
+
+    exampleCode = do
+        german $ if unicodeAllowed' then "(¬B ∨ C)" else "(nicht B oder C)"
+        english $ if unicodeAllowed' then "(¬B ∨ C)" else "(not B or C)"
+
+
+=============================================
+
+module Parse (parseSubmission) where
+
+
+import Control.OutputCapable.Blocks (
+  LangM',
+  ReportT,
+  OutputCapable,
+  )
+import FlexTask.Generic.Parse  (formParser, parseWithOrReport, reportWithFieldNumber)
+
+import Global
+
+
+
+parseSubmission ::
+  (Monad m, OutputCapable (ReportT o m))
+  => String
+  -> LangM' (ReportT o m) Submission
+parseSubmission = parseWithOrReport formParser reportWithFieldNumber
+
