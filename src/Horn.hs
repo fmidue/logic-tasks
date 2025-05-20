@@ -2,6 +2,7 @@ module Horn where
 
 import Data.Char (toLower)
 import Data.Containers.ListUtils (nubOrd)
+import Data.Maybe (isJust)
 import Data.List.Extra (notNull)
 import Test.QuickCheck.Gen
 
@@ -13,7 +14,7 @@ type Protocol = [(Int,[Char])]
 type Allocation = [(Char,Bool)]
 
 
-v1, v2 :: [SynTree BinOp Char]
+v1, v2, v3 :: [SynTree BinOp Char]
 v1 =
   [ Binary Impl (Leaf 'B') (Leaf 'A')
   , Binary Impl (Leaf '1') (Leaf 'B')
@@ -25,6 +26,12 @@ v2 =
   , Binary Impl (Leaf '1') (Leaf 'A')
   , Binary Impl (Binary And (Leaf 'B') (Leaf 'A')) (Leaf '0')
   , Binary Impl (Leaf 'D') (Leaf '0')
+  ]
+v3 =
+  [ Binary Impl (Leaf '1') (Leaf 'A')
+  , Binary Impl (Leaf '1') (Leaf 'B')
+  , Binary Impl (Leaf 'A') (Leaf 'C')
+  , Binary Impl (Leaf 'B') (Leaf 'D')
   ]
 
 makeHornFormula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
@@ -121,3 +128,12 @@ removeOnes tree = case tree of
     Binary Impl (Binary And (Leaf '1') a) b          -> [Binary Impl a b]
     Binary Impl (Binary And a (Leaf '1')) b          -> [Binary Impl a b]
     _                                                -> [tree]
+
+checkStepOrder :: [SynTree BinOp Char] -> [Char] -> Bool
+checkStepOrder clauses marked = isJust $ foldl tryStep (Just clauses) marked
+
+tryStep :: Maybe [SynTree BinOp Char] -> Char -> Maybe [SynTree BinOp Char]
+tryStep (Just clauses) c = if Binary Impl (Leaf '1') (Leaf c) `elem` clauses
+    then Just (doStep clauses c)
+    else Nothing
+tryStep Nothing        _ = Nothing
