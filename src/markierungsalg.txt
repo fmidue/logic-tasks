@@ -35,7 +35,7 @@ steps =  length atomics + extra
 
 -- v1, v2, custom list of clauses
 spirit :: [SynTree BinOp Char]
-spirit = v1
+spirit = v3
 
 extra :: Int
 extra = 0
@@ -206,7 +206,7 @@ checkSyntax _ (formula,_) (steps, output, model) = do
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, output, model) = do
-    let stepsCorrect = correctSteps == stepsSubmitted
+    let stepsCorrect = checkStepOrder (getClauses formula) stepsSubmitted
     yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
@@ -227,7 +227,7 @@ checkSemantics _ (formula, (correctSteps, correctOutput, correctModel)) (steps, 
     unless (points >= #{minimumPoints}) $ refuse $ pure ()
     return points
   where
-    stepsSubmitted = zip [1 :: Int ..] (map unCharAnswer (catMaybes steps))
+    stepsSubmitted = concat (map unCharAnswer (catMaybes steps))
 |]
   where
     feedbackCode :: String
