@@ -7,16 +7,28 @@ import Data.Set (fromList)
 import Formula.Types (Clause(..), Literal(..))
 
 
-type Submission = Int
+type Submission = Clause
 type TaskData = StepInst
 
 =============================================
 
+{-# Language PackageImports #-}
+
 module TaskSettings where
 
+import "logic-tasks" Config (dStepConf, dBaseConf, StepConfig(..))
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 
+
+stepConf :: StepConfig
+stepConf = StepConfig
+    { baseConf = dBaseConf
+    , useSetNotation = False
+    , printSolution = True
+    , extraText = Nothing
+    , offerUnicodeInput = True
+    }
 
 validateSettings :: OutputCapable m => LangM m
 validateSettings = pure ()
@@ -30,7 +42,7 @@ validateSettings = pure ()
 module TaskData (getTask) where
 
 import LogicTasks.Semantics.Step (genStepInst)
-import "logic-tasks" Config (dStepConf, StepInst(..))
+import "logic-tasks" Config (StepInst(..))
 
 import FlexTask.FormUtil       (getFormData)
 import FlexTask.Generic.Form
@@ -42,38 +54,55 @@ import Test.QuickCheck.Gen
 import Yesod                   (RenderMessage(..), fieldSettingsLabel)
 
 import Global
+import TaskSettings
 
 
 getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
 getTask = do
-    resInst <- genStepInst dStepConf
+    resInst <- genStepInst stepConf
     pure (resInst, checkers, getFormData form)
 
 
 form :: Rendered Widget
-form = formify (Nothing :: Maybe Submission) [[single "hi"]]
+form = formify (Nothing :: Maybe String) [[single "hi"]]
 
 checkers :: String
 checkers = [i|
 
 
 {-\# language ApplicativeDo \#-}
+{-\# Language PackageImports \#-}
+
 
 module Check (checkSyntax, checkSemantics) where
 
 
 import Control.OutputCapable.Blocks
+import Formula.Resolution (resolve)
+import "logic-tasks" Config (StepInst(..))
 
 import Global
 
-
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ _ _  = pure ()
-
+checkSyntax _ _ _ = pure ()
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
-checkSemantics _ _ _ =
-      pure 1.0
+checkSemantics _ taskData submittedClause =
+    case resolve (clause1 taskData) submittedClause (fst (solution taskData)) of
+        Nothing -> do
+            refuse $ indent $ translate $ do
+                german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
+                english "This literal cannot be used for a resolution step!"
+            pure 0.0
+
+        Just solClause ->
+            if solClause == snd (solution taskData)
+                then pure 1.0
+                else do
+                    refuse $ indent $ translate $ do
+                        german "Resolvente ist nicht korrekt."
+                        english "Resolvent is not correct."
+                    pure 0.0
 
 |]
 
@@ -152,11 +181,13 @@ description _ taskData = do
         english $ if unicodeAllowed' then "{¬B, C}" else "{not B, C}"
 
     exampleCode = do
-        german $ if unicodeAllowed' then "(¬B ∨ C)" else "(nicht B oder C)"
-        english $ if unicodeAllowed' then "(¬B ∨ C)" else "(not B or C)"
+        german $ if unicodeAllowed' then "¬B ∨ C" else "nicht B oder C"
+        english $ if unicodeAllowed' then "¬B ∨ C" else "not B or C"
 
 
 =============================================
+
+{-# Language PackageImports #-}
 
 module Parse (parseSubmission) where
 
@@ -166,10 +197,22 @@ import Control.OutputCapable.Blocks (
   ReportT,
   OutputCapable,
   )
-import FlexTask.Generic.Parse  (formParser, parseWithOrReport, reportWithFieldNumber)
+import FlexTask.Generic.Parse  (Parse(..), escaped, formParser, parseWithOrReport, reportWithFieldNumber)
+
+import Formula.Parsing (clauseFormulaParser, clauseSetParser)
+import Formula.Types (Clause(..))
+import "logic-tasks" Config (StepConfig(..))
+
 
 import Global
+import TaskSettings
 
+instance Parse Clause where
+  formParser
+    = escaped clauseParser
+    where
+      clauseParser | useSetNotation stepConf = clauseSetParser
+                   | otherwise = clauseFormulaParser
 
 
 parseSubmission ::
@@ -177,4 +220,3 @@ parseSubmission ::
   => String
   -> LangM' (ReportT o m) Submission
 parseSubmission = parseWithOrReport formParser reportWithFieldNumber
-
