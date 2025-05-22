@@ -64,7 +64,7 @@ getTask = do
 
 
 form :: Rendered Widget
-form = formify (Nothing :: Maybe String) [[single "hi"]]
+form = formify (Nothing :: Maybe String) [[single ""]]
 
 checkers :: String
 checkers = [i|
@@ -91,17 +91,16 @@ checkSemantics _ taskData submittedClause =
     case resolve (clause1 taskData) submittedClause (fst (solution taskData)) of
         Nothing -> do
             refuse $ indent $ translate $ do
-                german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
-                english "This literal cannot be used for a resolution step!"
+                german "Das Literal mit welchem der Schritt durchgeführt wird, fehlt in der Klausel!"
+                english "The literal used to perform the step is missing from the clause!"
             pure 0.0
-
         Just solClause ->
             if solClause == snd (solution taskData)
                 then pure 1.0
                 else do
                     refuse $ indent $ translate $ do
-                        german "Resolvente ist nicht korrekt."
-                        english "Resolvent is not correct."
+                        german "Die Resolution ist nicht korrekt."
+                        english "Die Resolution is not correct."
                     pure 0.0
 
 |]
