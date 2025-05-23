@@ -25,6 +25,7 @@ import Control.OutputCapable.Blocks (
 import Data.List (intercalate, sort)
 import Data.Map (Map)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
+import Data.Tuple.Extra (thd3)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
@@ -40,20 +41,6 @@ import Data.Foldable.Extra (notNull)
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
 import Formula.Parsing (resStepsParser, clauseSetParser, clauseFormulaParser)
 import Formula.Helpers (showCnfAsSet)
-
-
-
-
-fst3 :: (a,b,c) -> a
-fst3 (a,_,_) = a
-
-
-snd3 :: (a,b,c) -> b
-snd3 (_,b,_) = b
-
-
-third3 :: (a,b,c) -> c
-third3 (_,_,c) = c
 
 
 
@@ -314,7 +301,7 @@ gradeSteps setNotation steps appliedIsNothing = do
     where
       noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
             fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
-      checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
+      checkEmptyClause = null steps || not (isEmptyClause $ thd3 $ last steps)
 
 partialGrade :: OutputCapable m => ResolutionInst -> Delayed [ResStep] -> LangM m
 partialGrade inst = (partialGrade' inst `withDelayed` resStepsParser clauseParser) (const complainAboutWrongNotation)
