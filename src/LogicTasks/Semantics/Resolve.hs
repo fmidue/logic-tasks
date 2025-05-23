@@ -8,9 +8,11 @@ module LogicTasks.Semantics.Resolve where
 
 
 import Data.Set (fromList, member, toList, unions)
+import Control.Monad.State (State)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
+  Language,
   OutputCapable,
   english,
   german,
@@ -21,6 +23,7 @@ import Control.OutputCapable.Blocks (
   recoverFrom,
   )
 import Data.List (intercalate, sort)
+import Data.Map (Map)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Test.QuickCheck (Gen)
 
@@ -134,14 +137,14 @@ description oneInput ResolutionInst{..} = do
     translate $ do
       german "Nutzen Sie zur Angabe der Klauseln die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the clauses using set notation! A solution attempt could look like this: "
-    translatedCode $ flip localise $ translations setExample
+    translatedCode $ flip localise $ translations $ setExample unicodeAllowed oneInput
     pure ()
 
   unless usesSetNotation $ paragraph $ indent $ do
     translate $ do
       german "Nutzen Sie zur Angabe der Klauseln eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the clauses using a formula! A solution attempt could look like this: "
-    translatedCode $ flip localise $ translations exampleCode
+    translatedCode $ flip localise $ translations $ exampleCode unicodeAllowed oneInput
     pure ()
 
   extra addText
@@ -158,72 +161,77 @@ description oneInput ResolutionInst{..} = do
           )
         | otherwise = ( "", "")
 
-      setExample
-        | unicodeAllowed && oneInput = do
-          english "[(1, 2, {A}), (3, 4, {¬A, ¬B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
-          german "[(1, 2, {A}), (3, 4, {¬A, ¬B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
-        | not unicodeAllowed && oneInput = do
-          english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
-          german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
-        | unicodeAllowed && not oneInput = do
-          english $ unlines
-            [ "Step 1: First Clause:   1, Second Clause:       2, Resolvent: {A}       = 6"
-            , "Step 2: First Clause:   3, Second Clause:       4, Resolvent: {¬A, ¬B}  = 7"
-            , "Step 3: First Clause:   5, Second Clause:       7, Resolvent: {not A}   = 8"
-            , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}        = 9"
-            ]
-          german $ unlines
-            [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}       = 6" -- no-spell-check
-            , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {¬A, ¬B}  = 7" -- no-spell-check
-            , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A} = 8" -- no-spell-check
-            , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}        = 9" -- no-spell-check
-            ]
-        | otherwise = do
-          english $ unlines
-            [ "Step 1: First Clause:   1, Second Clause:       2, Resolvent: {A}        = 6"
-            , "Step 2: First Clause:   3, Second Clause:       4, Resolvent: {-A, -B}   = 7"
-            , "Step 3: First Clause:   5, Second Clause:       7, Resolvent: {not A}    = 8"
-            , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}         = 9"
-            ]
-          german $ unlines
-            [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}          = 6" -- no-spell-check
-            , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {-A, -B}     = 7" -- no-spell-check
-            , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A}    = 8" -- no-spell-check
-            , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}           = 9" -- no-spell-check
-            ]
-      exampleCode
-        | unicodeAllowed && oneInput = do
-          english "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, not A), (A, not A, {})]"
-          german "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, nicht A), (A, nicht A, {})]"
-        | not unicodeAllowed && oneInput = do
-          english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
-          german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
-        | unicodeAllowed && not oneInput = do
-          english $ unlines
-            [ "Step 1: First Clause: 1, Second Clause:     2, Resolvent: A       = 6"
-            , "Step 2: First Clause: 3, Second Clause:     4, Resolvent: ¬A ∨ ¬B = 7"
-            , "Step 3: First Clause: 5, Second Clause:     7, Resolvent: not A   = 8"
-            , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}      = 9"
-            ]
-          german $ unlines
-            [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A       = 6" -- no-spell-check
-            , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: ¬A ∨ ¬B = 7" -- no-spell-check
-            , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A = 8" -- no-spell-check
-            , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}      = 9" -- no-spell-check
-            ]
-        | otherwise = do
-          english $ unlines
-            [ "Step 1: First Clause: 1, Second Clause:     2, Resolvent: A        = 6"
-            , "Step 2: First Clause: 3, Second Clause:     4, Resolvent: -A or -B = 7"
-            , "Step 3: First Clause: 5, Second Clause:     7, Resolvent: not A    = 8"
-            , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}       = 9"
-            ]
-          german $ unlines
-            [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A          = 6" -- no-spell-check
-            , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: -A oder -B = 7" -- no-spell-check
-            , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A    = 8" -- no-spell-check
-            , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}         = 9" -- no-spell-check
-            ]
+
+exampleCode :: Bool -> Bool -> State (Map Language String) ()
+exampleCode unicode oneInput
+  | unicode && oneInput = do
+      english "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, not A), (A, not A, {})]"
+      german "[(1, 2, A), (3, 4, ¬A ∨ ¬B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+  | not unicode && oneInput = do
+      english "[(1, 2, A), (3, 4, -A or -B = 6), (5, 6, not A), (A, not A, {})]"
+      german "[(1, 2, A), (3, 4, -A oder -B = 6), (5, 6, nicht A), (A, nicht A, {})]"
+  | unicode && not oneInput = do
+      english $ unlines
+        [ "Step 1: First Clause: 1, Second Clause:     2, Resolvent: A       = 6"
+        , "Step 2: First Clause: 3, Second Clause:     4, Resolvent: ¬A ∨ ¬B = 7"
+        , "Step 3: First Clause: 5, Second Clause:     7, Resolvent: not A   = 8"
+        , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}      = 9"
+        ]
+      german $ unlines
+        [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A       = 6" -- no-spell-check
+        , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: ¬A ∨ ¬B = 7" -- no-spell-check
+        , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A = 8" -- no-spell-check
+        , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}      = 9" -- no-spell-check
+        ]
+  | otherwise = do
+      english $ unlines
+        [ "Step 1: First Clause: 1, Second Clause:     2, Resolvent: A        = 6"
+        , "Step 2: First Clause: 3, Second Clause:     4, Resolvent: -A or -B = 7"
+        , "Step 3: First Clause: 5, Second Clause:     7, Resolvent: not A    = 8"
+        , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}       = 9"
+        ]
+      german $ unlines
+        [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A          = 6" -- no-spell-check
+        , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: -A oder -B = 7" -- no-spell-check
+        , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A    = 8" -- no-spell-check
+        , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}         = 9" -- no-spell-check
+        ]
+
+
+setExample :: Bool -> Bool -> State (Map Language String) ()
+setExample unicode oneInput
+  | unicode && oneInput = do
+      english "[(1, 2, {A}), (3, 4, {¬A, ¬B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
+      german "[(1, 2, {A}), (3, 4, {¬A, ¬B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
+  | not unicode && oneInput = do
+      english "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {not A}), ({A}, {not A}, {})]"
+      german "[(1, 2, {A}), (3, 4, {-A, -B} = 6), (5, 6, {nicht A}), ({A}, {nicht A}, {})]"
+  | unicode && not oneInput = do
+      english $ unlines
+        [ "Step 1: First Clause:   1, Second Clause:       2, Resolvent: {A}       = 6"
+        , "Step 2: First Clause:   3, Second Clause:       4, Resolvent: {¬A, ¬B}  = 7"
+        , "Step 3: First Clause:   5, Second Clause:       7, Resolvent: {not A}   = 8"
+        , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}        = 9"
+        ]
+      german $ unlines
+        [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}       = 6" -- no-spell-check
+        , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {¬A, ¬B}  = 7" -- no-spell-check
+        , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A} = 8" -- no-spell-check
+        , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}        = 9" -- no-spell-check
+        ]
+  | otherwise = do
+      english $ unlines
+        [ "Step 1: First Clause:   1, Second Clause:       2, Resolvent: {A}        = 6"
+        , "Step 2: First Clause:   3, Second Clause:       4, Resolvent: {-A, -B}   = 7"
+        , "Step 3: First Clause:   5, Second Clause:       7, Resolvent: {not A}    = 8"
+        , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}         = 9"
+        ]
+      german $ unlines
+        [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}          = 6" -- no-spell-check
+        , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {-A, -B}     = 7" -- no-spell-check
+        , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A}    = 8" -- no-spell-check
+        , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}           = 9" -- no-spell-check
+        ]
 
 
 verifyStatic :: OutputCapable m => ResolutionInst -> LangM m
