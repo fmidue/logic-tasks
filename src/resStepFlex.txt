@@ -76,10 +76,13 @@ checkers = [i|
 
 module Check (checkSyntax, checkSemantics) where
 
+import Control.Monad (when)
 
 import Control.OutputCapable.Blocks
 import Formula.Resolution (resolve)
 import "logic-tasks" Config (StepInst(..))
+import LogicTasks.Semantics.Step (showClause)
+
 
 import Global
 
@@ -90,9 +93,12 @@ checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated
 checkSemantics _ taskData submittedClause =
     case resolve (clause1 taskData) submittedClause (fst (solution taskData)) of
         Nothing -> do
-            refuse $ indent $ translate $ do
-                german "Das Literal mit welchem der Schritt durchgeführt wird, fehlt in der Klausel!"
-                english "The literal used to perform the step is missing from the clause!"
+            refuse $ indent $ do
+                translate $ do
+                    german "Das Literal mit welchem der Schritt durchgeführt wird, fehlt in der Klausel!"
+                    english "The literal used to perform the step is missing from the clause!"
+                displaySolution
+                pure ()
             pure 0.0
         Just solClause ->
             if solClause == snd (solution taskData)
@@ -102,6 +108,13 @@ checkSemantics _ taskData submittedClause =
                         german "Die Resolution ist nicht korrekt."
                         english "Die Resolution is not correct."
                     pure 0.0
+  where
+    displaySolution = when (showSolution taskData) $ do
+        translate $ do
+            german "Eine mögliche Lösung für die Aufgabe ist:"
+            english "A possible solution for this task is:"
+        code (showClause (usesSetNotation taskData) (clause2 taskData))
+        pure ()
 
 |]
 
