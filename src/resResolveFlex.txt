@@ -1,0 +1,208 @@
+{-# Language PackageImports #-}
+
+module Global where
+
+import "logic-tasks" Config (ResolutionInst(..))
+import Data.Set (fromList)
+import Formula.Types (Clause(..), ResStep(..), Literal(..))
+
+
+type Submission = [ResStep]
+type TaskData = ResolutionInst
+
+=============================================
+
+{-# Language PackageImports #-}
+
+module TaskSettings where
+
+import "logic-tasks" Config (dResConf, dBaseConf, ResolutionConfig(..))
+
+import Control.OutputCapable.Blocks (LangM, OutputCapable)
+
+-- choose columns to be prefilled
+prefillSelect :: (Bool, Bool, Bool)
+prefillSelect = (True, False, True)
+
+resConf :: ResolutionConfig
+resConf = dResConf
+
+validateSettings :: OutputCapable m => LangM m
+validateSettings = pure ()
+
+=============================================
+
+{-# Language OverloadedStrings #-}
+{-# Language QuasiQuotes #-}
+{-# Language PackageImports #-}
+
+module TaskData (getTask) where
+
+import LogicTasks.Semantics.Resolve (genResInst)
+import "logic-tasks" Config (ResolutionInst(..), ResolutionConfig(..))
+import LogicTasks.Forms (fullResolutionForm)
+import LogicTasks.Semantics.Step (showClause)
+import Formula.Types (ResStep(..))
+
+import FlexTask.FormUtil       (getFormData)
+import FlexTask.Generic.Form
+import FlexTask.Types          (HtmlDict)
+import FlexTask.YesodConfig    (Rendered, Widget)
+import Data.String.Interpolate (i)
+import Data.Text               (Text)
+import Data.Either             (fromLeft)
+import Test.QuickCheck.Gen
+import Yesod                   (RenderMessage(..), fieldSettingsLabel)
+
+import Global
+import TaskSettings
+
+
+getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
+getTask = do
+    resInst <- genResInst resConf
+    pure (resInst, checkers, getFormData (form resInst))
+
+form :: ResolutionInst -> Rendered Widget
+form resInst = fullResolutionForm (minSteps resConf) (map (showClause (usesSetNotation resInst)) (clauses resInst))
+     (prefill prefillSelect (usesSetNotation resInst) (solution resInst))
+
+
+prefill :: (Bool, Bool, Bool) -> Bool -> [ResStep] -> [(Maybe String, Maybe String, Maybe String)]
+prefill (fill1, fill2, fill3) useSetNotation steps =
+  map (\(Res (c1, c2, (c3, _))) ->
+          ( if fill1 then
+              case c1 of
+                Left clause -> Just (showClause useSetNotation clause)
+                Right i     -> Just (show i)
+            else Nothing
+          , if fill2 then
+              case c2 of
+                Left clause -> Just (showClause useSetNotation clause)
+                Right i     -> Just (show i)
+            else Nothing
+          , if fill3 then
+              Just (showClause useSetNotation c3)
+            else Nothing
+          )
+      ) steps
+
+
+
+
+
+checkers :: String
+checkers = [i|
+
+
+{-\# language ApplicativeDo \#-}
+{-\# Language PackageImports \#-}
+
+
+module Check (checkSyntax, checkSemantics) where
+
+import Control.Monad (when)
+import Control.Applicative (Alternative)
+
+import Control.OutputCapable.Blocks
+import Formula.Resolution (resolve)
+import "logic-tasks" Config (ResolutionInst(..))
+import "logic-tasks" Util (preventWithHint)
+import LogicTasks.Semantics.Resolve (partialGrade', completeGrade')
+
+import Global
+
+checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
+checkSyntax _ = partialGrade'
+
+
+checkSemantics :: (OutputCapable m, Alternative m) => FilePath -> TaskData -> Submission -> Rated m
+checkSemantics _ taskData submission = do
+    completeGrade' taskData submission
+    pure 1.0
+
+|]
+
+=============================================
+
+
+{-# Language ApplicativeDo #-}
+{-# Language QuasiQuotes #-}
+{-# Language PackageImports #-}
+
+
+module Description (description) where
+
+import "logic-tasks" Config (ResolutionInst(..))
+import LogicTasks.Keys
+
+import Control.OutputCapable.Blocks
+import Control.Monad (when, unless)
+import Data.String.Interpolate                   (i)
+
+import Global
+
+
+description :: OutputCapable m => FilePath -> TaskData -> LangM m
+description _ taskData = do
+    paragraph $ do
+        translate $ do
+            german "Betrachten Sie diese Resolvente, als das Ergebnis eines Resolutionsschritts:"
+            english "Consider this resolvent as a result of a resolution step:"
+    code $ show $ clauses taskData
+    pure ()
+
+=============================================
+
+{-# Language PackageImports #-}
+
+module Parse (parseSubmission) where
+
+
+import Control.OutputCapable.Blocks.Generic (($>>=))
+import Control.OutputCapable.Blocks (
+  LangM',
+  ReportT,
+  OutputCapable,
+  )
+import FlexTask.Generic.Parse
+import Data.Maybe (fromJust)
+import Formula.Parsing (clauseFormulaParser, clauseSetParser, resStepParser)
+import Formula.Types (Clause(..), ResStep(..))
+import "logic-tasks" Config (ResolutionConfig(..))
+import Text.ParserCombinators.Parsec (
+  sepBy,
+  string,
+  )
+import Formula.Parsing.Delayed
+import ParsingHelpers          (fully)
+
+import Global
+import TaskSettings
+
+
+
+
+instance Parse [(Maybe String, Maybe String, Maybe String,Int)] where
+  formParser = sepBy (formParser @(Maybe String, Maybe String, Maybe String, Int)) (string "\a\a")
+
+
+tup :: (Maybe String, Maybe String, Maybe String, Int) -> String
+tup (c1,c2,c3,num) = if Nothing `elem` [c1,c2,c3]
+  then ""
+  else  ('(' : fromJust c1 ++ "," ++ fromJust c2 ++ "," ++ fromJust c3 ++ "=" ++ show num ++ ")")
+
+
+
+parseSubmission ::
+  (Monad m, OutputCapable (ReportT o m))
+  => String
+  -> LangM' (ReportT o m) Submission
+parseSubmission input =
+  parseWithOrReport (formParser @[(Maybe String, Maybe String, Maybe String,Int)]) reportWithFieldNumber input $>>= \steps ->
+    traverse parseIt (filter (/= "") (map tup steps))
+  where
+    parseIt =
+      parseWithOrReport
+        (fully (resStepParser (if useSetNotation resConf then clauseSetParser else clauseFormulaParser)))
+        (\_ _ -> complainAboutWrongNotation)
