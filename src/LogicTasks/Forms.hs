@@ -53,7 +53,7 @@ tableForm emptyColumns rows staticStart staticEnd =
       [2..totalColumns+1]
     let tableHeaders = map snd headersRes
         tableRows = transpose $ map (map snd) columnsRes
-    pure ( [headerName, inputName]
+    pure ( [[headerName], [inputName]]
          , [whamlet|
               #{extra}
               <table>
