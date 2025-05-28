@@ -61,8 +61,15 @@ genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
 
 
 
-description :: OutputCapable m => Bool -> ResolutionInst -> LangM m
-description oneInput ResolutionInst{..} = do
+baseDescription
+  :: OutputCapable m
+  => State (Map Language String) ()
+  -> State (Map Language String) ()
+  -> State (Map Language String) ()
+  -> State (Map Language String) ()
+  -> ResolutionInst
+  -> LangM m
+baseDescription howToInput howToHandleNumbers exampleSet exampleFormula ResolutionInst{..} = do
   paragraph $ do
     translate $ do
       german $ "Betrachten Sie die folgende " ++ gerSet ++ "Formel in KNF:"
@@ -73,21 +80,7 @@ description oneInput ResolutionInst{..} = do
     german "Führen Sie das Resolutionsverfahren an ihr durch, um die leere Klausel abzuleiten."
     english "Use the resolution technique on it to derive the empty clause."
 
-  paragraph $ translate $ if oneInput
-    then do
-      german "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
-      english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
-    else do
-      german "Geben Sie die Lösung als eine Auflistung von Schritten an. "
-      german "Füllen Sie für jeden Schritt die zugehörigen drei Eingabefelder mit den zwei verwendeten Klauseln sowie der daraus entstehenden Resolvente. "
-      german "Schritte können nicht partiell ausgefüllt werden. Wenn Sie einen Schritt hinzufügen, MUSS dieser vollständig sein. "
-      german "Bei Nichtbeachtung wird Ihre Abgabe aus Syntaxgründen abgelehnt. "
-      german "Es ist aber erlaubt, Schritte komplett wegzulassen, z.B. wenn Sie weniger Schritte benötigen als im Eingabeformular angegeben."
-      english "Provide the solution as a sequence of steps. "
-      english "Fill the three input fields for each step with the two used clauses and the resulting resolvent. "
-      english "Steps cannot be filled in partially. Each added step MUST be complete. "
-      english "Submissions containing partially filled steps will be rejected as syntactically wrong. "
-      english "You are allowed to entirely leave out steps, e.g., if your solution needs fewer steps overall than provided in the input form."
+  paragraph $ translate howToInput
   keyHeading
   negationKey unicodeAllowed
   unless usesSetNotation (orKey unicodeAllowed)
@@ -113,25 +106,19 @@ description oneInput ResolutionInst{..} = do
     german "Bestehende Klauseln sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)."
     english "Existing Clauses are already numbered by their order. first clause = 1, second clause = 2, ...)."
 
-  paragraph $ translate $ if oneInput
-    then do
-      german "Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
-      english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
-    else do
-      german "Neu resolvierte Klauseln erhalten automatisch die Nummer rechts neben ihrem Eingabefeld."
-      english "Newly resolved clauses are automatically assigned the number directly to the right of their input field."
+  paragraph $ translate howToHandleNumbers
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do
       german "Nutzen Sie zur Angabe der Klauseln die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the clauses using set notation! A solution attempt could look like this: "
-    translatedCode $ flip localise $ translations $ setExample unicodeAllowed oneInput
+    translatedCode $ flip localise $ translations exampleSet
     pure ()
 
   unless usesSetNotation $ paragraph $ indent $ do
     translate $ do
       german "Nutzen Sie zur Angabe der Klauseln eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the clauses using a formula! A solution attempt could look like this: "
-    translatedCode $ flip localise $ translations $ exampleCode unicodeAllowed oneInput
+    translatedCode $ flip localise $ translations exampleFormula
     pure ()
 
   extra addText
@@ -147,6 +134,50 @@ description oneInput ResolutionInst{..} = do
           , "set notation of a "
           )
         | otherwise = ( "", "")
+
+
+descriptionMultipleFields :: OutputCapable m => State (Map Language String) () -> ResolutionInst -> LangM m
+descriptionMultipleFields explainEmptySteps resInst@ResolutionInst{..} = baseDescription
+    (do
+      german "Geben Sie die Lösung als eine Auflistung von Schritten an. "
+      german "Füllen Sie für jeden Schritt die zugehörigen drei Eingabefelder mit den zwei verwendeten Klauseln sowie der daraus entstehenden Resolvente. "
+      english "Provide the solution as a sequence of steps. "
+      english "Fill the three input fields for each step with the two used clauses and the resulting resolvent. "
+      explainEmptySteps
+    )
+    (do
+      german "Neu resolvierte Klauseln erhalten automatisch die Nummer rechts neben ihrem Eingabefeld."
+      english "Newly resolved clauses are automatically assigned the number directly to the right of their input field."
+    )
+    (setExample unicodeAllowed False)
+    (exampleCode unicodeAllowed False)
+    resInst
+
+
+description :: OutputCapable m => ResolutionInst -> LangM m
+description resInst@ResolutionInst{..} = baseDescription
+    (do
+      german "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
+      english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
+    )
+
+    (do
+      german "Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
+      english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
+    )
+    (setExample unicodeAllowed True)
+    (exampleCode unicodeAllowed True)
+    resInst
+
+
+descriptionFlex :: OutputCapable m => ResolutionInst -> LangM m
+descriptionFlex = descriptionMultipleFields $ do
+  german "Schritte können nicht partiell ausgefüllt werden. Wenn Sie einen Schritt hinzufügen, MUSS dieser vollständig sein. "
+  german "Bei Nichtbeachtung wird Ihre Abgabe aus Syntaxgründen abgelehnt. "
+  german "Es ist aber erlaubt, Schritte komplett wegzulassen, z.B. wenn Sie weniger Schritte benötigen als im Eingabeformular angegeben."
+  english "Steps cannot be filled in partially. Each added step MUST be complete. "
+  english "Submissions containing partially filled steps will be rejected as syntactically wrong. "
+  english "You are allowed to entirely leave out steps, e.g., if your solution needs fewer steps overall than provided in the input form."
 
 
 exampleCode :: Bool -> Bool -> State (Map Language String) ()

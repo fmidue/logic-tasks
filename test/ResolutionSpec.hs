@@ -80,7 +80,7 @@ spec = do
     it "should not reject" $
       forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
-          doesNotRefuse (description False resInst :: LangM Maybe)
+          doesNotRefuse (description resInst :: LangM Maybe)
   describe "genResInst" $ do
     it "should required at least minSteps amount of steps" $
       forAll validBoundsResolutionConfig $ \resConfig ->
