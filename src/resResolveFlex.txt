@@ -64,7 +64,7 @@ getTask = do
     pure (resInst, checkers, getFormData (form resInst))
 
 form :: ResolutionInst -> Rendered Widget
-form resInst = fullResolutionForm (minSteps resConf) (map (showClause (usesSetNotation resInst)) (clauses resInst))
+form resInst = fullResolutionForm (minSteps resConf) (clauses resInst) (showClause (usesSetNotation resInst))
      (prefill prefillSelect (usesSetNotation resInst) (solution resInst))
 
 
@@ -135,6 +135,7 @@ module Description (description) where
 
 import "logic-tasks" Config (ResolutionInst(..))
 import LogicTasks.Keys
+import LogicTasks.Semantics.Resolve (descriptionMultipleFields)
 
 import Control.OutputCapable.Blocks
 import Control.Monad (when, unless)
@@ -144,13 +145,10 @@ import Global
 
 
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
-description _ taskData = do
-    paragraph $ do
-        translate $ do
-            german "Betrachten Sie diese Resolvente, als das Ergebnis eines Resolutionsschritts:"
-            english "Consider this resolvent as a result of a resolution step:"
-    code $ show $ clauses taskData
-    pure ()
+description _ =
+    descriptionMultipleFields
+    (do german "Unvollständige ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
+        english "Incomplete resolution steps will not be taken into account.")
 
 =============================================
 
@@ -191,8 +189,6 @@ tup :: (Maybe String, Maybe String, Maybe String, Int) -> String
 tup (c1,c2,c3,num) = if Nothing `elem` [c1,c2,c3]
   then ""
   else  ('(' : fromJust c1 ++ "," ++ fromJust c2 ++ "," ++ fromJust c3 ++ "=" ++ show num ++ ")")
-
-
 
 parseSubmission ::
   (Monad m, OutputCapable (ReportT o m))
