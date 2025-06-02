@@ -1,4 +1,4 @@
-{-# language DeriveDataTypeable#-}
+{-# language DeriveDataTypeable #-}
 
 module Global where
 
@@ -19,12 +19,12 @@ data Solution = Solution {
     correctSteps :: [(Int, [Char])],
     correctOutput :: Bool,
     correctModel :: [(Char,Bool)]
-    } deriving (Data)
+    } deriving Data
 
 data TaskData = TaskData {
     formula :: SynTree BinOp Char,
     solution :: Solution
-    } deriving (Data)
+    } deriving Data
 
 =============================================
 
@@ -118,10 +118,10 @@ instance RenderMessage a Label where
 getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
 getTask = do
     formula <- makeHornFormula spirit extra
-    let (steps, output, model) = startAlgorithm formula
+    let (steps, out, model) = startAlgorithm formula
         solution = Solution {
             correctSteps = steps,
-            correctOutput = output,
+            correctOutput = out,
             correctModel = model
         }
     pure (TaskData {formula, solution}, checkers, getFormData form)
@@ -226,16 +226,16 @@ checkSyntax _ TaskData{..} Submission{..} = do
 
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
-checkSemantics _ TaskData{..} Submission{..} = do
+checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
     let stepsCorrect = checkStepOrder (getClauses formula) stepsSubmitted
     yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
-    let outputCorrect = Just (if (correctOutput solution) then 2 else 3) == getAnswer output
+    let outputCorrect = Just (if correctOutput then 2 else 3) == getAnswer output
     yesNo outputCorrect $ translate $ do
         german "Ausgabe richtig?"
         english "Output correct?"
-    let modelCorrect = sort (correctModel solution) == sort (maybe [] (map (second truth)) model)
+    let modelCorrect = sort correctModel == sort (maybe [] (map (second truth)) model)
     yesNo modelCorrect $ translate $ do
         german "Modell richtig?"
         english "Model correct?"
@@ -279,12 +279,12 @@ checkSemantics _ TaskData{..} Submission{..} = do
         translate $ do
             english "The correct solution is:"
             german "Die korrekte Lösung ist:"
-        buildLatex formula (correctSteps solution)
+        buildLatex formula correctSteps
         paragraph $ do
             indent $ translate $ do
-                german $ if (correctOutput solution) then "\\"erfüllbar\\", mit" else "\\"unerfüllbar\\""
-                english $ if (correctOutput solution) then "\\"satisfiable\\", mit" else "\\"unsatisfiable\\""
-            case (correctModel solution) of
+                german $ if correctOutput then "\\"erfüllbar\\", mit" else "\\"unerfüllbar\\""
+                english $ if correctOutput then "\\"satisfiable\\", mit" else "\\"unsatisfiable\\""
+            case correctModel of
                 [] -> pure ()
                 m  -> indent $ latex $ intercalate ",\\\\ " $
                     map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)) (sort m)
@@ -351,6 +351,7 @@ import Control.OutputCapable.Blocks (
   ReportT,
   OutputCapable,
   )
+import Control.OutputCapable.Blocks.Generic (($>>=))
 import FlexTask.Generic.Parse  (
   Parse(..),
   escaped,
@@ -360,14 +361,10 @@ import FlexTask.Generic.Parse  (
   )
 import LogicTasks.Formula (TruthValue(..))
 
-import Control.OutputCapable.Blocks.Generic (($>>=))
-
 import qualified LogicTasks.Parsing as P
 
 
 import Global
-
-instance Parse Submission
 
 
 instance Parse CharAnswer where
@@ -397,6 +394,5 @@ parseSubmission ::
   (Monad m, OutputCapable (ReportT o m))
   => String
   -> LangM' (ReportT o m) Submission
-parseSubmission input =
-    parseWithOrReport formParser reportWithFieldNumber input $>>= \(steps, output, model) ->
-        pure $ Submission {steps, output, model}
+parseSubmission input = parseWithOrReport formParser reportWithFieldNumber input $>>= \(steps, output, model) ->
+  pure $ Submission {steps, output, model}
