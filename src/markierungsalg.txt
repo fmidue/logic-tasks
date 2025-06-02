@@ -118,10 +118,10 @@ instance RenderMessage a Label where
 getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
 getTask = do
     formula <- makeHornFormula spirit extra
-    let (steps, out, model) = startAlgorithm formula
+    let (steps, output, model) = startAlgorithm formula
         solution = Solution {
             correctSteps = steps,
-            correctOutput = out,
+            correctOutput = output,
             correctModel = model
         }
     pure (TaskData {formula, solution}, checkers, getFormData form)
