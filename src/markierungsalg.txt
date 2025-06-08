@@ -227,7 +227,7 @@ checkSyntax _ TaskData{..} Submission{..} = do
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
-    let stepsCorrect = checkStepOrder (getClauses formula) stepsSubmitted
+    let stepsCorrect = correctSteps == stepsSubmitted
     yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
@@ -248,7 +248,7 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
     unless (points >= #{minimumPoints}) $ refuse $ pure ()
     return points
   where
-    stepsSubmitted = concat (map unCharAnswer (catMaybes steps))
+    stepsSubmitted = zip [1 :: Int ..] (map unCharAnswer (catMaybes steps))
 |]
   where
     feedbackCode :: String
