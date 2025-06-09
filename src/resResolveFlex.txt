@@ -181,7 +181,7 @@ import TaskSettings
 
 
 
-instance Parse [(Maybe String, Maybe String, Maybe String,Int)] where
+instance Parse [(Maybe String, Maybe String, Maybe String, Int)] where
   formParser = sepBy (formParser @(Maybe String, Maybe String, Maybe String, Int)) (string "\a\a")
 
 
