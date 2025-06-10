@@ -142,6 +142,7 @@ form = formify (Nothing :: Maybe ([Maybe String], SingleChoiceSelection, Maybe S
 checkers :: String
 checkers = [i|
 
+{-\# OPTIONS_GHC -Wno-unused-record-wildcards \#-}
 
 {-\# language ApplicativeDo \#-}
 {-\# language RecordWildCards \#-}
