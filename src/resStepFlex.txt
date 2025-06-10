@@ -42,7 +42,6 @@ validateSettings = pure ()
 module TaskData (getTask) where
 
 import LogicTasks.Semantics.Step (genStepInst)
-import "logic-tasks" Config (StepInst(..))
 
 import FlexTask.FormUtil       (getFormData)
 import FlexTask.Generic.Form
