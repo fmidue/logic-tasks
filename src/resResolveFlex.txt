@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
 {-# Language PackageImports #-}
 
 module Global where
@@ -50,7 +52,6 @@ import FlexTask.YesodConfig    (Rendered, Widget)
 import Data.String.Interpolate (i)
 import Data.Text               (Text)
 import Test.QuickCheck.Gen
-import Yesod                   (RenderMessage(..), fieldSettingsLabel)
 
 import Global
 import TaskSettings
@@ -94,7 +95,6 @@ checkers = [i|
 
 
 {-\# language ApplicativeDo \#-}
-{-\# Language PackageImports \#-}
 
 
 module Check (checkSyntax, checkSemantics) where
@@ -128,7 +128,6 @@ module Description (description) where
 import LogicTasks.Semantics.Resolve (descriptionMultipleFields)
 
 import Control.OutputCapable.Blocks
-import Data.String.Interpolate                   (i)
 
 import Global
 
@@ -155,7 +154,6 @@ import Control.OutputCapable.Blocks (
 import FlexTask.Generic.Parse
 import Data.Maybe (fromJust)
 import Formula.Parsing (clauseFormulaParser, clauseSetParser, resStepParser)
-import Formula.Types (Clause(..), ResStep(..))
 import "logic-tasks" Config (ResolutionConfig(..))
 import Text.ParserCombinators.Parsec (
   sepBy,
