@@ -16,7 +16,7 @@ type TaskData = StepInst
 
 module TaskSettings where
 
-import "logic-tasks" Config (dStepConf, dBaseConf, StepConfig(..))
+import "logic-tasks" Config (dBaseConf, StepConfig(..))
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 
@@ -51,7 +51,6 @@ import FlexTask.YesodConfig    (Rendered, Widget)
 import Data.String.Interpolate (i)
 import Data.Text               (Text)
 import Test.QuickCheck.Gen
-import Yesod                   (RenderMessage(..), fieldSettingsLabel)
 
 import Global
 import TaskSettings
@@ -122,7 +121,6 @@ checkSemantics _ taskData submittedClause =
 
 
 {-# Language ApplicativeDo #-}
-{-# Language QuasiQuotes #-}
 {-# Language PackageImports #-}
 
 
@@ -184,8 +182,8 @@ description _ taskData = do
     pure ()
 
   where
-    usesSetNotation' = (usesSetNotation taskData)
-    unicodeAllowed' = (unicodeAllowed taskData)
+    usesSetNotation' = usesSetNotation taskData
+    unicodeAllowed' = unicodeAllowed taskData
     show' = showClause usesSetNotation'
 
     setExample = do
