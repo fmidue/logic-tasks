@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
 {-# Language PackageImports #-}
 
 module Global where
@@ -131,7 +133,6 @@ import LogicTasks.Keys
 
 import Control.OutputCapable.Blocks
 import Control.Monad (when, unless)
-import Data.String.Interpolate                   (i)
 
 import Global
 
