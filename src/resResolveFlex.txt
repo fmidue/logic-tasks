@@ -16,7 +16,7 @@ type TaskData = ResolutionInst
 
 module TaskSettings where
 
-import "logic-tasks" Config (dResConf, dBaseConf, ResolutionConfig(..))
+import "logic-tasks" Config (dResConf, ResolutionConfig(..))
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 
@@ -69,23 +69,23 @@ form resInst = fullResolutionForm (minSteps resConf) (clauses resInst) (showClau
 
 
 prefill :: (Bool, Bool, Bool) -> Bool -> [ResStep] -> [(Maybe String, Maybe String, Maybe String)]
-prefill (fill1, fill2, fill3) useSetNotation steps =
+prefill (fill1, fill2, fill3) useSetNotation =
   map (\(Res (c1, c2, (c3, _))) ->
           ( if fill1 then
               case c1 of
                 Left clause -> Just (showClause useSetNotation clause)
-                Right i     -> Just (show i)
+                Right j     -> Just (show j)
             else Nothing
           , if fill2 then
               case c2 of
                 Left clause -> Just (showClause useSetNotation clause)
-                Right i     -> Just (show i)
+                Right j     -> Just (show j)
             else Nothing
           , if fill3 then
               Just (showClause useSetNotation c3)
             else Nothing
           )
-      ) steps
+      )
 
 
 
@@ -101,13 +101,9 @@ checkers = [i|
 
 module Check (checkSyntax, checkSemantics) where
 
-import Control.Monad (when)
 import Control.Applicative (Alternative)
 
 import Control.OutputCapable.Blocks
-import Formula.Resolution (resolve)
-import "logic-tasks" Config (ResolutionInst(..))
-import "logic-tasks" Util (preventWithHint)
 import LogicTasks.Semantics.Resolve (partialGrade', completeGrade')
 
 import Global
@@ -127,18 +123,14 @@ checkSemantics _ taskData submission = do
 
 
 {-# Language ApplicativeDo #-}
-{-# Language QuasiQuotes #-}
 {-# Language PackageImports #-}
 
 
 module Description (description) where
 
-import "logic-tasks" Config (ResolutionInst(..))
-import LogicTasks.Keys
 import LogicTasks.Semantics.Resolve (descriptionMultipleFields)
 
 import Control.OutputCapable.Blocks
-import Control.Monad (when, unless)
 import Data.String.Interpolate                   (i)
 
 import Global
@@ -188,7 +180,7 @@ instance Parse [(Maybe String, Maybe String, Maybe String, Int)] where
 tup :: (Maybe String, Maybe String, Maybe String, Int) -> String
 tup (c1,c2,c3,num) = if Nothing `elem` [c1,c2,c3]
   then ""
-  else  ('(' : fromJust c1 ++ "," ++ fromJust c2 ++ "," ++ fromJust c3 ++ "=" ++ show num ++ ")")
+  else  '(' : fromJust c1 ++ "," ++ fromJust c2 ++ "," ++ fromJust c3 ++ "=" ++ show num ++ ")"
 
 parseSubmission ::
   (Monad m, OutputCapable (ReportT o m))
