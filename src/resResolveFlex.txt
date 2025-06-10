@@ -45,12 +45,10 @@ import LogicTasks.Semantics.Step (showClause)
 import Formula.Types (ResStep(..))
 
 import FlexTask.FormUtil       (getFormData)
-import FlexTask.Generic.Form
 import FlexTask.Types          (HtmlDict)
 import FlexTask.YesodConfig    (Rendered, Widget)
 import Data.String.Interpolate (i)
 import Data.Text               (Text)
-import Data.Either             (fromLeft)
 import Test.QuickCheck.Gen
 import Yesod                   (RenderMessage(..), fieldSettingsLabel)
 
@@ -123,7 +121,6 @@ checkSemantics _ taskData submission = do
 
 
 {-# Language ApplicativeDo #-}
-{-# Language PackageImports #-}
 
 
 module Description (description) where
