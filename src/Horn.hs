@@ -2,8 +2,7 @@ module Horn where
 
 import Data.Char (toLower)
 import Data.Containers.ListUtils (nubOrd)
-import Data.Maybe (isJust)
-import Data.List.Extra (notNull)
+import Data.List.Extra (notNull, sort)
 import Test.QuickCheck.Gen
 
 import Trees.Types (BinOp(..), SynTree(..))
@@ -14,7 +13,7 @@ type Protocol = [(Int,[Char])]
 type Allocation = [(Char,Bool)]
 
 
-v1, v2, v3 :: [SynTree BinOp Char]
+v1, v2 :: [SynTree BinOp Char]
 v1 =
   [ Binary Impl (Leaf 'B') (Leaf 'A')
   , Binary Impl (Leaf '1') (Leaf 'B')
@@ -27,11 +26,24 @@ v2 =
   , Binary Impl (Binary And (Leaf 'B') (Leaf 'A')) (Leaf '0')
   , Binary Impl (Leaf 'D') (Leaf '0')
   ]
+
+v3, v4 :: [SynTree BinOp Char]
 v3 =
   [ Binary Impl (Leaf '1') (Leaf 'A')
   , Binary Impl (Leaf '1') (Leaf 'B')
   , Binary Impl (Leaf 'A') (Leaf 'C')
   , Binary Impl (Leaf 'B') (Leaf 'D')
+  , Binary Impl (Leaf 'D') (Leaf 'E')
+  , Binary Impl (Leaf 'E') (Leaf '0')
+  ]
+
+v4 =
+  [ Binary Impl (Leaf '1') (Leaf 'A')
+  , Binary Impl (Leaf '1') (Leaf 'B')
+  , Binary Impl (Leaf 'A') (Leaf 'C')
+  , Binary Impl (Leaf 'B') (Leaf 'D')
+  , Binary Impl (Leaf 'D') (Leaf 'E')
+  , Binary Impl (Leaf 'F') (Leaf '0')
   ]
 
 makeHornFormula :: [SynTree BinOp Char] -> Int -> Gen (SynTree BinOp Char)
@@ -90,14 +102,15 @@ startAlgorithm formula = markingAlg modifiedClauses [(1, facts) | notNull facts]
 
 markingAlg :: [SynTree BinOp Char] -> Protocol -> (Protocol,Bool,Allocation)
 markingAlg clauses protocol = case nextToMark clauses of
-    Nothing   -> (protocol, True, model)
+    Nothing   -> (protocol, True, buildModel protocol clauses)
     Just '0'  -> (protocol, False, [])
     Just fact -> markingAlg (doStep clauses fact) (addStep fact protocol)
+
+buildModel :: Protocol -> [SynTree BinOp Char] -> Allocation
+buildModel protocol clauses = trueAtoms ++
+    concatMap (\c -> ([(c, False) | c `notElem` map fst trueAtoms])) (getAllAtomics clauses)
   where
     trueAtoms = concatMap (\(_,cs) -> concatMap (\c -> [(c,True)]) cs) protocol
-    model = trueAtoms ++
-        concatMap (\c -> ([(c, False) | c `notElem` map fst trueAtoms])) (getAllAtomics clauses)
-
 
 addStep :: Char -> Protocol -> Protocol
 addStep marked protocol = protocol ++ [(step,[marked])]
@@ -129,11 +142,25 @@ removeOnes tree = case tree of
     Binary Impl (Binary And a (Leaf '1')) b          -> [Binary Impl a b]
     _                                                -> [tree]
 
-checkStepOrder :: [SynTree BinOp Char] -> [Char] -> Bool
-checkStepOrder clauses marked = isJust $ foldl tryStep (Just clauses) marked
+newSolution :: SynTree BinOp Char -> Protocol -> (Protocol, Bool, Allocation)
+newSolution formula protocol =
+    if case protocol of
+       [] -> False
+       (_, chars):_ -> sort chars /= sort facts
+    then sampleSolution
+        else
+            case foldl tryStep (Just allClauses) steps of
+                Just a -> if '0' `elem` getFacts a then (protocol, False, [])
+                    else markingAlg a protocol
+                _      -> sampleSolution
+  where
+    sampleSolution = startAlgorithm formula
+    facts = getFacts allClauses
+    allClauses = getClauses formula
+    steps = concatMap snd protocol
 
-tryStep :: Maybe [SynTree BinOp Char] -> Char -> Maybe [SynTree BinOp Char]
-tryStep (Just clauses) c = if Binary Impl (Leaf '1') (Leaf c) `elem` clauses
-    then Just (doStep clauses c)
-    else Nothing
-tryStep Nothing        _ = Nothing
+    tryStep :: Maybe [SynTree BinOp Char] -> Char -> Maybe [SynTree BinOp Char]
+    tryStep (Just clauses) c = if Binary Impl (Leaf '1') (Leaf c) `elem` clauses
+        then Just (doStep clauses c)
+        else Nothing
+    tryStep Nothing        _ = Nothing
