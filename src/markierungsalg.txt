@@ -65,7 +65,7 @@ minimumPoints = 0.25
 
 validateSettings :: OutputCapable m => LangM m
 validateSettings
-    | not (isHornFormulaI (foldr1 (Binary And) spirit)) = refuse $ indent $ text $
+    | not (isHornFormulaI (foldr1 (Binary And) spirit)) = refuse $ indent $ text
         "Als spirit muss eine Liste von Hornklauseln angegeben werden."
     | extra > length atomics = refuse $ indent $ text $
         "Es können nur so viele extra Klauseln hinzugefügt werden, " ++
