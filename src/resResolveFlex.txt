@@ -147,7 +147,7 @@ import Global
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
 description _ =
     descriptionMultipleFields
-    (do german "Unvollständige ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
+    (do german "Unvollständig ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
         english "Incomplete resolution steps will not be taken into account.")
 
 =============================================
