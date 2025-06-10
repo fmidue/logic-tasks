@@ -227,7 +227,7 @@ checkSyntax _ TaskData{..} Submission{..} = do
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
-    let stepsCorrect = correctSteps == stepsSubmitted
+    let stepsCorrect = map (sort . snd) correctSteps == map (sort . snd) stepsSubmitted
     yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
@@ -264,7 +264,7 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
         german "Hinweis: Mit Ausnahme von Schritt 1, darf immer nur eine Aussage pro Schritt markiert werden."
         english "Hint: Apart from step 1, exactly one proposition may be marked in each step."
     checking ((\\case
-        (Just step : _) -> getFacts clauses /= unCharAnswer step
+        (Just step : _) -> sort (getFacts clauses) /= sort (unCharAnswer step)
         _               -> False) steps) $ do
             german "Hinweis: Im ersten Schritt müssen alle Fakten markiert werden."
             english "Hint: In the first step, all facts must be marked."
