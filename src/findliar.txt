@@ -402,7 +402,7 @@ instance Parse [Namen] where
 makeTable :: [Maybe (PropFormula Char)] -> [Maybe TruthValue] -> Table
 makeTable headers values = Table $ zip allHeaders formattedTruthValues
   where
-    allHeaders = map (Just . Atomic) "ABC" ++ headers
+    allHeaders = map (Just . Atomic) "ABC" ++ headers ++ [Just $ Atomic 'F']
     formattedTruthValues = transpose $ chunksOf totalColumns values
 
 
