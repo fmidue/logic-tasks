@@ -156,7 +156,7 @@ import Data.Maybe (fromJust)
 import Formula.Parsing (clauseFormulaParser, clauseSetParser, resStepParser)
 import "logic-tasks" Config (ResolutionConfig(..))
 import Text.ParserCombinators.Parsec (
-  sepBy,
+  sepBy1,
   string,
   )
 import Formula.Parsing.Delayed
@@ -169,7 +169,7 @@ import TaskSettings
 
 
 instance Parse [(Maybe String, Maybe String, Maybe String, Int)] where
-  formParser = sepBy (formParser @(Maybe String, Maybe String, Maybe String, Int)) (string "\a\a")
+  formParser = sepBy1 (formParser @(Maybe String, Maybe String, Maybe String, Int)) (string "\a\a")
 
 
 tup :: (Maybe String, Maybe String, Maybe String, Int) -> String
