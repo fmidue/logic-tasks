@@ -105,12 +105,14 @@ markingAlg clauses protocol = case nextToMark clauses of
     Nothing   -> (protocol, True, buildModel protocol clauses)
     Just '0'  -> (protocol, False, [])
     Just fact -> markingAlg (doStep clauses fact) (addStep fact protocol)
-
-buildModel :: Protocol -> [SynTree BinOp Char] -> Allocation
-buildModel protocol clauses = trueAtoms ++
-    concatMap (\c -> ([(c, False) | c `notElem` map fst trueAtoms])) (getAllAtomics clauses)
   where
-    trueAtoms = concatMap (\(_,cs) -> concatMap (\c -> [(c,True)]) cs) protocol
+    buildModel :: Protocol -> [SynTree BinOp Char] -> Allocation
+    buildModel protocol clauses = sort $ trueAtoms ++ falseAtoms
+      where
+        trueAtoms = [(c, True) | (_, cs) <- protocol, c <- cs]
+        allAtoms = getAllAtomics clauses
+        falseAtoms = [(c, False) | c <- allAtoms, c `notElem` map fst trueAtoms]
+
 
 addStep :: Char -> Protocol -> Protocol
 addStep marked protocol = protocol ++ [(step,[marked])]
@@ -145,7 +147,7 @@ removeOnes tree = case tree of
 newSolution :: SynTree BinOp Char -> Protocol -> (Protocol, Bool, Allocation)
 newSolution formula protocol =
     if case protocol of
-       [] -> False
+       [] -> True
        (_, chars):_ -> sort chars /= sort facts
     then sampleSolution
         else
@@ -158,7 +160,6 @@ newSolution formula protocol =
     facts = getFacts allClauses
     allClauses = getClauses formula
     steps = concatMap snd protocol
-
     tryStep :: Maybe [SynTree BinOp Char] -> Char -> Maybe [SynTree BinOp Char]
     tryStep (Just clauses) c = if Binary Impl (Leaf '1') (Leaf c) `elem` clauses
         then Just (doStep clauses c)
