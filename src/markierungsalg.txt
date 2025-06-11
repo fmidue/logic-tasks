@@ -228,7 +228,8 @@ checkSyntax _ TaskData{..} Submission{..} = do
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
-    let stepsCorrect = map (sort . snd) correctSteps == map (sort . snd) stepsSubmitted
+    let (altSteps,_,altModel) = newSolution formula stepsSubmitted
+    let stepsCorrect = map (sort . snd) altSteps == map (sort . snd) stepsSubmitted
     yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
@@ -236,7 +237,7 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
     yesNo outputCorrect $ translate $ do
         german "Ausgabe richtig?"
         english "Output correct?"
-    let modelCorrect = sort correctModel == sort (maybe [] (map (second truth)) model)
+    let modelCorrect = altModel == sort (maybe [] (map (second truth)) model)
     yesNo modelCorrect $ translate $ do
         german "Modell richtig?"
         english "Model correct?"
@@ -278,8 +279,8 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
     solutionCode = [i|
     when (points /= 1) $ paragraph $ do
         translate $ do
-            english "The correct solution is:"
-            german "Die korrekte Lösung ist:"
+            english "A correct solution is:"
+            german "Eine korrekte Lösung ist:"
         buildLatex formula correctSteps
         paragraph $ do
             indent $ translate $ do
