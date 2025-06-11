@@ -105,13 +105,13 @@ markingAlg clauses protocol = case nextToMark clauses of
     Nothing   -> (protocol, True, buildModel protocol clauses)
     Just '0'  -> (protocol, False, [])
     Just fact -> markingAlg (doStep clauses fact) (addStep fact protocol)
+
+buildModel :: Protocol -> [SynTree BinOp Char] -> Allocation
+buildModel protocol clauses = sort $ trueAtoms ++ falseAtoms
   where
-    buildModel :: Protocol -> [SynTree BinOp Char] -> Allocation
-    buildModel protocol clauses = sort $ trueAtoms ++ falseAtoms
-      where
-        trueAtoms = [(c, True) | (_, cs) <- protocol, c <- cs]
-        allAtoms = getAllAtomics clauses
-        falseAtoms = [(c, False) | c <- allAtoms, c `notElem` map fst trueAtoms]
+    trueAtoms = [(c, True) | (_, cs) <- protocol, c <- cs]
+    allAtoms = getAllAtomics clauses
+    falseAtoms = [(c, False) | c <- allAtoms, c `notElem` map fst trueAtoms]
 
 
 addStep :: Char -> Protocol -> Protocol
