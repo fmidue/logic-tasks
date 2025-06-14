@@ -131,10 +131,10 @@ getTask = do
           checkers,
           getFormData form)
   where
-    form = formify (Nothing :: Maybe [String])
-        [[list Vertical [ "1) ", "2) ", "3) "]]] $$>
-        formify (Nothing :: Maybe String)
-          [[single "Gesamtformel F="]] $$>
+    form = formify (Nothing :: Maybe ([String], String))
+        [ [list Vertical [ "1) ", "2) ", "3) "]]
+        , [single "Gesamtformel F="]
+        ] $$>
         addCss formulaCss (tableForm emptyColumns rows ["A","B","C"] ["F"]) $$>
         formify (Nothing :: Maybe [Namen])
           [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
