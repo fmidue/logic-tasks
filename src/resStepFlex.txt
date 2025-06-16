@@ -1,25 +1,26 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
-
-{-# Language PackageImports #-}
+{-# LANGUAGE PackageImports #-}
 
 module Global where
 
-import "logic-tasks" Config (StepInst(..))
 import Data.Set (fromList)
+
+import "logic-tasks" Config (StepInst(..))
 import Formula.Types (Clause(..), Literal(..))
 
 
 type Submission = Clause
 type TaskData = StepInst
 
+
 =============================================
 
-{-# Language PackageImports #-}
+
+{-# LANGUAGE PackageImports #-}
 
 module TaskSettings where
 
 import "logic-tasks" Config (dBaseConf, StepConfig(..))
-
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 
 
@@ -35,23 +36,25 @@ stepConf = StepConfig
 validateSettings :: OutputCapable m => LangM m
 validateSettings = pure ()
 
+
 =============================================
 
-{-# Language OverloadedStrings #-}
-{-# Language QuasiQuotes #-}
-{-# Language PackageImports #-}
+
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE PackageImports #-}
 
 module TaskData (getTask) where
 
-import LogicTasks.Semantics.Step (genStepInst)
+import Data.String.Interpolate (i)
+import Data.Text               (Text)
+import Test.QuickCheck.Gen
 
 import FlexTask.FormUtil       (getFormData)
 import FlexTask.Generic.Form
 import FlexTask.Types          (HtmlDict)
 import FlexTask.YesodConfig    (Rendered, Widget)
-import Data.String.Interpolate (i)
-import Data.Text               (Text)
-import Test.QuickCheck.Gen
+import LogicTasks.Semantics.Step (genStepInst)
 
 import Global
 import TaskSettings
@@ -62,29 +65,25 @@ getTask = do
     resInst <- genStepInst stepConf
     pure (resInst, checkers, getFormData form)
 
-
 form :: Rendered Widget
 form = formify (Nothing :: Maybe String) [[single ""]]
 
 checkers :: String
 checkers = [i|
-
-
-{-\# language ApplicativeDo \#-}
-{-\# Language PackageImports \#-}
-
+{-\# LANGUAGE ApplicativeDo \#-}
+{-\# LANGUAGE PackageImports \#-}
 
 module Check (checkSyntax, checkSemantics) where
 
 import Control.Monad (when)
 
+import "logic-tasks" Config (StepInst(..))
 import Control.OutputCapable.Blocks
 import Formula.Resolution (resolve)
-import "logic-tasks" Config (StepInst(..))
 import LogicTasks.Semantics.Step (showClause)
 
-
 import Global
+
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ _ _ = pure ()
@@ -115,24 +114,24 @@ checkSemantics _ taskData submittedClause =
             english "A possible solution for this task is:"
         code (showClause (usesSetNotation taskData) (clause2 taskData))
         pure ()
-
 |]
+
 
 =============================================
 
 
-{-# Language ApplicativeDo #-}
-{-# Language PackageImports #-}
 
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE PackageImports #-}
 
 module Description (description) where
 
+import Control.Monad (when, unless)
+
+import Control.OutputCapable.Blocks
 import "logic-tasks" Config (StepInst(..))
 import LogicTasks.Semantics.Step (showClause)
 import LogicTasks.Keys
-
-import Control.OutputCapable.Blocks
-import Control.Monad (when, unless)
 
 import Global
 
@@ -197,33 +196,28 @@ description _ taskData = do
 
 =============================================
 
-{-# Language PackageImports #-}
+
+{-# LANGUAGE PackageImports #-}
 
 module Parse (parseSubmission) where
 
-
-import Control.OutputCapable.Blocks (
-  LangM',
-  ReportT,
-  OutputCapable,
-  )
-import FlexTask.Generic.Parse  (Parse(..), escaped, formParser, parseWithOrReport, reportWithFieldNumber)
-
+import "logic-tasks" Config (StepConfig(..))
+import Control.OutputCapable.Blocks
+import FlexTask.Generic.Parse
 import Formula.Parsing (clauseFormulaParser, clauseSetParser)
 import Formula.Types (Clause(..))
-import "logic-tasks" Config (StepConfig(..))
-
 
 import Global
 import TaskSettings
+
 
 instance Parse Clause where
   formParser
     = escaped clauseParser
     where
-      clauseParser | useSetNotation stepConf = clauseSetParser
-                   | otherwise = clauseFormulaParser
-
+      clauseParser
+          | useSetNotation stepConf = clauseSetParser
+          | otherwise                = clauseFormulaParser
 
 parseSubmission ::
   (Monad m, OutputCapable (ReportT o m))
