@@ -1,28 +1,29 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
-
-{-# Language PackageImports #-}
+{-# LANGUAGE PackageImports #-}
 
 module Global where
 
-import "logic-tasks" Config (ResolutionInst(..))
 import Data.Set (fromList)
+
+import "logic-tasks" Config (ResolutionInst(..))
 import Formula.Types (Clause(..), ResStep(..), Literal(..))
 
 
 type Submission = [ResStep]
 type TaskData = ResolutionInst
 
+
 =============================================
 
-{-# Language PackageImports #-}
+
+{-# LANGUAGE PackageImports #-}
 
 module TaskSettings where
 
 import "logic-tasks" Config (dResConf, ResolutionConfig(..))
-
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 
--- choose columns to be prefilled
+
 prefillSelect :: (Bool, Bool, Bool)
 prefillSelect = (True, False, True)
 
@@ -32,26 +33,28 @@ resConf = dResConf
 validateSettings :: OutputCapable m => LangM m
 validateSettings = pure ()
 
+
 =============================================
 
-{-# Language OverloadedStrings #-}
-{-# Language QuasiQuotes #-}
-{-# Language PackageImports #-}
+
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE PackageImports #-}
 
 module TaskData (getTask) where
 
-import LogicTasks.Semantics.Resolve (genResInst)
-import "logic-tasks" Config (ResolutionInst(..), ResolutionConfig(..))
-import LogicTasks.Forms (fullResolutionForm)
-import LogicTasks.Semantics.Step (showClause)
-import Formula.Types (ResStep(..))
-
-import FlexTask.FormUtil       (getFormData)
-import FlexTask.Types          (HtmlDict)
-import FlexTask.YesodConfig    (Rendered, Widget)
 import Data.String.Interpolate (i)
 import Data.Text               (Text)
 import Test.QuickCheck.Gen
+
+import FlexTask.FormUtil (getFormData)
+import FlexTask.Types (HtmlDict)
+import FlexTask.YesodConfig (Rendered, Widget)
+import "logic-tasks" Config (ResolutionInst(..), ResolutionConfig(..))
+import LogicTasks.Forms (fullResolutionForm)
+import LogicTasks.Semantics.Resolve (genResInst)
+import LogicTasks.Semantics.Step (showClause)
+import Formula.Types (ResStep(..))
 
 import Global
 import TaskSettings
@@ -63,9 +66,11 @@ getTask = do
     pure (resInst, checkers, getFormData (form resInst))
 
 form :: ResolutionInst -> Rendered Widget
-form resInst = fullResolutionForm (minSteps resConf) (clauses resInst) (showClause (usesSetNotation resInst))
-     (prefill prefillSelect (usesSetNotation resInst) (solution resInst))
-
+form resInst = fullResolutionForm
+    (minSteps resConf)
+    (clauses resInst)
+    (showClause (usesSetNotation resInst))
+    (prefill prefillSelect (usesSetNotation resInst) (solution resInst))
 
 prefill :: (Bool, Bool, Bool) -> Bool -> [ResStep] -> [(Maybe String, Maybe String, Maybe String)]
 prefill (fill1, fill2, fill3) useSetNotation =
@@ -86,16 +91,9 @@ prefill (fill1, fill2, fill3) useSetNotation =
           )
       )
 
-
-
-
-
 checkers :: String
 checkers = [i|
-
-
-{-\# language ApplicativeDo \#-}
-
+{-\# LANGUAGE ApplicativeDo \#-}
 
 module Check (checkSyntax, checkSemantics) where
 
@@ -106,28 +104,26 @@ import LogicTasks.Semantics.Resolve (partialGrade', completeGrade')
 
 import Global
 
+
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ = partialGrade'
-
 
 checkSemantics :: (OutputCapable m, Alternative m) => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submission = do
     completeGrade' taskData submission
     pure 1.0
-
 |]
+
 
 =============================================
 
 
-{-# Language ApplicativeDo #-}
-
+{-# LANGUAGE ApplicativeDo #-}
 
 module Description (description) where
 
-import LogicTasks.Semantics.Resolve (descriptionMultipleFields)
-
 import Control.OutputCapable.Blocks
+import LogicTasks.Semantics.Resolve (descriptionMultipleFields)
 
 import Global
 
@@ -138,39 +134,37 @@ description _ =
     (do german "Unvollständig ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
         english "Incomplete resolution steps will not be taken into account.")
 
+
 =============================================
 
-{-# Language PackageImports #-}
+
+{-# LANGUAGE PackageImports #-}
 
 module Parse (parseSubmission) where
 
-
-import Control.OutputCapable.Blocks.Generic (($>>=))
-import Control.OutputCapable.Blocks (
-  LangM',
-  ReportT,
-  OutputCapable,
-  )
-import FlexTask.Generic.Parse
 import Data.Maybe (fromJust)
-import Formula.Parsing (clauseFormulaParser, clauseSetParser, resStepParser)
-import "logic-tasks" Config (ResolutionConfig(..))
-import Text.ParserCombinators.Parsec (
-  sepBy1,
-  string,
+import Text.ParserCombinators.Parsec
+  ( sepBy1
+  , string
   )
+
+import "logic-tasks" Config (ResolutionConfig(..))
+import Control.OutputCapable.Blocks.Generic (($>>=))
+import Control.OutputCapable.Blocks
+import FlexTask.Generic.Parse
+import Formula.Parsing (clauseFormulaParser, clauseSetParser, resStepParser)
 import Formula.Parsing.Delayed
-import ParsingHelpers          (fully)
+import ParsingHelpers (fully)
 
 import Global
 import TaskSettings
 
 
-
-
 instance Parse [(Maybe String, Maybe String, Maybe String, Int)] where
-  formParser = sepBy1 (formParser @(Maybe String, Maybe String, Maybe String, Int)) (string "\a\a")
-
+  formParser =
+      sepBy1
+          (formParser @(Maybe String, Maybe String, Maybe String, Int))
+          (string "\a\a")
 
 tup :: (Maybe String, Maybe String, Maybe String, Int) -> String
 tup (c1,c2,c3,num) = if Nothing `elem` [c1,c2,c3]
