@@ -1,36 +1,39 @@
-{-# language DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Global where
 
 import Data.Data (Data)
+
 import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import FlexTask.Generic.Form
 
-newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]} deriving (Eq, Show)
 
-data Submission = Submission {
-    steps :: [Maybe CharAnswer],
-    output :: SingleChoiceSelection,
-    model :: Maybe [(Char,TruthValue)]
+newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]}
+    deriving (Eq, Show)
+
+data Submission = Submission
+    { steps :: [Maybe CharAnswer]
+    , output :: SingleChoiceSelection
+    , model :: Maybe [(Char,TruthValue)]
     }
 
-data Solution = Solution {
-    correctSteps :: [(Int, [Char])],
-    correctOutput :: Bool,
-    correctModel :: [(Char,Bool)]
+data Solution = Solution
+    { correctSteps :: [(Int, [Char])]
+    , correctOutput :: Bool
+    , correctModel :: [(Char,Bool)]
     } deriving Data
 
-data TaskData = TaskData {
-    formula :: SynTree BinOp Char,
-    solution :: Solution
+data TaskData = TaskData
+    { formula :: SynTree BinOp Char
+    , solution :: Solution
     } deriving Data
+
 
 =============================================
 
 
 module TaskSettings where
-
 
 import Data.List ((\\))
 
@@ -45,9 +48,6 @@ atomics = getAllAtomics spirit
 stepFields :: Int
 stepFields =  length atomics + extra
 
-{- - - configuration constants - - -}
-
--- v1, v2, custom list of clauses
 spirit :: [SynTree BinOp Char]
 spirit = v3
 
@@ -61,8 +61,6 @@ printFeedbackImmediately = True
 minimumPoints :: Double
 minimumPoints = 0.25
 
-{- - - - - - - - - - - - - - - - - -}
-
 validateSettings :: OutputCapable m => LangM m
 validateSettings
     | not (isHornFormulaI (foldr1 (Binary And) spirit)) = refuse $ indent $ text
@@ -75,26 +73,30 @@ validateSettings
             "für die atomaren Aussagen verwendet werden."
     | otherwise = pure ()
 
+
 =============================================
 
 
-{-# language NamedFieldPuns #-}
-{-# language OverloadedStrings #-}
-{-# Language QuasiQuotes #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module TaskData (getTask) where
 
-
 import Data.String.Interpolate (i)
-import Data.Text               (Text, pack)
+import Data.Text (Text, pack)
 import Test.QuickCheck.Gen
-import Yesod                   (RenderMessage(..), SomeMessage(..), fieldSettingsLabel)
+import Yesod
+    ( RenderMessage(..)
+    , SomeMessage(..)
+    , fieldSettingsLabel
+    )
 
-import FlexTask.FormUtil       (getFormData)
+import FlexTask.FormUtil (getFormData)
 import FlexTask.Generic.Form
-import FlexTask.Types          (HtmlDict)
-import FlexTask.YesodConfig    (Rendered, Widget)
-import Horn                    (makeHornFormula, startAlgorithm)
+import FlexTask.Types (HtmlDict)
+import FlexTask.YesodConfig (Rendered, Widget)
+import Horn (makeHornFormula, startAlgorithm)
 
 import Global
 import TaskSettings
@@ -114,18 +116,16 @@ instance RenderMessage a Label where
     renderMessage _ _        Satisfiable   = "satisfiable"
     renderMessage _ _        Unsatisfiable = "unsatisfiable"
 
-
 getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
 getTask = do
     formula <- makeHornFormula spirit extra
     let (steps, output, model) = startAlgorithm formula
-        solution = Solution {
-            correctSteps = steps,
-            correctOutput = output,
-            correctModel = model
-        }
+        solution = Solution
+            { correctSteps = steps
+            , correctOutput = output
+            , correctModel = model
+            }
     pure (TaskData {formula, solution}, checkers, getFormData form)
-
 
 form :: Rendered Widget
 form = formify (Nothing :: Maybe ([Maybe String], SingleChoiceSelection, Maybe String))
@@ -136,20 +136,17 @@ form = formify (Nothing :: Maybe ([Maybe String], SingleChoiceSelection, Maybe S
         , SomeMessage Unsatisfiable
         ]
     , single (fieldSettingsLabel Model)
-    ]]
-
+    ] ]
 
 checkers :: String
 checkers = [i|
 
 {-\# OPTIONS_GHC -Wno-unused-record-wildcards \#-}
-
-{-\# language ApplicativeDo \#-}
-{-\# language RecordWildCards \#-}
+{-\# LANGUAGE ApplicativeDo \#-}
+{-\# LANGUAGE RecordWildCards \#-}
 {-\# LANGUAGE LambdaCase \#-}
 
 module Check (checkSyntax, checkSemantics) where
-
 
 import Data.Foldable (traverse_)
 import Data.List (intersperse, intercalate, sort, (\\\\))
@@ -163,12 +160,13 @@ import Control.OutputCapable.Blocks
 import FlexTask.Generic.Form (getAnswer)
 import Horn
 import LogicTasks.Formula (TruthValue(..))
-import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Types (BinOp(..), SynTree(..))
 import Trees.Print (simplestDisplay)
 
 import qualified Data.List.Extra as List (replace)
 
 import Global
+
 
 checking :: OutputCapable m => Bool -> State (Map Language String) () -> LangM m
 checking condition msg = when condition $ refuse $ indent $ translate msg
@@ -294,16 +292,16 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
         pure ()
 |]
 
+
 =============================================
 
-{-# Language ApplicativeDo #-}
-{-# Language RecordWildCards #-}
+
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Description (description) where
 
-
 import Control.OutputCapable.Blocks
-
 import Trees.Print (simplestDisplay)
 
 import Global
@@ -341,30 +339,28 @@ description _ TaskData{..} = do
 =============================================
 
 
-{-# language NamedFieldPuns #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Parse (parseSubmission) where
 
-
 import Text.Parsec
 
-import Control.OutputCapable.Blocks (
-  LangM',
-  ReportT,
-  OutputCapable,
+import Control.OutputCapable.Blocks
+  ( LangM'
+  , ReportT
+  , OutputCapable
   )
 import Control.OutputCapable.Blocks.Generic (($>>=))
-import FlexTask.Generic.Parse  (
-  Parse(..),
-  escaped,
-  formParser,
-  parseWithOrReport,
-  reportWithFieldNumber
+import FlexTask.Generic.Parse
+  ( Parse(..)
+  , escaped
+  , formParser
+  , parseWithOrReport
+  , reportWithFieldNumber
   )
 import LogicTasks.Formula (TruthValue(..))
 
 import qualified LogicTasks.Parsing as P
-
 
 import Global
 
@@ -390,7 +386,6 @@ instance Parse [(Char,TruthValue)] where
         t <- P.parser
         spaces
         pure (c,t)
-
 
 parseSubmission ::
   (Monad m, OutputCapable (ReportT o m))
