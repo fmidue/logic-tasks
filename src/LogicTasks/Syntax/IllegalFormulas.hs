@@ -138,7 +138,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
                 german "Nicht alle Operatoren verfügen über gültige Teilformeln."
                 english "Not all operators have valid subformulas."
               MissingOperator -> do
-                german "Nicht alle Teilformen werden verknüpft."
+                german "Nicht alle Teilformeln werden verknüpft."
                 english "There are uncombined subformulas."
               MissingOperand -> do
                 german "Nicht alle Operatoren verfügen über die korrekte Anzahl an Teilformeln."
