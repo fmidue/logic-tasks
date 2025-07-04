@@ -4,7 +4,8 @@
 
 module LogicTasks.Syntax.TreeToFormula where
 
-
+import Capabilities.Cache (cache)
+import Capabilities.Cache.IO ()
 import Control.Monad.IO.Class(MonadIO (liftIO))
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
@@ -19,7 +20,15 @@ import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
-import LogicTasks.Helpers (cacheIO, extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
+import LogicTasks.Helpers (
+  arrowsKey,
+  basicOpKey,
+  example,
+  extra,
+  instruct,
+  keyHeading,
+  reject,
+  )
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
@@ -151,5 +160,5 @@ outputImage path tree = do
 
 
 cacheTree :: String -> FilePath -> IO FilePath
-cacheTree tree path = cacheIO path ext "tree-" tree outputImage
+cacheTree tree path = cache path ext "tree-" tree outputImage
   where ext = showDigest (sha1 . fromString $ tree) ++ ".svg"

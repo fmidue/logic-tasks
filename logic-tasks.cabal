@@ -89,7 +89,6 @@ library
     , base >=4.7 && <5
     , bytestring
     , containers
-    , directory
     , extra
     , flex-tasks
     , hspec
@@ -97,7 +96,7 @@ library
     , math-functions
     , minisat-solver
     , mtl
-    , output-blocks >=0.2
+    , output-blocks >=0.5.0.1
     , parsec
     , pretty-simple
     , random
@@ -141,7 +140,6 @@ test-suite src-test
     , base >=4.7 && <5
     , bytestring
     , containers
-    , directory
     , extra
     , flex-tasks
     , hspec
@@ -150,7 +148,7 @@ test-suite src-test
     , math-functions
     , minisat-solver
     , mtl
-    , output-blocks >=0.2
+    , output-blocks >=0.5.0.1
     , parsec
     , pretty-simple
     , random
