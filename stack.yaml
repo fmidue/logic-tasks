@@ -19,9 +19,8 @@ extra-deps:
       - flex-tasks
       - flex-tasks-processing
   - git: https://github.com/fmidue/autotool-capabilities.git
-    commit: fa712df18cba66ce45acfbd3c2a5fbf7ba756dbb
+    commit: abf9b15ad431e517ae0700ad9dfb6f6941e10538
     subdirs:
       - autotool-capabilities
       - autotool-capabilities-io-instances
   - diagrams-graphviz-1.4.1.1@sha256:9a2bf7b7c9c86ab28228d36017c70cf1b53c95dae4004fc71e81fbc702098e9f,1495
-
