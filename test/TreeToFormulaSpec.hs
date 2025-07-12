@@ -1,5 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module TreeToFormulaSpec where
+
+import Capabilities.Cache.IO ()
+import Capabilities.LatexSvg.IO ()
 import Test.Hspec (Spec, describe, it)
 import Control.OutputCapable.Blocks (LangM)
 import TestHelpers (doesNotRefuse, doesNotRefuseIO)

@@ -5,6 +5,8 @@
 module LogicTasks.Syntax.SubTreeSet where
 
 
+import Capabilities.Cache (MonadCache)
+import Capabilities.LatexSvg (MonadLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
@@ -34,7 +36,6 @@ import Trees.Print (display, transferToPicture)
 import Trees.Helpers
 import Control.Monad (when)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
-import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaListSymbolParser)
@@ -149,7 +150,7 @@ partialGrade' SubTreeInst{..} fs
 
 
 completeGrade
-  :: (OutputCapable m, MonadIO m, Alternative m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m)
   => FilePath
   -> SubTreeInst
   -> Delayed [FormulaAnswer]
@@ -157,7 +158,7 @@ completeGrade
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
-  :: (OutputCapable m, MonadIO m, Alternative m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m)
   => FilePath
   -> SubTreeInst
   -> [FormulaAnswer]
@@ -184,7 +185,7 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
         german "mit zugehörigem Teil-Syntaxbaum:"
         english "with associated partial syntax tree:"
 
-      image $=<< liftIO $ cacheTree (transferToPicture x) path
+      image $=<< cacheTree (transferToPicture x) path
       pure ()
 
     pure ()
