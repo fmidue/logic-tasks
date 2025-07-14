@@ -2,6 +2,8 @@
 
 module LegalPropositionSpec (spec) where
 
+import Capabilities.Cache.IO ()
+import Capabilities.LatexSvg.IO ()
 import Data.Either (isLeft, isRight)
 import Data.List ((\\))
 import Data.Char (isLetter)

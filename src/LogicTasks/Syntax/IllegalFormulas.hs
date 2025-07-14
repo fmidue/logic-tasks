@@ -6,6 +6,8 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
+import Capabilities.Cache (MonadCache)
+import Capabilities.LatexSvg (MonadLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (code, image, indent),
   LangM,
@@ -32,7 +34,6 @@ import Tasks.LegalProposition.Config (
   )
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Data.Maybe (isJust, fromMaybe)
@@ -90,7 +91,7 @@ partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length fo
 
 -- jscpd:ignore-start
 completeGrade
-  :: (OutputCapable m, MonadIO m, Alternative m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m)
   => FilePath
   -> LegalPropositionInst
   -> [Int]
@@ -120,7 +121,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
             english "is correctly formed. "
             english "The corresponding syntax tree looks like this:"
 
-          image $=<< liftIO $ cacheTree (transferToPicture tree) path
+          image $=<< cacheTree (transferToPicture tree) path
 
           pure ()
         Erroneous err -> do

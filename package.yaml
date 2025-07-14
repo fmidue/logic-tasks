@@ -3,6 +3,7 @@ name: logic-tasks
 version: 0.1.0.0
 
 dependencies:
+  - autotool-capabilities
   - base >= 4.7 && < 5
   - extra
   - mtl
@@ -116,4 +117,5 @@ tests:
       - -Wunused-top-binds
       - -Werror
     dependencies:
+      - autotool-capabilities-io-instances
       - logic-tasks

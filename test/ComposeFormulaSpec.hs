@@ -2,6 +2,8 @@
 {-# LANGUAGE RecordWildCards #-}
 module ComposeFormulaSpec where
 
+import Capabilities.Cache.IO ()
+import Capabilities.LatexSvg.IO ()
 import Test.Hspec
 import Tasks.ComposeFormula.Config (
   ComposeFormulaConfig(..),

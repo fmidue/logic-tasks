@@ -5,7 +5,8 @@
 module LogicTasks.Syntax.ComposeFormula where
 
 
-import Control.Monad.IO.Class(MonadIO (liftIO))
+import Capabilities.Cache (MonadCache)
+import Capabilities.LatexSvg (MonadLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
@@ -38,7 +39,7 @@ import qualified Data.Map as Map (fromList)
 import Control.Applicative (Alternative)
 
 
-description :: (OutputCapable m, MonadIO m) => Bool -> FilePath -> ComposeFormulaInst -> LangM m
+description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => Bool -> FilePath -> ComposeFormulaInst -> LangM m
 description inputHelp path ComposeFormulaInst{..} = do
     instruct $ do
       english $ "Imagine that the two displayed " ++ eTreesOrFormulas ++ " are hung below a root node with operator "
@@ -54,7 +55,7 @@ description inputHelp path ComposeFormulaInst{..} = do
 
     case leftTreeImage of
       Nothing -> paragraph $ code $ display leftTree
-      Just image' -> image $=<< liftIO $ cacheTree image' path
+      Just image' -> image $=<< cacheTree image' path
 
     instruct $ do
       english $ "This is the second " ++ eTreeOrFormula ++ ":"
@@ -62,7 +63,7 @@ description inputHelp path ComposeFormulaInst{..} = do
 
     case rightTreeImage of
       Nothing -> paragraph $ code $ display rightTree
-      Just image' -> image $=<< liftIO $ cacheTree image' path
+      Just image' -> image $=<< cacheTree image' path
 
     instruct $ do
       english $ "Build the corresponding formulas for the two resulting trees" ++ onListsEng ++ ". "
@@ -186,11 +187,11 @@ partialGrade' ComposeFormulaInst{..} sol
       treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
       treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
 
-completeGrade :: (OutputCapable m, MonadIO m, Alternative m) =>
+completeGrade :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m) =>
   FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> Rated m
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
-completeGrade' :: (OutputCapable m, MonadIO m, Alternative m) =>
+completeGrade' :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m) =>
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> Rated m
 completeGrade' path ComposeFormulaInst{..} sol = reRefuse (
     multipleChoice
@@ -205,7 +206,7 @@ completeGrade' path ComposeFormulaInst{..} sol = reRefuse (
         german "Die Syntaxbäume zu Ihren eingegebenen Formeln sehen so aus:"
 
       for_ parsedSol $ \synTree ->
-        image $=<< liftIO $ cacheTree (transferToPicture synTree) path
+        image $=<< cacheTree (transferToPicture synTree) path
 
       when showSolution $
         example (concat ["[", display lrTree, ",", display rlTree, "]"]) $ do
