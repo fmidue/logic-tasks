@@ -40,7 +40,7 @@ small = ComposeFormulaConfig
     }
   , treeDisplayModes = (TreeDisplay, TreeDisplay)
   , extraText = Just (listToFM
-                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
                         , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])
   , printSolution = True
@@ -70,7 +70,7 @@ task03 = ComposeFormulaConfig
     }
   , treeDisplayModes = (TreeDisplay, TreeDisplay)
   , extraText = Just (listToFM
-                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
                         , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])
   , printSolution = True

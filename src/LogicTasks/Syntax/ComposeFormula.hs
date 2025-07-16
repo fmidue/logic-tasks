@@ -98,9 +98,9 @@ description inputHelp path ComposeFormulaInst{..} = do
         treeOrFormula (Just _) (Just _) = ("Baum", "tree")
         treeOrFormula _ _ = ("Baum/Formel", "tree/formula")
         (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
-        treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
+        treesOrFormulas Nothing Nothing = ("Formeln", "formulas")
         treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
-        treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
+        treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas")
         exampleCode | unicodeAllowed = do
                       english "[(A ∨ ¬B) and C, C and (A or not B)]"
                       german "[(A ∨ ¬B) und C, C und (A oder nicht B)]"
@@ -108,11 +108,11 @@ description inputHelp path ComposeFormulaInst{..} = do
                       english "[(A or not B) and C, C and (A or not B)]"
                       german "[(A oder nicht B) und C, C und (A oder nicht B)]"
         (onListsEng, onListsGer)
-          | inputHelp = (" and put them into a list", " und geben Sie diese in einer Liste an") -- no-spell-check
+          | inputHelp = (" and put them into a list", " und geben Sie diese in einer Liste an")
           | otherwise = ("", "")
         (onOrderEng,onOrderGer)
-          | inputHelp = (" in the list ", "in der Liste stehen") -- no-spell-check
-          | otherwise = (" ", "angegeben werden") -- no-spell-check
+          | inputHelp = (" in the list ", "in der Liste stehen")
+          | otherwise = (" ", "angegeben werden")
 
 
 verifyInst :: OutputCapable m => ComposeFormulaInst -> LangM m
@@ -183,9 +183,9 @@ partialGrade' ComposeFormulaInst{..} sol
       einerEinem' (Just _) (Just _) = "einem"
       einerEinem' _ _ = "einem/einer"
       (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
-      treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
+      treesOrFormulas Nothing Nothing = ("Formeln", "formulas")
       treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
-      treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
+      treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas")
 
 completeGrade :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m) =>
   FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> Rated m
