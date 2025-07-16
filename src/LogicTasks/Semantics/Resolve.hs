@@ -130,7 +130,7 @@ baseDescription howToInput howToHandleNumbers exampleSet exampleFormula Resoluti
 
       (gerSet,engSet)
         | usesSetNotation =
-          ( "Mengenschreibweise einer " -- no-spell-check
+          ( "Mengenschreibweise einer "
           , "set notation of a "
           )
         | otherwise = ( "", "")
@@ -196,10 +196,10 @@ exampleCode unicode oneInput
         , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}      = 9"
         ]
       german $ unlines
-        [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A       = 6" -- no-spell-check
-        , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: ¬A ∨ ¬B = 7" -- no-spell-check
-        , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A = 8" -- no-spell-check
-        , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}      = 9" -- no-spell-check
+        [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A       = 6"
+        , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: ¬A ∨ ¬B = 7"
+        , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A = 8"
+        , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}      = 9"
         ]
   | otherwise = do
       english $ unlines
@@ -209,10 +209,10 @@ exampleCode unicode oneInput
         , "Step 4: First Clause: A, Second Clause: not A, Resolvent: {}       = 9"
         ]
       german $ unlines
-        [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A          = 6" -- no-spell-check
-        , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: -A oder -B = 7" -- no-spell-check
-        , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A    = 8" -- no-spell-check
-        , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}         = 9" -- no-spell-check
+        [ "Schritt 1: Erste Klausel: 1, Zweite Klausel:       2, Resolvente: A          = 6"
+        , "Schritt 2: Erste Klausel: 3, Zweite Klausel:       4, Resolvente: -A oder -B = 7"
+        , "Schritt 3: Erste Klausel: 5, Zweite Klausel:       7, Resolvente: nicht A    = 8"
+        , "Schritt 4: Erste Klausel: A, Zweite Klausel: nicht A, Resolvente: {}         = 9"
         ]
 
 
@@ -232,10 +232,10 @@ setExample unicode oneInput
         , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}        = 9"
         ]
       german $ unlines
-        [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}       = 6" -- no-spell-check
-        , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {¬A, ¬B}  = 7" -- no-spell-check
-        , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A} = 8" -- no-spell-check
-        , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}        = 9" -- no-spell-check
+        [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}       = 6"
+        , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {¬A, ¬B}  = 7"
+        , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A} = 8"
+        , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}        = 9"
         ]
   | otherwise = do
       english $ unlines
@@ -245,10 +245,10 @@ setExample unicode oneInput
         , "Step 4: First Clause: {A}, Second Clause: {not A}, Resolvent: {}         = 9"
         ]
       german $ unlines
-        [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}          = 6" -- no-spell-check
-        , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {-A, -B}     = 7" -- no-spell-check
-        , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A}    = 8" -- no-spell-check
-        , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}           = 9" -- no-spell-check
+        [ "Schritt 1: Erste Klausel:   1, Zweite Klausel:         2, Resolvente: {A}          = 6"
+        , "Schritt 2: Erste Klausel:   3, Zweite Klausel:         4, Resolvente: {-A, -B}     = 7"
+        , "Schritt 3: Erste Klausel:   5, Zweite Klausel:         7, Resolvente: {nicht A}    = 8"
+        , "Schritt 4: Erste Klausel: {A}, Zweite Klausel: {nicht A}, Resolvente: {}           = 9"
         ]
 
 

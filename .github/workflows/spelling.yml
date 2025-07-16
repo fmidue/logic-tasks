@@ -49,17 +49,25 @@ jobs:
     steps:
       - name: check-spelling
         id: spelling
-        uses: check-spelling/check-spelling@v0.0.24
+        uses: check-spelling/check-spelling@v0.0.25
         with:
           suppress_push_for_open_pull_request: 1
           checkout: true
-          spell_check_this: check-spelling/spell-check-this@prerelease
+          spell_check_this: check-spelling/spell-check-this@v0.0.25
           post_comment: 0
           experimental_apply_changes_via_bot: 1
           extra_dictionaries:
             cspell:haskell/dict/haskell.txt
             cspell:filetypes/filetypes.txt
             cspell:software-terms/dict/softwareTerms.txt
+            cspell:de_DE/src/German_de_DE.dic
+            cspell:de_DE/src/hunspell/index.dic
+          ignore-pattern: '[^\p{Ll}\p{Lm}\p{Lt}\p{Lu}]'
+          upper-pattern: '[\p{Lu}\p{Lt}\p{Lm}]'
+          lower-pattern: '[\p{Ll}\p{Lm}]'
+          not-lower-pattern: '[^\p{Ll}\p{Lm}]'
+          not-upper-or-lower-pattern: '[^\p{Lu}\p{Lt}\p{Lm}]'
+          punctuation-pattern: "'"
 
   comment:
     name: Report
@@ -71,10 +79,10 @@ jobs:
     if: (success() || failure()) && needs.spelling.outputs.followup
     steps:
       - name: comment
-        uses: check-spelling/check-spelling@v0.0.24
+        uses: check-spelling/check-spelling@v0.0.25
         with:
           checkout: true
-          spell_check_this: check-spelling/spell-check-this@prerelease
+          spell_check_this: check-spelling/spell-check-this@v0.0.25
           task: ${{ needs.spelling.outputs.followup }}
           experimental_apply_changes_via_bot: 1
 
@@ -94,7 +102,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: apply spelling updates
-        uses: check-spelling/check-spelling@v0.0.24
+        uses: check-spelling/check-spelling@v0.0.25
         with:
           experimental_apply_changes_via_bot: 1
           checkout: true

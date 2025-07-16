@@ -68,9 +68,9 @@ data DecideChoice
   deriving (Show,Ord,Eq,Enum,Bounded,Generic)
 
 showChoice :: Language -> DecideChoice -> String
-showChoice German Correct = "Richtig"         -- no-spell-check
-showChoice German Wrong = "Fehlerhaft"        -- no-spell-check
-showChoice German NoAnswer = "Keine Antwort"  -- no-spell-check
+showChoice German Correct = "Richtig"
+showChoice German Wrong = "Fehlerhaft"
+showChoice German NoAnswer = "Keine Antwort"
 showChoice English Correct = "Correct"
 showChoice English Wrong = "Wrong"
 showChoice English NoAnswer = "No answer"

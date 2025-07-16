@@ -120,11 +120,11 @@ data Label = Step | First | Second | Resolvent
 
 instance RenderMessage FlexForm Label where
   renderMessage _   ("en":_) Step      = "Step"
-  renderMessage _   _        Step      = "Schritt" -- no-spell-check
+  renderMessage _   _        Step      = "Schritt"
   renderMessage _   ("en":_) First     = "First Clause"
-  renderMessage _   _        First     = "Erste Klausel" -- no-spell-check
+  renderMessage _   _        First     = "Erste Klausel"
   renderMessage _   ("en":_) Second    = "Second Clause"
-  renderMessage _   _        Second    = "Zweite Klausel" -- no-spell-check
+  renderMessage _   _        Second    = "Zweite Klausel"
   renderMessage _   _        Resolvent = "Resolvent"
 
 
