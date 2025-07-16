@@ -90,7 +90,7 @@ import TaskSettings                     (task03)
 data InputLabel = First | Second
 
 instance RenderMessage app InputLabel where
-  renderMessage _ ("en":_) First  = "First Formula This is a test"
+  renderMessage _ ("en":_) First  = "First Formula"
   renderMessage _ _        First  = "Erste Formel"
   renderMessage _ ("en":_) Second = "Second Formula"
   renderMessage _ _        Second = "Zweite Formel"

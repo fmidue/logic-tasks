@@ -11,8 +11,6 @@ Dnf
 Dnfs
 DNFs
 DSL
-einem
-einer
 equi
 fmap
 fmidue
