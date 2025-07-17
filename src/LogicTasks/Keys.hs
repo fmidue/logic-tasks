@@ -2,6 +2,7 @@
 module LogicTasks.Keys (
   arrowsKey,
   basicOpKey,
+  keyCollapsible,
   keyHeading,
   negationKey,
   orKey,

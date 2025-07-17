@@ -9,6 +9,7 @@ import Control.OutputCapable.Blocks (
   LangM,
   Language,
   OutputCapable,
+  collapsed,
   english,
   german,
   translate,
@@ -131,3 +132,8 @@ arrowsKey = do
     code "<=>"
     pure ()
   pure ()
+
+keyCollapsible :: OutputCapable m => LangM m -> LangM m
+keyCollapsible = collapsed True $ do
+        english "Input Options"
+        german "Eingabemöglichkeiten"
