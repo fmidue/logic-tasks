@@ -21,6 +21,13 @@
 | Aussagenlogik/Semantik/Resolution/LogicResolutionComplete           |   x   |   x    |  x   |                           | `Logic.Semantics.ResolutionFull`                                                                            | [`LogicTasks.Semantics.Resolve`](src/LogicTasks/Semantics/Resolve.hs)                                                                                      |
 | Aussagenlogik/Semantik/Resolution/PrologResolutionStep              |       |   x    |  x   |                           | `Logic.Semantics.ResolutionStepProlog`                                                                      | [`LogicTasks.Semantics.Prolog`](src/LogicTasks/Semantics/Prolog.hs)                                                                                        |
 
+## Flex-Tasks
+
+Directory `flex` contains some logic themed [Flex-Tasks](https://github.com/fmidue/flex-tasks) using code from this repository. Namely:
+
+- [composeFormula](flex/composeFormula.flex): Mostly identical to `ComposeFormula`, but with two separate text inputs instead of one (in Autotool).
+- [proplogic](flex/proplogic.flex): Logic puzzle based on a written exam task, not related to any of the ones here.
+
 ## Testing a module
 
 You can use the `testModule` function in order to test a module. A sample call looks like this:
