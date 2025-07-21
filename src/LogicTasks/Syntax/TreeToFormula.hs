@@ -5,7 +5,7 @@
 module LogicTasks.Syntax.TreeToFormula where
 
 import Capabilities.Cache (MonadCache, cache)
-import Capabilities.LatexSvg (MonadLatexSvg, writeLatexSvg)
+import Capabilities.LatexSvg (MonadLatexSvg, renderLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
@@ -137,7 +137,7 @@ completeGrade' path inst sol
 
 
 cacheTree :: (MonadCache m, MonadLatexSvg m) => String -> FilePath -> m FilePath
-cacheTree tree path = cache path ext "tree-" withTreeEnv $ writeLatexSvg Nothing $ Just treeOptions
+cacheTree tree path = cache path ext "tree-" withTreeEnv $ renderLatexSvg Nothing $ Just treeOptions
   where
     ext = showDigest (sha1 . fromString $ tree) ++ ".svg"
     withTreeEnv = "\\begin{forest}" ++ tree ++ "\\end{forest}"
