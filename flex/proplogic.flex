@@ -128,7 +128,7 @@ getTask = fromGen $ do
     let
       zipped = [(a, A), (b, B), (c, C), (d, D)]
       coming = [ n | (True,n) <- zipped ]
-    pure ((legend, hints, coming), checkers formula, getFormData (form names))
+    pure ((legend, hints, coming), checkers formula, form names)
   where
     form :: (String,String,String,String) -> Rendered Widget
     form n = addCss formulaCss $
