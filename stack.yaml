@@ -10,16 +10,16 @@ extra-deps:
   - minisat-solver-0.1
   - latex-svg-image-0.2
   - git: https://github.com/fmidue/output-blocks.git
-    commit: e97c5f06a17c5b99f0bed2a733bfbf974304adf3
+    commit: 77d9867b1d872795064086836e1b0cf24bcfd296
     subdirs:
       - output-blocks
   - git: https://github.com/fmidue/flex-tasks.git
-    commit: b02e270db57bac72471a4732bbb2e87a1fb76d6d
+    commit: 4ae738feee22ad11e4836b64eced903249ecfe48
     subdirs:
       - flex-tasks
       - flex-tasks-processing
   - git: https://github.com/fmidue/autotool-capabilities.git
-    commit: d291abc1c1be8c18a464cfc04e2abe32c6dffaec
+    commit: 8067088f23759d787c049677a26868df26c1676f
     subdirs:
       - autotool-capabilities
       - autotool-capabilities-io-instances

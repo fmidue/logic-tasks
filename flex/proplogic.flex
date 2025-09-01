@@ -1,3 +1,8 @@
+
+taskName: Concert
+
+============================================
+
 {-# language DeriveDataTypeable #-}
 
 module Global where
@@ -64,6 +69,7 @@ validateSettings
 module TaskData (getTask) where
 
 
+import Control.Monad.Random    (MonadRandom)
 import Data.Char               (digitToInt)
 import Data.Foldable           (toList)
 import Data.List               (transpose)
@@ -74,7 +80,6 @@ import FlexTask.FormUtil (
   ($$>),
   addCss,
   addCssClass,
-  getFormData,
   universalLabel,
   )
 import FlexTask.Generic.Form (
@@ -86,7 +91,7 @@ import FlexTask.Generic.Form (
   single,
   buttonsEnum
   )
-import FlexTask.Types          (HtmlDict)
+import FlexTask.GenUtil        (fromGen)
 import FlexTask.YesodConfig    (Rendered, Widget)
 import LogicTasks.Forms        (tableForm)
 import LogicTasks.Formula      (TruthValue(..))
@@ -115,8 +120,8 @@ getParticipants :: Gen [Bool]
 getParticipants = vectorOf 4 arbitrary `suchThat` \bs -> or bs && not (and bs)
 
 
-getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
-getTask = do
+getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
+getTask = fromGen $ do
     [a,b,c,d] <- getParticipants
     names <- getNames
     (formula, legend, hints) <- formulaAndHints a b c d names

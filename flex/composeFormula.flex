@@ -1,4 +1,7 @@
-{-# OPTIONS_GHC -Wno-unused-imports #-}
+
+taskName: ComposeFormula
+
+=============================================
 
 module Global where
 
@@ -73,14 +76,12 @@ validateSettings = checkComposeFormulaConfig task03
 
 module TaskData where
 
+import Control.Monad.Random             (MonadRandom)
 import Data.String.Interpolate          (i)
-import Data.Text                        (Text)
-import FlexTask.FormUtil                (getFormData)
 import FlexTask.Generic.Form
-import FlexTask.Types                   (HtmlDict)
+import FlexTask.GenUtil                 (fromGen)
 import FlexTask.YesodConfig             (Rendered, Widget)
 import Tasks.ComposeFormula.Quiz        (generateComposeFormulaInst)
-import Test.QuickCheck.Gen              (Gen)
 import Yesod                            (RenderMessage(..), fieldSettingsLabel)
 
 import Global                           (TaskData)
@@ -96,10 +97,10 @@ instance RenderMessage app InputLabel where
   renderMessage _ _        Second = "Zweite Formel"
 
 
-getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
-getTask = do
+getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
+getTask = fromGen $ do
     inst <- generateComposeFormulaInst task03
-    pure (inst, checkers, getFormData form)
+    pure (inst, checkers, form)
 
 fields :: [[FieldInfo]]
 fields = [[list Horizontal $ map fieldSettingsLabel [First, Second]]]
