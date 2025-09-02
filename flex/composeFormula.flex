@@ -6,9 +6,8 @@ taskName: ComposeFormula
 module Global where
 
 
-import Data.Map                         (fromList)
-import Tasks.ComposeFormula.Config      (ComposeFormulaInst(..))
-import Trees.Types                      (BinOp(..), SynTree(..), TreeFormulaAnswer)
+import Tasks.ComposeFormula.Config      (ComposeFormulaInst)
+import Trees.Types                      (TreeFormulaAnswer)
 
 
 type Submission = [TreeFormulaAnswer]
