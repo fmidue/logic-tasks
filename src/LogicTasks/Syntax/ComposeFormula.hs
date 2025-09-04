@@ -5,14 +5,22 @@
 module LogicTasks.Syntax.ComposeFormula where
 
 
-import Control.Monad.IO.Class(MonadIO (liftIO))
+import Capabilities.Cache (MonadCache)
+import Capabilities.LatexSvg (MonadLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
   ($=<<),
   english,
-  german, translate, localise, translations,
+  german,
+  translate,
+  localise,
+  translations,
+  reRefuse,
+  Rated,
+  multipleChoice,
+  ArticleToUse (IndefiniteArticle),
   )
 import Data.Maybe (fromJust, isNothing)
 
@@ -27,11 +35,11 @@ import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Formula.Parsing (Parse(parser), formulaListSymbolParser)
 import Formula.Parsing.Delayed (Delayed, withDelayedSucceeding, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn)
+import qualified Data.Map as Map (fromList)
+import Control.Applicative (Alternative)
 
 
-
-
-description :: (OutputCapable m, MonadIO m) => Bool -> FilePath -> ComposeFormulaInst -> LangM m
+description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => Bool -> FilePath -> ComposeFormulaInst -> LangM m
 description inputHelp path ComposeFormulaInst{..} = do
     instruct $ do
       english $ "Imagine that the two displayed " ++ eTreesOrFormulas ++ " are hung below a root node with operator "
@@ -47,7 +55,7 @@ description inputHelp path ComposeFormulaInst{..} = do
 
     case leftTreeImage of
       Nothing -> paragraph $ code $ display leftTree
-      Just image' -> image $=<< liftIO $ cacheTree image' path
+      Just image' -> image $=<< cacheTree image' path
 
     instruct $ do
       english $ "This is the second " ++ eTreeOrFormula ++ ":"
@@ -55,7 +63,7 @@ description inputHelp path ComposeFormulaInst{..} = do
 
     case rightTreeImage of
       Nothing -> paragraph $ code $ display rightTree
-      Just image' -> image $=<< liftIO $ cacheTree image' path
+      Just image' -> image $=<< cacheTree image' path
 
     instruct $ do
       english $ "Build the corresponding formulas for the two resulting trees" ++ onListsEng ++ ". "
@@ -90,9 +98,9 @@ description inputHelp path ComposeFormulaInst{..} = do
         treeOrFormula (Just _) (Just _) = ("Baum", "tree")
         treeOrFormula _ _ = ("Baum/Formel", "tree/formula")
         (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
-        treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
+        treesOrFormulas Nothing Nothing = ("Formeln", "formulas")
         treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
-        treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
+        treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas")
         exampleCode | unicodeAllowed = do
                       english "[(A ∨ ¬B) and C, C and (A or not B)]"
                       german "[(A ∨ ¬B) und C, C und (A oder nicht B)]"
@@ -100,11 +108,11 @@ description inputHelp path ComposeFormulaInst{..} = do
                       english "[(A or not B) and C, C and (A or not B)]"
                       german "[(A oder nicht B) und C, C und (A oder nicht B)]"
         (onListsEng, onListsGer)
-          | inputHelp = (" and put them into a list", " und geben Sie diese in einer Liste an") -- no-spell-check
+          | inputHelp = (" and put them into a list", " und geben Sie diese in einer Liste an")
           | otherwise = ("", "")
         (onOrderEng,onOrderGer)
-          | inputHelp = (" in the list ", "in der Liste stehen") -- no-spell-check
-          | otherwise = (" ", "angegeben werden") -- no-spell-check
+          | inputHelp = (" in the list ", "in der Liste stehen")
+          | otherwise = (" ", "angegeben werden")
 
 
 verifyInst :: OutputCapable m => ComposeFormulaInst -> LangM m
@@ -175,33 +183,43 @@ partialGrade' ComposeFormulaInst{..} sol
       einerEinem' (Just _) (Just _) = "einem"
       einerEinem' _ _ = "einem/einer"
       (gTreesOrFormulas, eTreesOrFormulas) = treesOrFormulas leftTreeImage rightTreeImage
-      treesOrFormulas Nothing Nothing = ("Formeln", "formulas") -- no-spell-check
+      treesOrFormulas Nothing Nothing = ("Formeln", "formulas")
       treesOrFormulas (Just _) (Just _) = ("Bäume", "trees")
-      treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas") -- no-spell-check
+      treesOrFormulas _ _ = ("Bäume/Formeln", "trees/formulas")
 
-completeGrade :: (OutputCapable m, MonadIO m) =>
-  FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
+completeGrade :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m) =>
+  FilePath -> ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> Rated m
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
-completeGrade' :: (OutputCapable m, MonadIO m) =>
-  FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
-completeGrade' path ComposeFormulaInst{..} sol
-  | lrTree `notElem` parsedSol || rlTree `notElem` parsedSol = refuse $ do
-    instruct $ do
-      english "Your submission is not correct. The syntax trees for your entered formulas look like this:"
-      german "Ihre Abgabe ist nicht die korrekte Lösung. Die Syntaxbäume zu Ihren eingegebenen Formeln sehen so aus:"
+completeGrade' :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m) =>
+  FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> Rated m
+completeGrade' path ComposeFormulaInst{..} sol = reRefuse (
+    multipleChoice
+      IndefiniteArticle
+      what
+      Nothing
+      solution
+      parsedSol
+    ) $ when notCorrect $ do
+      instruct $ do
+        english "The syntax trees for your entered formulas look like this:"
+        german "Die Syntaxbäume zu Ihren eingegebenen Formeln sehen so aus:"
 
-    for_ parsedSol $ \synTree ->
-      image $=<< liftIO $ cacheTree (transferToPicture synTree) path
+      for_ parsedSol $ \synTree ->
+        image $=<< cacheTree (transferToPicture synTree) path
 
-    when showSolution $
-      example (concat ["[", display lrTree, ",", display rlTree, "]"]) $ do
-        english "A possible solution for this task is:"
-        german "Eine mögliche Lösung für diese Aufgabe ist:"
+      when showSolution $
+        example (concat ["[", display lrTree, ",", display rlTree, "]"]) $ do
+          english "A possible solution for this task is:"
+          german "Eine mögliche Lösung für diese Aufgabe ist:"
 
-    pure ()
-  | otherwise = pure ()
+      pure ()
     where
       parsedSol = map (fromJust . maybeTree) sol
       lrTree = Binary operator leftTree rightTree
       rlTree = Binary operator rightTree leftTree
+      notCorrect =  lrTree `notElem` parsedSol || rlTree `notElem` parsedSol
+      what = translations $ do
+        german "Formeln"
+        english "formulas"
+      solution = Map.fromList [(lrTree, True), (rlTree, True)]

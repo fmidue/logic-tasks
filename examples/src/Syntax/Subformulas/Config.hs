@@ -41,7 +41,7 @@ task04 = SubTreeConfig
   , subTreeAmount = 3
   , extraText = Just (listToFM
                       [ (English, "It does not matter in which order the formulas appear in the listing.")
-                      , (German, "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Auflistung stehen.") {- german -}
+                      , (German, "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Auflistung stehen.")
                       ])
   , printSolution = True
   , offerUnicodeInput = True

@@ -13,7 +13,7 @@ module LogicTasks.Forms (
 
 
 import Control.Monad.Reader             (reader)
-import Data.List                        (transpose)
+import Data.List                        (transpose, sort)
 import Data.Maybe                       (isNothing)
 import Data.Text                        (Text, pack)
 import FlexTask.Generic.Form (
@@ -38,6 +38,8 @@ import Yesod (
   textField,
   whamlet,
   )
+
+import Formula.Types (Clause)
 
 
 
@@ -118,11 +120,11 @@ data Label = Step | First | Second | Resolvent
 
 instance RenderMessage FlexForm Label where
   renderMessage _   ("en":_) Step      = "Step"
-  renderMessage _   _        Step      = "Schritt" -- no-spell-check
+  renderMessage _   _        Step      = "Schritt"
   renderMessage _   ("en":_) First     = "First Clause"
-  renderMessage _   _        First     = "Erste Klausel" -- no-spell-check
+  renderMessage _   _        First     = "Erste Klausel"
   renderMessage _   ("en":_) Second    = "Second Clause"
-  renderMessage _   _        Second    = "Zweite Klausel" -- no-spell-check
+  renderMessage _   _        Second    = "Zweite Klausel"
   renderMessage _   _        Resolvent = "Resolvent"
 
 
@@ -135,10 +137,11 @@ In that case, everything afterwards is left empty. (Filled up with triples of No
 -}
 fullResolutionForm
   :: Int -- ^ amount of input rows
-  -> [String] -- ^ pool of clauses for resolution
+  -> [Clause] -- ^ pool of clauses for resolution
+  -> (Clause -> String) -- ^ how to display the clauses
   -> [(Maybe String, Maybe String, Maybe String)] -- ^ list of values to prefill rows with
   -> Rendered Widget
-fullResolutionForm steps clauseStrings prefilledFields = addCss css $ do
+fullResolutionForm steps clauses howToShow prefilledFields = addCss css $ do
   forms <- traverse
             (\(x,(val1,val2,val3)) -> formifyComponentsFlat
               (Just (val1 ,val2, val3, Hidden x))
@@ -154,6 +157,7 @@ fullResolutionForm steps clauseStrings prefilledFields = addCss css $ do
     pure (concat fields, html extra formRows)
   where
     indexZip xs = zip xs [1 :: Int ..]
+    clauseStrings = map howToShow $ sort clauses
     firstFreeIndex = length clauseStrings +1
     rowIndices = [firstFreeIndex .. firstFreeIndex + steps]
     rowDefaults = prefilledFields ++ replicate

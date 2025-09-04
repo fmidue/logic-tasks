@@ -149,7 +149,7 @@ instance Parse TruthValue where
               where
                 parseTrue = do
                   string "1" <|> try (single "w") <|> try (single "t")
-                    <|> caseInsensitive "wahr" -- no-spell-check
+                    <|> caseInsensitive "wahr"
                     <|> caseInsensitive "true"
                   pure $ TruthValue True
                 parseFalse = do
@@ -398,14 +398,14 @@ instance Parse DecideChoice where
   parser = lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
     where
       parseCorrect = Correct <$
-          ( try (caseInsensitive "Richtig") -- no-spell-check
+          ( try (caseInsensitive "Richtig")
         <|> caseInsensitive "Correct"
           )
       parseWrong = Wrong <$
-          ( try (caseInsensitive "Fehlerhaft") -- no-spell-check
+          ( try (caseInsensitive "Fehlerhaft")
         <|> caseInsensitive "Wrong"
           )
       parseNoAnswer = NoAnswer <$
-          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort") -- no-spell-check
+          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort")
         <|> (lexeme (caseInsensitive "No") <* caseInsensitive "answer")
           )
