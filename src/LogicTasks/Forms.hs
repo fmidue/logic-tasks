@@ -2,6 +2,7 @@
 {-# language FlexibleInstances #-}
 {-# language MultiParamTypeClasses #-}
 {-# language OverloadedStrings #-}
+{-# language PatternSynonyms #-}
 {-# language QuasiQuotes #-}
 {-# language RecordWildCards #-}
 {-# language TypeApplications #-}
@@ -28,7 +29,12 @@ import FlexTask.FormUtil (
   addNameAndCssClass,
   readOnly,
   )
-import FlexTask.YesodConfig             (FlexForm, Rendered, Widget)
+import FlexTask.YesodConfig (
+  FlexForm,
+  Rendered,
+  Widget,
+  pattern Singular,
+  )
 import Yesod (
   RenderMessage(..),
   cassius,
@@ -55,7 +61,7 @@ tableForm emptyColumns rows staticStart staticEnd =
       [2..totalColumns+1]
     let tableHeaders = map snd headersRes
         tableRows = transpose $ map (map snd) columnsRes
-    pure ( [[headerName], [inputName]]
+    pure ( Singular headerName ++ Singular inputName
          , [whamlet|
               #{extra}
               <table>
