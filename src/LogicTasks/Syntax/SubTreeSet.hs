@@ -5,6 +5,8 @@
 module LogicTasks.Syntax.SubTreeSet where
 
 
+import Capabilities.Cache (MonadCache)
+import Capabilities.LatexSvg (MonadLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
@@ -34,7 +36,6 @@ import Trees.Print (display, transferToPicture)
 import Trees.Helpers
 import Control.Monad (when)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
-import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaListSymbolParser)
@@ -70,7 +71,7 @@ description withListInput SubTreeInst{..} = do
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die ürsprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
+      german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
       english "You can copy the original formula into the submission several times and remove parts, or start from scratch and use the following syntax:"
 
     keyHeading
@@ -85,8 +86,8 @@ description withListInput SubTreeInst{..} = do
           english $ exampleForm eng
 
         (ger,eng)
-          | unicodeAllowed = (["A ∨ (B ∧ C)", "B und C"] ,["A ∨ (B ∧ C)", "B and C"]) -- no-spell-check
-          | otherwise = (["A oder (B und C)", "B und C"],["A or (B and C)", "B and C"]) -- no-spell-check
+          | unicodeAllowed = (["A ∨ (B ∧ C)", "B und C"] ,["A ∨ (B ∧ C)", "B and C"])
+          | otherwise = (["A oder (B und C)", "B und C"],["A or (B and C)", "B and C"])
 
         exampleForm s
           | withListInput = "[ " ++ intercalate ", " s ++ " ]"
@@ -149,7 +150,7 @@ partialGrade' SubTreeInst{..} fs
 
 
 completeGrade
-  :: (OutputCapable m, MonadIO m, Alternative m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m)
   => FilePath
   -> SubTreeInst
   -> Delayed [FormulaAnswer]
@@ -157,7 +158,7 @@ completeGrade
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
-  :: (OutputCapable m, MonadIO m, Alternative m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m)
   => FilePath
   -> SubTreeInst
   -> [FormulaAnswer]
@@ -184,7 +185,7 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
         german "mit zugehörigem Teil-Syntaxbaum:"
         english "with associated partial syntax tree:"
 
-      image $=<< liftIO $ cacheTree (transferToPicture x) path
+      image $=<< cacheTree (transferToPicture x) path
       pure ()
 
     pure ()

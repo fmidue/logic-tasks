@@ -3,6 +3,8 @@ module LogicTasks.Keys (
   arrowsKey,
   basicOpKey,
   keyHeading,
+  negationKey,
+  orKey,
 ) where
 
 

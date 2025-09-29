@@ -3,6 +3,7 @@ name: logic-tasks
 version: 0.1.0.0
 
 dependencies:
+  - autotool-capabilities
   - base >= 4.7 && < 5
   - extra
   - mtl
@@ -15,13 +16,12 @@ dependencies:
   - parsec
   - text
   - flex-tasks
-  - output-blocks >= 0.2
+  - output-blocks >= 0.5.0.1
   - pretty-simple
   - latex-svg-image >= 0.2
   - bytestring
   - utf8-string
   - SHA
-  - directory
   - math-functions
   - yesod
   - temporary
@@ -117,4 +117,5 @@ tests:
       - -Wunused-top-binds
       - -Werror
     dependencies:
+      - autotool-capabilities-io-instances
       - logic-tasks

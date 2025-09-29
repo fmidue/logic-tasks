@@ -36,7 +36,7 @@ small = DecomposeFormulaConfig
     , minUniqueBinOperators = 2
     }
   , extraText = Just (listToFM
-                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
                         , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])
   , printSolution = True
@@ -65,7 +65,7 @@ task05 = DecomposeFormulaConfig
     , minUniqueBinOperators = 3
     }
   , extraText = Just (listToFM
-                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")  -- no-spell-check
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
                         , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])
   , printSolution = True

@@ -4,7 +4,7 @@
 
 | in Autotool inventory (on <https://autotool.fmi.uni-due.de>)        | Forms | Direct | Quiz | Supports fractional points? | Autotool module (in [`collection/src`](https://git.uni-due.de/fmi/autotool-dev/-/tree/HEAD/collection/src)) | `logic-tasks` module(s)                                                                                                                                    |
 | :------------------------------------------------------------------ | :---: | :----: | :--: | :-----------------------: | :---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Aussagenlogik/Syntax/LogicComposeFormula                            |       |        |  x   |                           | `Logic.Syntax.ComposeFormula`                                                                               | [`LogicTasks.Syntax.ComposeFormula`](src/LogicTasks/Syntax/ComposeFormula.hs), [`Tasks.ComposeFormula.Quiz`](src/Tasks/ComposeFormula/Quiz.hs)             |
+| Aussagenlogik/Syntax/LogicComposeFormula                            |       |        |  x   | x                         | `Logic.Syntax.ComposeFormula`                                                                               | [`LogicTasks.Syntax.ComposeFormula`](src/LogicTasks/Syntax/ComposeFormula.hs), [`Tasks.ComposeFormula.Quiz`](src/Tasks/ComposeFormula/Quiz.hs)             |
 | Aussagenlogik/Syntax/LogicDecomposeFormula                          |       |        |  x   |                           | `Logic.Syntax.DecomposeFormula`                                                                             | [`LogicTasks.Syntax.DecomposeFormula`](src/LogicTasks/Syntax/DecomposeFormula.hs), [`Tasks.DecomposeFormula.Quiz`](src/Tasks/DecomposeFormula/Quiz.hs)     |
 | Aussagenlogik/Syntax/LogicInvalidCnfs                               |   x   |        |  x   | x                         | `Logic.Syntax.LegalCnf`                                                                                     | [`LogicTasks.Syntax.IllegalCnfs`](src/LogicTasks/Syntax/IllegalCnfs.hs), [`Tasks.LegalNormalForm.Quiz`](src/Tasks/LegalNormalForm/Quiz.hs)                 |
 | Aussagenlogik/Syntax/LogicInvalidDnfs                               |   x   |        |  x   | x                         | `Logic.Syntax.LegalDnf`                                                                                     | [`LogicTasks.Syntax.IllegalDnfs`](src/LogicTasks/Syntax/IllegalDnfs.hs), [`Tasks.LegalNormalForm.Quiz`](src/Tasks/LegalNormalForm/Quiz.hs)                 |
@@ -20,6 +20,13 @@
 | Aussagenlogik/Semantik/Resolution/LogicResolutionStep               |   x   |   x    |  x   |                           | `Logic.Semantics.ResolutionStep`                                                                            | [`LogicTasks.Semantics.Step`](src/LogicTasks/Semantics/Step.hs)                                                                                            |
 | Aussagenlogik/Semantik/Resolution/LogicResolutionComplete           |   x   |   x    |  x   |                           | `Logic.Semantics.ResolutionFull`                                                                            | [`LogicTasks.Semantics.Resolve`](src/LogicTasks/Semantics/Resolve.hs)                                                                                      |
 | Aussagenlogik/Semantik/Resolution/PrologResolutionStep              |       |   x    |  x   |                           | `Logic.Semantics.ResolutionStepProlog`                                                                      | [`LogicTasks.Semantics.Prolog`](src/LogicTasks/Semantics/Prolog.hs)                                                                                        |
+
+## Flex-Tasks
+
+Directory `flex` contains some logic themed [Flex-Tasks](https://github.com/fmidue/flex-tasks) using code from this repository. Namely:
+
+- [composeFormula](flex/composeFormula.flex): Mostly identical to `ComposeFormula`, but with two separate text inputs instead of one (in Autotool).
+- [proplogic](flex/proplogic.flex): Logic puzzle based on a written exam task, not related to any of the ones here.
 
 ## Testing a module
 

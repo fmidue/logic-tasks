@@ -139,7 +139,7 @@ checkNormalFormConfig :: OutputCapable m => NormalFormConfig -> LangM m
 checkNormalFormConfig NormalFormConfig {..}
     | any (<1) [minClauseAmount, maxClauseAmount] =
         refuse $ indent $ translate $ do
-          german "Mindestens eines der 'amount'-Parater ist negativ."
+          german "Mindestens eines der 'amount'-Parameter ist negativ."
           english "At least one amount parameter is negative."
 
     | minClauseAmount > maxClauseAmount =
@@ -150,8 +150,8 @@ checkNormalFormConfig NormalFormConfig {..}
     | minClauseAmount * minClauseLength baseConf < length (usedAtoms baseConf) =
         refuse $ indent $ translate $ do
           german $ unlines
-            [ "Nicht immer genug Platz für alle atomaren Formeln in der Formel."  {- german -}
-            , "(Mögliche Lösung: Eine der unteren Schranken erhöhen)" {- german -}
+            [ "Nicht immer genug Platz für alle atomaren Formeln in der Formel."
+            , "(Mögliche Lösung: Eine der unteren Schranken erhöhen)"
             ]
           english $ unlines
             [ "Not always enough space in formula for all atomic formulas."

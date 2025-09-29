@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 module DecomposeFormulaSpec where
 
+import Capabilities.Cache.IO ()
+import Capabilities.LatexSvg.IO ()
 import Test.Hspec
 import Tasks.DecomposeFormula.Config (
   DecomposeFormulaConfig(..),
