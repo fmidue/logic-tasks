@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.37.0.
+-- This file has been generated from package.yaml by hpack version 0.38.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -86,10 +86,10 @@ library
   build-depends:
       QuickCheck >=2.14
     , SHA
+    , autotool-capabilities
     , base >=4.7 && <5
     , bytestring
     , containers
-    , directory
     , extra
     , flex-tasks
     , hspec
@@ -97,7 +97,7 @@ library
     , math-functions
     , minisat-solver
     , mtl
-    , output-blocks >=0.2
+    , output-blocks >=0.5.0.1
     , parsec
     , pretty-simple
     , random
@@ -138,10 +138,11 @@ test-suite src-test
   build-depends:
       QuickCheck >=2.14
     , SHA
+    , autotool-capabilities
+    , autotool-capabilities-io-instances
     , base >=4.7 && <5
     , bytestring
     , containers
-    , directory
     , extra
     , flex-tasks
     , hspec
@@ -150,7 +151,7 @@ test-suite src-test
     , math-functions
     , minisat-solver
     , mtl
-    , output-blocks >=0.2
+    , output-blocks >=0.5.0.1
     , parsec
     , pretty-simple
     , random

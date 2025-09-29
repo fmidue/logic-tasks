@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wwarn=x-partial #-}
+{-# language DeriveDataTypeable #-}
 {-# language DeriveGeneric #-}
 {-# language DuplicateRecordFields #-}
 
@@ -22,9 +23,7 @@ module Formula.Types
        , genClause
        , genCon
        , genCnf
-       , genCnfWithPercentRange
        , genDnf
-       , genDnfWithPercentRange
        , possibleAllocations
        , Formula(..)
        , ToSAT(..)
@@ -37,8 +36,6 @@ module Formula.Types
        , ClauseShape(..)
        , HornShape(..)
        , anyClause, anyHornClause, factClause, procedureClause, queryClause
-       , PercentRangeMode(ByPositiveLiterals,ByTruthValues)
-       , withPercentRange
        ) where
 
 
@@ -46,26 +43,25 @@ module Formula.Types
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
-import Data.List(intercalate, delete, nub, transpose, (\\)) -- minimumBy
--- import Data.Ord(comparing)
+import Data.Data (Data)
+import Data.List(intercalate, delete, nub, transpose, (\\))
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
 import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
 
--- import GHC.Real ((%))
-
-newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
+newtype ResStep = Res {
+  trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))
+  } deriving (Show,Data)
 
 newtype TruthValue = TruthValue {truth :: Bool}
   deriving (Eq, Ord, Show, Typeable, Generic)
 
-data PercentRangeMode = ByPositiveLiterals (Int, Int) |  ByTruthValues (Int, Int) deriving (Show)
+
 
 class Formula a where
     literals :: a -> [Literal]
-    duplicateLiterals :: a -> [Literal]
     atomics :: a -> [Char]
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
@@ -96,6 +92,7 @@ data Literal
       ( Eq -- ^ derived
       , Typeable -- ^ derived
       , Generic -- ^ derived
+      , Data -- ^ derived
       )
 
 
@@ -120,8 +117,6 @@ instance Read Literal where
 
 instance Formula Literal where
    literals lit = [lit]
-
-   duplicateLiterals lit = [lit]
 
    atomics (Positive x) = [x]
    atomics (Negative x) = [x]
@@ -158,7 +153,7 @@ opposite (Negative l) = Positive l
 
 -- | A datatype representing a clause
 newtype Clause = Clause { literalSet :: Set Literal}
-    deriving (Eq,Typeable,Generic)
+    deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -182,8 +177,6 @@ instance Show Clause where
 
 instance Formula Clause where
    literals (Clause set) = Set.toList set
-
-   duplicateLiterals (Clause set) = Set.toList set
 
    atomics (Clause set) = concat $ Set.toList $ Set.map atomics set
 
@@ -223,7 +216,7 @@ type Allocation = [(Char, Bool)]
 
 -- | A datatype representing a formula in conjunctive normal form.
 newtype Cnf = Cnf { clauseSet :: Set Clause}
-     deriving (Eq,Typeable,Generic)
+     deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -254,8 +247,6 @@ instance Show Cnf where
 
 instance Formula Cnf where
     literals (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
-
-    duplicateLiterals (Cnf set) = concatMap literals (Set.toList set)
 
     atomics (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
@@ -289,19 +280,10 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf = genCnfWithPercentRange (ByPositiveLiterals (0,100))
-
--- | Generates a random cnf satisfying the given bounds
---   for the amount and the length of the contained clauses,
---   as well as the ratio of negative literals.
---   The used atomic formulas are drawn from the list of chars.
---   The ratio must be between 0 and 1; otherwise, it will be ignored.
-genCnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
-      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && withPercentRange percentPosLiterals (Cnf xs)
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -319,7 +301,7 @@ genCnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms 
 
 -- | A datatype representing a conjunction
 newtype Con = Con { literalSet :: Set Literal}
-    deriving (Eq,Typeable,Generic)
+    deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -345,8 +327,6 @@ instance Show Con where
 
 instance Formula Con where
    literals (Con set) = Set.toList set
-
-   duplicateLiterals (Con set) = Set.toList set
 
    atomics (Con set) = concat $ Set.toList $ Set.map atomics set
 
@@ -381,7 +361,7 @@ genCon (minLength,maxLength) atoms = do
 
 -- | A datatype representing a formula in disjunctive normal form.
 newtype Dnf = Dnf { clauseSet :: Set Con}
-     deriving (Eq,Typeable,Generic)
+     deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -414,8 +394,6 @@ instance Show Dnf where
 instance Formula Dnf where
     literals (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
 
-    duplicateLiterals (Dnf set) = concatMap literals (Set.toList set)
-
     atomics (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
     amount (Dnf set) = Set.size set
@@ -445,22 +423,13 @@ instance Arbitrary Dnf where
 
 
 -- | Generates a random dnf satisfying the given bounds
---   for the amount and the length of the contained conjunctions,
---   as well as the ratio of negative literals.
---   The used atomic formulas are drawn from the list of chars.
---   The ratio must be between 0 and 1; otherwise, it will be ignored.
-genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf = genDnfWithPercentRange (ByPositiveLiterals (0,100))
-
--- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
-genDnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
-      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && withPercentRange percentPosLiterals (Dnf xs)
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -469,6 +438,7 @@ genDnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms 
         | otherwise = do
             con <- genCon (minLen,maxLen) usedAtoms
             generateCons usedAtoms (Set.insert con set) num
+
 
 ------------------------------------------------------------
 
@@ -560,7 +530,7 @@ data PrologLiteral = PrologLiteral
     { polarity :: Bool
     , name :: String
     , constants :: [String]
-    } deriving (Eq,Typeable,Generic)
+    } deriving (Eq,Typeable,Generic,Data)
 
 positivePLit :: String -> [String] -> PrologLiteral
 positivePLit = PrologLiteral True
@@ -586,7 +556,8 @@ instance Show PrologLiteral where
 ---------------------------------------------------------------------------------
 
 
-newtype PrologClause = PrologClause {pLiterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic)
+newtype PrologClause = PrologClause {pLiterals :: Set PrologLiteral}
+  deriving (Eq,Typeable,Generic,Data)
 
 
 
@@ -652,27 +623,3 @@ lengthBound nLiterals maxLen =
   --   | n == minLen = 2^n * literalLength
   --   | n == literalLength = 2^n + lengthBound (n-1) literalLength (minLen,maxLen)
   --   | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)
-
-
-withPercentRange :: Formula a => PercentRangeMode -> a -> Bool
-withPercentRange mode form =
-    posLiteralsNumber <= max upperBound (if upperLiteralNumberBound == 0 then 0 else 1)
-        && posLiteralsNumber >= max (if lowerLiteralNumberBound == 0 then 0 else 1) lowerBound
-  where
-    (posLiteralsNumber, totalLiteralsNumber, (lowerLiteralNumberBound,upperLiteralNumberBound)) = case mode of
-      ByTruthValues bounds ->
-        let
-          tableEntries = getEntries (getTable form)
-          trueEntries = filter (== Just True) tableEntries
-        in (length trueEntries, length tableEntries, bounds)
-      ByPositiveLiterals bounds ->
-        let
-          allLiterals = duplicateLiterals form
-          posLiterals = filter isPositive allLiterals
-        in (length posLiterals, length allLiterals, bounds)
-
-    upperBound = totalLiteralsNumber *upperLiteralNumberBound `div` 100
-    lowerBound = ceiling $ fromIntegral (totalLiteralsNumber* lowerLiteralNumberBound) / (100 :: Double)
-    isPositive (Negative _) = False
-    isPositive (Positive _) = True
-

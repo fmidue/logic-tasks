@@ -85,9 +85,9 @@ complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
       Nothing ->
         translate $ do
           german $  unlines
-            [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
-            , "Bitte prüfen Sie, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit der Eingaben genügt." {- german -}
-            , "Insbesondere sollten Sie genügend Klammern benutzen." {- german -}
+            [ "Ihre Abgabe konnte nicht gelesen werden."
+            , "Bitte prüfen Sie, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit der Eingaben genügt."
+            , "Insbesondere sollten Sie genügend Klammern benutzen."
             ]
           english $ unlines
             [ "Unable to read submission."
@@ -98,8 +98,8 @@ complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
 complainAboutWrongNotation :: OutputCapable m => LangM m
 complainAboutWrongNotation = translate $ do
   german $ unlines
-    [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
-    , "Bitte stellen Sie sicher, dass Sie die geforderte Notation verwenden." {- german -}
+    [ "Ihre Abgabe konnte nicht gelesen werden."
+    , "Bitte stellen Sie sicher, dass Sie die geforderte Notation verwenden."
     ]
   english $ unlines
     [ "Unable to read submission."

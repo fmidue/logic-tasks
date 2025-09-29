@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns, TypeApplications #-}
 module SubTreeSpec (spec) where
 
+import Capabilities.Cache.IO ()
+import Capabilities.LatexSvg.IO ()
 import Test.Hspec (describe, it, xit, Spec)
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat, ioProperty)
 import Text.Parsec (parse)
