@@ -135,6 +135,11 @@ partialGrade' SuperfluousBracketsInst{..} f
         english "Your submission contains fewer logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
+    | not $ noBracketIsMissing (show pForm) (stringWithSuperfluousBrackets) =
+      reject $ do
+        english "Your submission contains at least one extra bracket compared to the task."
+        german "Ihre Abgabe beinhaltet mindestens eine zusätzliche Klammer im Vergleich zur Aufgabenstellung."
+
     | otherwise = pure()
   where
     pForm = fromJust $ maybeForm f
@@ -162,18 +167,6 @@ completeGrade' inst sol
   where
     countBracketPairs :: String -> Integer
     countBracketPairs = fromIntegral . length . filter (== '(')
-    noBracketIsMissing :: String -> String -> Bool
-    noBracketIsMissing [] [] = True
-    noBracketIsMissing _ [] = False
-    noBracketIsMissing [] (')' : ys) = noBracketIsMissing [] ys
-    noBracketIsMissing [] _ = False
-    noBracketIsMissing (x : xs) (y : ys)
-      | x == y = noBracketIsMissing xs ys
-      | y == '(' || y == ')' = noBracketIsMissing (x : xs) ys
-      | x == ' ' = noBracketIsMissing xs (y : ys)
-      | y == ' ' = noBracketIsMissing (x:xs) ys
-      |otherwise = False
-
     submission = fromJust (maybeForm sol)
     synTreeSubmission = toSynTree submission
     bracketPairsSubmission = countBracketPairs $ show submission
@@ -188,3 +181,15 @@ completeGrade' inst sol
       (MinimumThreshold (1 % superfluousBracketPairsTask))
       DefiniteArticle
       (if showSolution inst then Just $ simplestString inst else Nothing)
+
+noBracketIsMissing :: String -> String -> Bool
+noBracketIsMissing [] [] = True
+noBracketIsMissing _ [] = False
+noBracketIsMissing [] (')' : ys) = noBracketIsMissing [] ys
+noBracketIsMissing [] _ = False
+noBracketIsMissing (x : xs) (y : ys)
+  | x == y = noBracketIsMissing xs ys
+  | y == '(' || y == ')' = noBracketIsMissing (x : xs) ys
+  | x == ' ' = noBracketIsMissing xs (y : ys)
+  | y == ' ' = noBracketIsMissing (x:xs) ys
+  |otherwise = False
