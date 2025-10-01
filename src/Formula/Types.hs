@@ -23,7 +23,9 @@ module Formula.Types
        , genClause
        , genCon
        , genCnf
+       , genCnfWithPercentRange
        , genDnf
+       , genDnfWithPercentRange
        , possibleAllocations
        , Formula(..)
        , ToSAT(..)
@@ -36,6 +38,8 @@ module Formula.Types
        , ClauseShape(..)
        , HornShape(..)
        , anyClause, anyHornClause, factClause, procedureClause, queryClause
+       , PercentRangeMode(ByPositiveLiterals,ByTruthValues)
+       , withPercentRange
        ) where
 
 
@@ -58,7 +62,7 @@ newtype ResStep = Res {
 newtype TruthValue = TruthValue {truth :: Bool}
   deriving (Eq, Ord, Show, Typeable, Generic)
 
-
+data PercentRangeMode = ByPositiveLiterals (Int, Int) |  ByTruthValues (Int, Int) deriving (Show)
 
 class Formula a where
     literals :: a -> [Literal]
@@ -280,10 +284,19 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnf = genCnfWithPercentRange (ByPositiveLiterals (0,100))
+
+-- | Generates a random cnf satisfying the given bounds
+--   for the amount and the length of the contained clauses,
+--   as well as the ratio of negative literals.
+--   The used atomic formulas are drawn from the list of chars.
+--   The ratio must be between 0 and 1; otherwise, it will be ignored.
+genCnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
+genCnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
+      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
+      && withPercentRange percentPosLiterals (Cnf xs)
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -292,9 +305,6 @@ genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
         | otherwise = do
             clause <- genClause (minLen,maxLen) usedAtoms
             generateClauses usedAtoms (Set.insert clause set) num
-
-
-
 
 
 ------------------------------------------------------------
@@ -426,10 +436,19 @@ instance Arbitrary Dnf where
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genDnf = genDnfWithPercentRange (ByPositiveLiterals (0,100))
+
+-- | Generates a random dnf satisfying the given bounds
+--   for the amount and the length of the contained conjunctions,
+--   as well as the ratio of negative literals.
+--   The used atomic formulas are drawn from the list of chars.
+--   The ratio must be between 0 and 1; otherwise, it will be ignored.
+genDnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
+genDnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do  
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
+      `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
+      && withPercentRange percentPosLiterals (Dnf xs)
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -623,3 +642,25 @@ lengthBound nLiterals maxLen =
   --   | n == minLen = 2^n * literalLength
   --   | n == literalLength = 2^n + lengthBound (n-1) literalLength (minLen,maxLen)
   --   | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)
+
+withPercentRange :: Formula a => PercentRangeMode -> a -> Bool
+withPercentRange mode form =
+    numerator <= max upperBound (if upperLiteralNumberBound == 0 then 0 else 1)
+        && numerator >= max (if lowerLiteralNumberBound == 0 then 0 else 1) lowerBound
+  where
+    (numerator, totalLiteralsNumber, (lowerLiteralNumberBound,upperLiteralNumberBound)) = case mode of
+      ByTruthValues bounds ->
+        let
+          tableEntries = getEntries (getTable form)
+          trueEntries = filter (== Just True) tableEntries
+        in (length trueEntries, length tableEntries, bounds)
+      ByPositiveLiterals bounds ->
+        let
+          allLiterals = literals form
+          posLiterals = filter isPositive allLiterals
+        in (length posLiterals, length allLiterals, bounds)
+
+    upperBound = totalLiteralsNumber *upperLiteralNumberBound `div` 100
+    lowerBound = ceiling $ fromIntegral (totalLiteralsNumber* lowerLiteralNumberBound) / (100 :: Double)
+    isPositive (Negative _) = False
+    isPositive (Positive _) = True

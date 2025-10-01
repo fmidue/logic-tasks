@@ -34,10 +34,6 @@ instance Formula FormulaInst where
   literals (InstDnf d) = literals d
   literals (InstArbitrary t) = literals t
 
-  duplicateLiterals (InstCnf c) = duplicateLiterals c
-  duplicateLiterals (InstDnf d) = duplicateLiterals d
-  duplicateLiterals (InstArbitrary t) = duplicateLiterals t
-
   atomics (InstCnf c) = atomics c
   atomics (InstDnf d) = atomics d
   atomics (InstArbitrary t) = atomics t
