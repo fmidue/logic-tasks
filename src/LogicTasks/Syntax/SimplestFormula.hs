@@ -135,7 +135,7 @@ partialGrade' SuperfluousBracketsInst{..} f
         english "Your submission contains fewer logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
-    | not $ noBracketIsMissing (show pForm) (stringWithSuperfluousBrackets) =
+    | not $ noBracketIsMissing (show pForm) stringWithSuperfluousBrackets =
       reject $ do
         english "Your submission contains at least one extra bracket compared to the task."
         german "Ihre Abgabe beinhaltet mindestens eine zusätzliche Klammer im Vergleich zur Aufgabenstellung."
@@ -193,3 +193,4 @@ noBracketIsMissing (x : xs) (y : ys)
   | x == ' ' = noBracketIsMissing xs (y : ys)
   | y == ' ' = noBracketIsMissing (x:xs) ys
   |otherwise = False
+  
