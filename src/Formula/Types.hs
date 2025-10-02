@@ -662,4 +662,3 @@ withPercentRange mode form =
     lowerBound = ceiling $ fromIntegral (totalLiteralsNumber* lowerLiteralNumberBound) / (100 :: Double)
     isPositive (Negative _) = False
     isPositive (Positive _) = True
-    
