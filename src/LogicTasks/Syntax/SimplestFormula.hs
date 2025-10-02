@@ -193,4 +193,3 @@ noBracketIsMissing (x : xs) (y : ys)
   | x == ' ' = noBracketIsMissing xs (y : ys)
   | y == ' ' = noBracketIsMissing (x:xs) ys
   |otherwise = False
-  
