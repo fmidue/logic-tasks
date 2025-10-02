@@ -288,15 +288,14 @@ genCnf = genCnfWithPercentRange (ByPositiveLiterals (0,100))
 
 -- | Generates a random cnf satisfying the given bounds
 --   for the amount and the length of the contained clauses,
---   as well as the ratio of negative literals.
+--   as well as the used PercentRangeMode.
 --   The used atomic formulas are drawn from the list of chars.
---   The ratio must be between 0 and 1; otherwise, it will be ignored.
 genCnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+genCnfWithPercentRange percentRangeMode (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     cnf <- generateClauses nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && withPercentRange percentPosLiterals (Cnf xs)
+      && withPercentRange percentRangeMode (Cnf xs)
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -440,15 +439,14 @@ genDnf = genDnfWithPercentRange (ByPositiveLiterals (0,100))
 
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions,
---   as well as the ratio of negative literals.
+--   as well as the used PercentRangeMode.
 --   The used atomic formulas are drawn from the list of chars.
---   The ratio must be between 0 and 1; otherwise, it will be ignored.
 genDnfWithPercentRange :: PercentRangeMode -> (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnfWithPercentRange percentPosLiterals (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do  
+genDnfWithPercentRange percentRangeMode (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
     (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
     dnf <- generateCons nAtoms empty num
       `suchThat` \xs -> (not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms)
-      && withPercentRange percentPosLiterals (Dnf xs)
+      && withPercentRange percentRangeMode (Dnf xs)
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
