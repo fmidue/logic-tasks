@@ -135,6 +135,11 @@ partialGrade' SuperfluousBracketsInst{..} f
         english "Your submission contains fewer logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
+    | not $ isDerivedByRemovingBrackets (show pForm) stringWithSuperfluousBrackets =
+      reject $ do
+        english "Your submission cannot be obtained from the original formula by removing brackets."
+        german "Ihre Abgabe lässt sich nicht durch Entfernen von Klammern aus der ursprünglichen Formel erhalten."
+
     | otherwise = pure()
   where
     pForm = fromJust $ maybeForm f
@@ -149,7 +154,7 @@ completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
   | show sol == simplestString inst = rate 1
-  | synTreeEquivalent && noBracketIsMissing (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
+  | synTreeEquivalent && isDerivedByRemovingBrackets (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
     german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
     english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
   | synTreeEquivalent = reRefuse (rate 0) (translate $ do
@@ -162,18 +167,6 @@ completeGrade' inst sol
   where
     countBracketPairs :: String -> Integer
     countBracketPairs = fromIntegral . length . filter (== '(')
-    noBracketIsMissing :: String -> String -> Bool
-    noBracketIsMissing [] [] = True
-    noBracketIsMissing _ [] = False
-    noBracketIsMissing [] (')' : ys) = noBracketIsMissing [] ys
-    noBracketIsMissing [] _ = False
-    noBracketIsMissing (x : xs) (y : ys)
-      | x == y = noBracketIsMissing xs ys
-      | y == '(' || y == ')' = noBracketIsMissing (x : xs) ys
-      | x == ' ' = noBracketIsMissing xs (y : ys)
-      | y == ' ' = noBracketIsMissing (x:xs) ys
-      |otherwise = False
-
     submission = fromJust (maybeForm sol)
     synTreeSubmission = toSynTree submission
     bracketPairsSubmission = countBracketPairs $ show submission
@@ -188,3 +181,18 @@ completeGrade' inst sol
       (MinimumThreshold (1 % superfluousBracketPairsTask))
       DefiniteArticle
       (if showSolution inst then Just $ simplestString inst else Nothing)
+
+-- | Checks whether the second string can be transformed into
+--   the first string by removing only brackets.
+--   Spaces are ignored.
+isDerivedByRemovingBrackets :: String -> String -> Bool
+isDerivedByRemovingBrackets [] [] = True
+isDerivedByRemovingBrackets _ [] = False
+isDerivedByRemovingBrackets [] (')' : ys) = isDerivedByRemovingBrackets [] ys
+isDerivedByRemovingBrackets [] _ = False
+isDerivedByRemovingBrackets (x : xs) (y : ys)
+  | x == y = isDerivedByRemovingBrackets xs ys
+  | y == '(' || y == ')' = isDerivedByRemovingBrackets (x : xs) ys
+  | x == ' ' = isDerivedByRemovingBrackets xs (y : ys)
+  | y == ' ' = isDerivedByRemovingBrackets (x:xs) ys
+  |otherwise = False
