@@ -137,8 +137,8 @@ partialGrade' SuperfluousBracketsInst{..} f
 
     | not $ isDerivedByRemovingBrackets (show pForm) stringWithSuperfluousBrackets =
       reject $ do
-        english "Your submission cannot be derived from the assignment by simply removing brackets."
-        german "Ihre Abgabe lässt sich nicht durch Entfernen von Klammern aus der Aufgabenstellung ableiten."
+        english "Your submission cannot be obtained from the original formula by removing brackets."
+        german "Ihre Abgabe lässt sich nicht durch Entfernen von Klammern aus der ursprünglichen Formel erhalten."
 
     | otherwise = pure()
   where
