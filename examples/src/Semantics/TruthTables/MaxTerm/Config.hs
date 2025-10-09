@@ -22,6 +22,7 @@ unused01 = MinMaxConfig
       }
     , minClauseAmount = 3
     , maxClauseAmount = 3
+    , percentPosLiterals = (0,100)
     }
   , percentTrueEntries = Just (50, 70)
   , extraText = Nothing
@@ -41,6 +42,7 @@ unused02 = MinMaxConfig
       }
     , minClauseAmount = 3
     , maxClauseAmount = 4
+    , percentPosLiterals = (0,100)
     }
   , percentTrueEntries = Just (50, 70)
   , extraText = Nothing

@@ -34,7 +34,11 @@ import TestHelpers (doesNotRefuse)
 
 validBoundsLegalNormalFormConfig :: Gen LegalNormalFormConfig
 validBoundsLegalNormalFormConfig = do
-    ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedAtoms) <- validBoundsNormalFormParams
+    ((minClauseAmount,maxClauseAmount),
+      (minClauseLength,maxClauseLength),
+      usedAtoms,
+      (percentPosLiteralsLow,percentPosLiteralsHigh)
+      ) <- validBoundsNormalFormParams
 
     let
       maxFormulas = (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1) `div` 2 + 1
@@ -57,7 +61,8 @@ validBoundsLegalNormalFormConfig = do
                 minClauseLength,
                 maxClauseLength,
                 usedAtoms
-            }
+            },
+            percentPosLiterals = (percentPosLiteralsLow,percentPosLiteralsHigh)
           },
           formulas,
           illegals,
@@ -91,7 +96,8 @@ invalidBoundsLegalCNF = do
                 minClauseLength,
                 maxClauseLength,
                 usedAtoms
-            }
+            },
+            percentPosLiterals = (0,100)
           },
           formulas,
           illegals,

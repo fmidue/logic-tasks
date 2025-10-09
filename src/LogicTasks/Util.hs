@@ -11,7 +11,7 @@ module LogicTasks.Util
 
 import Util
 import Test.QuickCheck (Gen)
-import Formula.Types (Cnf, genCnf, genDnf, Dnf)
+import Formula.Types (Cnf, genCnfWithPercentRange, genDnfWithPercentRange, Dnf, PercentRangeMode (ByPositiveLiterals))
 import Config (NormalFormConfig (..), BaseConfig(..), FormulaInst (..), FormulaConfig (..))
 import Trees.Print (simplestDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(minAmountOfUniqueAtoms, availableAtoms))
@@ -19,11 +19,21 @@ import Formula.Util (isEmptyCnf, hasEmptyClause, isEmptyDnf, hasEmptyCon)
 
 genCnf' :: NormalFormConfig -> Gen Cnf
 genCnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genCnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
+  = genCnfWithPercentRange
+    (ByPositiveLiterals percentPosLiterals)
+    (minClauseAmount,maxClauseAmount)
+    (minClauseLength, maxClauseLength)
+    usedAtoms
+    True
 
 genDnf' :: NormalFormConfig -> Gen Dnf
 genDnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
-  = genDnf (minClauseAmount,maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
+  = genDnfWithPercentRange
+    (ByPositiveLiterals percentPosLiterals)
+    (minClauseAmount,maxClauseAmount)
+    (minClauseLength, maxClauseLength)
+    usedAtoms
+    True
 
 displayFormula :: FormulaInst -> String
 displayFormula (InstCnf c) = show c

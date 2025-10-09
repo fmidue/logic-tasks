@@ -19,8 +19,8 @@ import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), FormulaInst (..))
-import Formula.Types (Formula, getTable, lengthBound)
-import Formula.Table (readEntries)
+import Formula.Types (Formula, lengthBound, PercentRangeMode (ByTruthValues), withPercentRange)
+-- import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig, checkSynTreeConfig)
 import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
 import Trees.Helpers (synTreeDependsOnAllAtomics)
@@ -68,16 +68,17 @@ remove num xs = do
 
 
 withRatio :: Formula a => (Int,Int) -> a -> Bool
-withRatio (lower,upper) form =
-    length trueEntries <= max upperBound (if upper == 0 then 0 else 1)
-        && length trueEntries >= max (if lower == 0 then 0 else 1) lowerBound
-  where
-    tableEntries = readEntries (getTable form)
-    trueEntries = filter (== Just True) tableEntries
-    percentage :: Int -> Int
-    percentage num = length tableEntries *num `div` 100
-    upperBound = percentage upper
-    lowerBound = percentage lower
+withRatio range = withPercentRange (ByTruthValues range)
+-- withRatio (lower,upper) form =
+--     length trueEntries <= max upperBound (if upper == 0 then 0 else 1)
+--         && length trueEntries >= max (if lower == 0 then 0 else 1) lowerBound
+--   where
+--     tableEntries = readEntries (getTable form)
+--     trueEntries = filter (== Just True) tableEntries
+--     percentage :: Int -> Int
+--     percentage num = length tableEntries *num `div` 100
+--     upperBound = percentage upper
+--     lowerBound = percentage lower
 
 
 
@@ -167,7 +168,26 @@ checkNormalFormConfig NormalFormConfig {..}
           german "Zu kurze Klauseln für gewünschte Anzahl an Klauseln."
           english "Clauses are to short for the desired number of clauses."
 
+    | low > high =
+        refuse $ indent $ translate $ do
+            german "Die untere Grenze für die Anzahl positiver Literale ist größer als die obere Grenze."
+            english "The lower bound for the number of positive literals is bigger than the higher bound."
+
+    | low < 0 || high > 100 =
+        refuse $ indent $ translate $ do
+            german "Das Intervall für die Anzahl positiver Literale ist außerhalb der Grenzen 0 und 100."
+            english "The Range for the number of positive literals is not in the bounds of 0 and 100."
+
+    | ceiling (fromIntegral (low * minClauseAmount * minClauseLength baseConf) / (100 :: Double)) >=
+      (high * minClauseAmount * minClauseLength baseConf) `div` 100 =
+        refuse $ indent $ translate $ do
+            german "Es müssen mindestens zwei unterschiedliche Anzahlen positiver Literale möglich sein. \
+            \Bitte vergrößern Sie das Intervall."
+            english "There must be at least two different possible numbers of positive literals. Please increase the range."
+
     | otherwise = checkBaseConf baseConf
+
+    where (low, high) = percentPosLiterals
 
 checkTruthValueRangeAndSynTreeConf :: OutputCapable m => (Int,Int) -> SynTreeConfig -> LangM m
 checkTruthValueRangeAndSynTreeConf range synTreeConfig = do

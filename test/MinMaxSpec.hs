@@ -24,7 +24,11 @@ import TestHelpers (doesNotRefuse)
 
 validBoundsMinMaxConfig :: Gen MinMaxConfig
 validBoundsMinMaxConfig = do
-  ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedAtoms) <- validBoundsNormalFormParams
+  ((minClauseAmount,maxClauseAmount),
+    (minClauseLength,maxClauseLength),
+    usedAtoms,
+    (percentPosLiteralsLow,percentPosLiteralsHigh)
+    ) <- validBoundsNormalFormParams
   offerUnicodeInput <- chooseAny
   printSolution <- chooseAny
   pure $ MinMaxConfig
@@ -35,7 +39,8 @@ validBoundsMinMaxConfig = do
               minClauseLength,
               maxClauseLength,
               usedAtoms
-          }
+          },
+          percentPosLiterals = (percentPosLiteralsLow,percentPosLiteralsHigh)
       }
     -- Restrictions on this lead to infinite loops.
     -- A satisfying formula is frequently not found, even with large intervals.
