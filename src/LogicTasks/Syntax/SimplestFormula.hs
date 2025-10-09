@@ -135,10 +135,10 @@ partialGrade' SuperfluousBracketsInst{..} f
         english "Your submission contains fewer logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
-    | not $ noBracketIsMissing (show pForm) stringWithSuperfluousBrackets =
+    | not $ isDerivedByRemovingBrackets (show pForm) stringWithSuperfluousBrackets =
       reject $ do
-        english "Your submission contains at least one extra bracket compared to the task."
-        german "Ihre Abgabe beinhaltet mindestens eine zusätzliche Klammer im Vergleich zur Aufgabenstellung."
+        english "Your submission cannot be derived from the assignment by simply removing brackets."
+        german "Ihre Abgabe lässt sich nicht durch Entfernen von Klammern aus der Aufgabenstellung ableiten."
 
     | otherwise = pure()
   where
@@ -154,7 +154,7 @@ completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
   | show sol == simplestString inst = rate 1
-  | synTreeEquivalent && noBracketIsMissing (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
+  | synTreeEquivalent && isDerivedByRemovingBrackets (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
     german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
     english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
   | synTreeEquivalent = reRefuse (rate 0) (translate $ do
@@ -182,14 +182,17 @@ completeGrade' inst sol
       DefiniteArticle
       (if showSolution inst then Just $ simplestString inst else Nothing)
 
-noBracketIsMissing :: String -> String -> Bool
-noBracketIsMissing [] [] = True
-noBracketIsMissing _ [] = False
-noBracketIsMissing [] (')' : ys) = noBracketIsMissing [] ys
-noBracketIsMissing [] _ = False
-noBracketIsMissing (x : xs) (y : ys)
-  | x == y = noBracketIsMissing xs ys
-  | y == '(' || y == ')' = noBracketIsMissing (x : xs) ys
-  | x == ' ' = noBracketIsMissing xs (y : ys)
-  | y == ' ' = noBracketIsMissing (x:xs) ys
+-- | Checks whether the second string can be transformed into
+--   the first string by removing only brackets.
+--   Spaces are ignored.
+isDerivedByRemovingBrackets :: String -> String -> Bool
+isDerivedByRemovingBrackets [] [] = True
+isDerivedByRemovingBrackets _ [] = False
+isDerivedByRemovingBrackets [] (')' : ys) = isDerivedByRemovingBrackets [] ys
+isDerivedByRemovingBrackets [] _ = False
+isDerivedByRemovingBrackets (x : xs) (y : ys)
+  | x == y = isDerivedByRemovingBrackets xs ys
+  | y == '(' || y == ')' = isDerivedByRemovingBrackets (x : xs) ys
+  | x == ' ' = isDerivedByRemovingBrackets xs (y : ys)
+  | y == ' ' = isDerivedByRemovingBrackets (x:xs) ys
   |otherwise = False
