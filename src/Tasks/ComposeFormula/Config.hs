@@ -1,5 +1,9 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+#if !MIN_VERSION_base(4,18,0)
+{-# LANGUAGE DerivingStrategies #-}
+#endif
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
 
@@ -17,7 +21,9 @@ import Data.Data (Data)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
-import Data.Typeable
+#if !MIN_VERSION_base(4,18,0)
+import Data.Typeable (Typeable)
+#endif
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import LogicTasks.Helpers (reject)
@@ -32,7 +38,10 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
+#if !MIN_VERSION_base(4,18,0)
+  deriving Typeable
+#endif
 
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
@@ -78,5 +87,7 @@ data ComposeFormulaInst = ComposeFormulaInst
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
-               deriving (Data, Show, Typeable, Generic)
-
+  deriving (Data, Generic, Show)
+#if !MIN_VERSION_base(4,18,0)
+  deriving Typeable
+#endif

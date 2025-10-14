@@ -1,4 +1,8 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
+#if !MIN_VERSION_base(4,18,0)
+{-# LANGUAGE DerivingStrategies #-}
+#endif
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
 
@@ -13,7 +17,9 @@ import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTr
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, findWithDefault)
 import Trees.Types (SynTree(..), BinOp(..))
-import Data.Typeable
+#if !MIN_VERSION_base(4,18,0)
+import Data.Typeable (Typeable)
+#endif
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, german, english)
 import LogicTasks.Helpers (reject)
@@ -24,7 +30,10 @@ data DecomposeFormulaConfig = DecomposeFormulaConfig {
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
+#if !MIN_VERSION_base(4,18,0)
+  deriving Typeable
+#endif
 
 defaultDecomposeFormulaConfig :: DecomposeFormulaConfig
 defaultDecomposeFormulaConfig = DecomposeFormulaConfig
@@ -68,5 +77,7 @@ data DecomposeFormulaInst = DecomposeFormulaInst
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
-
+  deriving (Generic, Show)
+#if !MIN_VERSION_base(4,18,0)
+  deriving Typeable
+#endif
