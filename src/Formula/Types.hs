@@ -1,10 +1,6 @@
 {-# OPTIONS_GHC -Wwarn=x-partial #-}
-{-# LANGUAGE CPP #-}
 {-# language DeriveDataTypeable #-}
 {-# language DeriveGeneric #-}
-#if !MIN_VERSION_base(4,18,0)
-{-# LANGUAGE DerivingStrategies #-}
-#endif
 {-# language DuplicateRecordFields #-}
 
 -- | Some basic types for propositional logic
@@ -50,9 +46,6 @@ import qualified SAT.MiniSat as Sat
 import Data.Data (Data)
 import Data.List(intercalate, delete, nub, transpose, (\\))
 import Data.Set (Set,empty)
-#if !MIN_VERSION_base(4,18,0)
-import Data.Typeable (Typeable)
-#endif
 import GHC.Generics
 import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
@@ -63,9 +56,6 @@ newtype ResStep = Res {
 
 newtype TruthValue = TruthValue {truth :: Bool}
   deriving (Eq, Generic, Ord, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 
@@ -102,9 +92,6 @@ data Literal
       , Generic -- ^ derived
       , Data -- ^ derived
       )
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable -- ^ derived
-#endif
 
 
 -- | order literals alphabetically first, then prefer a positive sign
@@ -165,9 +152,6 @@ opposite (Negative l) = Positive l
 -- | A datatype representing a clause
 newtype Clause = Clause { literalSet :: Set Literal}
   deriving (Data, Eq, Generic)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 
@@ -231,9 +215,6 @@ type Allocation = [(Char, Bool)]
 -- | A datatype representing a formula in conjunctive normal form.
 newtype Cnf = Cnf { clauseSet :: Set Clause}
   deriving (Data, Eq, Generic)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 
@@ -319,9 +300,6 @@ genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
 -- | A datatype representing a conjunction
 newtype Con = Con { literalSet :: Set Literal}
   deriving (Data, Eq, Generic)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 
@@ -382,9 +360,6 @@ genCon (minLength,maxLength) atoms = do
 -- | A datatype representing a formula in disjunctive normal form.
 newtype Dnf = Dnf { clauseSet :: Set Con}
   deriving (Data, Eq, Generic)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 
@@ -471,9 +446,6 @@ data Table = Table
     , getEntries :: [Maybe Bool]
     }
   deriving (Generic, Ord)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 
@@ -559,9 +531,6 @@ data PrologLiteral = PrologLiteral
     , constants :: [String]
     }
   deriving (Data, Eq, Generic)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 positivePLit :: String -> [String] -> PrologLiteral
 positivePLit = PrologLiteral True
@@ -589,9 +558,6 @@ instance Show PrologLiteral where
 
 newtype PrologClause = PrologClause {pLiterals :: Set PrologLiteral}
   deriving (Data, Eq, Generic)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 

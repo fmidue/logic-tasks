@@ -1,18 +1,11 @@
-{-# LANGUAGE CPP #-}
 {-# language DeriveDataTypeable #-}
 {-# language DeriveGeneric #-}
-#if !MIN_VERSION_base(4,18,0)
-{-# LANGUAGE DerivingStrategies #-}
-#endif
 {-# language DuplicateRecordFields #-}
 
 module Config where
 
 
 import Data.Data (Data)
-#if !MIN_VERSION_base(4,18,0)
-import Data.Typeable (Typeable)
-#endif
 import GHC.Generics
 import Formula.Types
 import Formula.Util
@@ -60,16 +53,10 @@ instance ToSAT FormulaInst where
 
 newtype Number = Number {value :: Maybe Int}
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)}
   deriving Generic
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 instance Show StepAnswer where
   show (StepAnswer (Just (b,c))) = '(' : show b ++ ',' : ' ' : show c ++ ")"
@@ -96,9 +83,6 @@ data PickInst = PickInst {
                , addText :: Maybe (Map Language String)
                }
   deriving (Data, Eq, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dPickInst :: PickInst
 dPickInst =  PickInst
@@ -117,9 +101,6 @@ data MaxInst = MaxInst {
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
@@ -139,9 +120,6 @@ data MinInst = MinInst {
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dMinInst :: MinInst
 dMinInst =  MinInst
@@ -161,9 +139,6 @@ data FillInst = FillInst {
                , addText :: Maybe (Map Language String)
                }
   deriving (Data, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dFillInst :: FillInst
 dFillInst =  FillInst
@@ -183,9 +158,6 @@ data DecideInst = DecideInst {
                , addText :: Maybe (Map Language String)
                }
   deriving (Data, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
@@ -207,9 +179,6 @@ data StepInst = StepInst {
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dStepInst :: StepInst
 dStepInst =  StepInst
@@ -234,9 +203,6 @@ data ResolutionInst = ResolutionInst {
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dResInst :: ResolutionInst
 dResInst = let
@@ -279,9 +245,6 @@ data PrologInst = PrologInst {
                , addText :: Maybe (Map Language String)
                }
   deriving (Data, Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 dPrologInst :: PrologInst
@@ -303,9 +266,6 @@ data BaseConfig = BaseConfig
     , usedAtoms :: String
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 
 dBaseConf :: BaseConfig
@@ -323,9 +283,6 @@ data NormalFormConfig = NormalFormConfig
     , maxClauseAmount :: Int
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dNormalFormConf :: NormalFormConfig
 dNormalFormConf = NormalFormConfig
@@ -345,9 +302,6 @@ data PickConfig = PickConfig {
      , extraText :: Maybe (Map Language String)
      }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
@@ -368,9 +322,6 @@ data FillConfig = FillConfig {
     , extraText :: Maybe (Map Language String)
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
@@ -391,9 +342,6 @@ data MinMaxConfig = MinMaxConfig {
     , offerUnicodeInput :: Bool
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
@@ -414,9 +362,6 @@ data DecideConfig = DecideConfig {
     , extraText :: Maybe (Map Language String)
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
@@ -437,9 +382,6 @@ data StepConfig = StepConfig {
     , offerUnicodeInput :: Bool
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dStepConf :: StepConfig
 dStepConf = StepConfig
@@ -463,9 +405,6 @@ data PrologConfig = PrologConfig {
     , useSetNotation :: Bool
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dPrologConf :: PrologConfig
 dPrologConf = PrologConfig
@@ -490,9 +429,6 @@ data ResolutionConfig = ResolutionConfig {
     , offerUnicodeInput :: Bool
     }
   deriving (Generic, Show)
-#if !MIN_VERSION_base(4,18,0)
-  deriving Typeable
-#endif
 
 dResConf :: ResolutionConfig
 dResConf = ResolutionConfig
