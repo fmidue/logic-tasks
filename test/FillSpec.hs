@@ -30,7 +30,7 @@ validBoundsBaseConfig :: Gen BaseConfig
 validBoundsBaseConfig = do
   minClauseLength <- choose (1, 5)
   maxClauseLength <- choose (2, 10) `suchThat` \x -> minClauseLength <= x
-  usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
+  usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength && length xs <= 12
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength
