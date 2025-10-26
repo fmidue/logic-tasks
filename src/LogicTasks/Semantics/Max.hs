@@ -20,7 +20,7 @@ import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, suchThat)
 
-import Config (BaseConfig(..), NormalFormConfig(..),  MaxInst(..), MinMaxConfig(..))
+import Config (BaseConfig(..), NormalFormConfig(..),  MaxInst(..), MinMaxConfig(..), FormulaConfig (..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
@@ -95,7 +95,7 @@ verifyStatic MaxInst{..}
 
 verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..} = do
-  checkTruthValueRange (low,high)
+  checkTruthValueRange (low,high) (FormulaDnf normalFormConf)
   checkNormalFormConfig normalFormConf
   pure ()
   where

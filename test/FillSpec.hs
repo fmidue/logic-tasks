@@ -4,7 +4,7 @@ module FillSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, choose, elements, suchThat, sublistOf)
+import Test.QuickCheck (forAll, Gen, choose, suchThat, sublistOf)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (
   dFillConf,
@@ -51,6 +51,24 @@ validBoundsNormalFormConfig = do
   , maxClauseAmount
   }
 
+validBoundsPercentTrueEntries :: FormulaConfig -> Gen (Int, Int)
+validBoundsPercentTrueEntries formulaConfig = do
+  case formulaConfig of
+    FormulaDnf nfc -> do
+      let entries = (2 ^ length (usedAtoms (baseConf nfc))) :: Int
+      validRange entries
+    FormulaCnf nfc -> do
+      let entries = (2 ^ length (usedAtoms (baseConf nfc))) :: Int
+      validRange entries
+    FormulaArbitrary stc -> do
+      let entries = (2 ^ length (availableAtoms stc)) :: Int
+      validRange entries
+  where
+    validRange entries = do
+      trueEntriesLow <- choose (1,entries - 2)
+      trueEntriesHigh <- choose (trueEntriesLow + 2, entries)
+      pure (floor (fromIntegral (trueEntriesLow * 100) / fromIntegral entries), ceiling (fromIntegral (trueEntriesHigh * 100) / fromIntegral entries))
+
 validBoundsFillConfig :: Gen FillConfig
 validBoundsFillConfig = do
   -- formulaType <- elements ["Cnf", "Dnf", "Arbitrary"]
@@ -63,9 +81,8 @@ validBoundsFillConfig = do
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
 
   percentageOfGaps <- choose (1, 100)
-  percentTrueEntriesLow' <- choose (0, 90)
-  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')
-  percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
+  percentTrueEntries' <- validBoundsPercentTrueEntries formulaConfig
+  let percentTrueEntries = Just percentTrueEntries'
 
   pure $ FillConfig {
       formulaConfig
