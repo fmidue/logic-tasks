@@ -8,7 +8,6 @@ import Test.QuickCheck (forAll, Gen, choose, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
-import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -30,8 +29,7 @@ validBoundsDecideConfig = do
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
 
   percentageOfChanged <- choose (1, 100)
-  percentTrueEntries' <- validBoundsPercentTrueEntries formulaConfig
-  let percentTrueEntries = Just percentTrueEntries'
+  percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
 
   pure $ DecideConfig {
       formulaConfig
@@ -89,5 +87,5 @@ spec = do
     it "should respect percentTrueEntries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
-          withRatio (fromMaybe (0, 100) percentTrueEntries) formula
+          withRatio percentTrueEntries formula
 

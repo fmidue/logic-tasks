@@ -27,7 +27,7 @@ import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, Formula (atomics))
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (extra)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
@@ -36,17 +36,16 @@ import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyF
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
-  let percentTrueEntries' = fromMaybe (0,100) percentTrueEntries
   formulas <- vectorOfUniqueBy
     amountOfOptions
     isSemanticEqual
     $ flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
         (FormulaArbitrary syntaxTreeConfig) ->
-          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
+          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries
         (FormulaCnf cnfCfg) ->
-          InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+          InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries
         (FormulaDnf dnfCfg) ->
-          InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
+          InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries
 
   correct <- elements [1..amountOfOptions]
 
@@ -136,9 +135,9 @@ verifyQuiz PickConfig{..}
           german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
           english "The given restriction on True entries should not fall below a range of 30."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf range formulaConfig
+    | otherwise = checkTruthValueRangeAndFormulaConf percentTrueEntries formulaConfig
   where
-    range@(rangeL, rangeH) = fromMaybe (0,100) percentTrueEntries
+    (rangeL, rangeH) = percentTrueEntries
     hasMinUniqueAtoms x (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= x
     hasMinUniqueAtoms _ _ = True
     doesOvershootOptions (FormulaArbitrary syntaxTreeConfig)

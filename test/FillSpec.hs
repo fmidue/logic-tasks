@@ -17,7 +17,6 @@ import Config (
   dNormalFormConf
  )
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
-import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -67,7 +66,10 @@ validBoundsPercentTrueEntries formulaConfig = do
     validRange entries = do
       trueEntriesLow <- choose (1,entries - 2)
       trueEntriesHigh <- choose (trueEntriesLow + 2, entries)
-      pure (floor (fromIntegral (trueEntriesLow * 100) / fromIntegral entries), ceiling (fromIntegral (trueEntriesHigh * 100) / fromIntegral entries))
+      pure (
+        floor (fromIntegral (trueEntriesLow * 100) / fromIntegral entries),
+        ceiling (fromIntegral (trueEntriesHigh * 100) / fromIntegral entries)
+        )
 
 validBoundsFillConfig :: Gen FillConfig
 validBoundsFillConfig = do
@@ -81,8 +83,7 @@ validBoundsFillConfig = do
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
 
   percentageOfGaps <- choose (1, 100)
-  percentTrueEntries' <- validBoundsPercentTrueEntries formulaConfig
-  let percentTrueEntries = Just percentTrueEntries'
+  percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
 
   pure $ FillConfig {
       formulaConfig
@@ -131,7 +132,7 @@ spec = do
     it "should respect percentTrueEntries" $
       forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} ->
         forAll (genFillInst fillConfig) $ \FillInst{..} ->
-          withRatio (fromMaybe (0, 100) percentTrueEntries) formula
+          withRatio percentTrueEntries formula
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsFillConfig $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->

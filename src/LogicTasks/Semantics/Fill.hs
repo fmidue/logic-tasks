@@ -21,7 +21,6 @@ import Control.OutputCapable.Blocks (
   translations,
   Rated, reRefuse,
   )
-import Data.Maybe (fromMaybe)
 import Test.QuickCheck(Gen, suchThat)
 
 import Config ( FillConfig(..), FillInst(..), FormulaInst (..), FormulaConfig (..))
@@ -48,15 +47,14 @@ import Data.Foldable.Extra (notNull)
 
 genFillInst :: FillConfig -> Gen FillInst
 genFillInst FillConfig{..} = do
-    let percentTrueEntries' = fromMaybe (0,100) percentTrueEntries
 
     formula <- flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
+        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries
       (FormulaCnf cnfCfg) ->
-        InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+        InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries
       (FormulaDnf dnfCfg) ->
-        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
+        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries
 
     let
       entries = readEntries $ getTable formula
@@ -142,9 +140,7 @@ verifyQuiz FillConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf range formulaConfig
-  where
-    range = fromMaybe (0,100) percentTrueEntries
+    | otherwise = checkTruthValueRangeAndFormulaConf percentTrueEntries formulaConfig
 
 
 
