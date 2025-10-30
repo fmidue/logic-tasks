@@ -83,18 +83,17 @@ validateSettings
 
 module TaskData (getTask) where
 
+import Control.Monad.Random (MonadRandom)
 import Data.String.Interpolate (i)
-import Data.Text (Text, pack)
-import Test.QuickCheck.Gen
+import Data.Text (pack)
 import Yesod
     ( RenderMessage(..)
     , SomeMessage(..)
     , fieldSettingsLabel
     )
 
-import FlexTask.FormUtil (getFormData)
 import FlexTask.Generic.Form
-import FlexTask.Types (HtmlDict)
+import FlexTask.GenUtil (fromGen)
 import FlexTask.YesodConfig (Rendered, Widget)
 import Horn (makeHornFormula, startAlgorithm)
 
@@ -116,8 +115,8 @@ instance RenderMessage a Label where
     renderMessage _ _        Satisfiable   = "satisfiable"
     renderMessage _ _        Unsatisfiable = "unsatisfiable"
 
-getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
-getTask = do
+getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
+getTask = fromGen $ do
     formula <- makeHornFormula spirit extra
     let (steps, output, model) = startAlgorithm formula
         solution = Solution
@@ -125,7 +124,7 @@ getTask = do
             , correctOutput = output
             , correctModel = model
             }
-    pure (TaskData {formula, solution}, checkers, getFormData form)
+    pure (TaskData {formula, solution}, checkers, form)
 
 form :: Rendered Widget
 form = formify (Nothing :: Maybe ([Maybe String], SingleChoiceSelection, Maybe String))

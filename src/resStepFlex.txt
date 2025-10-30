@@ -46,13 +46,11 @@ validateSettings = pure ()
 
 module TaskData (getTask) where
 
+import Control.Monad.Random    (MonadRandom)
 import Data.String.Interpolate (i)
-import Data.Text               (Text)
-import Test.QuickCheck.Gen
 
-import FlexTask.FormUtil       (getFormData)
 import FlexTask.Generic.Form
-import FlexTask.Types          (HtmlDict)
+import FlexTask.GenUtil        (fromGen)
 import FlexTask.YesodConfig    (Rendered, Widget)
 import LogicTasks.Semantics.Step (genStepInst)
 
@@ -60,10 +58,10 @@ import Global
 import TaskSettings
 
 
-getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
+getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = do
-    resInst <- genStepInst stepConf
-    pure (resInst, checkers, getFormData form)
+    resInst <- fromGen $ genStepInst stepConf
+    pure (resInst, checkers, form)
 
 form :: Rendered Widget
 form = formify (Nothing :: Maybe String) [[single ""]]
