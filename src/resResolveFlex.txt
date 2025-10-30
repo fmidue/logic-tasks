@@ -43,12 +43,10 @@ validateSettings = pure ()
 
 module TaskData (getTask) where
 
+import Control.Monad.Random (MonadRandom)
 import Data.String.Interpolate (i)
-import Data.Text               (Text)
-import Test.QuickCheck.Gen
 
-import FlexTask.FormUtil (getFormData)
-import FlexTask.Types (HtmlDict)
+import FlexTask.GenUtil (fromGen)
 import FlexTask.YesodConfig (Rendered, Widget)
 import "logic-tasks" Config (ResolutionInst(..), ResolutionConfig(..))
 import LogicTasks.Forms (fullResolutionForm)
@@ -60,10 +58,10 @@ import Global
 import TaskSettings
 
 
-getTask :: Gen (TaskData, String, IO ([Text],HtmlDict))
+getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = do
-    resInst <- genResInst resConf
-    pure (resInst, checkers, getFormData (form resInst))
+    resInst <- fromGen $ genResInst resConf
+    pure (resInst, checkers, form resInst)
 
 form :: ResolutionInst -> Rendered Widget
 form resInst = fullResolutionForm

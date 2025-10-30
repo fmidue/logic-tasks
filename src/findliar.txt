@@ -84,6 +84,7 @@ validateSettings
 
 module TaskData (getTask) where
 
+import Control.Monad.Random (MonadRandom)
 import Data.Char (digitToInt)
 import Data.List (sortOn, transpose)
 import Data.String (fromString)
@@ -94,7 +95,7 @@ import Test.QuickCheck.Gen
 import Yesod
 
 import FlexTask.FormUtil
-  ( ($$>), addCss, getFormData )
+  ( ($$>), addCss )
 import FlexTask.Generic.Form
   ( Alignment(..)
   , Formify(..)
@@ -104,7 +105,8 @@ import FlexTask.Generic.Form
   , single
   , buttonsEnum
   )
-import FlexTask.Types (HtmlDict)
+import FlexTask.GenUtil (fromGen)
+import FlexTask.YesodConfig (Rendered, Widget)
 import LogicTasks.Formula (TruthValue(..))
 import LogicTasks.Forms (tableForm)
 import FindLiarTask
@@ -116,8 +118,8 @@ import TaskSettings
 instance MonadFail Gen where
   fail = error
 
-getTask :: Gen (TaskData, String, IO ([Text], HtmlDict))
-getTask = do
+getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
+getTask = fromGen $ do
     d@(x, y, z, _) <- taskData
     let (formulas, unsortedHints) = makeHintsAndFormula d
         dataSortedOnName = sortOn fst [x, y, z]
@@ -125,7 +127,7 @@ getTask = do
         solutionValues = map snd dataSortedOnName
     pure ( TaskData {hints, solutionValues, formulaParts}
          , checkers
-         , getFormData form
+         , form
          )
   where
     form = formify (Nothing :: Maybe ([String], String))
