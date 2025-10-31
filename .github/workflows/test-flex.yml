@@ -1,124 +1,23 @@
 ---
 name: Compile and Lint Flex-Tasks
 
-env:
-  tasks: src
-  config: .github/actions/test-flex
-  script: src
-  settings-gens: settings-gens
-  TERM: xterm
-
 on:
   repository_dispatch:
     types: [CI-Completed]
 
-permissions: read-all
+permissions:
+  contents: write
 
 jobs:
   test_flex:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
+
+      - uses: fmidue/flex-tasks/.github/actions/test-flex@main
         with:
-          ref: ${{ github.event.client_payload.sha }}
+          tasks: src
+          config: .github/actions/test-flex
+          settings-gens: src/settings-gens
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Install Dependencies
-        uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: zsh hlint expect colorized-logs
-          version: 1.0
-
-      - uses: TeX-Live/setup-texlive-action@v3
-        with:
-          packages: |
-            scheme-basic
-            forest
-            preview
-            dvisvgm
-
-      - name: Cache DB
-        id: restore-cache-db
-        uses: actions/cache@v3
-        with:
-          path: |
-            ${{ env.tasks }}/root
-            haskell-template-setup/stack.yaml
-          key: ${{ hashFiles('stack.yaml') }}-${{ hashFiles(format('{0}/package.yaml', env.config)) }}-${{ hashFiles('src/**/*.hs') }}
-
-      - name: Checkout Setup Repository
-        uses: actions/checkout@v4
-        if: steps.restore-cache-db.outputs.cache-hit != 'true'
-        with:
-          repository: fmidue/haskell-template-setup
-          path: haskell-template-setup
-
-      - name: Setup DB
-        if: steps.restore-cache-db.outputs.cache-hit != 'true'
-        run: |
-          set -ex
-          sudo mv -f stack.yaml ./haskell-template-setup
-          sudo mv -f ./${{ env.config }}/package.yaml ./haskell-template-setup
-          cd haskell-template-setup
-          this_repo="git@github.com:${{ github.repository }}.git"
-          sed -i "/extra-deps/a\  - git: $this_repo\n    commit: ${{ github.event.client_payload.sha }}" stack.yaml
-          sed -i "s@/autotool/default@$(realpath "$PWD"/../${{ env.tasks }}/root)@" env
-          eval "$(ssh-agent -s)"
-          ssh-add <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
-          ./create.sh
-          sudo mv root ../${{ env.tasks }}
-          set +ex
-
-      - name: Determine GHC-Version
-        id: ghc-version
-        run: |
-          set -ex
-          cd ${{ env.tasks }}
-          ghc_file="$(find root/pkgdb -name "ghci*" -print -quit)"
-          temp="${ghc_file##*/ghci-}"
-          ghc_version="${temp%-*.conf*}"
-          echo version="$ghc_version" >> $GITHUB_OUTPUT
-          set +ex
-
-      - name: Install GHC
-        uses: haskell-actions/setup@v2
-        with:
-          ghc-version: ${{steps.ghc-version.outputs.version}}
-
-      - name: Run Test Script
-        run: |
-          set -ex
-          sudo cp haskell-template-setup/stack.yaml ${{ env.tasks }}
-          cd ${{ env.tasks }}
-          for file in $(find . -name '*.txt' -and -not -path "./root/*"); do
-            ../${{ env.script }}/test.sh $file root ${{ env.settings-gens }}/$(basename $file .txt).hs
-          done
-          if [ $(find . -name "Check.hs" -or -name "ghc.html" | wc -l) -eq 0 ]; then
-            rm -f stack.yaml
-          fi
-          set +ex
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        id: upload-artifact
-        with:
-          name: reports
-          path: |
-            ${{ env.tasks }}/*/*/*.html
-            ${{ env.tasks }}/*/*/settings.txt
-            ${{ env.tasks }}/*/*/Check.hs
-            ${{ env.tasks }}/stack.yaml
-            ${{ env.tasks }}/*/hlint.html
-          if-no-files-found: ignore
-          overwrite: true
-
-      - name: Link Comment
-        if: ${{ steps.upload-artifact.outputs.artifact-url != '' }}
-        uses: peter-evans/commit-comment@v3
-        with:
-          sha: ${{ github.event.client_payload.sha }}
-          body: |
-            The flex-task test workflow reported issues or suggestions for the following commit:
-            __${{ github.event.client_payload.message }}__
-            [Download Reports](${{ steps.upload-artifact.outputs.artifact-url }})
