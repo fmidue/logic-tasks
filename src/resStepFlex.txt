@@ -1,12 +1,14 @@
-{-# OPTIONS_GHC -Wno-unused-imports #-}
+
+taskName: ResolutionStepReverse
+
+=============================================
+
 {-# LANGUAGE PackageImports #-}
 
 module Global where
 
-import Data.Set (fromList)
-
-import "logic-tasks" Config (StepInst(..))
-import Formula.Types (Clause(..), Literal(..))
+import "logic-tasks" Config (StepInst)
+import Formula.Types (Clause)
 
 
 type Submission = Clause
