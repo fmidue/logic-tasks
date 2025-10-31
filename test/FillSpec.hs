@@ -53,14 +53,14 @@ validBoundsNormalFormConfig = do
 validBoundsPercentTrueEntries :: FormulaConfig -> Gen (Int, Int)
 validBoundsPercentTrueEntries formulaConfig = do
   case formulaConfig of
-    FormulaDnf nfc -> do
-      let entries = (2 ^ length (usedAtoms (baseConf nfc))) :: Int
+    FormulaDnf normalFormConfig -> do
+      let entries = (2 ^ length (usedAtoms (baseConf normalFormConfig))) :: Int
       validRange entries
-    FormulaCnf nfc -> do
-      let entries = (2 ^ length (usedAtoms (baseConf nfc))) :: Int
+    FormulaCnf normalFormConfig -> do
+      let entries = (2 ^ length (usedAtoms (baseConf normalFormConfig))) :: Int
       validRange entries
-    FormulaArbitrary stc -> do
-      let entries = (2 ^ length (availableAtoms stc)) :: Int
+    FormulaArbitrary synTreeConf -> do
+      let entries = (2 ^ length (availableAtoms synTreeConf)) :: Int
       validRange entries
   where
     validRange entries = do
