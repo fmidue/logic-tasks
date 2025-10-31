@@ -1,4 +1,8 @@
-{-# OPTIONS_GHC -Wno-unused-imports #-}
+
+taskName: FindLiar
+
+=============================================
+
 {-# LANGUAGE DeriveDataTypeable#-}
 
 module Global where
@@ -6,9 +10,8 @@ module Global where
 import Data.Data (Data)
 import Data.Text (Text)
 
-import Control.OutputCapable.Blocks
-import LogicTasks.Formula (TruthValue(..))
-import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+import LogicTasks.Formula (TruthValue)
+import Trees.Types (SynTree, BinOp, PropFormula)
 
 
 newtype Table = Table [(Maybe (PropFormula Char), [Maybe TruthValue])]
@@ -32,9 +35,6 @@ data TaskData = TaskData
   , solutionValues :: [Bool]
   , formulaParts   :: [SynTree BinOp Char]
   } deriving (Data)
-
-bothLangs :: OutputCapable m => String -> LangM m
-bothLangs s = translate $ german s >> english s
 
 
 =============================================
@@ -89,7 +89,6 @@ import Data.Char (digitToInt)
 import Data.List (sortOn, transpose)
 import Data.String (fromString)
 import Data.String.Interpolate (i)
-import Data.Text (Text)
 import Numeric (showBin)
 import Test.QuickCheck.Gen
 import Yesod
@@ -115,8 +114,6 @@ import Global
 import TaskSettings
 
 
-instance MonadFail Gen where
-  fail = error
 
 getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = fromGen $ do
@@ -206,7 +203,7 @@ printAllocation =
 
 feedbackCompareHints :: OutputCapable m => Text -> [Namen] -> LangM m
 feedbackCompareHints unmatchedHint identifiedLiars = do
-  indent $ bothLangs $
+  indent $ text $
     "Widerspruch gefunden: Die ausgewählten Lügner sind: " ++
     show identifiedLiars ++ "." ++
     " Das passt jedoch nicht zu dem Hinweis: " ++
@@ -214,7 +211,7 @@ feedbackCompareHints unmatchedHint identifiedLiars = do
 
 feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> SynTree BinOp Char -> LangM m
 feedbackCompareChosenLiars allocationFromLiars wrongLiar = do
-  indent $ bothLangs $
+  indent $ text $
     "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl passende Belegung ist: " ++
     printAllocation allocationFromLiars ++ "." ++
     " Jedoch wertet die angegebene Teilformel: " ++
@@ -224,15 +221,15 @@ feedbackCompareChosenLiars allocationFromLiars wrongLiar = do
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ TaskData{..} Submission{..} = do
   when (nubOrd atomicRows /= atomicRows) $
-    refuse $ indent $ bothLangs $
+    refuse $ indent $ text $
       "Mindestens eine Belegung kommt in der Wahrheitstafel mehrfach vor. " ++
       "Es müssen alle Belegungen genau einmal vorkommen."
   let theTable = #{startingTable} --ignore-length
   when (atomicCols == map reverse theTable) $
-    refuse $ indent $ bothLangs $
+    refuse $ indent $ text $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
-  assertion (atomicCols == theTable) $ bothLangs
+  assertion (atomicCols == theTable) $ text
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
   #{if printFeedbackImmediately then findContradictions "map toSynTree submittedParts" else ""}
   pure ()
@@ -257,18 +254,18 @@ generateTruthTable solutionValues =
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ TaskData{..} Submission{..} = do
   let correctParts = zipWith isSemanticEqual formulaParts submittedTrees
-  yesNo (and correctParts) $ bothLangs
+  yesNo (and correctParts) $ text
     "Aussagen sind korrekt übersetzt?"
   let correctFormula = isSemanticEqual (toSynTree submittedFormula) solutionFormula ||
                        isSemanticEqual (toSynTree submittedFormula) (foldr1 (Binary And) submittedTrees)
-  yesNo correctFormula $ bothLangs
+  yesNo correctFormula $ text
     "Gesamtformel ist korrekt?"
   #{if not printFeedbackImmediately then findContradictions "submittedTrees" else ""}
   let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
-  yesNo correctLast $ bothLangs
+  yesNo correctLast $ text
     "Spalte F der Wahrheitstafel ist korrekt?"
   let correctNames = identifiedLiars == listOfLiars
-  yesNo correctNames $ bothLangs
+  yesNo correctNames $ text
     "Auswahl der Lügner ist korrekt?"
   let points = (if and correctParts then 0.4 else 0.0) +
                (if correctFormula   then 0.2 else 0.0) +
@@ -325,21 +322,21 @@ import Global
 
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
 description _ TaskData{..} = do
-  paragraph $ bothLangs
+  paragraph $ text
     ("Ein Logiker irrt auf dem Campus herum, um seinen Hörsaal zu finden. " ++
       "Er fragt drei Studierende (mit den ausgefallenen Namen A, B, C), wo er den Raum LB 107 finden kann. " ++
       "Diese Studierenden sagen (jeweils) immer die Wahrheit oder lügen immer. " ++
       "Um die Zuverlässigkeit der Antworten zu überprüfen, fragt er die drei Studierenden, ob die anderen lügen, " ++
       "und erhält folgende Antworten:")
-  enumerateM (bothLangs . (++ ")") . show) (zip [1 ::Int ..] (map (bothLangs . unpack) hints))
-  paragraph $ bothLangs
+  enumerateM (text . (++ ")") . show) (zip [1 ::Int ..] (map (text . unpack) hints))
+  paragraph $ text
     ("Übersetzen Sie die Hinweise und die Kombination dieser jeweils in eine aussagenlogische Formel. " ++
       "Geben Sie die Formeln in die entsprechend benannten Textfelder ein.")
-  paragraph $ bothLangs
+  paragraph $ text
     ("Wer lügt? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. " ++
       "Füllen Sie dabei alle benannten Spalten vollständig aus. " ++
       "Sie können Hilfsspalten verwenden. Kreuzen Sie anschließend die entsprechenden Namen an.")
-  paragraph $ bothLangs
+  paragraph $ text
     ("Verwenden Sie dabei die atomaren Formeln A, B, C mit der Interpretation, " ++
     "dass eine Zuordnung von 'wahr' dafür steht, dass die entsprechende Person die Wahrheit sagt.")
   keyHeading
