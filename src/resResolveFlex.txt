@@ -1,12 +1,14 @@
-{-# OPTIONS_GHC -Wno-unused-imports #-}
+
+taskName: ResolutionFullPrefilled
+
+=============================================
+
 {-# LANGUAGE PackageImports #-}
 
 module Global where
 
-import Data.Set (fromList)
-
-import "logic-tasks" Config (ResolutionInst(..))
-import Formula.Types (Clause(..), ResStep(..), Literal(..))
+import "logic-tasks" Config (ResolutionInst)
+import Formula.Types (ResStep)
 
 
 type Submission = [ResStep]

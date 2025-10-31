@@ -1,12 +1,17 @@
+
+taskName: MarkierungsAlgorithmus
+
+=============================================
+
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Global where
 
 import Data.Data (Data)
 
-import LogicTasks.Formula (TruthValue(..))
-import Trees.Types (SynTree(..), BinOp(..))
-import FlexTask.Generic.Form
+import LogicTasks.Formula (TruthValue)
+import Trees.Types (SynTree, BinOp)
+import FlexTask.Generic.Form (SingleChoiceSelection)
 
 
 newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]}
