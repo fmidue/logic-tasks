@@ -16,7 +16,7 @@ fi
 leave_check=false
 
 if [[ -f $3 ]]; then
-  mutator="$3"
+  mutator="$(realpath "$3")"
 else
   echo "settings generator does not exist: $3"
   echo "Usage: $0 input_file pkgdb_directory settings_generator [-c]"
@@ -37,8 +37,26 @@ base_name=$(basename "$1" | sed 's/\(.*\)\..*/\1/')
 pkg_path=$PWD/$2/pkgdb
 script_path="$(realpath "../.github/actions/test-flex")"
 expect_script="${script_path}/runGhci.expect"
-mapfile -t files \
-  < <(awk '/^\s*module/ && !/^\s*module +Check +/ {sub(/module /,"")sub(/ (where|\().*/,".hs"); print}' "$1")
+mapfile -t files < <(
+  awk '
+    /^\s*taskName:\s*/ {
+      print "TaskName.txt"
+      next
+    }
+    /^\s*module/ && !/^\s*module +Check +/ {
+      mod = $0
+
+      while (mod !~ /where/) {
+        if (getline line <= 0) break   # Stop if end of file
+        mod = mod " " line
+      }
+
+      sub(/module[[:space:]]+/, "", mod)
+      sub(/[[:space:]]*(where|\().*/, ".hs", mod)
+      print mod
+    }
+  ' "$1"
+)
 files=("${files[@]/#/$base_name/}")
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
@@ -66,7 +84,12 @@ while IFS= read -r line || [ -n "$line" ]; do
     true >"${files[$current_file]}"
     continue
   fi
-  echo "${line//$'\r'/}" >>"${files[$current_file]}"
+  if [[ "$line" =~ "taskName:" ]]; then
+    task_name=$(awk '{$1=$1;print}' <<<"${line#"taskName:"}")
+    echo "$task_name" >>"${files[$current_file]}"
+  else
+    echo "${line//$'\r'/}" >>"${files[$current_file]}"
+  fi
 done <"$1"
 
 cp "$1" "$base_name/config.txt"
@@ -87,8 +110,7 @@ else
   hlint_hints=true
   echo -e "${RED}Suggestions available!\n${NC}"
 fi
-
-expect "$script_path/mutator.expect" "$ghc_version" "../$mutator" "$config_mutations" >/dev/null
+expect "$script_path/mutator.expect" "$ghc_version" "$mutator" "$config_mutations" >/dev/null
 echo "Testing a total of $(grep -c ^ settings_variants.txt) config mutations."
 sed -i "s/,\ /;/g" "settings_variants.txt"
 for i in $(seq 1 "$(grep -c ^ settings_variants.txt)"); do
@@ -130,7 +152,7 @@ for i in $(seq 1 "$(grep -c ^ settings_variants.txt)"); do
   fi
 
   echo -e "${CYAN}Running Check.hs scan...${NC}"
-  "$script_path"/scan_check.sh "$i"
+  bash "$script_path"/scan_check.sh "$i"
   if [ "$(grep -w "class=header" -c "$i/scan_check.html")" -eq 0 ]; then
     rm "$i/scan_check.html"
     echo -e "${GREEN}No Issues!\n${NC}"
