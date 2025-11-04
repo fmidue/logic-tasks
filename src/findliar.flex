@@ -242,7 +242,7 @@ checkSyntax _ TaskData{..} Submission{..} = do
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
   assertion (atomicCols == theTable) $ text
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
-  #{if printFeedbackImmediately then findContradictions "map toSynTree submittedParts" else ""}
+  #{if printFeedbackImmediately then findContradictions True "map toSynTree submittedParts" else ""}
   pure ()
   where
     Table xs   = submittedTable
@@ -271,7 +271,7 @@ checkSemantics _ TaskData{..} Submission{..} = do
                        isSemanticEqual (toSynTree submittedFormula) (foldr1 (Binary And) submittedTrees)
   yesNo correctFormula $ text
     "Gesamtformel ist korrekt?"
-  #{if not printFeedbackImmediately then findContradictions "submittedTrees" else ""}
+  #{if not printFeedbackImmediately then findContradictions False "submittedTrees" else ""}
   let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
   yesNo correctLast $ text
     "Spalte F der Wahrheitstafel ist korrekt?"
@@ -295,17 +295,19 @@ checkSemantics _ TaskData{..} Submission{..} = do
   where
     solutionCode = [i|"Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: " ++ show listOfLiars|]
 
-    findContradictions :: String -> String
-    findContradictions submittedTrees = [i|
+    findContradictions :: Bool -> String -> String
+    findContradictions refusal submittedTrees =
+      let mode = if refusal then "refuse $" else "" :: String
+      in [i|
   let allocationFromLiars = toAllocationInverted identifiedLiars
       evaluated           = not . fromJust . evaluate allocationFromLiars
       wrongLiars          = [formula | formula <- #{submittedTrees}, evaluated formula]
   case wrongLiars of
-    liar:_ -> refuse $ feedbackCompareChosenLiars allocationFromLiars liar
+    liar:_ -> #{mode} feedbackCompareChosenLiars allocationFromLiars liar
     [] -> pure ()
   let unmatchedHints = [hint | (formula, hint) <- zip formulaParts hints, evaluated formula]
   case unmatchedHints of
-    hint:_ -> refuse $ feedbackCompareHints hint identifiedLiars
+    hint:_ -> #{mode} feedbackCompareHints hint identifiedLiars
     [] -> pure ()
     |]
 
