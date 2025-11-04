@@ -1,10 +1,7 @@
 ---
-resolver: nightly-2024-03-20
+resolver: nightly-2025-10-07
 packages:
   - .
 extra-deps:
-  - call-alloy-0.6.0.2@sha256:f7ecb0f4b8f7cc804d6d8ace7c323b48e3aa03994a2d09c4b7ee66cc4bf15abd,3850
 
 allow-newer: true
-allow-newer-deps:
-  - latex-svg-image
