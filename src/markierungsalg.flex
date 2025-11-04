@@ -206,26 +206,28 @@ checkSyntax _ TaskData{..} Submission{..} = do
         english "The submission is interpreted as:"
     buildLatex formula stepsSubmitted
 
-    paragraph $ do
-        indent $ translate $ do
-            german (case getAnswer output of
-                Just 3 -> "\\"unerfüllbar\\""
-                Just 2 -> "\\"erfüllbar\\", mit"
-                _      -> "")
-            english (case getAnswer output of
-                Just 3 -> "\\"unsatisfiable\\""
-                Just 2 -> "\\"satisfiable\\", with"
-                _      -> "")
-        case model of
-            Nothing -> pure ()
-            Just m  -> indent $ latex $ intercalate ",\\\\ " $
-                map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum $ truth w)) m
+    paragraph $ indent $ do
+        translate $ do
+          german $ germanOutput ++ germanWith
+          english $ englishOutput ++ englishWith
+        modelDisplay
         pure ()
     #{if printFeedbackImmediately then feedbackCode else ""}
 
     pure ()
   where
     stepsSubmitted = zip [1..] (map unCharAnswer (catMaybes steps))
+    (germanOutput, englishOutput) = case getAnswer output of
+      Just 3 -> ("\\"unerfüllbar\\"","\\"unsatisfiable\\"")
+      Just 2 -> ("\\"erfüllbar\\"","\\"satisfiable\\"")
+      _      -> ("","")
+    (germanWith, englishWith, modelDisplay) = case model of
+      Nothing -> ("","",pure ())
+      Just m  -> ( ", mit"
+                 , ", with"
+                 , latex $ intercalate ",\\\\ " $
+                     map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum $ truth w)) m
+                 )
 
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
