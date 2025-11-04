@@ -94,7 +94,7 @@ import Test.QuickCheck.Gen
 import Yesod
 
 import FlexTask.FormUtil
-  ( ($$>), addCss )
+  (($$>), addCss, addCssClass)
 import FlexTask.Generic.Form
   ( Alignment(..)
   , Formify(..)
@@ -127,15 +127,18 @@ getTask = fromGen $ do
          , form
          )
   where
-    form = formify (Nothing :: Maybe ([String], String))
+    form = addCss formulaCss $
+      formify (Nothing :: Maybe ([String], String))
         [ [list Vertical [ "1) ", "2) ", "3) "]]
-        , [single "Gesamtformel F="]
+        , [single $ addCssClass "formula-input" "Gesamtformel F="]
         ] $$>
-        addCss formulaCss (tableForm emptyColumns rows ["A","B","C"] ["F"]) $$>
-        formify (Nothing :: Maybe [Namen])
-          [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
+      tableForm emptyColumns rows ["A","B","C"] ["F"] $$>
+      formify (Nothing :: Maybe [Namen])
+        [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
 
     formulaCss = [cassius|
+      .formula-input
+        width: 42%
       th, td
         border: 1px solid black
         border-collapse: collapse
