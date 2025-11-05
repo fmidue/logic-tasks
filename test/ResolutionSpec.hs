@@ -39,7 +39,7 @@ containsNoTautologies (x:xs) = (length list == length (Data.Set.fromList list)) 
     list = map (\case
       Positive y -> y
       Negative y -> y)
-      (literals x)  
+      (literals x)
 
 validBoundsResolutionConfig :: Gen ResolutionConfig
 validBoundsResolutionConfig = do
