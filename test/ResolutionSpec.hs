@@ -1,12 +1,13 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE LambdaCase #-}
 module ResolutionSpec where
 
 import Test.Hspec
 import Formula.Resolution (applySteps)
 import Data.Maybe (isJust, fromJust, isNothing)
-import Formula.Types (Clause(Clause), Literal (..))
+import Formula.Types (Clause(Clause), Literal (..), Formula (literals))
 import qualified Data.Set
-import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution))
+import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution, clauses))
 import Test.QuickCheck (Gen, choose, suchThat, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM)
@@ -30,6 +31,15 @@ justB = Clause (Data.Set.fromList [Positive 'B'])
 
 emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
+
+containsNoTautologies :: [Clause] -> Bool
+containsNoTautologies [] = True
+containsNoTautologies (x:xs) = (length list == length (Data.Set.fromList list)) && containsNoTautologies xs
+  where
+    list = map (\case
+      Positive y -> y
+      Negative y -> y)
+      (literals x)  
 
 validBoundsResolutionConfig :: Gen ResolutionConfig
 validBoundsResolutionConfig = do
@@ -86,6 +96,10 @@ spec = do
       forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           minSteps resConfig <= length (solution resInst)
+    it "should contain no clause with a literal that appears both positively and negatively" $
+      forAll validBoundsResolutionConfig $ \resConfig ->
+        forAll (genResInst resConfig) $ \resInst ->
+          containsNoTautologies (clauses resInst)
     it "should pass verifyStatic" $
       forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
