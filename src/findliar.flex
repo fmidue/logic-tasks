@@ -117,7 +117,7 @@ import TaskSettings
 
 getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = fromGen $ do
-    d@(x, y, z, _) <- taskData
+    d@(x, y, z, _) <- taskData `suchThat` (/= (('A',True),('B',False),('C',False),False))
     let (formulas, unsortedHints) = makeHintsAndFormula d
         dataSortedOnName = sortOn fst [x, y, z]
         (formulaParts, hints) = unzip $ sortOn snd $ zip formulas unsortedHints
