@@ -145,7 +145,7 @@ getTask = fromGen $ do
 
     formulaCss = [cassius|
       .flex-form-span
-        label
+        > label
           display:block
           margin-bottom: 1em
           margin-top: 2em
