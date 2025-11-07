@@ -144,17 +144,18 @@ getTask = fromGen $ do
       return (a,b,c,d)
 
     formulaCss = [cassius|
-      .flex-form-span > label
-        display:block
-        margin-bottom: 1em
-        margin-top: 2em
+      .flex-form-span
+        label
+          display:block
+          margin-bottom: 1em
+          margin-top: 2em
 
-      .flex-form-span .#{formulaClass}
-        display:block
-        width: 95%
-        margin-left: auto
-        margin-right: auto
-        margin-bottom: 0.5em
+        .#{formulaClass}
+          display:block
+          width: 95%
+          margin-left: auto
+          margin-right: auto
+          margin-bottom: 0.5em
     |]
 
 formulaAndHints

@@ -116,12 +116,12 @@ form = addCss inputCss $ formify (Nothing :: Maybe [String]) fields
         margin-right: var(--margin)
         width: min(calc(100% - var(--margin)), 25em)
 
-      .flex-form-span .formula-input
-        width: 100%
-        margin-left: 0.5em
+        .formula-input
+          width: 100%
+          margin-left: 0.5em
 
-      .flex-form-span label
-        display: block
+        label
+          display: block
     |]
 
 checkers :: String
