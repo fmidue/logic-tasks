@@ -149,7 +149,7 @@ getTask = fromGen $ do
         margin-bottom: 1em
         margin-top: 2em
 
-      .#{formulaClass}
+      .flex-form-span .#{formulaClass}
         display:block
         width: 95%
         margin-left: auto
