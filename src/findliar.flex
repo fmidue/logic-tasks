@@ -137,22 +137,23 @@ getTask = fromGen $ do
         [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
 
     formulaCss = [cassius|
-      .formula-input
+      .flex-form-div .formula-input
         width: 42%
-      th, td
-        border: 1px solid black
-        border-collapse: collapse
-        text-align: center
-      table tr th:nth-child(-n+3)
-        width: 20px
-      table tr td:nth-child(-n+3)
-        height: 25px
-      table tr th:nth-child(n+4)
-        width: 125px
-      table tr th:nth-child(n+8)
-        width: 25px
-      table tr th:last-child
-        padding: 10px 0px
+      .truth-table
+        th, td
+          border: 1px solid black
+          border-collapse: collapse
+          text-align: center
+        table tr th:nth-child(-n+3)
+          width: 20px
+        table tr td:nth-child(-n+3)
+          height: 25px
+        table tr th:nth-child(n+4)
+          width: 125px
+        table tr th:nth-child(n+8)
+          width: 25px
+        table tr th:last-child
+          padding: 10px 0px
       |]
 
 instance Formify [Namen] where
