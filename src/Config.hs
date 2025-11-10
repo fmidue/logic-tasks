@@ -1,10 +1,11 @@
+{-# language DeriveDataTypeable #-}
 {-# language DeriveGeneric #-}
 {-# language DuplicateRecordFields #-}
 
 module Config where
 
 
-import Data.Typeable
+import Data.Data (Data)
 import GHC.Generics
 import Formula.Types
 import Formula.Util
@@ -25,7 +26,7 @@ data FormulaInst
   = InstCnf Cnf
   | InstDnf Dnf
   | InstArbitrary (ST.SynTree ST.BinOp Char)
-  deriving (Show,Eq,Generic)
+  deriving (Show,Eq,Generic,Data)
 
 instance Formula FormulaInst where
   literals (InstCnf c) = literals c
@@ -50,10 +51,12 @@ instance ToSAT FormulaInst where
   convert (InstArbitrary t) = convert t
 
 
-newtype Number = Number {value :: Maybe Int} deriving (Show,Typeable, Generic)
+newtype Number = Number {value :: Maybe Int}
+  deriving (Generic, Show)
 
 
-newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)} deriving (Typeable, Generic)
+newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)}
+  deriving Generic
 
 instance Show StepAnswer where
   show (StepAnswer (Just (b,c))) = '(' : show b ++ ',' : ' ' : show c ++ ")"
@@ -66,9 +69,9 @@ data DecideChoice
   deriving (Show,Ord,Eq,Enum,Bounded,Generic)
 
 showChoice :: Language -> DecideChoice -> String
-showChoice German Correct = "Richtig"         -- no-spell-check
-showChoice German Wrong = "Fehlerhaft"        -- no-spell-check
-showChoice German NoAnswer = "Keine Antwort"  -- no-spell-check
+showChoice German Correct = "Richtig"
+showChoice German Wrong = "Fehlerhaft"
+showChoice German NoAnswer = "Keine Antwort"
 showChoice English Correct = "Correct"
 showChoice English Wrong = "Wrong"
 showChoice English NoAnswer = "No answer"
@@ -79,7 +82,7 @@ data PickInst = PickInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Show, Eq)
+  deriving (Data, Eq, Generic, Show)
 
 dPickInst :: PickInst
 dPickInst =  PickInst
@@ -97,7 +100,7 @@ data MaxInst = MaxInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
+  deriving (Data, Generic, Show)
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
@@ -116,7 +119,7 @@ data MinInst = MinInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
+  deriving (Data, Generic, Show)
 
 dMinInst :: MinInst
 dMinInst =  MinInst
@@ -135,7 +138,7 @@ data FillInst = FillInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Show)
+  deriving (Data, Generic, Show)
 
 dFillInst :: FillInst
 dFillInst =  FillInst
@@ -154,7 +157,7 @@ data DecideInst = DecideInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Show)
+  deriving (Data, Generic, Show)
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
@@ -175,7 +178,7 @@ data StepInst = StepInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
+  deriving (Data, Generic, Show)
 
 dStepInst :: StepInst
 dStepInst =  StepInst
@@ -199,7 +202,7 @@ data ResolutionInst = ResolutionInst {
                , addText    :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic, Show)
+  deriving (Data, Generic, Show)
 
 dResInst :: ResolutionInst
 dResInst = let
@@ -241,7 +244,7 @@ data PrologInst = PrologInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Show, Typeable, Generic)
+  deriving (Data, Generic, Show)
 
 
 dPrologInst :: PrologInst
@@ -261,7 +264,8 @@ data BaseConfig = BaseConfig
     { minClauseLength :: Int
     , maxClauseLength :: Int
     , usedAtoms :: String
-    } deriving (Typeable, Generic, Show)
+    }
+  deriving (Generic, Show)
 
 
 dBaseConf :: BaseConfig
@@ -277,7 +281,8 @@ data NormalFormConfig = NormalFormConfig
     { baseConf:: BaseConfig
     , minClauseAmount :: Int
     , maxClauseAmount :: Int
-    } deriving (Typeable, Generic, Show)
+    }
+  deriving (Generic, Show)
 
 dNormalFormConf :: NormalFormConfig
 dNormalFormConf = NormalFormConfig
@@ -296,7 +301,7 @@ data PickConfig = PickConfig {
      , printSolution :: Bool
      , extraText :: Maybe (Map Language String)
      }
-     deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
@@ -316,7 +321,7 @@ data FillConfig = FillConfig {
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
@@ -336,7 +341,7 @@ data MinMaxConfig = MinMaxConfig {
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Show, Typeable, Generic)
+  deriving (Generic, Show)
 
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
@@ -356,7 +361,7 @@ data DecideConfig = DecideConfig {
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
@@ -376,7 +381,7 @@ data StepConfig = StepConfig {
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Show, Typeable, Generic)
+  deriving (Generic, Show)
 
 dStepConf :: StepConfig
 dStepConf = StepConfig
@@ -399,7 +404,7 @@ data PrologConfig = PrologConfig {
     , secondClauseShape :: ClauseShape
     , useSetNotation :: Bool
     }
-    deriving (Show, Typeable, Generic)
+  deriving (Generic, Show)
 
 dPrologConf :: PrologConfig
 dPrologConf = PrologConfig
@@ -423,7 +428,7 @@ data ResolutionConfig = ResolutionConfig {
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dResConf :: ResolutionConfig
 dResConf = ResolutionConfig

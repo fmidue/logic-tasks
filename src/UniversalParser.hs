@@ -141,14 +141,14 @@ data AllowNegation = Nowhere | LiteralsOnly | Everywhere
 orParser :: Parser ()
 orParser =
       keyword "or"
-  <|> keyword "oder" {- german -}
+  <|> keyword "oder"
   <|> tokenSymbol "∨" <|> tokenSymbol "v" <|> tokenSymbol "\\/"
   <?> "Disjunction"
 
 andParser :: Parser ()
 andParser =
       keyword "and"
-  <|> keyword "und" {- german -}
+  <|> keyword "und"
   <|> tokenSymbol "∧" <|> tokenSymbol "^" <|> tokenSymbol "/\\"
   <?> "Conjunction"
 

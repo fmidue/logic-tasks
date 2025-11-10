@@ -5,7 +5,8 @@
 module LogicTasks.Syntax.DecomposeFormula where
 
 
-import Control.Monad.IO.Class (MonadIO (liftIO))
+import Capabilities.Cache (MonadCache)
+import Capabilities.LatexSvg (MonadLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (paragraph, indent, translatedCode, refuse, image),
   LangM,
@@ -118,7 +119,7 @@ partialGrade' DecomposeFormulaInst{..} sol = do
 
 
 completeGrade
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m)
   => FilePath
   -> DecomposeFormulaInst
   -> Delayed TreeFormulaAnswer
@@ -126,7 +127,7 @@ completeGrade
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m)
   => FilePath
   -> DecomposeFormulaInst
   -> TreeFormulaAnswer
@@ -141,13 +142,13 @@ completeGrade' path DecomposeFormulaInst{..} sol
       english "The original syntax tree looks like this:"
       german "Der originale Syntaxbaum sieht so aus:"
 
-    image $=<< liftIO $ cacheTree (transferToPicture tree) path
+    image $=<< cacheTree (transferToPicture tree) path
 
     instruct $ do
       english "The syntax tree for your entered formula looks like this:"
       german "Der Syntaxbaum für Ihre eingegebene Formel sieht so aus:"
 
-    image $=<< liftIO $ cacheTree (transferToPicture solTree) path
+    image $=<< cacheTree (transferToPicture solTree) path
 
     when showSolution $ do
       example (display swappedTree) $ do
@@ -158,7 +159,7 @@ completeGrade' path DecomposeFormulaInst{..} sol
         english "The corresponding syntax tree looks like this:"
         german "Der zugehörige Syntaxbaum sieht so aus:"
 
-      image $=<< liftIO $ cacheTree (transferToPicture swappedTree) path
+      image $=<< cacheTree (transferToPicture swappedTree) path
 
       pure ()
 

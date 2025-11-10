@@ -101,7 +101,7 @@ description oneInput StepInst{..} = do
       show' = showClause usesSetNotation
 
       (gerEnd, engEnd)
-        | oneInput = (" in der folgenden Tupelform an: (Literal, Resolvente)." -- no-spell-check
+        | oneInput = (" in der folgenden Tupelform an: (Literal, Resolvente)."
                      , " in the following tuple form: (literal, resolvent)."
                      )
         | otherwise = (" an.",".")

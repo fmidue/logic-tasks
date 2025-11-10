@@ -36,14 +36,14 @@ spec = do
         ]
   describe "parser @Cnf" $ do
     it "correctly recognizes all different notations" $
-      isRight $ parse (parser @Cnf) "" "A/\\B und (C or ~D) and (not E oder nicht F \\/ G)" {- german -}
+      isRight $ parse (parser @Cnf) "" "A/\\B und (C or ~D) and (not E oder nicht F \\/ G)"
   describe "parser @Dnf" $ do
     it "correctly recognizes all different notations" $
-      isRight $ parse (parser @Dnf) "" "A \\/-B oder (C and D) or (not E and nicht F /\\ ~ G)" {- german -}
+      isRight $ parse (parser @Dnf) "" "A \\/-B oder (C and D) or (not E and nicht F /\\ ~ G)"
 
   describe "parser @ResStep" $ do
     it "can handle extra whitespace in resolved clause" $
-      isRight $ parse (parser @ResStep) "" "(1, 2, {   A   ,    nicht    B   } = 5)" {- german -}
+      isRight $ parse (parser @ResStep) "" "(1, 2, {   A   ,    nicht    B   } = 5)"
   describe "parser @PickInst" $ do
     it "correctly parses the pretty representation of a PickInst (cnf)" $
       either (const False) (== dPickInst) $ parse (parser @PickInst) "" $ show $ pretty dPickInst

@@ -4,8 +4,8 @@
 
 module LogicTasks.Syntax.TreeToFormula where
 
-
-import Control.Monad.IO.Class(MonadIO (liftIO))
+import Capabilities.Cache (MonadCache, cache)
+import Capabilities.LatexSvg (MonadLatexSvg, renderLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
@@ -17,9 +17,17 @@ import Control.OutputCapable.Blocks (
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
-import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
+import Image.LaTeX.Render (FormulaOptions(..))
 
-import LogicTasks.Helpers (cacheIO, extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
+import LogicTasks.Helpers (
+  arrowsKey,
+  basicOpKey,
+  example,
+  extra,
+  instruct,
+  keyHeading,
+  reject,
+  )
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
@@ -34,13 +42,13 @@ import Data.List ((\\), intercalate)
 import Data.List.Extra (notNull)
 
 
-description :: (OutputCapable m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
+description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
 description path TreeToFormulaInst{..} = do
     instruct $ do
       english "Consider the following syntax tree:"
       german "Betrachten Sie den folgenden Syntaxbaum:"
 
-    image $=<< liftIO $ cacheTree latexImage path
+    image $=<< cacheTree latexImage path
 
     instruct $ do
       english "Give the propositional logic formula that is represented by this syntax tree."
@@ -90,7 +98,7 @@ partialGrade' inst sol
         diffDisplay = intercalate ", " (map show atomicsDiff)
 
 completeGrade
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m)
   => FilePath
   -> TreeToFormulaInst
   -> Delayed TreeFormulaAnswer
@@ -98,7 +106,7 @@ completeGrade
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m)
   => FilePath
   -> TreeToFormulaInst
   -> TreeFormulaAnswer
@@ -109,7 +117,7 @@ completeGrade' path inst sol
           english "Your submission is not correct. The syntax tree for your submitted formula looks like this:"
           german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
-        image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
+        image $=<< cacheTree (transferToPicture treeAnswer) path
 
         when (isSemanticEqual treeAnswer correctTree) $
           instruct $ do
@@ -128,28 +136,9 @@ completeGrade' path inst sol
 
 
 
-treeOptions :: FormulaOptions
-treeOptions = FormulaOptions "\\usepackage[linguistics]{forest}" Nothing
-
-
-
-getImage :: String -> IO SVG
-getImage s = do
-  let iTree = "\\begin{forest}" ++ s ++ "\\end{forest}"
-  render <- imageForFormula defaultEnv treeOptions iTree
-  case render of (Left err) -> error $ unlines ["failed to render an image with the given formula: ", show err]
-                 (Right svg) -> pure svg
-
-
-
-outputImage :: FilePath -> String -> IO FilePath
-outputImage path tree = do
-  picture <- getImage tree
-  writeFile path picture
-  pure path
-
-
-
-cacheTree :: String -> FilePath -> IO FilePath
-cacheTree tree path = cacheIO path ext "tree-" tree outputImage
-  where ext = showDigest (sha1 . fromString $ tree) ++ ".svg"
+cacheTree :: (MonadCache m, MonadLatexSvg m) => String -> FilePath -> m FilePath
+cacheTree tree path = cache path ext "tree-" withTreeEnv $ renderLatexSvg Nothing $ Just treeOptions
+  where
+    ext = showDigest (sha1 . fromString $ tree) ++ ".svg"
+    withTreeEnv = "\\begin{forest}" ++ tree ++ "\\end{forest}"
+    treeOptions = FormulaOptions "\\usepackage[linguistics]{forest}" Nothing

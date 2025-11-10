@@ -13,7 +13,6 @@ import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTr
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, findWithDefault)
 import Trees.Types (SynTree(..), BinOp(..))
-import Data.Typeable
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, german, english)
 import LogicTasks.Helpers (reject)
@@ -24,7 +23,7 @@ data DecomposeFormulaConfig = DecomposeFormulaConfig {
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 defaultDecomposeFormulaConfig :: DecomposeFormulaConfig
 defaultDecomposeFormulaConfig = DecomposeFormulaConfig
@@ -68,5 +67,4 @@ data DecomposeFormulaInst = DecomposeFormulaInst
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
-
+  deriving (Generic, Show)

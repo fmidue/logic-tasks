@@ -17,7 +17,6 @@ import Data.Data (Data)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
-import Data.Typeable
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import LogicTasks.Helpers (reject)
@@ -32,7 +31,7 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
@@ -78,5 +77,4 @@ data ComposeFormulaInst = ComposeFormulaInst
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
-               deriving (Data, Show, Typeable, Generic)
-
+  deriving (Data, Generic, Show)
