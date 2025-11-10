@@ -11,10 +11,10 @@ import Data.Data (Data)
 import Data.Text (Text)
 
 import LogicTasks.Formula (TruthValue)
-import Trees.Types (SynTree, BinOp, PropFormula)
+import Trees.Types (SynTree, BinOp)
 
 
-newtype Table = Table [(Maybe (PropFormula Char), [Maybe TruthValue])]
+newtype Table = Table [(Maybe (SynTree BinOp Char), [Maybe TruthValue])]
     deriving (Eq,Show)
 
 data Namen = A | B | C
@@ -24,8 +24,8 @@ allNamen :: [Namen]
 allNamen = [minBound .. maxBound]
 
 data Submission = Submission
-  { submittedParts   :: [PropFormula Char]
-  , submittedFormula :: PropFormula Char
+  { submittedParts   :: [SynTree BinOp Char]
+  , submittedFormula :: SynTree BinOp Char
   , submittedTable   :: Table
   , identifiedLiars  :: [Namen]
   }
@@ -186,7 +186,6 @@ import Trees.Print (simplestDisplay)
 import Trees.Types
   ( SynTree(..)
   , BinOp(..)
-  , toSynTree
   )
 
 import Global
@@ -245,7 +244,7 @@ checkSyntax _ TaskData{..} Submission{..} = do
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
   assertion (atomicCols == theTable) $ text
     "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
-  #{if printFeedbackImmediately then findContradictions True "map toSynTree submittedParts" else ""}
+  #{if printFeedbackImmediately then findContradictions True "submittedParts" else ""}
   pure ()
   where
     Table xs   = submittedTable
@@ -267,14 +266,14 @@ generateTruthTable solutionValues =
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ TaskData{..} Submission{..} = do
-  let correctParts = zipWith isSemanticEqual formulaParts submittedTrees
+  let correctParts = zipWith isSemanticEqual formulaParts submittedParts
   yesNo (and correctParts) $ text
     "Aussagen sind korrekt übersetzt?"
-  let correctFormula = isSemanticEqual (toSynTree submittedFormula) solutionFormula ||
-                       isSemanticEqual (toSynTree submittedFormula) (foldr1 (Binary And) submittedTrees)
+  let correctFormula = isSemanticEqual submittedFormula solutionFormula ||
+                       isSemanticEqual submittedFormula (foldr1 (Binary And) submittedParts)
   yesNo correctFormula $ text
     "Gesamtformel ist korrekt?"
-  #{if not printFeedbackImmediately then findContradictions False "submittedTrees" else ""}
+  #{if not printFeedbackImmediately then findContradictions False "submittedParts" else ""}
   let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
   yesNo correctLast $ text
     "Spalte F der Wahrheitstafel ist korrekt?"
@@ -289,7 +288,6 @@ checkSemantics _ TaskData{..} Submission{..} = do
   pure res
   where
     Table xs        = submittedTable
-    submittedTrees  = map toSynTree submittedParts
     solutionFormula = foldr1 (Binary And) formulaParts
     listOfLiars     = map fst $ filter (not . snd) (zip allNamen solutionValues)
     columns         = map snd xs
@@ -385,8 +383,8 @@ import FlexTask.Generic.Parse
   )
 import LogicTasks.Formula (TruthValue)
 import ParsingHelpers (fully)
-import Trees.Parsing ()
-import Trees.Types (PropFormula(..))
+import Trees.Parsing (liberalParser)
+import Trees.Types (SynTree(Leaf), BinOp)
 
 import qualified Formula.Parsing as FP
 
@@ -400,10 +398,10 @@ instance Parse TruthValue where
 instance Parse [Namen] where
   formParser = parseInstanceMultiChoice
 
-makeTable :: [Maybe (PropFormula Char)] -> [Maybe TruthValue] -> Table
+makeTable :: [Maybe (SynTree BinOp Char)] -> [Maybe TruthValue] -> Table
 makeTable headers values = Table $ zip allHeaders formattedTruthValues
   where
-    allHeaders = map (Just . Atomic) "ABC" ++ headers ++ [Just $ Atomic 'F']
+    allHeaders = map (Just . Leaf) "ABC" ++ headers ++ [Just $ Leaf 'F']
     formattedTruthValues = transpose $ chunksOf totalColumns values
 
 parseSubmission :: (Monad m, OutputCapable (ReportT o m)) => String -> LangM' (ReportT o m) Submission
@@ -420,6 +418,6 @@ parseSubmission input =
             }
   where
     parseIt = parseWithFallback
-      (fully FP.parser)
+      (fully liberalParser)
       (displayInputAnd complainAboutMissingParenthesesIfNotFailingOn)
       (fully FP.formulaSymbolParser)
