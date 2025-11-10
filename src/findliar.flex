@@ -421,3 +421,95 @@ parseSubmission input =
       (fully liberalParser)
       (displayInputAnd complainAboutMissingParenthesesIfNotFailingOn)
       (fully FP.formulaSymbolParser)
+
+
+{-# language QuasiQuotes #-}
+{-# language OverloadedStrings #-}
+
+
+=============================================
+
+{-# language QuasiQuotes #-}
+{-# language OverloadedStrings #-}
+module FindLiarTask (taskData,
+                     makeHintsAndFormula) where
+
+import Data.Text (Text)
+import Data.String.Interpolate (i)
+import Test.QuickCheck.Arbitrary (arbitrary)
+import Test.QuickCheck.Gen
+import Trees.Types (BinOp(..), SynTree(..))
+import BuildHints (hintFromFormula, isNot)
+
+
+taskData :: Gen ((Char, Bool), (Char, Bool), (Char, Bool), Bool)
+taskData = do
+  permutation <- shuffle ['A','B','C']
+  values <- vectorOf 3 arbitrary
+  v <- arbitrary
+  case zip permutation values of
+    [(p0,v0), (p1,v1), (p2,v2)]
+      -> return ((p0,v0), (p1,v1), (p2,v2), v)
+    _
+      -> error "This is impossible!"
+
+makeHintsAndFormula :: ((Char, Bool), (Char, Bool), (Char, Bool), Bool) -> ([SynTree BinOp Char], [Text])
+makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
+  where
+    xYnOrNotYn = if xw == yw        then Leaf yn       else Not (Leaf yn)
+    yZnOrNotZn = if yw == zw        then Leaf zn       else Not (Leaf zn)
+    zXnOrNotXn = if v               then Leaf xn       else Not (Leaf xn)
+    zYnOrNotYn = if (xw == yw) == v then Not (Leaf yn) else Leaf yn
+
+    parts = [px, py, pz]
+    px = Binary Equi (Leaf xn) xYnOrNotYn
+    py = Binary Equi (Leaf yn) yZnOrNotZn
+    pz = Binary Equi (Leaf zn) $ (if xn > yn then flip else id) (Binary (if zw then Or else And)) zXnOrNotXn zYnOrNotYn
+
+    hints = [hx, hy, hz]
+    hx = [i|#{xn} sagt: "#{yn}#{if isNot xYnOrNotYn then " lügt" else " sagt die Wahrheit" :: String}."|]
+    hy = [i|#{yn} sagt: "#{zn}#{if isNot yZnOrNotZn then " lügt" else " sagt die Wahrheit" :: String}."|]
+    hz = hintFromFormula pz
+
+=============================================
+
+{-# language QuasiQuotes #-}
+{-# language OverloadedStrings #-}
+
+module BuildHints where
+
+import Data.Text (Text)
+import Data.String.Interpolate (i)
+import Trees.Types (BinOp(..), SynTree(..))
+
+hintFromFormula :: SynTree BinOp Char -> Text
+hintFromFormula (Binary Equi (Leaf nameA) (Binary operator b c)) =
+  [i|#{nameA} sagt: "#{nameFromLeaf b}#{word1}#{operatorName} #{nameFromLeaf c}#{word2}."|]
+  where
+    operatorName :: String
+      | operator == Or                        = " oder"
+      | operator == And && isNot b == isNot c = " und"
+      | otherwise                             = ", aber"
+
+    word1 :: String
+      | isNot b == isNot c = ""
+      | isNot b            = " lügt"
+      | otherwise          = " sagt die Wahrheit"
+
+    word2 :: String
+      | isNot b && isNot c = " lügen"
+      | isNot b            = " sagt die Wahrheit"
+      |            isNot c = " lügt"
+      | otherwise          = " sagen die Wahrheit"
+
+    nameFromLeaf :: SynTree BinOp Char -> String
+    nameFromLeaf (Leaf name)       = [name]
+    nameFromLeaf (Not (Leaf name)) = [name]
+    nameFromLeaf _                 = error "not a Leaf and not a Not Leaf"
+
+hintFromFormula _ = error "formula not supported"
+
+isNot :: SynTree b c -> Bool
+isNot (Not _) = True
+isNot _       = False
+
