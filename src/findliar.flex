@@ -150,7 +150,7 @@ getTask = fromGen $ do
           height: 25px
         table tr th:nth-child(n+4)
           width: 125px
-        table tr th:nth-child(n+8)
+        table tr th:last-child
           width: 25px
         table tr th:last-child
           padding: 10px 0px
