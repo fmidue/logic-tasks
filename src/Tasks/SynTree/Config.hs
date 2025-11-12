@@ -138,7 +138,7 @@ checkSynTreeConfig SynTreeConfig {..}
 
 getArrows :: SynTreeConfig -> [BinOp]
 getArrows syntaxTreeConfig = filter
-  (\x -> 
+  (\x ->
     case Data.Map.lookup x (binOpFrequencies syntaxTreeConfig) of
       Nothing -> False
       Just frequency -> frequency /= 0

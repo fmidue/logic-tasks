@@ -24,7 +24,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
+import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey')
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
@@ -77,7 +77,7 @@ description inputHelp path ComposeFormulaInst{..} = do
 
     keyHeading
     basicOpKey unicodeAllowed
-    arrowsKey
+    arrowsKey' arrowOperatorsToShow
 
     when inputHelp $ paragraph $ indent $ do
       translate $ do

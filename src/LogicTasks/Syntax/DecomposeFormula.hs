@@ -19,7 +19,7 @@ import Control.OutputCapable.Blocks (
   translations,
   )
 
-import LogicTasks.Helpers (extra, example, instruct, keyHeading, basicOpKey, arrowsKey, reject)
+import LogicTasks.Helpers (extra, example, instruct, keyHeading, basicOpKey, arrowsKey', reject)
 import Trees.Types (TreeFormulaAnswer(..))
 import Tasks.DecomposeFormula.Config (DecomposeFormulaInst(..), DecomposeFormulaConfig, checkDecomposeFormulaConfig)
 import Trees.Print (display, transferToPicture)
@@ -53,7 +53,7 @@ description DecomposeFormulaInst{..} = do
 
     keyHeading
     basicOpKey unicodeAllowed
-    arrowsKey
+    arrowsKey' arrowOperatorsToShow
 
     paragraph $ indent $ do
       translate $ do
