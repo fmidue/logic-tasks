@@ -42,6 +42,8 @@ data TaskData = TaskData
 
 module TaskSettings where
 
+-- 2025: Weight 1.0 (in Logik, Task10)
+
 import Control.OutputCapable.Blocks
   ( LangM
   , OutputCapable
@@ -117,7 +119,11 @@ import TaskSettings
 
 getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = fromGen $ do
-    d@(x, y, z, _) <- taskData `suchThat` (/= (('A',True),('B',False),('C',False),False))
+    d@(x, y, z, _) <- taskData `suchThat` (`notElem`
+        [ (('A',True),('B',False),('C',False),False) -- Task in exercise sheet 2
+        , (('A',False),('B',True),('C',False),False) -- Example from lecture
+        ]
+      )
     let (formulas, unsortedHints) = makeHintsAndFormula d
         dataSortedOnName = sortOn fst [x, y, z]
         (formulaParts, hints) = unzip $ sortOn snd $ zip formulas unsortedHints
