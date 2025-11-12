@@ -18,6 +18,7 @@ import Control.OutputCapable.Blocks (
   )
 import Control.Monad.State (State, put)
 import Data.Map (Map)
+import Trees.Types (BinOp (..))
 
 
 
@@ -117,17 +118,26 @@ negationKey allowUnicode =
     pure ()
 
 arrowsKey :: OutputCapable m => LangM m
-arrowsKey = do
-  paragraph $ indent $ do
-    translate $ do
+arrowsKey = arrowsKey' [Impl, BackImpl, Equi]
+
+arrowsKey' :: OutputCapable m => [BinOp] -> LangM m
+arrowsKey' [] = pure ()
+arrowsKey' (op:os)
+  | op == Impl = go "=>" $ do
       english "Implication:"
       german "Implikation:"
-    code "=>, <="
-    pure ()
-  paragraph $ indent $ do
-    translate $ do
+  | op == BackImpl = go "<=" $ do
+      english "Back Implication:"
+      german "Back Implikation:"
+  | op == Equi = go "<=>" $ do
       english "Bi-Implication:"
       german "Bi-Implikation:"
-    code "<=>"
-    pure ()
-  pure ()
+  | otherwise = arrowsKey' os
+  where
+    go codeString x = do
+      paragraph $ indent $ do
+        translate x
+        code codeString
+        pure ()
+      arrowsKey' os
+      pure ()
