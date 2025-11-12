@@ -28,7 +28,7 @@ type Submission = (Table,SynTree BinOp Char,[Namen])
 
 module TaskSettings where
 
--- 2024: Weight 1.0 (in Logik, Task13)
+-- 2025: Weight 1.0 (in Logik, Task14)
 
 import Control.OutputCapable.Blocks (
   LangM,
