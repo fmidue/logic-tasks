@@ -25,7 +25,7 @@ import Control.OutputCapable.Blocks (
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 import GHC.Real ((%))
-import LogicTasks.Helpers (basicOpKey, extra, focus, instruct, reject, arrowsKey)
+import LogicTasks.Helpers (basicOpKey, extra, focus, instruct, reject, arrowsKey')
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
@@ -33,7 +33,6 @@ import Tasks.SuperfluousBrackets.Config (
     )
 import Trees.Helpers
 import Trees.Types
-import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaSymbolParser)
 import Formula.Util (isSemanticEqual)
@@ -78,7 +77,7 @@ description SuperfluousBracketsInst{..} = do
       german "Sie können dafür die ursprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
       english "You can copy the original formula into the submission field and remove unnecessary brackets, or start from scratch and use the following syntax:"
     basicOpKey unicodeAllowed
-    when showArrowOperators arrowsKey
+    arrowsKey' arrowOperatorsToShow
 
     extra addText
     pure ()

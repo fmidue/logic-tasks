@@ -20,7 +20,7 @@ import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..))
 
 import LogicTasks.Helpers (
-  arrowsKey,
+  arrowsKey',
   basicOpKey,
   example,
   extra,
@@ -60,7 +60,7 @@ description path TreeToFormulaInst{..} = do
 
     keyHeading
     basicOpKey unicodeAllowed
-    when showArrowOperators arrowsKey
+    arrowsKey' arrowOperatorsToShow
 
     extra addText
     pure ()

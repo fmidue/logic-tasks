@@ -6,13 +6,14 @@
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
     checkSynTreeConfig,
-    defaultSynTreeConfig
+    defaultSynTreeConfig,
+    getArrows
     ) where
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
-import Data.Map (Map)
+import Data.Map (Map, lookup)
 import qualified Data.Map as Map (fromList, filter, keys)
 
 import LogicTasks.Helpers (reject)
@@ -134,3 +135,11 @@ checkSynTreeConfig SynTreeConfig {..}
         english "The maximum number of consecutive negations does not comply with the frequency of the negation operator."
         german "Maximale Anzahl an aufeinanderfolgenden Negationen passt nicht zur Frequenz des Negationsoperators."
     | otherwise = pure()
+
+getArrows :: SynTreeConfig -> [BinOp]
+getArrows syntaxTreeConfig = filter
+  (\x -> 
+    case Data.Map.lookup x (binOpFrequencies syntaxTreeConfig) of
+      Nothing -> False
+      Just frequency -> frequency /= 0
+  ) [Impl, BackImpl, Equi]

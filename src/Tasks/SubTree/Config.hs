@@ -73,7 +73,7 @@ data SubTreeInst =
     { tree :: SynTree BinOp Char
     , correctTrees :: Set (SynTree BinOp Char)
     , inputTreeAmount :: Integer
-    , showArrowOperators :: Bool
+    , arrowOperatorsToShow :: [BinOp]
     , showSolution :: Bool
     , addText :: Maybe (Map Language String)
     , unicodeAllowed :: Bool
