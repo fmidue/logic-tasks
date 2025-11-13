@@ -122,6 +122,10 @@ getTask = fromGen $ do
     d@(x, y, z, _) <- taskData `suchThat` (`notElem`
         [ (('A',True),('B',False),('C',False),False) -- Task in exercise sheet 2
         , (('A',False),('B',True),('C',False),False) -- Example from lecture
+        , (('A',False),('B',False),('C',False),False) -- Everybody is lying
+        , (('A',False),('B',False),('C',False),True) -- Everybody is lying
+        , (('A',True),('B',True),('C',True),False) -- Everybody tells the truth
+        , (('A',True),('B',True),('C',True),True) -- Everybody tells the truth
         ]
       )
     let (formulas, unsortedHints) = makeHintsAndFormula d
