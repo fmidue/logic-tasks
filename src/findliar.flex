@@ -233,7 +233,7 @@ feedbackCompareHints unmatchedHint identifiedLiars = do
 feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> SynTree BinOp Char -> LangM m
 feedbackCompareChosenLiars allocationFromLiars wrongLiar = do
   indent $ text $
-    "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl passende Belegung ist: " ++
+    "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl gehörende Belegung ist: " ++
     printAllocation allocationFromLiars ++ "." ++
     " Jedoch wertet die angegebene Teilformel: " ++
     simplestDisplay wrongLiar ++
@@ -251,9 +251,9 @@ checkSyntax _ TaskData{..} Submission{..} = do
   when (atomicCols == map reverse theTable) $
     refuse $ indent $ text $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
-      "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
+      "Bitte legen Sie die Tafel so an, wie in der Vorlesung vorgegeben."
   assertion (atomicCols == theTable) $ text
-    "Spalten der atomaren Formeln ergeben eine korrekte (aufsteigend geordnete) Wahrheitstafel?"
+    "Spalten der atomaren Formeln ergeben eine korrekt geformte (aufsteigend geordnete) Wahrheitstafel?"
   #{if printFeedbackImmediately then findContradictions True "submittedParts" else ""}
   pure ()
   where
