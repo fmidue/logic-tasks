@@ -141,6 +141,26 @@ stack test --test-arguments="--verbose"
 stack test --test-arguments="--dry-run"
 ```
 
+**Finding Test Names**:
+
+To see available test names and their hierarchy:
+
+```bash
+# List all test specs (shows full tree)
+stack test --test-arguments="--dry-run"
+
+# Filter and view specific category
+stack test --test-arguments="-m Fill --dry-run"
+```
+
+**Best Practices**:
+
+- **Simple substring matching works**: `Fill` will match tests in `FillSpec`
+- **Use `--dry-run` to verify**: Always test your pattern with `--dry-run` first to see what will run
+- **Quote patterns with spaces**: Use `-m \"truth table\"` with escaped quotes for multi-word patterns
+- **Be specific to avoid over-matching**: `Fill` is better than just `F` which might match multiple modules
+- **Substring matching is powerful**: `Semantics` matches all semantics-related tests
+
 ### Interactive Testing with testModule
 
 You can test individual modules using the `testModule` function in the REPL:
@@ -258,7 +278,13 @@ hlint src/ test/
 **Examples of good naming**:
 
 ```haskell
--- Good: Full, descriptive names
+-- Good: Full, descriptive names from logic-tasks
+genFillInst :: FillConfig -> Gen FillInst
+description :: OutputCapable m => Bool -> FillInst -> LangM m
+partialGrade :: OutputCapable m => FillInst -> [TruthValue] -> LangM m
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => FillInst -> [TruthValue] -> Rated m
+
+-- Good: Clear compound words with CamelCase
 theLength :: Int
 currentIndex :: Int
 temporaryValue :: String
