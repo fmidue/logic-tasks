@@ -1,13 +1,38 @@
 # Copilot Instructions for logic-tasks
 
-## Repository Overview
+This is `logic-tasks`, a Haskell library that provides logic-related tasks for educational purposes. The repository generates various propositional logic exercises, including syntax tasks (formula composition, decomposition, normal forms) and semantics tasks (truth tables, resolution).
 
-This is `logic-tasks`, a Haskell library that provides logic-related tasks for educational purposes. The repository generates various propositional logic exercises, including:
+**Always reference these instructions first and fall back to search or Bash commands only when you encounter unexpected information that does not match the info here.**
 
-- **Syntax tasks**: Formula composition, decomposition, normal forms, subformulas
-- **Semantics tasks**: Truth tables, resolution
+## 🤖 Automated Copilot Setup
 
-The library is designed for integration with the Autotool system and provides both direct task generation and quiz-based interfaces.
+This repository includes an automated setup workflow (`.github/workflows/copilot-setup-steps.yml`) that prepares the environment for Copilot operations. The workflow automatically:
+
+- **Installs TeX Live**: Required packages for LaTeX rendering (forest, preview, dvisvgm)
+- **Verifies LaTeX installation**: Ensures pdflatex is working
+- **Sets up Haskell Stack**: Configures the build environment
+- **Installs HLint**: Enables code quality checking
+- **Pre-builds dependencies**: Downloads and builds Haskell project dependencies
+
+System dependencies and Haskell dependencies are already available. You can immediately proceed with builds and tests.
+
+## 🚨 CRITICAL WARNINGS
+
+### ⏰ NEVER CANCEL BUILDS OR TESTS
+
+- **Haskell builds**: Can take 30+ minutes on first run (set timeout to 60+ minutes)
+- **Test suites**: Can take 10-20 minutes (set timeout to 30+ minutes)
+- Builds resume from cache when interrupted - canceling wastes progress
+
+### 🔴 ALWAYS RUN LINTERS BEFORE COMMITTING
+
+**BEFORE ANY COMMIT**, run:
+
+```bash
+hlint src/ test/
+```
+
+**If violations found**, fix them immediately. **DO NOT COMMIT** or use `report_progress` until checks pass.
 
 ## Build tool
 
@@ -31,6 +56,8 @@ stack test
 # Build with tests, coverage, benchmarks, and documentation
 stack --no-terminal test --coverage --bench --no-run-benchmarks --haddock --no-haddock-deps
 ```
+
+**Build Timeouts**: Set initial_wait to at least 60 for builds and 30 for tests to avoid premature timeout.
 
 ## Testing
 
