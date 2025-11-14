@@ -9,7 +9,7 @@ This is `logic-tasks`, a Haskell library that provides logic-related tasks for e
 
 The library is designed for integration with the Autotool system and provides both direct task generation and quiz-based interfaces.
 
-## Build System
+## Build tool
 
 This project uses **Stack** as its build tool. The compiler (GHC) is automatically installed.
 
@@ -107,7 +107,7 @@ hlint src/ test/
 
 **Always look for refactoring opportunities**: When adding functions, check for opportunities to increase code reuse:
 
-- Between the new function and pre-existing ones
+- Between the new function and preexisting ones
 - Between multiple functions being added in the same PR
 
 ### Unsafe Functions and Partiality
@@ -174,7 +174,7 @@ testModule (Just AutoLeijen) German generatorFunction description partialGrade c
 
 ### Test Failures
 
-- Check if failures are related to your changes or pre-existing
+- Check if failures are related to your changes or preexisting
 - Review test output carefully for error messages
 - Run specific failing tests: `stack test --test-arguments="-m TestName"`
 - Use `--verbose` flag for more detailed output
