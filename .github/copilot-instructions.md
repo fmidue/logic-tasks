@@ -11,29 +11,13 @@ The library is designed for integration with the Autotool system and provides bo
 
 ## Build System
 
-This project uses **Stack** as its build tool:
-
-- **Resolver**: `nightly-2025-10-07`
-- **Build Tool**: Stack 3.x
-- **Compiler**: GHC (installed automatically by Stack)
-
-## Prerequisites
-
-### Required System Dependencies
-
-- **TeX Live**: Required for LaTeX rendering of formulas and diagrams
-  - Packages: `scheme-basic`, `forest`, `preview`, `dvisvgm`
-- **Stack**: Haskell build tool
-- **HLint**: Code quality checker (installed via workflow)
+This project uses **Stack** as its build tool. The compiler (GHC) is automatically installed.
 
 ## Building the Project
 
 ### Quick Start
 
 ```bash
-# Install dependencies (first time or after package.yaml changes)
-stack --no-terminal --install-ghc test --bench --only-dependencies
-
 # Build the library
 stack --no-terminal build
 
@@ -48,34 +32,12 @@ stack test
 stack --no-terminal test --coverage --bench --no-run-benchmarks --haddock --no-haddock-deps
 ```
 
-### Development Workflow
-
-```bash
-# Start interactive REPL
-stack repl
-
-# Run HLint on source code
-hlint src/ test/
-
-# Clean build artifacts
-stack clean
-
-# Full clean (including Stack cache)
-stack clean --full
-```
-
 ## Testing
 
 ### Run All Tests
 
 ```bash
 stack test
-```
-
-### Run Tests with Coverage
-
-```bash
-stack test --coverage
 ```
 
 ### Run Specific Test Module
@@ -104,9 +66,6 @@ Then in GHCi:
 ```haskell
 -- Example: Test the Fill module (truth table gap-filling)
 testModule (Just AutoLeijen) German (genFillInst dFillConf) LogicTasks.Semantics.Fill.description LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
-
--- Change language to English
-testModule (Just AutoLeijen) English (genFillInst dFillConf) LogicTasks.Semantics.Fill.description LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
 ```
 
 ## Project Structure
@@ -134,46 +93,13 @@ testModule (Just AutoLeijen) English (genFillInst dFillConf) LogicTasks.Semantic
 - `examples/` - Example applications
 - `flex/` - Flex-Tasks integration
 
-### Key Files
-
-- `package.yaml` - Package configuration with dependencies and build settings (**Edit this, not .cabal**)
-- `logic-tasks.cabal` - Generated Cabal file (**DO NOT EDIT** - auto-generated from package.yaml)
-- `stack.yaml` - Stack resolver and extra dependencies
-- `.hlint.yaml` - HLint configuration for linting
-
 ## Code Style and Quality
-
-### Compiler Flags
-
-The project uses strict compiler settings:
-
-- `-Wall` - All warnings enabled
-- `-Werror` - Warnings treated as errors (except for specific cases)
-- `-Widentities` - Warn about identities
-- `-fdefer-typed-holes` - Defer typed holes to runtime
-- `-fno-warn-unused-do-bind` - Allow unused do-bind
-
-### Linting
 
 Run HLint on the codebase:
 
 ```bash
 hlint src/ test/
 ```
-
-Configuration is in `.hlint.yaml`. HLint is automatically run in CI.
-
-### Cabal File Consistency
-
-The `.cabal` file is **auto-generated** from `package.yaml`. **DO NOT EDIT** `.cabal` directly.
-
-To regenerate after changing `package.yaml`:
-
-```bash
-stack build --dry-run
-```
-
-**Always commit both** `package.yaml` and the generated `.cabal` file together.
 
 ## Haskell Development Best Practices
 
@@ -223,27 +149,6 @@ stack build --dry-run
 - Then it is sometimes better to simply inline it directly
 - Balance this with readability - don't inline if it makes code harder to understand
 
-## CI/CD Workflows
-
-The repository has several CI workflows:
-
-- **Haskell CI** (`haskell.yml`) - Main build and test workflow
-- **HLint** (`hlint.yml`) - Haskell linter
-- **Consistency** (`consistency.yml`) - Checks `.cabal` file consistency
-- **Spelling** (`spelling.yml`) - Spell checking
-- **XrefCheck** (`xrefcheck.yml`) - Link checking
-- **Super-Linter** (`linter.yml`) - Multiple linters including YAML
-
-### Caching Strategy
-
-The CI uses Stack caching to speed up builds:
-
-- **Cache paths**: `~/.stack` (Stack home), `.stack-work` (project build artifacts)
-- **Cache key pattern**: `${{ runner.os }}-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}`
-- **Restore keys**: Allow partial cache matches when files change
-
-The Copilot setup workflow uses the same caching strategy to benefit from shared cache with the main CI.
-
 ## Development Guidelines
 
 ### Making Changes
@@ -255,15 +160,7 @@ The Copilot setup workflow uses the same caching strategy to benefit from shared
 5. **Test your changes**: Add or update tests for any new functionality
 6. **Run linters**: Use HLint to catch code quality issues early
 
-### Adding Dependencies
-
-1. Add new dependencies to `package.yaml` under the `dependencies` section
-2. Run `stack build --dry-run` to update the `.cabal` file
-3. Commit both `package.yaml` and the generated `.cabal` file together
-
-### Common Development Tasks
-
-#### Working with REPL
+### Working with REPL
 
 ```bash
 # Start REPL with library loaded
@@ -273,49 +170,7 @@ stack repl
 testModule (Just AutoLeijen) German generatorFunction description partialGrade completeGrade parser
 ```
 
-#### Building Documentation
-
-```bash
-# Generate Haddock documentation
-stack haddock
-
-# Generate and open in browser
-stack haddock --open
-```
-
-#### Running Benchmarks
-
-```bash
-stack bench --no-run-benchmarks
-```
-
-#### Cleaning Build Artifacts
-
-```bash
-# Clean project build artifacts
-stack clean
-
-# Full clean including Stack cache
-stack clean --full
-```
-
-## External Dependencies
-
-The project depends on several external Git repositories defined in `stack.yaml`:
-
-- `output-blocks` - Output formatting
-- `flex-tasks` - Flex task integration
-- `autotool-capabilities` - Autotool integration
-
-These are managed automatically by Stack and cloned as needed during builds.
-
 ## Troubleshooting
-
-### Build Fails with Missing Packages
-
-- Ensure TeX Live is installed with all required packages: `scheme-basic`, `forest`, `preview`, `dvisvgm`
-- Run `stack clean` and rebuild
-- Check that system dependencies are available: `pdflatex --version`
 
 ### Test Failures
 
@@ -323,22 +178,3 @@ These are managed automatically by Stack and cloned as needed during builds.
 - Review test output carefully for error messages
 - Run specific failing tests: `stack test --test-arguments="-m TestName"`
 - Use `--verbose` flag for more detailed output
-
-### Cache Issues
-
-- If build behaves unexpectedly: `stack clean --full`
-- Clear Stack cache completely: `rm -rf ~/.stack`
-- Clear project build cache: `rm -rf .stack-work`
-
-### Dependency Resolution Issues
-
-- Update Stack: `stack upgrade`
-- Clean resolver cache: `rm -rf ~/.stack/pantry`
-- Try rebuilding from scratch: `stack clean --full && stack build`
-
-## Resources
-
-- [Stack Documentation](https://docs.haskellstack.org/)
-- [Haskell Language](https://www.haskell.org/)
-- [HLint Manual](https://github.com/ndmitchell/hlint)
-- [Project README](../README.md)
