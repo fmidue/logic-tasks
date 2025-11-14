@@ -92,7 +92,7 @@ This project uses **Stack** as its build tool. The compiler (GHC) is automatical
 
 ```bash
 # Build the library
-stack --no-terminal build
+stack --no-terminal test --no-run-tests logic-tasks
 
 # Run tests
 stack test
