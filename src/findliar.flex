@@ -251,7 +251,7 @@ checkSyntax _ TaskData{..} Submission{..} = do
   when (atomicCols == map reverse theTable) $
     refuse $ indent $ text $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
-      "Bitte legen Sie die Tafel so an, wie in der Vorlesung vorgegeben."
+      "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
   assertion (atomicCols == theTable) $ text
     "Spalten der atomaren Formeln ergeben eine korrekt geformte (aufsteigend geordnete) Wahrheitstafel?"
   #{if printFeedbackImmediately then findContradictions True "submittedParts" else ""}
