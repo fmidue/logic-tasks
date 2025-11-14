@@ -18,7 +18,7 @@ System dependencies and Haskell dependencies are already available. You can imme
 
 ## 🚨 CRITICAL WARNINGS
 
-### 🔴 NEVER COMMIT FILES THAT VIOLATE .EDITORCONFIG
+### 🔴 NEVER COMMIT FILES THAT VIOLATE EditorConfig
 
 **ABSOLUTE REQUIREMENT**: Every file you create or modify MUST comply with `.editorconfig` rules:
 
@@ -136,27 +136,10 @@ stack test --test-arguments="-m Semantics"
 
 # Run with verbose output
 stack test --test-arguments="--verbose"
-```
 
-**Finding Test Names**:
-
-To see available test names and their hierarchy:
-
-```bash
 # List all test specs (shows full tree)
 stack test --test-arguments="--dry-run"
-
-# Filter and view specific category
-stack test --test-arguments="-m Modelling.ActivityDiagram --dry-run"
 ```
-
-**Best Practices**:
-
-- **Simple substring matching works**: `SelectAS` will match `Modelling.ActivityDiagram.SelectAS`
-- **Use `--dry-run` to verify**: Always test your pattern with `--dry-run` first to see what will run
-- **Quote patterns with spaces**: Use `-m \"is valid\"` with escaped quotes for multi-word patterns
-- **Be specific to avoid over-matching**: `SelectAS` is better than just `Select` which might match multiple modules
-- **Substring matching is powerful**: `Modelling.CdOd` matches all class/object diagram tests
 
 ### Interactive Testing with testModule
 
@@ -276,12 +259,6 @@ hlint src/ test/
 
 ```haskell
 -- Good: Full, descriptive names
-checkDifferentNamesInstance :: DifferentNamesInstance -> Maybe String
-differentNamesEvaluation :: OutputCapable m => DifferentNamesInstance -> [(Name, Name)] -> Rated m
-defaultDifferentNamesConfig :: DifferentNamesConfig
-randomiseLayout :: RandomiseLayout a => a -> Int -> IO a
-
--- Good: Clear compound words with CamelCase
 theLength :: Int
 currentIndex :: Int
 temporaryValue :: String
@@ -308,7 +285,6 @@ num :: Int              -- Use: number, numberOfItems
 - Standard Haskell conventions (e.g., `xs`, `x`, single-letter type variables)
 - Loop variables in very short, localized contexts (e.g., `i`, `j`, `k` in list comprehensions)
 - Widely accepted mathematical notation in domain-specific contexts (e.g., `n` for count in mathematical functions)
-- Standard abbreviations from the problem domain (e.g., `cd` for "class diagram", `od` for "object diagram" when these are established terms in the codebase)
 
 ## Development Guidelines
 
