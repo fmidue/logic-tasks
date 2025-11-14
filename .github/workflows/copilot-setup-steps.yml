@@ -100,7 +100,7 @@ jobs:
         run: |
           set -ex
           # shellcheck disable=SC2086
-          stack --no-terminal build
+          stack --no-terminal test --no-run-tests
           set +ex
 
       - name: Cache Stack
