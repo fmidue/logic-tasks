@@ -39,18 +39,6 @@ sed -i 's/[[:space:]]*$//' filename  # Remove trailing whitespace
 echo >> filename                     # Add final newline
 ```
 
-Then run EditorConfig validation again to confirm fixes:
-
-```bash
-./scripts/check-editorconfig.sh
-```
-
-**IF `./scripts/check-editorconfig.sh` FAILS**:
-
-- **DO NOT COMMIT**
-- **DO NOT USE `report_progress`**
-- **FIX ALL VIOLATIONS FIRST**
-
 ### 🔴 NEVER COMMIT CODE THAT DOESN'T BUILD
 
 **ABSOLUTE REQUIREMENT**: Every commit MUST successfully build with `stack test --no-run-tests logic-tasks`.
@@ -68,17 +56,9 @@ stack test --no-run-tests logic-tasks
 - Re-run `stack test --no-run-tests logic-tasks` until it succeeds
 - Only then proceed with committing
 
-**IF `stack test --no-run-tests logic-tasks` FAILS**:
-
-- **DO NOT COMMIT**
-- **DO NOT USE `report_progress`**
-- **FIX ALL BUILD ERRORS FIRST**
-
-**Build times**: Remember that builds can take 30-45 minutes. Set appropriate timeout values (60+ minutes) and never cancel builds.
-
 ### ⏰ NEVER CANCEL BUILDS OR TESTS
 
-- **Haskell builds**: Can take 30+ minutes on first run (set timeout to 60+ minutes)
+- **Haskell builds**: Can take 30-45 minutes on first run (set timeout to 60+ minutes)
 - **Test suites**: Can take 10-20 minutes (set timeout to 30+ minutes)
 - Builds resume from cache when interrupted - canceling wastes progress
 
@@ -90,7 +70,17 @@ stack test --no-run-tests logic-tasks
 hlint src/ test/
 ```
 
-**If violations found**, fix them immediately. **DO NOT COMMIT** or use `report_progress` until checks pass.
+**If violations found**, fix them immediately.
+
+### ⚠️ COMMIT CHECKLIST
+
+**Before using `report_progress` or committing changes**:
+
+1. ✅ Run `./scripts/check-editorconfig.sh` - must pass
+2. ✅ Run `stack test --no-run-tests logic-tasks` - must build successfully
+3. ✅ Run `hlint src/ test/` - must have no violations
+
+**If any check fails**: **DO NOT COMMIT** or use `report_progress` - fix all issues first.
 
 ## Build tool
 
@@ -115,8 +105,6 @@ stack test
 stack --no-terminal test --coverage --bench --no-run-benchmarks --haddock --no-haddock-deps
 ```
 
-**Build Timeouts**: Set initial_wait to at least 60 for builds and 30 for tests to avoid premature timeout.
-
 ## Testing
 
 ### Run All Tests
@@ -139,18 +127,6 @@ stack test --test-arguments="--verbose"
 
 # List all test specs (shows full tree)
 stack test --test-arguments="--dry-run"
-```
-
-**Finding Test Names**:
-
-To see available test names and their hierarchy:
-
-```bash
-# List all test specs (shows full tree)
-stack test --test-arguments="--dry-run"
-
-# Filter and view specific category
-stack test --test-arguments="-m Fill --dry-run"
 ```
 
 **Best Practices**:
@@ -200,14 +176,6 @@ testModule (Just AutoLeijen) German (genFillInst dFillConf) LogicTasks.Semantics
 - `test/` - Test specifications using Hspec
 - `examples/` - Example applications
 - `flex/` - Flex-Tasks integration
-
-## Code Style and Quality
-
-Run HLint on the codebase:
-
-```bash
-hlint src/ test/
-```
 
 ## Haskell Development Best Practices
 
