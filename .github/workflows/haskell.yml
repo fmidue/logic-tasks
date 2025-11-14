@@ -38,21 +38,21 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/.stack
-          key: ${{ matrix.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          key: ${{ runner.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
           restore-keys: |
-            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}
-            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-home-
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-home-
 
       - name: Restore .stack-work
         id: cache-stack-work-restore
         uses: actions/cache/restore@v4
         with:
           path: .stack-work
-          key: ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}-${{ hashFiles('**/*.hs') }}
+          key: ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}-${{ hashFiles('**/*.hs') }}
           restore-keys: |
-            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
-            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}
-            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-
 
       - name: Setup stack
         uses: haskell-actions/setup@v2
