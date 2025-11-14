@@ -1,5 +1,5 @@
 ---
-name: "Copilot Setup Steps"
+name: Copilot Setup Steps
 
 # Automatically run the setup steps when they are changed to allow for easy
 # validation, and allow manual testing through the repository's "Actions" tab
@@ -68,10 +68,11 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .stack-work
-          key: ${{ runner.os }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          key: ${{ runner.os }}-stack-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}-${{ hashFiles('**/*.hs') }}
           restore-keys: |
-            ${{ runner.os }}-stack-work-${{ hashFiles('stack.yaml') }}
-            ${{ runner.os }}-stack-work-
+            ${{ runner.os }}-stack-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+            ${{ runner.os }}-stack-stack-work-${{ hashFiles('stack.yaml') }}
+            ${{ runner.os }}-stack-stack-work-
 
       # Set up Haskell Stack environment
       - name: Setup stack
@@ -93,6 +94,13 @@ jobs:
           set -ex
           # shellcheck disable=SC2086
           stack --no-terminal --install-ghc test --bench --only-dependencies
+          set +ex
+
+      - name: Build Haskell project
+        run: |
+          set -ex
+          # shellcheck disable=SC2086
+          stack --no-terminal build
           set +ex
 
       - name: Cache Stack
