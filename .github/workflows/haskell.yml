@@ -33,12 +33,26 @@ jobs:
             preview
             dvisvgm
 
-      - name: Cache Stack
-        id: cache-stack-unix
-        uses: actions/cache@v4
+      - name: Restore Stack
+        id: cache-stack-restore
+        uses: actions/cache/restore@v4
         with:
           path: ~/.stack
           key: ${{ matrix.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}
+            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-home-
+
+      - name: Restore .stack-work
+        id: cache-stack-work-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .stack-work
+          key: ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}-${{ hashFiles('**/*.hs') }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}
+            ${{ matrix.os }}-${{ matrix.plan.build }}-stack-work-
 
       - name: Setup stack
         uses: haskell-actions/setup@v2
@@ -61,6 +75,24 @@ jobs:
           set +ex
         env:
           BUILD: ${{ matrix.plan.build }}
+
+      - name: Cache Stack
+        id: cache-stack-save
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.stack
+          key: ${{ steps.cache-stack-restore.outputs.cache-primary-key }}
+        if: >-
+          steps.cache-stack-restore.outputs.cache-hit != 'true'
+
+      - name: Cache .stack-work
+        id: cache-stack-work-save
+        uses: actions/cache/save@v4
+        with:
+          path: .stack-work
+          key: ${{ steps.cache-stack-work-restore.outputs.cache-primary-key }}
+        if: >-
+          steps.cache-stack-work-restore.outputs.cache-hit != 'true'
 
       - name: Escape commit message
         id: escape

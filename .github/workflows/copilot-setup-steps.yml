@@ -1,0 +1,122 @@
+---
+name: Copilot Setup Steps
+
+# Automatically run the setup steps when they are changed to allow for easy
+# validation, and allow manual testing through the repository's "Actions" tab
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up
+  # by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    # Set the permissions to the lowest permissions possible needed for your
+    # steps. Copilot will be given its own token for its operations.
+    permissions:
+      # If you want to clone the repository as part of your setup steps, for
+      # example to install dependencies, you'll need the `contents: read`
+      # permission. If you don't clone the repository in your setup steps,
+      # Copilot will do this for you automatically after the steps complete.
+      contents: read
+      # Cache actions require actions: write to save/restore cache
+      actions: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      # Install TeX Live for LaTeX rendering support
+      - name: Install TeX Live
+        uses: TeX-Live/setup-texlive-action@v3
+        with:
+          packages: |
+            scheme-basic
+            forest
+            preview
+            dvisvgm
+
+      # Verify TeX Live installation
+      - name: Verify LaTeX installation
+        run: pdflatex --version
+
+      - name: Restore Stack
+        id: cache-stack-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.stack
+          key: ${{ runner.os }}-stack-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-stack-home-${{ hashFiles('stack.yaml') }}-
+            ${{ runner.os }}-stack-stack-home-
+
+      - name: Restore .stack-work
+        id: cache-stack-work-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .stack-work
+          key: ${{ runner.os }}-stack-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}-${{ hashFiles('**/*.hs') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+            ${{ runner.os }}-stack-stack-work-${{ hashFiles('stack.yaml') }}
+            ${{ runner.os }}-stack-stack-work-
+
+      # Set up Haskell Stack environment
+      - name: Setup stack
+        uses: haskell-actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-global: true
+
+      # Set up HLint for code quality checking
+      - name: "Set up HLint"
+        uses: haskell-actions/hlint-setup@v2
+        with:
+          version: "latest"
+
+      # Install Haskell project dependencies
+      # This is the most time-consuming step but critical for the environment
+      - name: Install Haskell dependencies
+        run: |
+          set -ex
+          # shellcheck disable=SC2086
+          stack --no-terminal --install-ghc test --bench --only-dependencies
+          set +ex
+
+      - name: Build Haskell project
+        run: |
+          set -ex
+          # shellcheck disable=SC2086
+          stack --no-terminal build
+          set +ex
+
+      - name: Cache Stack
+        id: cache-stack-save
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.stack
+          key: ${{ steps.cache-stack-restore.outputs.cache-primary-key }}
+        if: >-
+          steps.cache-stack-restore.outputs.cache-hit != 'true'
+
+      - name: Cache .stack-work
+        id: cache-stack-work-save
+        uses: actions/cache/save@v4
+        with:
+          path: .stack-work
+          key: ${{ steps.cache-stack-work-restore.outputs.cache-primary-key }}
+        if: >-
+          steps.cache-stack-work-restore.outputs.cache-hit != 'true'
