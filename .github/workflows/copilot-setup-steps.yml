@@ -1,0 +1,52 @@
+---
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  setup_environment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: TeX-Live/setup-texlive-action@v3
+        with:
+          packages: |
+            scheme-basic
+            forest
+            preview
+            dvisvgm
+
+      - name: Cache Stack
+        id: cache-stack-unix
+        uses: actions/cache@v4
+        with:
+          path: ~/.stack
+          key: ubuntu-latest-stack-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          restore-keys: |
+            ubuntu-latest-stack-stack-home-${{ hashFiles('stack.yaml') }}-
+            ubuntu-latest-stack-stack-home-
+
+      - name: Setup stack
+        uses: haskell-actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-global: true
+
+      - name: Install dependencies
+        run: |
+          set -ex
+          stack --no-terminal --install-ghc test --bench --only-dependencies
+          set +ex
+
+      - name: Build and test
+        run: |
+          set -ex
+          stack --no-terminal test --coverage --bench --no-run-benchmarks --haddock --no-haddock-deps
+          set +ex
