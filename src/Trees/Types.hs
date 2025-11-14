@@ -136,9 +136,9 @@ toLayeredTree x@Assoc{} =
     gatherLayer p@Brackets{} = (NonEmpty.singleton p,[])
     gatherLayer (Assoc op l r) =
       let
-        (fsl,osl) = gatherLayer l
-        (fsr,osr) = gatherLayer r
-      in (fsl <> fsr,osl <> [op] <> osr)
+        (formulasLeft, operatorsLeft) = gatherLayer l
+        (formulasRight, operatorsRight) = gatherLayer r
+      in (formulasLeft <> formulasRight, operatorsLeft <> [op] <> operatorsRight)
 
 validateLayers :: Eq o => (NonEmpty o -> Maybe String) -> LayeredSynTree o a -> Either String (LayeredSynTree o a)
 validateLayers _ (LTreeLeaf c) = Right $ LTreeLeaf c
