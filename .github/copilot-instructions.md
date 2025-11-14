@@ -5,7 +5,7 @@
 This is `logic-tasks`, a Haskell library that provides logic-related tasks for educational purposes. The repository generates various propositional logic exercises, including:
 
 - **Syntax tasks**: Formula composition, decomposition, normal forms, subformulas
-- **Semantics tasks**: Truth tables, resolution, maxterms, minterms
+- **Semantics tasks**: Truth tables, resolution
 
 The library is designed for integration with the Autotool system and provides both direct task generation and quiz-based interfaces.
 
@@ -78,7 +78,7 @@ testModule (Just AutoLeijen) German (genFillInst dFillConf) LogicTasks.Semantics
       - `Fill.hs` - Truth table gap-filling
       - `Pick.hs` - Truth table selection
       - `Decide.hs` - Truth table error finding
-      - `Max.hs`, `Min.hs` - Maxterm/Minterm generation
+      - `Max.hs`, `Min.hs` - **deprecated**
       - `Step.hs`, `Resolve.hs`, `Prolog.hs` - Resolution tasks
     - `Syntax/` - Syntax tasks (formulas, normal forms)
       - `ComposeFormula.hs`, `DecomposeFormula.hs` - Formula composition
