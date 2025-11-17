@@ -3,12 +3,14 @@ module LiberalParserSpec (spec) where
 
 import Data.Either (isLeft)
 import qualified Data.Map as Map (fromList)
+import Data.Maybe (isNothing, fromJust)
 
 import Formula.Parsing (Parse(parser))
+import ParsingHelpers (fully)
 
 import Test.Hspec ( describe, it, shouldBe, Spec, shouldSatisfy )
-import Test.Hspec.QuickCheck (prop)
-import Test.QuickCheck (forAll, Gen, chooseInt, listOf1, elements, oneof, classify)
+import Test.Hspec.QuickCheck (prop, modifyMaxSuccess)
+import Test.QuickCheck (forAll, Gen, chooseInt, listOf1, elements, oneof, classify, counterexample)
 
 import Text.Parsec ( ParseError, parse )
 
@@ -56,13 +58,28 @@ spec = do
       parseString "A ∧ B ∨ C" `shouldSatisfy` isLeft
     it "should reject \"A ∧ not B => C ∧ D\"" $
       parseString "A ∧ not B => C ∧ D" `shouldSatisfy` isLeft
-    prop "it should agree with PropFormula-parser on which token sequences are valid formulas" $
+    modifyMaxSuccess (*2) $ prop "it should agree with PropFormula-parser on which token sequences are valid formulas" $
       forAll tokenSequence $ \str ->
-        let propFormulaFailure = isLeft $ parse (parser @(PropFormula Char)) "(reference)" str
-        in classify propFormulaFailure "parser errors" $ isLeft (parseString str) `shouldBe` propFormulaFailure
+        let
+          reference = parse (fully $ parser @(PropFormula Char)) "(reference)" str
+          liberalResult = parseString str
+          disagreement = compareResults reference liberalResult
+        in
+          classify (isLeft reference) "invalid sequences" $
+            counterexample (fromJust disagreement) $
+            isNothing disagreement
+
+compareResults
+  :: Either ParseError (PropFormula Char)
+  -> Either ParseError (SynTree BinOp Char)
+  -> Maybe String
+compareResults (Left _) (Left _) = Nothing
+compareResults (Right _) (Right _) = Nothing
+compareResults (Right _) (Left _) = Just "liberalParser failed, but PropFormula-parser accepts the sequence"
+compareResults (Left _) (Right _) = Just "liberalParser succeeds, but PropFormula-parser rejects the sequence"
 
 parseString :: String -> Either ParseError (SynTree BinOp Char)
-parseString = parse liberalParser "(test case)"
+parseString = parse (fully liberalParser) "(test case)"
 
 treeWithExtraBrackets :: Gen (String,SynTree BinOp Char)
 treeWithExtraBrackets = do
