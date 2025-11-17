@@ -7,7 +7,8 @@ module Tasks.SynTree.Config (
     SynTreeConfig(..),
     checkSynTreeConfig,
     defaultSynTreeConfig,
-    getArrows
+    getArrows,
+    checkArrowOperatorsToShow
     ) where
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german)
@@ -143,3 +144,6 @@ getArrows syntaxTreeConfig = filter
       Nothing -> False
       Just frequency -> frequency /= 0
   ) [Impl, BackImpl, Equi]
+
+checkArrowOperatorsToShow :: [BinOp] -> Bool
+checkArrowOperatorsToShow = all (`elem` [Impl, BackImpl, Equi])

@@ -30,7 +30,7 @@ import Data.Containers.ListUtils (nubOrd)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Formula.Parsing (Parse(parser), formulaSymbolParser)
 import Formula.Parsing.Delayed (Delayed, withDelayedSucceeding, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn)
-
+import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 
@@ -74,7 +74,11 @@ description DecomposeFormulaInst{..} = do
 
 
 verifyInst :: OutputCapable m => DecomposeFormulaInst -> LangM m
-verifyInst _ = pure ()
+verifyInst DecomposeFormulaInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 

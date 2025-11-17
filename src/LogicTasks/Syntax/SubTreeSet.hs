@@ -41,6 +41,7 @@ import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutM
 import Formula.Parsing (Parse(..), formulaListSymbolParser)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
+import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 description :: OutputCapable m => Bool -> SubTreeInst -> LangM m
@@ -95,7 +96,11 @@ description withListInput SubTreeInst{..} = do
 
 
 verifyInst :: OutputCapable m => SubTreeInst -> LangM m
-verifyInst _ = pure ()
+verifyInst SubTreeInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 

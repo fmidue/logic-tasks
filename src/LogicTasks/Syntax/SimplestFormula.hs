@@ -38,7 +38,7 @@ import Formula.Parsing (Parse(..), formulaSymbolParser)
 import Formula.Util (isSemanticEqual)
 import Trees.Parsing()
 import Control.Applicative (Alternative)
-
+import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 
@@ -91,7 +91,11 @@ description SuperfluousBracketsInst{..} = do
 
 
 verifyInst :: OutputCapable m => SuperfluousBracketsInst -> LangM m
-verifyInst _ = pure()
+verifyInst SuperfluousBracketsInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 

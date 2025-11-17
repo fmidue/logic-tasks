@@ -40,6 +40,7 @@ import Trees.Parsing()
 import Formula.Types (Formula(atomics))
 import Data.List ((\\), intercalate)
 import Data.List.Extra (notNull)
+import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -68,7 +69,11 @@ description path TreeToFormulaInst{..} = do
 
 
 verifyInst :: OutputCapable m => TreeToFormulaInst -> LangM m
-verifyInst _ = pure ()
+verifyInst TreeToFormulaInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 
