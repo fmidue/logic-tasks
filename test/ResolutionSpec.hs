@@ -33,10 +33,9 @@ emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
 
 containsNoTautologies :: [Clause] -> Bool
-containsNoTautologies [] = True
-containsNoTautologies (x:xs) = (length list == length (Data.Set.fromList list)) && containsNoTautologies xs
+containsNoTautologies = all (\x -> length (list x) == length (Data.Set.fromList $ list x))
   where
-    list = map (\case
+    list x = map (\case
       Positive y -> y
       Negative y -> y)
       (literals x)
