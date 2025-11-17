@@ -28,7 +28,7 @@ import LogicTasks.Helpers (
   keyHeading,
   reject,
   )
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
+import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig, checkArrowOperatorsToShow)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
@@ -40,7 +40,7 @@ import Trees.Parsing()
 import Formula.Types (Formula(atomics))
 import Data.List ((\\), intercalate)
 import Data.List.Extra (notNull)
-import Tasks.SynTree.Config (checkArrowOperatorsToShow)
+
 
 
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
