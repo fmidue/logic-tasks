@@ -53,8 +53,7 @@ resolvableWith c1 c2
     | length possible == 1 = Just (head possible)
     | otherwise = Nothing
   where
-    lits = map Positive $ atomics c1 -- TODO: Should `literals` be used here?
-    possible = filter (isJust . resolve c1 c2) lits
+    possible = filter (isJust . resolve c1 c2) (literals c1)
 
 
 
