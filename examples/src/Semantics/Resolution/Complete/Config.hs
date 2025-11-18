@@ -9,9 +9,9 @@ import Util.VerifyConfig
 import LogicTasks.Util (checkBaseConf)
 import Control.OutputCapable.Blocks (Language(German))
 
--- 2024: Weight 0.5
-task16 :: ResolutionConfig
-task16 = ResolutionConfig
+-- 2025: Weight 0.5
+task17 :: ResolutionConfig
+task17 = ResolutionConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 3
@@ -25,9 +25,9 @@ task16 = ResolutionConfig
     , offerUnicodeInput = True
     }
 
--- 2024: Weight 0.5
-task17 :: ResolutionConfig
-task17 = ResolutionConfig
+-- 2025: Weight 0.5
+task18 :: ResolutionConfig
+task18 = ResolutionConfig
   { baseConf = BaseConfig
       { minClauseLength = 4
       , maxClauseLength = 5
@@ -43,5 +43,5 @@ task17 = ResolutionConfig
 
 spec :: Spec
 spec = do
-  describe "task16" $ verifyConfig German (baseConf task16) checkBaseConf
   describe "task17" $ verifyConfig German (baseConf task17) checkBaseConf
+  describe "task18" $ verifyConfig German (baseConf task18) checkBaseConf

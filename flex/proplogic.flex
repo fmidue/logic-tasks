@@ -10,17 +10,17 @@ module Global where
 
 import Data.Data (Data)
 import LogicTasks.Formula (TruthValue(..))
-import Trees.Types (PropFormula)
+import Trees.Types (SynTree, BinOp)
 
 
-newtype Table = Table [(Maybe (PropFormula Char), [Maybe TruthValue])] deriving (Eq,Show)
+newtype Table = Table [(Maybe (SynTree BinOp Char), [Maybe TruthValue])] deriving (Eq,Show)
 
 data Namen = A | B | C | D deriving (Data,Eq,Enum,Bounded,Show)
 
 type FormType = (String,[Namen])
 
 type TaskData = (String,[String],[Namen])
-type Submission = (Table,PropFormula Char,[Namen])
+type Submission = (Table,SynTree BinOp Char,[Namen])
 
 
 
@@ -28,7 +28,7 @@ type Submission = (Table,PropFormula Char,[Namen])
 
 module TaskSettings where
 
--- 2024: Weight 1.0 (in Logik, Task13)
+-- 2025: Weight 1.0 (in Logik, Task14)
 
 import Control.OutputCapable.Blocks (
   LangM,
@@ -144,17 +144,18 @@ getTask = fromGen $ do
       return (a,b,c,d)
 
     formulaCss = [cassius|
-      .flex-form-span > label
-        display:block
-        margin-bottom: 1em
-        margin-top: 2em
+      .flex-form-span
+        > label
+          display:block
+          margin-bottom: 1em
+          margin-top: 2em
 
-      .#{formulaClass}
-        display:block
-        width: 95%
-        margin-left: auto
-        margin-right: auto
-        margin-bottom: 0.5em
+        .#{formulaClass}
+          display:block
+          width: 95%
+          margin-left: auto
+          margin-right: auto
+          margin-bottom: 0.5em
     |]
 
 formulaAndHints
@@ -261,9 +262,7 @@ import LogicTasks.Formula (
   )
 import Trees.Types (
   SynTree(..),
-  PropFormula(..),
   BinOp(..),
-  toSynTree
   )
 import Trees.Print                      (simplestDisplay)
 
@@ -273,7 +272,7 @@ import Global
 
 
 
-correctColumn :: (PropFormula Char,[Maybe TruthValue]) -> Bool
+correctColumn :: (SynTree BinOp Char,[Maybe TruthValue]) -> Bool
 correctColumn (f,bs) = all lookFor allocationsAndValues
   where
     ones = Sat.solve_all $ convert f
@@ -286,7 +285,7 @@ correctColumn (f,bs) = all lookFor allocationsAndValues
 
 
 
-isSubFormula :: PropFormula Char -> PropFormula Char -> Bool
+isSubFormula :: SynTree BinOp Char -> SynTree BinOp Char -> Bool
 isSubFormula a b = noSpaces a `isInfixOf` noSpaces b
   where
     noSpaces = filter (/=' ') . show
@@ -306,11 +305,11 @@ checkSyntax _ _ (Table xs,f,n) = do
       text "Es wurden Formeln wie folgt gelesen:"
       when (any (/=Nothing) mColumns) $ indent $ do
         text "Tabellenspalten"
-        code $ unlines $ map (simplestDisplay . toSynTree) entered
+        code $ unlines $ map simplestDisplay entered
         pure ()
       indent $ do
         text "Antwortformel"
-        code $ simplestDisplay $ toSynTree f
+        code $ simplestDisplay f
         pure ()
       pure ()
     when (atomicColumns == map reverse startingTable) $ refuse $ indent $ text $
@@ -335,7 +334,7 @@ checkSyntax _ _ (Table xs,f,n) = do
     atomicColumns = take #{staticColumns} $ map snd xs
     mColumns = dropStatic fs
     entered = catMaybes mColumns
-    noDuplicate formula = formula `notElem` (map Atomic "ABCD" ++ delete formula entered)
+    noDuplicate formula = formula `notElem` (map Leaf "ABCD" ++ delete formula entered)
     atomicRows = filter (notElem Nothing) $ transpose atomicColumns
     solutionAtoms = #{show $ toList fSol} --ignore-length
 
@@ -353,7 +352,7 @@ checkSemantics _ (_,_,nSol) (Table xs,f,n) = do
       "Tafel ist gefüllt und Tabellenspalten enthalten nur korrekt ermittelte Wahrheitswerte?"
     yesNo (all (`elem` f) "ABCD") $ text
        "Gesamtformel enthält alle vorkommenden atomaren Formeln?"
-    let correctFormula = isSemanticEqual (#{fSol}) (toSynTree f) --ignore-length
+    let correctFormula = isSemanticEqual (#{fSol}) f --ignore-length
     yesNo correctFormula $ text "Gesamtformel ist korrekt?"
     let correctNames = n == nSol
     yesNo correctNames $ text "Die Auflistung der Begleitenden ist korrekt?"
@@ -369,12 +368,12 @@ checkSemantics _ (_,_,nSol) (Table xs,f,n) = do
             then Just ("Formel: " ++ simplestDisplay fSol ++ "\nKorrekte Einträge in Wahrheitstafel.\nBegleitende: ")
             else Nothing
          } --ignore-length
-    replaceF (Just (Atomic 'F')) = Just f
+    replaceF (Just (Leaf 'F')) = Just f
     replaceF a                   = a
 
     replaceFAll = map replaceF headers
     zippedEntries = [(sf,b)| (Just sf,b) <- dropStatic $ zip replaceFAll columns]
-    negations = map (Neg . Atomic) ['A'..'D']
+    negations = map (Not . Leaf) ['A'..'D']
 
 
 |]
@@ -443,7 +442,8 @@ import Formula.Parsing.Delayed (
 import LogicTasks.Formula      (TruthValue)
 import LogicTasks.Parsing      (formulaSymbolParser, parser)
 import ParsingHelpers          (fully)
-import Trees.Types             (PropFormula(Atomic))
+import Trees.Parsing           (liberalParser)
+import Trees.Types             (BinOp, SynTree(Leaf))
 
 import Global
 import TaskSettings
@@ -457,10 +457,10 @@ instance Parse [Namen] where
   formParser = parseInstanceMultiChoice
 
 
-makeTable :: [Maybe (PropFormula Char)] -> [Maybe TruthValue] -> Table
+makeTable :: [Maybe (SynTree BinOp Char)] -> [Maybe TruthValue] -> Table
 makeTable headers values = Table $ zip allHeaders formattedTruthValues
   where
-    allHeaders = map (Just . Atomic) "ABCD" ++ headers
+    allHeaders = map (Just . Leaf) "ABCD" ++ headers
     formattedTruthValues = transpose $ chunksOf totalColumns values
 
 
@@ -473,6 +473,6 @@ parseSubmission input =
   where
     parseIt =
       parseWithFallback
-        (fully parser)
+        (fully liberalParser)
         (displayInputAnd complainAboutMissingParenthesesIfNotFailingOn)
         (fully formulaSymbolParser)

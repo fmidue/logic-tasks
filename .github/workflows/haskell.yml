@@ -33,12 +33,26 @@ jobs:
             preview
             dvisvgm
 
-      - name: Cache Stack
-        id: cache-stack-unix
-        uses: actions/cache@v4
+      - name: Restore Stack
+        id: cache-stack-restore
+        uses: actions/cache/restore@v4
         with:
           path: ~/.stack
-          key: ${{ matrix.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          key: ${{ runner.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-home-${{ hashFiles('stack.yaml') }}
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-home-
+
+      - name: Restore .stack-work
+        id: cache-stack-work-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .stack-work
+          key: ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}-${{ hashFiles('**/*.hs') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-${{ hashFiles('stack.yaml') }}
+            ${{ runner.os }}-${{ matrix.plan.build }}-stack-work-
 
       - name: Setup stack
         uses: haskell-actions/setup@v2
@@ -62,14 +76,34 @@ jobs:
         env:
           BUILD: ${{ matrix.plan.build }}
 
+      - name: Cache Stack
+        id: cache-stack-save
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.stack
+          key: ${{ steps.cache-stack-restore.outputs.cache-primary-key }}
+        if: >-
+          steps.cache-stack-restore.outputs.cache-hit != 'true'
+
+      - name: Cache .stack-work
+        id: cache-stack-work-save
+        uses: actions/cache/save@v4
+        with:
+          path: .stack-work
+          key: ${{ steps.cache-stack-work-restore.outputs.cache-primary-key }}
+        if: >-
+          steps.cache-stack-work-restore.outputs.cache-hit != 'true'
+
       - name: Escape commit message
         id: escape
+        if: ${{ github.ref_name == github.event.repository.default_branch }}
         env:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           echo "commit_msg=$(echo "$COMMIT_MSG" | jq -Rs '.|rtrimstr("\n")')" >> "$GITHUB_OUTPUT"
 
       - name: Trigger Test-Flex
+        if: ${{ github.ref_name == github.event.repository.default_branch }}
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: CI-Completed

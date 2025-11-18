@@ -95,8 +95,8 @@ description withDropdowns DecideInst{..} = do
           english $ intercalate ", " $ map (showChoice English) [Correct,Wrong,NoAnswer]
           german $ intercalate ", " $ map (showChoice German) [Correct,Wrong,NoAnswer]
         translate $ do
-          english "Choose the appropriate option for each row."
-          german "Wählen Sie für jede Zeile die passende Option aus."
+          english "Choose the appropriate answer for each row."
+          german "Wählen Sie für jede Zeile die passende Antwort aus."
         pure ()
     else do
       paragraph $ do
