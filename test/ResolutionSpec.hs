@@ -33,12 +33,12 @@ emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
 
 containsNoTautologies :: [Clause] -> Bool
-containsNoTautologies = all (\x -> let theList = list x in length theList == length (Data.Set.fromList theList))
+containsNoTautologies = all ((\theList -> length theList == length (Data.Set.fromList theList)) . list)
   where
-    list x = map (\case
+    list = map (\case
       Positive y -> y
       Negative y -> y)
-      (literals x)
+      . literals
 
 validBoundsResolutionConfig :: Gen ResolutionConfig
 validBoundsResolutionConfig = do
