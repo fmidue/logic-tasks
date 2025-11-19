@@ -115,14 +115,14 @@ genRes (minLen,maxLen) steps atoms = do
                     then buildClauses xs (ys,rs) (runs+1)
                     else do
                       let clauseSize = Set.size chosenClause
-                      choice <- if clauseSize == 1 || chosenClause `Set.member` underMin
-                            then return (1 :: Int)
+                      useSimpleInsert <- if clauseSize == 1 || chosenClause `Set.member` underMin
+                            then return True
                             else
                               if clauseSize == maxLen
-                                then return 2
-                                else choose (1,2)
+                                then return False
+                                else choose (True,False)
                       chosenChar <- elements chooseableAtoms
-                      if choice == 1
+                      if useSimpleInsert
                         then checkValidAndInsert (Positive chosenChar) chosenClause rs clauseSize 0
                         else do
                           firstAmount <- choose (1, clauseSize-1)
