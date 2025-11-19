@@ -43,7 +43,7 @@ small = DecomposeFormulaConfig
   , offerUnicodeInput = False
   }
 
--- 2024: Weight 0.3
+-- 2025: Weight 0.3
 task05 :: DecomposeFormulaConfig
 task05 = DecomposeFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
