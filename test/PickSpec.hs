@@ -6,7 +6,7 @@ import Test.Hspec (Spec, describe, it)
 import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
+import Test.QuickCheck (Gen, chooseInt, forAll, suchThat, elements)
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Formula.Util (isSemanticEqual)
@@ -19,7 +19,7 @@ import TestHelpers (doesNotRefuse)
 
 validBoundsPickConfig :: Gen PickConfig
 validBoundsPickConfig = do
-  amountOfOptions <- choose (2, 5)
+  amountOfOptions <- chooseInt (2, 5)
   -- formulaType <- elements ["Cnf", "Dnf", "Arbitrary"]
   let formulaType = "Arbitrary"
   formulaConfig <- case formulaType of
@@ -32,8 +32,8 @@ validBoundsPickConfig = do
             maxNodes <= 40
 
   percentTrueEntries' <- (do
-    percentTrueEntriesLow' <- choose (1, 90)
-    percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+    percentTrueEntriesLow' <- chooseInt (1, 90)
+    percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
     return (percentTrueEntriesLow', percentTrueEntriesHigh')
     ) `suchThat` \(a,b) -> b - a >= 30
 

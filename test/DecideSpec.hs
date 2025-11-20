@@ -4,7 +4,7 @@ module DecideSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
+import Test.QuickCheck (forAll, Gen, chooseInt, suchThat, elements)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
@@ -29,9 +29,9 @@ validBoundsDecideConfig = do
             maxNodes < 30 &&
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
 
-  percentageOfChanged <- choose (1, 100)
-  percentTrueEntriesLow' <- choose (1, 90)
-  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+  percentageOfChanged <- chooseInt (1, 100)
+  percentTrueEntriesLow' <- chooseInt (1, 90)
+  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ DecideConfig {
