@@ -26,11 +26,11 @@ validBoundsNormalFormParams :: Gen ((Int,Int),(Int,Int),[Char])
 validBoundsNormalFormParams = do
     ((minLen,maxLen),chars) <- validBoundsClause
     let lowerBound = (length chars `div` minLen) + 1
-    let upperBound = min 50 (lengthBound (length chars) maxLen)
-    minNum <- chooseInt (lowerBound, upperBound)
-    if minNum > lengthBound (length chars) minLen
+    if lowerBound > lengthBound (length chars) minLen
       then validBoundsNormalFormParams
       else do
+        let upperBound = min 50 (lengthBound (length chars) maxLen)
+        minNum <- chooseInt (lowerBound, upperBound)
         maxNum <- chooseInt (minNum,upperBound)
         pure ((minNum,maxNum),(minLen,maxLen),chars)
 
