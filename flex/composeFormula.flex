@@ -30,7 +30,7 @@ import Trees.Types                      (BinOp(..))
 import qualified Data.Map               as Map (fromList)
 
 
--- 2024: Weight 0.33 (in Logik)
+-- 2025: Weight 0.33 (in Logik)
 task03 :: ComposeFormulaConfig
 task03 = ComposeFormulaConfig
   { syntaxTreeConfig = SynTreeConfig

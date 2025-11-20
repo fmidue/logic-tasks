@@ -42,6 +42,7 @@ ignore$
 \.zip$
 ^\.github/actions/spelling/
 ^\.github/linters/
+^\.github/copilot-instructions\.md$
 ^\Qtest/Spec.hs\E$
 ^\Qtest/ResolutionSpec.hs\E$
 ^\QREADME.md\E$

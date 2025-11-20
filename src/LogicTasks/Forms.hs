@@ -135,7 +135,8 @@ instance RenderMessage FlexForm Label where
   renderMessage _   _        First     = "Erste Klausel"
   renderMessage _   ("en":_) Second    = "Second Clause"
   renderMessage _   _        Second    = "Zweite Klausel"
-  renderMessage _   _        Resolvent = "Resolvent"
+  renderMessage _   ("en":_) Resolvent = "Resolvent"
+  renderMessage _   _        Resolvent = "Resolvente"
 
 
 
