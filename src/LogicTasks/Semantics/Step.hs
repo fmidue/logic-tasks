@@ -82,7 +82,7 @@ description oneInput StepInst{..} = do
 
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Nutzen Sie zur Angabe der Resolvente die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      german "Nutzen Sie zur Angabe der Resolvente die Mengenschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the resolvent using set notation! A valid solution could look like this: "
     translatedCode $ flip localise $ translations setExample
     pure ()
