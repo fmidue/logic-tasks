@@ -140,7 +140,7 @@ getTask = fromGen $ do
     form = addCss formulaCss $
       formify (Nothing :: Maybe ([String], String))
         [ [list Vertical [ "1) ", "2) ", "3) "]]
-        , [single $ addCssClass "formula-input" "Gesamtformel F="]
+        , [single $ addCssClass "formula-input" "Gesamtformel F = "]
         ] $$>
       tableForm emptyColumns rows ["A","B","C"] ["F"] $$>
       formify (Nothing :: Maybe [Namen])
@@ -283,7 +283,7 @@ checkSemantics _ TaskData{..} Submission{..} = do
   let correctFormula = isSemanticEqual submittedFormula solutionFormula ||
                        isSemanticEqual submittedFormula (foldr1 (Binary And) submittedParts)
   yesNo correctFormula $ text
-    "Gesamtformel ist korrekt?"
+    "Gesamtformel ist korrekt zusammengestellt?"
   #{if not printFeedbackImmediately then findContradictions False "submittedParts" else ""}
   let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
   yesNo correctLast $ text
