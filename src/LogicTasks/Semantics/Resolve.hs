@@ -109,15 +109,15 @@ baseDescription howToInput howToHandleNumbers exampleSet exampleFormula Resoluti
   paragraph $ translate howToHandleNumbers
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Nutzen Sie zur Angabe der Klauseln die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      german "Nutzen Sie zur Angabe der Klauseln die Mengenschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "Specify the clauses using set notation! A solution attempt could look like this: "
     translatedCode $ flip localise $ translations exampleSet
     pure ()
 
   unless usesSetNotation $ paragraph $ indent $ do
     translate $ do
-      german "Nutzen Sie zur Angabe der Klauseln eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "Specify the clauses using a formula! A solution attempt could look like this: "
+      german "Nutzen Sie zur Angabe der Klauseln die Formelschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the clauses using the formula notation! A solution attempt could look like this: "
     translatedCode $ flip localise $ translations exampleFormula
     pure ()
 
@@ -172,10 +172,10 @@ description resInst@ResolutionInst{..} = baseDescription
 
 descriptionFlex :: OutputCapable m => ResolutionInst -> LangM m
 descriptionFlex = descriptionMultipleFields $ do
-  german "Schritte können nicht partiell ausgefüllt werden. Wenn Sie einen Schritt hinzufügen, MUSS dieser vollständig sein. "
+  german "Schritte können nicht partiell ausgefüllt werden. Wenn Sie einen Schritt hinzufügen, muss dieser komplett sein. "
   german "Bei Nichtbeachtung wird Ihre Abgabe aus Syntaxgründen abgelehnt. "
   german "Es ist aber erlaubt, Schritte komplett wegzulassen, z.B. wenn Sie weniger Schritte benötigen als im Eingabeformular angegeben."
-  english "Steps cannot be filled in partially. Each added step MUST be complete. "
+  english "Steps cannot be filled in partially. Each added step must be complete. "
   english "Submissions containing partially filled steps will be rejected as syntactically wrong. "
   english "You are allowed to entirely leave out steps, e.g., if your solution needs fewer steps overall than provided in the input form."
 
@@ -261,7 +261,7 @@ verifyStatic ResolutionInst{..}
 
     | sat $ mkCnf clauses =
         refuse $ indent $ translate $ do
-          german "Die Formel ist erfüllbar."
+          german "Diese Formel ist erfüllbar."
           english "This formula is satisfiable."
 
     | otherwise = pure()
@@ -272,7 +272,7 @@ verifyQuiz :: OutputCapable m => ResolutionConfig -> LangM m
 verifyQuiz ResolutionConfig{..}
     | minSteps < 1 =
         refuse $ indent $ translate $ do
-          german "Die Mindestschritte müssen größer als 0 sein."
+          german "Die Mindestanzahl an Schritten muss größer als 0 sein."
           english "The minimal amount of steps must be greater than 0."
 
     | maxClauseLength baseConf == 1 && minSteps > 1 =
@@ -282,13 +282,13 @@ verifyQuiz ResolutionConfig{..}
 
     | minSteps > 2 * length (usedAtoms baseConf) =
         refuse $ indent $ translate $ do
-          german "Diese minimale Schrittzahl kann mit den gegebenen atomaren Formeln nicht durchgeführt werden."
+          german "Diese minimale Anzahl Schritte kann mit den gegebenen atomaren Formeln nicht durchgeführt werden."
           english "This amount of steps is impossible with the given amount of atomic formulas."
 
     | printFeedbackImmediately && printSolution =
         refuse $ indent $ translate $ do
-          german "Wenn sofortiges Feedback eingeschaltet ist, kann nicht abschließend die Lösung angezeigt werden."
-          english "If instant feedback is turned on, then the correct solution cannot be given."
+          german "Wenn sofortiges Feedback eingeschaltet ist, kann nicht abschließend die korrekte Lösung angezeigt werden."
+          english "If instant feedback is turned on, then the correct solution cannot be displayed afterwards."
 
     | otherwise = checkBaseConf baseConf
 
@@ -301,26 +301,26 @@ gradeSteps :: OutputCapable m => Bool -> [(Clause,Clause,Clause)] -> Bool -> Lan
 gradeSteps setNotation steps appliedIsNothing = do
     preventWithHint (notNull noResolveSteps)
         (translate $ do
-          german "Alle Schritte sind gültig?"
-          english "All steps are valid?"
+          german "Jeder Schritt ist korrekt?"
+          english "Each step is correct?"
         )
         (paragraph $ do
           translate $ do
-            german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
-            english "At least one step is not a valid resolution step. "
+            german "Mindestens ein Schritt ist kein korrekter Resolutionsschritt. "
+            english "At least one step is not a correct resolution step. "
           itemizeM $ map (text . tripShow setNotation) noResolveSteps
           pure ()
         )
 
     prevent checkEmptyClause $
       translate $ do
-        german "Letzter Schritt leitet die leere Klausel ab?"
+        german "Der letzte Schritt leitet die leere Klausel ab?"
         english "The last step derives the empty clause?"
 
     preventWithHint appliedIsNothing
       (translate $ do
-        german "Alle Schritte nutzen vorhandene oder zuvor abgeleitete Klauseln?"
-        english "All steps utilize existing or previously derived clauses?"
+        german "Jeder Schritt nutzt nur in der Formel vorhandene oder zuvor abgeleitete Klauseln?"
+        english "Each step utilizes only clauses existing in the formula or previously derived?"
       )
       (paragraph $ do
         translate $ do
@@ -351,7 +351,7 @@ partialGrade' ResolutionInst{..} sol = do
     (paragraph $ do
       translate $ do
         german "Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
-        english "At least one step contains literals not found in the original formula. "
+        english "At least one step contains literals not found in the formula. "
       itemizeM $ map (text . tripShow usesSetNotation) wrongLitsSteps
       pure ()
     )
@@ -380,13 +380,13 @@ completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
       recoverFrom stepsGraded
 
     yesNo isCorrect $ translate $ do
-      german "Lösung ist korrekt?"
-      english "Solution is correct?"
+      german "Lösung ist korrekt und vollständig?"
+      english "Solution is correct and complete?"
 
     when (showSolution && not isCorrect) $
       example solutionDisplay $ do
         english "A possible solution for this task is:"
-        german "Eine mögliche Lösung für die Aufgabe ist:"
+        german "Eine mögliche Lösung für diese Aufgabe ist:"
 
     pure ()
   where
@@ -410,7 +410,7 @@ correctMapping ((j, Res (c1,c2,(c3,i))): rest) mapping = do
   prevent checkIndices $
     translate $ do
       german $ show j ++ ". Schritt verwendet nur existierende Indizes?"
-      english $ "Step " ++ show j ++ " uses only valid indices?"
+      english $ "Step " ++ show j ++ " uses only existing indices?"
 
   prevent (alreadyUsed i) $
     translate $ do
