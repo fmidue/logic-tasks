@@ -287,7 +287,7 @@ checkSemantics _ TaskData{..} Submission{..} = do
   #{if not printFeedbackImmediately then findContradictions False "submittedParts" else ""}
   let correctLast = drop #{staticColumns+emptyColumns} columns == generateTruthTable solutionValues
   yesNo correctLast $ text
-    "Spalte F der Wahrheitstafel ist korrekt?"
+    "Spalte F der Wahrheitstafel ist korrekt ausgefüllt?"
   let correctNames = identifiedLiars == listOfLiars
   yesNo correctNames $ text
     "Auswahl der Lügner ist korrekt?"
