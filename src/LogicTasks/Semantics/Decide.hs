@@ -215,10 +215,10 @@ completeGrade DecideInst{..} sol = reRefuse
       paragraph $ translate $ do
         english "All of the above table rows given in the above list contain a wrong entry. "
         english "Every other row of the table contains a correct entry. "
-        english "Please compare with the correct version of the table:"
+        english "Please compare with the correct table for the given formula:"
         german "Die obige Liste enthält alle Zeilen der obigen Tafel, welche einen falschen Eintrag enthalten. "
         german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag. "
-        german "Vergleichen Sie mit der richtigen Tafel für diese Formel:"
+        german "Vergleichen Sie mit der richtigen Tafel für die gegebene Formel:"
       code $ show table
       pure ()
     where
