@@ -7,7 +7,7 @@ module Tasks.LegalProposition.Quiz (
 
 
 import Data.Char (isLetter)
-import Test.QuickCheck (Gen, choose, suchThat, vectorOf)
+import Test.QuickCheck (Gen, chooseInt, suchThat, vectorOf)
 
 import Auxiliary (listNoDuplicate)
 import Tasks.LegalProposition.Config (
@@ -33,10 +33,10 @@ generateLegalPropositionInst LegalPropositionConfig  {..} = do
         (fromIntegral formulas)
         (genSynTree syntaxTreeConfig)
       `suchThat` (not . similarExist)
-    serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` listNoDuplicate
+    serialsOfWrong <- vectorOf (fromIntegral illegals) (chooseInt (1, fromIntegral formulas) )`suchThat` listNoDuplicate
     serialsOfBracket <- vectorOf
         (fromIntegral bracketFormulas)
-        (choose (1, fromIntegral formulas))
+        (chooseInt (1, fromIntegral formulas))
       `suchThat` (listNoDuplicate . (++ serialsOfWrong))
     pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` (noSimilarFormulas . map fst)
     return $ LegalPropositionInst

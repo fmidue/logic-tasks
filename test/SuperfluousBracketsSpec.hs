@@ -2,7 +2,7 @@
 
 module SuperfluousBracketsSpec (spec) where
 
-import Test.QuickCheck (Gen, forAll, choose, suchThat, (==>))
+import Test.QuickCheck (Gen, forAll, chooseInteger, suchThat, (==>))
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (notNull)
 import Test.Hspec (Spec, describe, it)
@@ -34,7 +34,7 @@ validBoundsSuperfluousBracketsConfig :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBracketsConfig = do
     syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTreeConfig
       `suchThat` \SynTreeConfig{..} -> 2 * minUniqueBinOperators + 2 < minNodes
-    superfluousBracketPairs <- choose (1, minNodes `div` 2)
+    superfluousBracketPairs <- chooseInteger (1, minNodes `div` 2)
     return $ SuperfluousBracketsConfig
         {
           syntaxTreeConfig

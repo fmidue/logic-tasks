@@ -4,7 +4,7 @@ module FillSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, choose, elements, suchThat, sublistOf)
+import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat, sublistOf)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (
   dFillConf,
@@ -28,8 +28,8 @@ import TestHelpers (doesNotRefuse)
 
 validBoundsBaseConfig :: Gen BaseConfig
 validBoundsBaseConfig = do
-  minClauseLength <- choose (1, 5)
-  maxClauseLength <- choose (2, 10) `suchThat` \x -> minClauseLength <= x
+  minClauseLength <- chooseInt (1, 5)
+  maxClauseLength <- chooseInt (2, 10) `suchThat` \x -> minClauseLength <= x
   usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
   pure $ BaseConfig {
     minClauseLength
@@ -39,8 +39,8 @@ validBoundsBaseConfig = do
 
 validBoundsNormalFormConfig :: Gen NormalFormConfig
 validBoundsNormalFormConfig = do
-  minClauseAmount <- choose (1, 5)
-  maxClauseAmount <- choose (2, 10) `suchThat` \x -> minClauseAmount <= x
+  minClauseAmount <- chooseInt (1, 5)
+  maxClauseAmount <- chooseInt (2, 10) `suchThat` \x -> minClauseAmount <= x
   baseConf <- validBoundsBaseConfig `suchThat` \bc ->
     minClauseAmount * minClauseLength bc >= length (usedAtoms bc) &&
     minClauseAmount <= 2 ^ length (usedAtoms bc) &&
@@ -62,9 +62,9 @@ validBoundsFillConfig = do
             maxNodes < 30 &&
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
 
-  percentageOfGaps <- choose (1, 100)
-  percentTrueEntriesLow' <- choose (0, 90)
-  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')
+  percentageOfGaps <- chooseInt (1, 100)
+  percentTrueEntriesLow' <- chooseInt (0, 90)
+  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ FillConfig {

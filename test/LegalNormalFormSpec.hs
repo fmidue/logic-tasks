@@ -4,7 +4,7 @@ module LegalNormalFormSpec (spec) where
 
 import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess, within)
+import Test.QuickCheck (Gen, chooseInt, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess, within)
 import Data.List((\\))
 import Data.Tuple.Extra (thd3)
 
@@ -42,9 +42,9 @@ validBoundsLegalNormalFormConfig = do
         | maxFormulas < 0 = 15 -- Int overflow
         | otherwise = min 15 maxFormulas
 
-    formulas <- choose
+    formulas <- chooseInt
       (1, formulaUpperBound)
-    illegals <- choose (0, formulas)
+    illegals <- chooseInt (0, formulas)
     let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals > 0
         includeFormWithJustOneLiteralPerClause = minClauseLength == 1 && formulas - illegals > 1
     allowArrowOperators <- elements [True, False]
@@ -73,15 +73,15 @@ validBoundsLegalNormalFormConfig = do
 invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
 invalidBoundsLegalCNF = do
     usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \atoms -> not (null atoms) && (10>=length atoms)
-    maxClauseLength <- choose (1, 2 * length usedAtoms)
-    minClauseLength <- choose (maxClauseLength, 100)
+    maxClauseLength <- chooseInt (1, 2 * length usedAtoms)
+    minClauseLength <- chooseInt (maxClauseLength, 100)
     let clauses = product (take maxClauseLength (reverse [1 .. (2 * length usedAtoms)]))
-    maxClauseAmount <- choose (1, max 15 clauses)  `suchThat` \amount ->amount > 1 || maxClauseLength > 1
-    minClauseAmount <- choose (1, maxClauseAmount + 20)
-    formulas <- choose (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
-    illegals <- choose (-5, -1)
-    minStringSize <- choose (minClauseLength * (2 + minClauseAmount), 300)
-    maxStringSize <- choose (1, minStringSize)
+    maxClauseAmount <- chooseInt (1, max 15 clauses)  `suchThat` \amount ->amount > 1 || maxClauseLength > 1
+    minClauseAmount <- chooseInt (1, maxClauseAmount + 20)
+    formulas <- chooseInt (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
+    illegals <- chooseInt (-5, -1)
+    minStringSize <- chooseInt (minClauseLength * (2 + minClauseAmount), 300)
+    maxStringSize <- chooseInt (1, minStringSize)
     return $ LegalNormalFormConfig
         {
           normalFormConfig = NormalFormConfig{
