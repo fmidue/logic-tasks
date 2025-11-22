@@ -40,7 +40,7 @@ validBoundsBaseConfig = do
 validBoundsNormalFormConfig :: Gen NormalFormConfig
 validBoundsNormalFormConfig = do
   minClauseAmount <- chooseInt (1, 5)
-  maxClauseAmount <- chooseInt (minClauseAmount, 10)
+  maxClauseAmount <- chooseInt (max 2 minClauseAmount, 10)
   baseConf <- validBoundsBaseConfig `suchThat` \bc ->
     minClauseAmount * minClauseLength bc >= length (usedAtoms bc) &&
     minClauseAmount <= 2 ^ length (usedAtoms bc) &&
