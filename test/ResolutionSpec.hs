@@ -8,7 +8,7 @@ import Data.Maybe (isJust, fromJust, isNothing)
 import Formula.Types (Clause(Clause), Literal (..), Formula (literals))
 import qualified Data.Set
 import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution, clauses))
-import Test.QuickCheck (Gen, chooseInt, suchThat, forAll)
+import Test.QuickCheck (Gen, chooseInt, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM)
 import FillSpec (validBoundsBaseConfig)
@@ -43,8 +43,7 @@ containsNoTautologies = all ((\theList -> length theList == length (Data.Set.fro
 validBoundsResolutionConfig :: Gen ResolutionConfig
 validBoundsResolutionConfig = do
   baseConf <- validBoundsBaseConfig
-  minSteps <- chooseInt (1,10) `suchThat` \ms ->
-    (maxClauseLength baseConf > 1 || ms == 1) && ms <= 2 * length (usedAtoms baseConf)
+  minSteps <- chooseInt (1, min (if maxClauseLength baseConf > 1 then 10 else 1) (2 * length (usedAtoms baseConf)))
   pure $ ResolutionConfig {
     baseConf
   , minSteps
