@@ -4,7 +4,7 @@ module SubTreeSpec (spec) where
 import Capabilities.Cache.IO ()
 import Capabilities.LatexSvg.IO ()
 import Test.Hspec (describe, it, xit, Spec)
-import Test.QuickCheck (Gen, choose, forAll, elements, suchThat, ioProperty)
+import Test.QuickCheck (Gen, chooseInteger, forAll, elements, suchThat, ioProperty)
 import Text.Parsec (parse)
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (isInfixOf )
@@ -29,7 +29,7 @@ validBoundsSubTreeConfig :: Gen SubTreeConfig
 validBoundsSubTreeConfig = do
     allowSameSubTree <- elements [True,False]
     syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTreeConfig `suchThat` ((4<=) . minNodes)
-    subTreeAmount <- choose (2, minNodes - maxLeavesForNodes minNodes)
+    subTreeAmount <- chooseInteger (2, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {
         syntaxTreeConfig
