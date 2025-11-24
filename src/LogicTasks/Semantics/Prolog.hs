@@ -90,7 +90,7 @@ description PrologInst{..} = do
   paragraph $ indent $ if usesSetNotation
     then do
       translate $ do
-        german "Nutzen Sie zur Angabe der Klauseln die Mengennotation. Ein Lösungsversuch mit den Klauseln {a(x), b(x)} und {-a(x), b(x), c(x)} könnte beispielsweise so aussehen:"
+        german "Nutzen Sie zur Angabe der Klauseln die Mengenschreibweise. Ein Lösungsversuch mit den Klauseln {a(x), b(x)} und {-a(x), b(x), c(x)} könnte beispielsweise so aussehen:"
         english "Specify the clauses using set notation. A valid solution with the clauses {a(x), b(x)} and {-a(x), b(x), c(x)} could look like this:"
       code "(a(x), { b(x), c(x) })"
       pure ()

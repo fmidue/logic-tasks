@@ -8,7 +8,7 @@ import Data.Either (isLeft, isRight)
 import Data.List ((\\))
 import Data.Char (isLetter)
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, within, ioProperty)
+import Test.QuickCheck (Gen, chooseInteger, forAll, suchThat, within, ioProperty)
 import Data.Tuple.Extra (thd3)
 
 import Tasks.LegalProposition.Config (
@@ -33,11 +33,11 @@ import System.IO.Temp (withSystemTempDirectory)
 
 validBoundsLegalPropositionConfig :: Gen LegalPropositionConfig
 validBoundsLegalPropositionConfig = do
-    formulas <- choose (1, 15)
+    formulas <- chooseInteger (1, 15)
     syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTreeConfig
       `suchThat` \cfg -> formulaAmount cfg >= formulas
-    illegals <- choose (0, formulas)
-    bracketFormulas <- choose (0, formulas - illegals)
+    illegals <- chooseInteger (0, formulas)
+    bracketFormulas <- chooseInteger (0, formulas - illegals)
     return $ LegalPropositionConfig
         {
             syntaxTreeConfig

@@ -15,7 +15,7 @@ import qualified SAT.MiniSat as Sat
 
 import Data.Set (empty,Set)
 import Data.Maybe (isJust)
-import Test.QuickCheck (Gen,choose,elements,shuffle)
+import Test.QuickCheck (Gen,chooseInt,elements,shuffle, arbitrary)
 
 import Formula.Types hiding (Dnf(..), Con(..))
 import Formula.Util
@@ -115,17 +115,17 @@ genRes (minLen,maxLen) steps atoms = do
                     then buildClauses xs (ys,rs) (runs+1)
                     else do
                       let clauseSize = Set.size chosenClause
-                      choice <- if clauseSize == 1 || chosenClause `Set.member` underMin
-                            then return (1 :: Int)
+                      useSimpleInsert <- if clauseSize == 1 || chosenClause `Set.member` underMin
+                            then return True
                             else
                               if clauseSize == maxLen
-                                then return 2
-                                else choose (1,2)
+                                then return False
+                                else arbitrary
                       chosenChar <- elements chooseableAtoms
-                      if choice == 1
+                      if useSimpleInsert
                         then checkValidAndInsert (Positive chosenChar) chosenClause rs clauseSize 0
                         else do
-                          firstAmount <- choose (1, clauseSize-1)
+                          firstAmount <- chooseInt (1, clauseSize-1)
                           chosenSign <- elements [Positive chosenChar, Negative chosenChar]
                           checkValidAndInsert chosenSign chosenClause rs firstAmount firstAmount
       where
@@ -149,4 +149,4 @@ genRes (minLen,maxLen) steps atoms = do
 setElements :: Set a -> Gen a
 setElements set
     | null set = error "setElements used with empty set."
-    | otherwise = (`Set.elemAt` set) `fmap` choose (0, Set.size set - 1)
+    | otherwise = (`Set.elemAt` set) `fmap` chooseInt (0, Set.size set - 1)

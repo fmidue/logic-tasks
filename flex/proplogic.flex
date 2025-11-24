@@ -213,7 +213,7 @@ formulaAndHints a b c d (aN,bN,cN,dN) = do
 
 nonTableFields :: (String,String,String,String) -> [[FieldInfo]]
 nonTableFields (a,b,c,d) = [
-      [single $ addCssClass formulaClass "Formel"]
+      [single $ addCssClass formulaClass "Formel F"]
     , [buttonsEnum Vertical "Wer kommt?" getName]
     ]
   where
@@ -346,7 +346,7 @@ checkSemantics _ (_,_,nSol) (Table xs,f,n) = do
       "Spalten der atomaren Formeln ergeben sinnvolle Wahrheitstafel?"
     let subFormulas = all (\\e -> e `isSubFormula` f || e `elem` negations) $ catMaybes $ dropStatic replaceFAll
     #{checkType} subFormulas $ text
-      "Als Tabellenspalten kommen nur Teilformeln der Gesamtformel vor?"
+      "Als weitere Tabellenspalten kommen (neben negierten atomaren Formeln) nur Teilformeln der Gesamtformel vor?"
     let correctValues = all correctColumn zippedEntries && not (all (null . catMaybes . snd) zippedEntries)
     #{checkType} correctValues $ text
       "Tafel ist gefüllt und Tabellenspalten enthalten nur korrekt ermittelte Wahrheitswerte?"

@@ -6,7 +6,7 @@
 module SynTreeSpec (spec, validBoundsSynTreeConfig) where
 
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
+import Test.QuickCheck (Gen, chooseInteger, elements, forAll, sublistOf, suchThat)
 import Data.List.Extra (nubOrd, isInfixOf)
 
 import TestHelpers (deleteSpaces, doesNotRefuse)
@@ -54,18 +54,18 @@ opFrequenciesNoArrows = Map.fromList
 validBoundsSynTreeConfig :: Gen SynTreeConfig
 validBoundsSynTreeConfig = do
   binOpFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
-  maxConsecutiveNegations <- choose (0, 3)
+  maxConsecutiveNegations <- chooseInteger (0, 3)
   availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minAmountOfUniqueAtoms <- choose (1, fromIntegral $ length availableAtoms)
-  minNodes <- choose (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
+  minAmountOfUniqueAtoms <- chooseInteger (1, fromIntegral $ length availableAtoms)
+  minNodes <- chooseInteger (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
-  maxDepth <- choose (minMaxDepth,max (minMaxDepth+ 3) 10)
-  maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat`
+  maxDepth <- chooseInteger (minMaxDepth,max (minMaxDepth+ 3) 10)
+  maxNodes <- chooseInteger (minNodes, maxNodesForDepth maxDepth) `suchThat`
     \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes')
       && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
   let availableBinOpsCount = fromIntegral $ length $ Map.filter (>0) binOpFrequencies
-  minUniqueBinOperators <- choose (1, min availableBinOpsCount ((minNodes - 1) `div` 2))
+  minUniqueBinOperators <- chooseInteger (1, min availableBinOpsCount ((minNodes - 1) `div` 2))
   return $ SynTreeConfig {
     maxNodes,
     minNodes,
