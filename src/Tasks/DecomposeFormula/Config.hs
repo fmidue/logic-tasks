@@ -64,6 +64,7 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..
 data DecomposeFormulaInst = DecomposeFormulaInst
                { tree :: SynTree BinOp Char
                , addText :: Maybe (Map Language String)
+               , arrowOperatorsToShow :: [BinOp]
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
