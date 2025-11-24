@@ -52,8 +52,8 @@ description SuperfluousBracketsInst{..} = do
     focus stringWithSuperfluousBrackets
 
     instruct $ do
-      english "Give your answer as a propositional logic formula."
-      german "Geben Sie die Lösung in Form einer aussagenlogischen Formel an."
+      english "Give your answer as a propositional logic formula again."
+      german "Geben Sie die Lösung wieder in Form einer aussagenlogischen Formel an."
 
     collapsed False (do
       english "Additional hints:"
