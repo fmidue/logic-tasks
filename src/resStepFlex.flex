@@ -140,7 +140,7 @@ description :: OutputCapable m => FilePath -> TaskData -> LangM m
 description _ taskData = do
     paragraph $ do
         translate $ do
-            german "Betrachten Sie diese Resolvente, als das Ergebnis eines Resolutionsschritts:"
+            german "Betrachten Sie diese Resolvente als das Ergebnis eines Resolutionsschritts:"
             english "Consider this resolvent as a result of a resolution step:"
         indent $ code $ show' (snd (solution taskData))
         translate $ do
@@ -150,8 +150,8 @@ description _ taskData = do
         pure ()
     paragraph $ indent $ translate $ do
         german $ "Geben Sie eine mögliche zweite Klausel an, " ++
-            "sodass die Resolvente durch Resolution der beiden Klauseln entsteht."
-        english "Provide a possible second clause such that the resolvent results from resolving the two clauses."
+            "sodass ein Resolutionsschritt mit dieser und der gegebenen Klausel die obige Resolvente erzeugt."
+        english "Provide a feasible second clause such that resolving it with the given clause results in the above resolvent."
 
     keyHeading
     negationKey unicodeAllowed'
