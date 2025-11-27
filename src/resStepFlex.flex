@@ -123,10 +123,9 @@ checkSemantics _ taskData submittedClause =
 
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE PackageImports #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Description (description) where
-
-import Control.Monad (when, unless)
 
 import Control.OutputCapable.Blocks
 import "logic-tasks" Config (StepInst(..))
@@ -137,61 +136,62 @@ import Global
 
 
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
-description _ taskData = do
+description _ StepInst{..} = do
     paragraph $ do
         translate $ do
             german "Betrachten Sie diese Resolvente als das Ergebnis eines Resolutionsschritts:"
             english "Consider this resolvent as a result of a resolution step:"
-        indent $ code $ show' (snd (solution taskData))
+        indent $ code $ show' $ snd solution
         translate $ do
             german "Eine der zur Resolution verwendeten Klauseln ist:"
             english "One of the clauses used for the resolution is:"
-        indent $ code $ show' (clause1 taskData)
+        indent $ code $ show' clause1
         pure ()
     paragraph $ indent $ translate $ do
         german $ "Geben Sie eine mögliche zweite Klausel an, " ++
             "so dass ein Resolutionsschritt mit dieser und der gegebenen Klausel die obige Resolvente erzeugt."
         english "Provide a feasible second clause such that resolving it with the given clause results in the above resolvent."
 
+    paragraph $ indent $ do
+      translate $ notationText
+      translatedCode $ flip localise $ translations example
+      pure ()
+
     keyHeading
-    negationKey unicodeAllowed'
-    unless usesSetNotation' (orKey unicodeAllowed')
-
-    when usesSetNotation' $ paragraph $ indent $ do
-        translate $ do
-            german "Nicht-leere Klausel:"
-            english "Non-empty clause:"
-        code "{ ... }"
-        pure ()
-
-    when usesSetNotation' $ paragraph $ indent $ do
-        translate $ do
-            german "Nutzen Sie zur Angabe der Klausel die Mengenschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen: "
-            english "Specify the clause using set notation! A valid solution could look like this: "
-        translatedCode $ flip localise $ translations setExample
-        pure ()
-
-    unless usesSetNotation' $ paragraph $ indent $ do
-        translate $ do
-            german "Nutzen Sie zur Angabe der Klausel eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
-            english "Specify the clause using a formula! A valid solution could look like this: "
-        translatedCode $ flip localise $ translations exampleCode
-        pure ()
+    negationKey unicodeAllowed
+    key
 
     pure ()
 
   where
-    usesSetNotation' = usesSetNotation taskData
-    unicodeAllowed' = unicodeAllowed taskData
-    show' = showClause usesSetNotation'
+    show' = showClause usesSetNotation
 
     setExample = do
-        german $ if unicodeAllowed' then "{¬B, C}" else "{nicht B, C}"
-        english $ if unicodeAllowed' then "{¬B, C}" else "{not B, C}"
+        german $ if unicodeAllowed then "{¬B, C}" else "{nicht B, C}"
+        english $ if unicodeAllowed then "{¬B, C}" else "{not B, C}"
 
     exampleCode = do
-        german $ if unicodeAllowed' then "¬B ∨ C" else "nicht B oder C"
-        english $ if unicodeAllowed' then "¬B ∨ C" else "not B or C"
+        german $ if unicodeAllowed then "¬B ∨ C" else "nicht B oder C"
+        english $ if unicodeAllowed then "¬B ∨ C" else "not B or C"
+
+    (notationText,key,example) = if usesSetNotation
+      then (
+        do german "Nutzen Sie zur Angabe der Klausel die Mengenschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+           english "Specify the clause using set notation! A valid solution could look like this: "
+      , paragraph $ indent $ do
+          translate $ do
+            german "Nicht-leere Klausel:"
+            english "Non-empty clause:"
+          code "{ ... }"
+          pure ()
+      , setExample
+      )
+      else (
+        do german "Nutzen Sie zur Angabe der Klausel eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+           english "Specify the clause using a formula! A valid solution could look like this: "
+      , orKey unicodeAllowed
+      , exampleCode
+      )
 
 
 =============================================
