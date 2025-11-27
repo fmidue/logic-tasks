@@ -150,7 +150,7 @@ description _ taskData = do
         pure ()
     paragraph $ indent $ translate $ do
         german $ "Geben Sie eine mögliche zweite Klausel an, " ++
-            "sodass ein Resolutionsschritt mit dieser und der gegebenen Klausel die obige Resolvente erzeugt."
+            "so dass ein Resolutionsschritt mit dieser und der gegebenen Klausel die obige Resolvente erzeugt."
         english "Provide a feasible second clause such that resolving it with the given clause results in the above resolvent."
 
     keyHeading
@@ -166,7 +166,7 @@ description _ taskData = do
 
     when usesSetNotation' $ paragraph $ indent $ do
         translate $ do
-            german "Nutzen Sie zur Angabe der Klausel die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+            german "Nutzen Sie zur Angabe der Klausel die Mengenschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen: "
             english "Specify the clause using set notation! A valid solution could look like this: "
         translatedCode $ flip localise $ translations setExample
         pure ()
