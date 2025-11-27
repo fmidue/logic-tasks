@@ -140,10 +140,10 @@ descriptionMultipleFields :: OutputCapable m => State (Map Language String) () -
 descriptionMultipleFields explainEmptySteps resInst@ResolutionInst{..} = baseDescription
     (do
       german "Geben Sie die Lösung als eine Auflistung von Schritten an. "
-      german "Ein Schritt besteht aus den zwei verwendeten Klauseln sowie der daraus entstehenden Resolvente."
+      german "Ein Schritt besteht aus den zwei verwendeten Klauseln sowie der daraus entstehenden Resolvente. "
       german "Füllen Sie für jeden Schritt die leeren Eingabefelder aus. "
       english "Provide the solution as a sequence of steps. "
-      english "A step consists of the two clauses used and the resulting resolvent."
+      english "A step consists of the two clauses used and the resulting resolvent. "
       english "Fill in the empty input fields for each step. "
       explainEmptySteps
     )
