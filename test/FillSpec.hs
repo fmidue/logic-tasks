@@ -4,7 +4,7 @@ module FillSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat, sublistOf)
+import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat, shuffle)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (
   dFillConf,
@@ -29,8 +29,9 @@ import TestHelpers (doesNotRefuse)
 validBoundsBaseConfig :: Gen BaseConfig
 validBoundsBaseConfig = do
   minClauseLength <- chooseInt (1, 5)
-  maxClauseLength <- chooseInt (2, 10) `suchThat` \x -> minClauseLength <= x
-  usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
+  maxClauseLength <- chooseInt (max 2 minClauseLength, 10)
+  lengthAtoms <- chooseInt (maxClauseLength, 26)
+  usedAtoms <- shuffle ['A' .. 'Z'] >>= return . take lengthAtoms
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength
@@ -64,7 +65,7 @@ validBoundsFillConfig = do
 
   percentageOfGaps <- chooseInt (1, 100)
   percentTrueEntriesLow' <- chooseInt (0, 90)
-  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')
+  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow' + 1, 100)
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ FillConfig {

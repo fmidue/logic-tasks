@@ -4,7 +4,7 @@ module LegalNormalFormSpec (spec) where
 
 import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, chooseInt, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess, within)
+import Test.QuickCheck (Gen, chooseInt, forAll, elements, ioProperty, withMaxSuccess, within, shuffle)
 import Data.List((\\))
 import Data.Tuple.Extra (thd3)
 
@@ -72,11 +72,12 @@ validBoundsLegalNormalFormConfig = do
 
 invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
 invalidBoundsLegalCNF = do
-    usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \atoms -> not (null atoms) && (10>=length atoms)
+    lengthAtoms <- chooseInt (1, 10)
+    usedAtoms <- shuffle ['A' .. 'Z'] >>= return . take lengthAtoms
     maxClauseLength <- chooseInt (1, 2 * length usedAtoms)
     minClauseLength <- chooseInt (maxClauseLength, 100)
     let clauses = product (take maxClauseLength (reverse [1 .. (2 * length usedAtoms)]))
-    maxClauseAmount <- chooseInt (1, max 15 clauses)  `suchThat` \amount ->amount > 1 || maxClauseLength > 1
+    maxClauseAmount <- chooseInt (if maxClauseLength > 1 then 1 else 2, max 15 clauses)
     minClauseAmount <- chooseInt (1, maxClauseAmount + 20)
     formulas <- chooseInt (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
     illegals <- chooseInt (-5, -1)

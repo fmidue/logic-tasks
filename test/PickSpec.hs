@@ -33,7 +33,7 @@ validBoundsPickConfig = do
 
   percentTrueEntries' <- (do
     percentTrueEntriesLow' <- chooseInt (1, 90)
-    percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+    percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow' + 1, 99)
     return (percentTrueEntriesLow', percentTrueEntriesHigh')
     ) `suchThat` \(a,b) -> b - a >= 30
 
