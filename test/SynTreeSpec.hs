@@ -56,7 +56,7 @@ validBoundsSynTreeConfig = do
   binOpFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
   maxConsecutiveNegations <- chooseInteger (0, 3)
   lengthAtoms <- chooseInt (1, 26)
-  availableAtoms <- shuffle ['A' .. 'Z'] >>= return . take lengthAtoms
+  availableAtoms <- take lengthAtoms <$> shuffle ['A' .. 'Z']
   minAmountOfUniqueAtoms <- chooseInteger (1, fromIntegral $ length availableAtoms)
   minNodes <- chooseInteger (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)

@@ -31,7 +31,7 @@ validBoundsBaseConfig = do
   minClauseLength <- chooseInt (1, 5)
   maxClauseLength <- chooseInt (max 2 minClauseLength, 10)
   lengthAtoms <- chooseInt (maxClauseLength, 26)
-  usedAtoms <- shuffle ['A' .. 'Z'] >>= return . take lengthAtoms
+  usedAtoms <- take lengthAtoms <$> shuffle ['A' .. 'Z']
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength

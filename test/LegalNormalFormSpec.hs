@@ -73,7 +73,7 @@ validBoundsLegalNormalFormConfig = do
 invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
 invalidBoundsLegalCNF = do
     lengthAtoms <- chooseInt (1, 10)
-    usedAtoms <- shuffle ['A' .. 'Z'] >>= return . take lengthAtoms
+    usedAtoms <- take lengthAtoms <$> shuffle ['A' .. 'Z']
     maxClauseLength <- chooseInt (1, 2 * length usedAtoms)
     minClauseLength <- chooseInt (maxClauseLength, 100)
     let clauses = product (take maxClauseLength (reverse [1 .. (2 * length usedAtoms)]))
