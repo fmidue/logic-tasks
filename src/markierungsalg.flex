@@ -8,6 +8,7 @@ taskName: MarkierungsAlgorithmus
 module Global where
 
 import Data.Data (Data)
+import Data.List.Extra (replace)
 
 import LogicTasks.Formula (TruthValue)
 import Trees.Types (SynTree, BinOp)
@@ -34,6 +35,8 @@ data TaskData = TaskData
     , solution :: Solution
     } deriving Data
 
+withUnicodeImpl :: String -> String
+withUnicodeImpl = replace "=>" "\\Rightarrow"
 
 =============================================
 
@@ -177,7 +180,7 @@ checking condition msg = when condition $ refuse $ indent $ translate msg
 
 buildLatex :: OutputCapable m => SynTree BinOp Char -> [(Int, [Char])] -> LangM m
 buildLatex formula steps = do
-    paragraph $ indent $ latex $ foldr (\\(i,c) acc -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
+    paragraph $ indent $ latex $ withUnicodeImpl $ foldr (\\(i,c) acc -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
         (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) steps
     paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
         german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
@@ -318,7 +321,7 @@ description _ TaskData{..} = do
     paragraph $ translate $ do
         german "Gegeben ist eine Hornformel, welche sich bereits in Implikationsschreibweise befindet:"
         english "A Horn formula is given, which is already in implicational form."
-    indent $ latex (simplestDisplay formula)
+    indent $ latex $ withUnicodeImpl $ simplestDisplay formula
     paragraph $ translate $ do
         german "Wenden Sie den Markierungsalgorithmus aus der Vorlesung auf die Formel an."
         english "Apply the marking algorithm from the lecture to the formula."
