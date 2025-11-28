@@ -4,7 +4,7 @@ module FillSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat, shuffle)
+import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (
   dFillConf,
@@ -23,15 +23,14 @@ import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (Trut
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
-import TestHelpers (doesNotRefuse)
+import TestHelpers (doesNotRefuse, genSublistOf)
 -- jscpd:ignore-end
 
 validBoundsBaseConfig :: Gen BaseConfig
 validBoundsBaseConfig = do
   minClauseLength <- chooseInt (1, 5)
   maxClauseLength <- chooseInt (max 2 minClauseLength, 10)
-  lengthAtoms <- chooseInt (maxClauseLength, 26)
-  usedAtoms <- take lengthAtoms <$> shuffle ['A' .. 'Z']
+  usedAtoms <- genSublistOf (maxClauseLength, 15) ['A' .. 'Z']
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength

@@ -3,7 +3,8 @@ module TestHelpers (
   deleteBrackets,
   deleteSpaces,
   doesNotRefuse,
-  doesNotRefuseIO
+  doesNotRefuseIO,
+  genSublistOf
   ) where
 
 import Data.Char (isSpace)
@@ -11,6 +12,7 @@ import Control.OutputCapable.Blocks.Generic (evalLangM, RunnableOutputCapable (R
 import Control.Monad.Identity (Identity(runIdentity))
 import Data.Maybe (isJust)
 import Control.OutputCapable.Blocks (Language, LangM')
+import Test.QuickCheck (Gen, shuffle, chooseInt)
 
 deleteBrackets :: String  -> String
 deleteBrackets = filter (`notElem` "()")
@@ -28,3 +30,9 @@ doesNotRefuseIO
 doesNotRefuseIO thing = do
   (r, _) <- runLangMReport (pure ()) (>>) thing
   pure $ isJust r
+
+genSublistOf :: (Int, Int) -> [a] -> Gen [a]
+genSublistOf (minLength, maxLength) xs = do
+  lengthAtoms <- chooseInt (minLength, min maxLength (length xs))
+  usedAtoms <- take lengthAtoms <$> shuffle xs
+  return usedAtoms
