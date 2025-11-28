@@ -484,6 +484,52 @@ makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw), v) = (parts, hints)
 
 =============================================
 
+-- This is an alternative implementation of the riddle that can be used in place of the above module
+-- (mind the difference in parameters for taskData!)
+
+module FindLiarTask2 (taskData, makeHintsAndFormula) where
+
+import Data.Text (Text)
+import Test.QuickCheck.Gen
+import Test.QuickCheck.Arbitrary (arbitrary)
+import Trees.Types (BinOp(..), SynTree(..))
+import BuildHints (hintFromFormula)
+
+
+taskData :: Gen ((Char, Bool), (Char, Bool), (Char, Bool))
+taskData = do
+  permutation <- shuffle ['A','B','C']
+  values <- vectorOf 3 arbitrary
+  case zip permutation values of
+    [(p0,v0), (p1,v1), (p2,v2)]
+      -> return ((p0,v0), (p1,v1), (p2,v2))
+    _
+      -> error "This is impossible!"
+
+makeHintsAndFormula :: ((Char, Bool), (Char, Bool), (Char, Bool)) -> ([SynTree BinOp Char], [Text])
+makeHintsAndFormula ((xn, xw), (yn, yw), (zn, zw)) = (parts, hints)
+  where
+    xOperator  = if xw       then Or            else And
+    xYnOrNotYn = if xw == yw then Leaf yn       else Not (Leaf yn)
+    xZnOrNotZn = if xw == zw then Not (Leaf zn) else Leaf zn
+
+    yOperator  = if yw       then Or            else And
+    yXnOrNotXn = if yw == xw then Leaf xn       else Not (Leaf xn)
+    yZnOrNotZn = if yw == zw then Leaf zn       else Not (Leaf zn)
+
+    zOperator  = if zw       then And           else Or
+    zXnOrNotXn = if zw == xw then Leaf xn       else Not (Leaf xn)
+    zYnOrNotYn = if zw == yw then Leaf yn       else Not (Leaf yn)
+
+    parts = [px, py, pz]
+    px = Binary Equi (Leaf xn) $ (if yn > zn then flip else id) (Binary xOperator) xYnOrNotYn xZnOrNotZn
+    py = Binary Equi (Leaf yn) $ (if xn > zn then flip else id) (Binary yOperator) yXnOrNotXn yZnOrNotZn
+    pz = Binary Equi (Leaf zn) $ (if xn > yn then flip else id) (Binary zOperator) zXnOrNotXn zYnOrNotYn
+
+    hints = [hintFromFormula px, hintFromFormula py, hintFromFormula pz]
+
+=============================================
+
 {-# language QuasiQuotes #-}
 {-# language OverloadedStrings #-}
 
