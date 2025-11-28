@@ -77,7 +77,7 @@ description SuperfluousBracketsInst{..} = do
 
         instruct $ do
           english "Due to the associativity of ∧ and ∨, it is not necessary to use brackets in subformulas consisting of three or more atomic formulas connected by the same logical operator, for example in:"
-          german "Aufgrund der Assoziativität von ∧ und ∨ muss in Teilformeln, die aus drei oder mehr atomaren Formeln verbunden mit dem gleichen logischen Operator bestehen, nicht geklammert werden, z.B. bei:"
+          german "Aufgrund der Assoziativität von ∧ und ∨ muss in Teilformeln, die aus drei oder mehr atomaren Formeln verknüpft mit dem gleichen logischen Operator bestehen, nicht geklammert werden, z.B. bei:"
 
         focus "A ∧ B ∧ C"
 
