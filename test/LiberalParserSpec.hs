@@ -72,13 +72,15 @@ spec = do
     prop "if the simplestDisplay of a Bracket-free formula adds brackets then the liberal parser should fail" $
     -- This property does not hold for formulas like
     --    p = Neg (Assoc Or (Atomic 'A') (Atomic 'B'))
-    -- show p = \neg A \or \neg B is accepted by the parser but as
+    -- show p = \neg A \or B is accepted by the parser but as
     -- the tree for Assoc Or (Neg $ Atomic 'A') (Atomic 'B') instead.
     -- The bracketFreeFormula generator does not produce such formulas.
       forAll bracketFreeFormula $ \p ->
-        let s = show p
-        in counterexample (simplestDisplay (toSynTree p)) $ (s /= simplestDisplay (toSynTree p))
-          ==> isLeft (parseString s)
+        let
+          showDirect = show p
+          showSimple = simplestDisplay (toSynTree p)
+        in counterexample showSimple $ (showDirect /= showSimple)
+          ==> isLeft (parseString showDirect)
     modifyMaxSuccess (*2) $ prop "token sequences rejected by the PropFormula parser are rejected by the liberal parser as well" $
       forAll tokenSequence $ \str ->
         let
