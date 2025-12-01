@@ -11,7 +11,7 @@ import ParsingHelpers (fully)
 
 import Test.Hspec ( describe, it, shouldBe, Spec, shouldSatisfy )
 import Test.Hspec.QuickCheck (prop, modifyMaxSuccess)
-import Test.QuickCheck (forAll, Gen, chooseInt, listOf1, elements, oneof, classify, counterexample)
+import Test.QuickCheck (forAll, Gen, chooseInt, listOf1, elements, oneof, classify, counterexample, (==>))
 
 import Text.Parsec ( ParseError, parse )
 
@@ -20,7 +20,7 @@ import Trees.Generate (genSynTree)
 import Trees.Parsing ( liberalParser )
 import Trees.Print (simplestDisplay)
 import Trees.Types
-    ( PropFormula,
+    ( PropFormula(..),
       SynTree(..),
       BinOp(..),
       showOperator,
@@ -69,6 +69,16 @@ spec = do
       parseString "A ∧ B ∨ C" `shouldSatisfy` isLeft
     it "should reject \"A ∧ not B => C ∧ D\"" $
       parseString "A ∧ not B => C ∧ D" `shouldSatisfy` isLeft
+    prop "if the simplestDisplay of a Bracket-free formula adds brackets then the liberal parser should fail" $
+    -- This property does not hold for formulas like
+    --    p = Neg (Assoc Or (Atomic 'A') (Atomic 'B'))
+    -- show p = \neg A \or \neg B is accepted by the parser but as
+    -- the tree for Assoc Or (Neg $ Atomic 'A') (Atomic 'B') instead.
+    -- The bracketFreeFormula generator does not produce such formulas.
+      forAll bracketFreeFormula $ \p ->
+        let s = show p
+        in counterexample (simplestDisplay (toSynTree p)) $ (s /= simplestDisplay (toSynTree p))
+          ==> isLeft (parseString s)
     modifyMaxSuccess (*2) $ prop "token sequences rejected by the PropFormula parser are rejected by the liberal parser as well" $
       forAll tokenSequence $ \str ->
         let
@@ -146,6 +156,14 @@ addSomeBrackets :: String -> Gen String
 addSomeBrackets x = do
   n <- chooseInt (0,3)
   pure $ concat [replicate n '(', x, replicate n ')']
+
+bracketFreeFormula :: Gen (PropFormula Char)
+bracketFreeFormula = oneof
+  [ atomic
+  , Neg <$> atomic -- without brackets negations
+  , Assoc <$> elements [And,Or,Impl,BackImpl] <*> bracketFreeFormula <*> bracketFreeFormula
+  ] where
+    atomic = Atomic <$> elements "ABCDE"
 
 tokenSequence :: Gen String
 tokenSequence = unwords <$> listOf1
