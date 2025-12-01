@@ -25,6 +25,7 @@ import Trees.Types
       BinOp(..),
       showOperator,
       showOperatorNot, toSynTree )
+import Data.Foldable (traverse_)
 
 spec :: Spec
 spec = do
@@ -57,18 +58,22 @@ spec = do
             fmap toSynTree reference == liberalResult
 
     -- negative tests
-    it "should reject \"A ∧ B => C\"" $
-      parseString "A ∧ B => C" `shouldSatisfy` isLeft
-    it "should reject \"A => B => C\"" $
-      parseString "A => B => C" `shouldSatisfy` isLeft
-    it "should reject \"A <= B <= C\"" $
-      parseString "A <= B <= C" `shouldSatisfy` isLeft
-    it "should reject \"A <=> B <=> C\"" $
-      parseString "A <=> B <=> C" `shouldSatisfy` isLeft
-    it "should reject \"A ∧ B ∨ C\"" $
-      parseString "A ∧ B ∨ C" `shouldSatisfy` isLeft
-    it "should reject \"A ∧ not B => C ∧ D\"" $
-      parseString "A ∧ not B => C ∧ D" `shouldSatisfy` isLeft
+    traverse_
+      (\s -> it ("should reject \""++ s ++"\"") $
+        parseString s `shouldSatisfy` isLeft
+      )
+      [ "A ∧ B => C"
+      , "A => B => C"
+      , "A <= B <= C"
+      , "A <=> B <=> C"
+      , "A ∧ B ∨ C"
+      , "A ∧ not B => C ∧ D"
+      , "(A ∧ B => C) ∧ (A => B => C)"
+      , "(A <= B <= C) ∨ (A <=> B <=> C)"
+      , "(A ∧ B ∨ C) => (A ∧ not B => C ∧ D)"
+      , "(A ∧ not B => C ∧ D) <=> (A => B => C)"
+      , "not (A ∧ B ∨ C )"
+      ]
     prop "if the simplestDisplay of a Bracket-free formula adds brackets then the liberal parser should fail" $
     -- This property does not hold for formulas like
     --    p = Neg (Assoc Or (Atomic 'A') (Atomic 'B'))
