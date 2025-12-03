@@ -153,7 +153,7 @@ description _ StepInst{..} = do
         english "Provide a feasible second clause such that resolving it with the given clause results in the above resolvent."
 
     paragraph $ indent $ do
-      translate $ notationText
+      translate notationText
       translatedCode $ flip localise $ translations example
       pure ()
 
