@@ -189,6 +189,10 @@ buildLatex formula steps = do
         english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") steps
     pure ()
 
+displayAllocation :: (Char,Bool) -> String
+displayAllocation (c,w) = "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)
+
+
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ TaskData{..} Submission{..} = do
     checking (all isNothing steps && isNothing model) $ do
@@ -231,7 +235,7 @@ checkSyntax _ TaskData{..} Submission{..} = do
       Just m  -> ( ", mit"
                  , ", with"
                  , latex $ intercalate ",\\\\ " $
-                     map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum $ truth w)) m
+                     map (displayAllocation . second truth) m
                  )
 
 
@@ -298,7 +302,7 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
             case correctModel of
                 [] -> pure ()
                 m  -> indent $ latex $ intercalate ",\\\\ " $
-                    map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)) (sort m)
+                    map displayAllocation $ sort m
             pure ()
         pure ()
 |]
