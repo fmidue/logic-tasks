@@ -25,11 +25,14 @@ ghci
 github
 Graphviz
 hcat
+Hornformel
+Hornklauseln
 hsep
 hspec
 Hspec
 https
 HUnit
+Implikationsschreibweise
 Impls
 Klauselanzahl
 Klauselformen
@@ -41,6 +44,7 @@ Leftarrow
 Leftrightarrow
 Leijen
 LTree
+Markierungsalgorithmus
 Maxterme
 maxterms
 Minterme
@@ -52,6 +56,8 @@ parseable
 PLit
 println
 Resolutionsschritt
+Resolutionsschritte
+Resolutionsschritts
 Resolutionsverfahren
 Resolvente
 resolvierbar

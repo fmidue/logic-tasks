@@ -1,5 +1,5 @@
 
-taskName: MarkierungsAlgorithmus
+taskName: Markierungsalgorithmus
 
 =============================================
 
@@ -180,12 +180,18 @@ checking condition msg = when condition $ refuse $ indent $ translate msg
 
 buildLatex :: OutputCapable m => SynTree BinOp Char -> [(Int, [Char])] -> LangM m
 buildLatex formula steps = do
-    paragraph $ indent $ latex $ withUnicodeImpl $ foldr (\\(i,c) acc -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
-        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) steps
+    paragraph $ indent $ latex $ withUnicodeImpl $ foldr
+      (\\(i,c) acc -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
+      (simplestDisplay formula)
+      $ concatMap (\\(i,s) -> map (i,) s) steps
     paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
         german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
         english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") steps
     pure ()
+
+displayAllocation :: (Char,Bool) -> String
+displayAllocation (c,w) = "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)
+
 
 checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
 checkSyntax _ TaskData{..} Submission{..} = do
@@ -229,7 +235,7 @@ checkSyntax _ TaskData{..} Submission{..} = do
       Just m  -> ( ", mit"
                  , ", with"
                  , latex $ intercalate ",\\\\ " $
-                     map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum $ truth w)) m
+                     map (displayAllocation . second truth) m
                  )
 
 
@@ -296,7 +302,7 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
             case correctModel of
                 [] -> pure ()
                 m  -> indent $ latex $ intercalate ",\\\\ " $
-                    map (\\(c,w) -> "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)) (sort m)
+                    map displayAllocation $ sort m
             pure ()
         pure ()
 |]

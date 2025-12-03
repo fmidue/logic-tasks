@@ -305,7 +305,8 @@ checkSemantics _ TaskData{..} Submission{..} = do
     maybeAnswer     = #{if showSolution then "Just (" ++ solutionCode ++ ")" else "Nothing"}
 |]
   where
-    solutionCode = [i|"Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: " ++ show listOfLiars|]
+    solutionCode =
+      [i|"Formel: " ++ simplestDisplay solutionFormula ++ "\\nKorrekte Einträge in Wahrheitstafel.\\nLügner: " ++ show listOfLiars|]
 
     findContradictions :: Bool -> String -> String
     findContradictions refusal submittedTrees =
