@@ -1,5 +1,5 @@
 
-taskName: MarkierungsAlgorithmus
+taskName: Markierungsalgorithmus
 
 =============================================
 
