@@ -180,8 +180,10 @@ checking condition msg = when condition $ refuse $ indent $ translate msg
 
 buildLatex :: OutputCapable m => SynTree BinOp Char -> [(Int, [Char])] -> LangM m
 buildLatex formula steps = do
-    paragraph $ indent $ latex $ withUnicodeImpl $ foldr (\\(i,c) acc -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
-        (simplestDisplay formula) $ concatMap (\\(i,s) -> map (i,) s) steps
+    paragraph $ indent $ latex $ withUnicodeImpl $ foldr
+      (\\(i,c) acc -> List.replace [c] ("\\\\underline{" ++ [c] ++ "^" ++ show i ++ "}") acc)
+      (simplestDisplay formula)
+      $ concatMap (\\(i,s) -> map (i,) s) steps
     paragraph $ traverse_ (\\(i,c) -> indent $ translate $ do
         german $  "Schritt " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n"
         english $ "Step " ++ show i ++ ": " ++ intersperse ',' c ++ "\\n") steps
