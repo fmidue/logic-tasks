@@ -175,7 +175,6 @@ completeGrade FillInst{..} sol = reRefuse
     (MinimumThreshold (1 % 2))
     (Punishment 0)
     (TargetedCorrect (length solution))
-    DefiniteArticle
     what
     solutionDisplay
     solution
@@ -189,10 +188,10 @@ completeGrade FillInst{..} sol = reRefuse
     zippedShort = zip3 boolSol missingValues [1..]
     (_,diff) = pairwiseCheck zippedShort
     displayMistake = show $ length diff
-    what = translations $ do
+    what = Just $ translations $ do
       german "Wahr-Werte"
       english "True values"
-    solutionDisplay | showSolution = Just $ show missingValues
+    solutionDisplay | showSolution = Just (DefiniteArticle, show missingValues)
                     | otherwise = Nothing
     solution = Map.fromAscList $ zip [1 :: Int ..] missingValues
     submission = Map.fromAscList $ zip [1 :: Int ..] boolSol
