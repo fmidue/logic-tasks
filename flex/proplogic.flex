@@ -301,17 +301,6 @@ startingTable = #{startingTable} --ignore-length
 
 checkSyntax :: OutputCapable m => a -> b -> Submission -> LangM m
 checkSyntax _ _ (Table xs,f,n) = do
-    paragraph $ do
-      text "Es wurden Formeln wie folgt gelesen:"
-      when (any (/=Nothing) mColumns) $ indent $ do
-        text "Tabellenspalten"
-        code $ unlines $ map simplestDisplay entered
-        pure ()
-      indent $ do
-        text "Antwortformel"
-        code $ simplestDisplay f
-        pure ()
-      pure ()
     when (atomicColumns == map reverse startingTable) $ refuse $ indent $ text $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
