@@ -24,6 +24,7 @@ module TaskSettings where
 
 import "logic-tasks" Config (dBaseConf, StepConfig(..))
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import LogicTasks.Semantics.Step        (verifyQuiz)
 
 
 stepConf :: StepConfig
@@ -36,7 +37,7 @@ stepConf = StepConfig
     }
 
 validateSettings :: OutputCapable m => LangM m
-validateSettings = pure ()
+validateSettings = verifyQuiz stepConf
 
 
 =============================================

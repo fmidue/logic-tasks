@@ -24,6 +24,7 @@ module TaskSettings where
 
 import "logic-tasks" Config (dResConf, ResolutionConfig(..))
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import LogicTasks.Semantics.Resolve     (verifyQuiz)
 
 
 prefillSelect :: (Bool, Bool, Bool)
@@ -33,7 +34,7 @@ resConf :: ResolutionConfig
 resConf = dResConf
 
 validateSettings :: OutputCapable m => LangM m
-validateSettings = pure ()
+validateSettings = verifyQuiz resConf
 
 
 =============================================
