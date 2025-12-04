@@ -76,20 +76,16 @@ description SuperfluousBracketsInst{..} = do
         when showArrowOperators arrowsKey
 
         instruct $ do
-          english "Due to the associativity of ∧ and ∨, it is not necessary to use brackets in subformulas consisting of three or more atomic formulas connected by the same logical operator, for example in:"
-          german "Aufgrund der Assoziativität von ∧ und ∨ muss in Teilformeln, die aus drei oder mehr atomaren Formeln verknüpft mit dem gleichen logischen Operator bestehen, nicht geklammert werden, z.B. bei:"
+          english "Since the associative property holds, parentheses that merely determine the order of evaluation for operations of the same kind can be omitted. Example:"
+          german "Da das Assoziativgesetz gilt, können Klammern weggelassen werden, die nur die Auswerungsreihenfolge gleichartiger Verknüpfungen festlegen. Beispiel:"
 
-        focus "A ∧ B ∧ C"
-
-        instruct $ do
-          english "Similarly, brackets are not necessary for one or more consecutive negations directly in front of an atomic formula, for example in:"
-          german "Genauso sind Klammern bei einer oder mehreren Negationen direkt vor einer atomaren Formel nicht nötig, z.B. bei"
-
-        focus "¬¬A"
+        focus "A ∧ B ∧ (C ∨ D ∨ E)"
 
         instruct $ do
-          english "Remove all unnecessary pairs of brackets in the given formula (regarding associativity not just concerning atomic formulas)."
-          german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel (hinsichtlich Assoziativität nicht nur atomare Formeln betreffend)."
+          english "Because negation is a unary operator and its direct repeated application is unambiguous, no additional parentheses are required when multiple negations occur in sequence. Example:"
+          german "Da die Negation ein unärer Operator ist und seine direkte Hintereinanderausführung eindeutig, werden beim Aufeinanderfolgen dieser, keine zusätzlichen Klammern benötigt. Beispiel:"
+
+        focus "¬¬(A ∧ ¬¬B)"
 
         pure ()
       )
