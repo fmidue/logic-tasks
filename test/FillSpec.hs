@@ -6,7 +6,7 @@ module FillSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat, sublistOf)
 import Control.OutputCapable.Blocks (LangM, Rated)
-import Config (
+import LogicTasks.Config (
   dFillConf,
   FillConfig (..),
   FillInst (..),

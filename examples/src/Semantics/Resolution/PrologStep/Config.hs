@@ -2,7 +2,7 @@ module Semantics.Resolution.PrologStep.Config where
 
 import Test.Hspec
 
-import Config (
+import LogicTasks.Config (
   PrologConfig(..)
   )
 import Formula.Types (positivePLit, queryClause, procedureClause)
