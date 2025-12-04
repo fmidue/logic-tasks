@@ -229,7 +229,7 @@ completeGrade DecideInst{..} sol = reRefuse
         Correct -> i `elem` restOf
         _   -> i `elem` changed
 
-      what = translations $ do
+      what = Just $ translations $ do
         german "Antworten"
         english "answers"
 
@@ -238,14 +238,15 @@ withExtendedMultipleChoice
   :: (Ord a, OutputCapable m)
   => Integer
   -> Int
-  -> Map Language String
+  -> Maybe (Map Language String)
   -> Maybe String
   -> Map a Bool
   -> Map a Bool
   -> Rated m
-withExtendedMultipleChoice options changed =
+withExtendedMultipleChoice options changed what =
   extendedMultipleChoice
     (MinimumThreshold (1 % 2))
     (Punishment (1 % options))
     (TargetedCorrect changed)
-    DefiniteArticle
+    what
+  . fmap (DefiniteArticle,)

@@ -9,6 +9,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (translatedCode),
   LangM,
   OutputCapable,
+  collapsed,
   english,
   german,
   paragraph,
@@ -20,7 +21,7 @@ import Control.OutputCapable.Blocks (
   translations,
   Rated,
   reRefuse,
-  printSolutionAndAssertMinimum, collapsed
+  printSolutionAndAssertWithMinimum,
   )
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
@@ -55,7 +56,7 @@ description SuperfluousBracketsInst{..} = do
       english "Give your answer as a propositional logic formula again."
       german "Geben Sie die Lösung wieder in Form einer aussagenlogischen Formel an."
 
-    collapsed False (do
+    collapsed False (translations $ do
       english "Additional hints:"
       german "Weitere Hinweise:")
       (do
@@ -191,10 +192,10 @@ completeGrade' inst sol
     synTreeEquivalent = isSemanticEqual synTreeSubmission (tree inst)
     percentage = (superfluousBracketPairsTask - superfluousBracketPairsSubmission) % superfluousBracketPairsTask
     isSingular = superfluousBracketPairsSubmission  == 1
-    rate = printSolutionAndAssertMinimum
+    rate = printSolutionAndAssertWithMinimum
       (MinimumThreshold (1 % superfluousBracketPairsTask))
-      DefiniteArticle
-      (if showSolution inst then Just $ simplestString inst else Nothing)
+      False
+      (if showSolution inst then Just (DefiniteArticle, simplestString inst) else Nothing)
 
 -- | Checks whether the second string can be transformed into
 --   the first string by removing only brackets.
