@@ -317,6 +317,8 @@ checkSyntax _ _ (Table xs,f,n) = do
       "Tabellenspalten existieren nur einmal?"
     assertion (not (null n)) $ text
       "Es wurde mindestens ein Name angekreuzt? (Alleine gehen ist ausgeschlossen.)"
+    assertion (any (`elem` entered) [f, Leaf 'F']) $ text
+      "Die Gesamtformel belegt eine Tabellenspalte?"
     pure ()
   where
     fs = map fst xs
@@ -404,7 +406,8 @@ description _ (legend,hints,_) = do
     paragraph $ text $
       "Beim Ausfüllen der Wahrheitstafel können Spalten leer gelassen werden. " ++
       "Sollten Sie für die Eingabe einer Formelüberschrift mehr Platz benötigen, " ++
-      "können Sie die kleineren Eingabefelder überspringen und eines der größeren nutzen."
+      "können Sie die kleineren Eingabefelder überspringen und eines der größeren nutzen. " ++
+      "Sie dürfen zusätzlich die Gesamtformel in der Tafel mit 'F' abkürzen."
     pure ()
 
 
