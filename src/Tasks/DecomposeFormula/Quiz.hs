@@ -13,6 +13,7 @@ import Tasks.DecomposeFormula.Config (DecomposeFormulaConfig(..), DecomposeFormu
 import Trees.Helpers (binOp, bothKids, mirrorTree)
 import Trees.Types (BinOp(Equi, Or, And))
 import Data.List.Extra (nubOrd)
+import Tasks.SynTree.Config (getArrows)
 
 
 
@@ -25,6 +26,7 @@ generateDecomposeFormulaInst DecomposeFormulaConfig {..} = do
     return $ DecomposeFormulaInst
       { tree
       , addText = extraText
+      , arrowOperatorsToShow = getArrows syntaxTreeConfig
       , showSolution = printSolution
       , unicodeAllowed = offerUnicodeInput
       }
