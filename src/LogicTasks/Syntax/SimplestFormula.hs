@@ -76,16 +76,16 @@ description SuperfluousBracketsInst{..} = do
         when showArrowOperators arrowsKey
 
         instruct $ do
-          english "Due to the associativity of ∧ and ∨, it is not necessary to use brackets in formulas with three or more subformulas that are connected exclusively by the same logical operator, for example in:"
-          german "Aufgrund der Assoziativität von ∧ und ∨ muss in Formeln mit drei oder mehr Teilformeln, welche ausschließlich durch den gleichen logischen Operatoren verknüpft sind, nicht geklammert werden, z.B. bei:"
+          english "Since the associative law holds, parentheses that merely determine the order of evaluation for operations of the same kind can be omitted. Example:"
+          german "Da das Assoziativgesetz gilt, können Klammern weggelassen werden, die nur die Auswerungsreihenfolge gleichartiger Verknüpfungen festlegen. Beispiel:"
 
         focus "A ∧ B ∧ (C ∨ D ∨ E)"
 
         instruct $ do
-          english "Similarly, brackets are not necessary for one or more consecutive negations directly in front of an atomic formula, for example in:"
-          german "Genauso sind Klammern bei einer oder mehreren Negationen direkt vor einer atomaren Formel nicht nötig, z.B. bei"
+          english "Because negation is a unary operator and its direct repeated application is unambiguous, no additional parentheses are required when multiple negations occur in sequence. Exapmle:"
+          german "Da die Negation ein unärer Operator ist und seine direkte Hintereinanderausführung eindeutig, werden beim Aufeinanderfolgen dieser, keine zusätzlichen Klammern benötigt. Beispiel:"
 
-        focus "¬¬A"
+        focus "¬¬(A ∧ ¬¬B)"
 
         pure ()
       )
