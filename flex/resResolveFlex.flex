@@ -3,11 +3,9 @@ taskName: ResolutionFullPrefilled
 
 =============================================
 
-{-# LANGUAGE PackageImports #-}
-
 module Global where
 
-import "logic-tasks" Config (ResolutionInst)
+import LogicTasks.Config                (ResolutionInst)
 import Formula.Types (ResStep)
 
 
@@ -18,11 +16,9 @@ type TaskData = ResolutionInst
 =============================================
 
 
-{-# LANGUAGE PackageImports #-}
-
 module TaskSettings where
 
-import "logic-tasks" Config (dResConf, ResolutionConfig(..))
+import LogicTasks.Config                (dResConf, ResolutionConfig(..))
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 import LogicTasks.Semantics.Resolve     (verifyQuiz)
 
@@ -42,7 +38,6 @@ validateSettings = verifyQuiz resConf
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE PackageImports #-}
 
 module TaskData (getTask) where
 
@@ -51,7 +46,7 @@ import Data.String.Interpolate (i)
 
 import FlexTask.GenUtil (fromGen)
 import FlexTask.YesodConfig (Rendered, Widget)
-import "logic-tasks" Config (ResolutionInst(..), ResolutionConfig(..))
+import LogicTasks.Config                (ResolutionInst(..), ResolutionConfig(..))
 import LogicTasks.Forms (fullResolutionForm)
 import LogicTasks.Semantics.Resolve (genResInst)
 import LogicTasks.Semantics.Step (showClause)
@@ -139,8 +134,6 @@ description _ =
 =============================================
 
 
-{-# LANGUAGE PackageImports #-}
-
 module Parse (parseSubmission) where
 
 import Data.Maybe (fromJust)
@@ -149,7 +142,7 @@ import Text.ParserCombinators.Parsec
   , string
   )
 
-import "logic-tasks" Config (ResolutionConfig(..))
+import LogicTasks.Config                (ResolutionConfig(..))
 import Control.OutputCapable.Blocks.Generic (($>>=))
 import Control.OutputCapable.Blocks
 import FlexTask.Generic.Parse

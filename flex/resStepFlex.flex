@@ -3,11 +3,9 @@ taskName: ResolutionStepReverse
 
 =============================================
 
-{-# LANGUAGE PackageImports #-}
-
 module Global where
 
-import "logic-tasks" Config (StepInst)
+import LogicTasks.Config                (StepInst)
 import Formula.Types (Clause)
 
 
@@ -18,11 +16,9 @@ type TaskData = StepInst
 =============================================
 
 
-{-# LANGUAGE PackageImports #-}
-
 module TaskSettings where
 
-import "logic-tasks" Config (dBaseConf, StepConfig(..))
+import LogicTasks.Config                (dBaseConf, StepConfig(..))
 import Control.OutputCapable.Blocks (LangM, OutputCapable)
 import LogicTasks.Semantics.Step        (verifyQuiz)
 
@@ -45,7 +41,6 @@ validateSettings = verifyQuiz stepConf
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE PackageImports #-}
 
 module TaskData (getTask) where
 
@@ -72,13 +67,12 @@ form = formify (Nothing :: Maybe String) [[single ""]]
 checkers :: String
 checkers = [i|
 {-\# LANGUAGE ApplicativeDo \#-}
-{-\# LANGUAGE PackageImports \#-}
 
 module Check (checkSyntax, checkSemantics) where
 
 import Control.Monad (when)
 
-import "logic-tasks" Config (StepInst(..))
+import LogicTasks.Config                (StepInst(..))
 import Control.OutputCapable.Blocks
 import Formula.Resolution (resolve)
 import LogicTasks.Semantics.Step (showClause)
@@ -123,13 +117,12 @@ checkSemantics _ taskData submittedClause =
 
 
 {-# LANGUAGE ApplicativeDo #-}
-{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Description (description) where
 
 import Control.OutputCapable.Blocks
-import "logic-tasks" Config (StepInst(..))
+import LogicTasks.Config                (StepInst(..))
 import LogicTasks.Semantics.Step (showClause)
 import LogicTasks.Keys
 
@@ -198,11 +191,9 @@ description _ StepInst{..} = do
 =============================================
 
 
-{-# LANGUAGE PackageImports #-}
-
 module Parse (parseSubmission) where
 
-import "logic-tasks" Config (StepConfig(..))
+import LogicTasks.Config                (StepConfig(..))
 import Control.OutputCapable.Blocks
 import FlexTask.Generic.Parse
 import Formula.Parsing (clauseFormulaParser, clauseSetParser)
