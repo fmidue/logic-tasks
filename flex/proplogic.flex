@@ -264,7 +264,6 @@ import Trees.Types (
   SynTree(..),
   BinOp(..),
   )
-import Trees.Print                      (simplestDisplay)
 
 import qualified SAT.MiniSat            as Sat
 
