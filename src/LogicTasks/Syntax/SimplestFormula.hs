@@ -76,7 +76,7 @@ description SuperfluousBracketsInst{..} = do
         when showArrowOperators arrowsKey
 
         instruct $ do
-          english "Since the associative law holds, parentheses that merely determine the order of evaluation for operations of the same kind can be omitted. Example:"
+          english "Since the associative property holds, parentheses that merely determine the order of evaluation for operations of the same kind can be omitted. Example:"
           german "Da das Assoziativgesetz gilt, können Klammern weggelassen werden, die nur die Auswerungsreihenfolge gleichartiger Verknüpfungen festlegen. Beispiel:"
 
         focus "A ∧ B ∧ (C ∨ D ∨ E)"
