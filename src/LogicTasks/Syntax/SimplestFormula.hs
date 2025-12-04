@@ -82,7 +82,7 @@ description SuperfluousBracketsInst{..} = do
         focus "A ∧ B ∧ (C ∨ D ∨ E)"
 
         instruct $ do
-          english "Because negation is a unary operator and its direct repeated application is unambiguous, no additional parentheses are required when multiple negations occur in sequence. Exapmle:"
+          english "Because negation is a unary operator and its direct repeated application is unambiguous, no additional parentheses are required when multiple negations occur in sequence. Example:"
           german "Da die Negation ein unärer Operator ist und seine direkte Hintereinanderausführung eindeutig, werden beim Aufeinanderfolgen dieser, keine zusätzlichen Klammern benötigt. Beispiel:"
 
         focus "¬¬(A ∧ ¬¬B)"
