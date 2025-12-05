@@ -8,7 +8,7 @@ import Control.OutputCapable.Blocks (LangM)
 import Test.QuickCheck (Gen, chooseAny, forAll)
 import qualified LogicTasks.Semantics.Max as Max (verifyQuiz, verifyStatic, genMaxInst, description, partialGrade', completeGrade')
 import qualified LogicTasks.Semantics.Min as Min (verifyQuiz, verifyStatic, genMinInst, description, partialGrade', completeGrade')
-import Config (
+import LogicTasks.Config (
   MinMaxConfig(..),
   dMinMaxConf,
   MaxInst (cnf),

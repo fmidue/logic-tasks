@@ -87,7 +87,6 @@ library:
     - Formula.Helpers
     - Formula.Printing
     - ParsingHelpers
-    - Config
     - Formula.Types
     - Formula.Resolution
     - Formula.Util

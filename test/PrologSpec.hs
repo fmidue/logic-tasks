@@ -2,7 +2,7 @@
 module PrologSpec where
 import Test.Hspec
 import LogicTasks.Semantics.Prolog (genPrologInst, verifyQuiz, description, verifyStatic, partialGrade', completeGrade')
-import Config (dPrologConf, PrologInst (..), PrologConfig (..))
+import LogicTasks.Config (dPrologConf, PrologInst (..), PrologConfig (..))
 import Formula.Helpers (hasTheClauseShape)
 import Test.QuickCheck
 import Control.OutputCapable.Blocks (LangM)
