@@ -31,7 +31,7 @@ validBoundsDecideConfig = do
 
   percentageOfChanged <- chooseInt (1, 100)
   percentTrueEntriesLow' <- chooseInt (1, 90)
-  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow' + 1, 99)
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ DecideConfig {

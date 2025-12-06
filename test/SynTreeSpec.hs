@@ -6,7 +6,7 @@
 module SynTreeSpec (spec, validBoundsSynTreeConfig) where
 
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, chooseInteger, elements, forAll, sublistOf, suchThat)
+import Test.QuickCheck (Gen, chooseInteger, elements, forAll, suchThat, sublistOf)
 import Data.List.Extra (nubOrd, isInfixOf)
 
 import TestHelpers (deleteSpaces, doesNotRefuse)
