@@ -18,7 +18,6 @@ import Control.OutputCapable.Blocks (
   Punishment (Punishment),
   TargetedCorrect (TargetedCorrect),
   ArticleToUse (DefiniteArticle),
-  translations,
   Rated, reRefuse,
   )
 import Data.Maybe (fromMaybe)
