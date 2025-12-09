@@ -54,13 +54,13 @@ atomics :: [Char]
 atomics = getAllAtomics spirit
 
 stepFields :: Int
-stepFields =  length atomics + extra
+stepFields =  length atomics + extraClauses
 
 spirit :: [SynTree BinOp Char]
 spirit = v3
 
-extra :: Int
-extra = 0
+extraClauses :: Int
+extraClauses = 0
 
 showSolution, printFeedbackImmediately :: Bool
 showSolution = True
@@ -73,7 +73,7 @@ validateSettings :: OutputCapable m => LangM m
 validateSettings
     | not (isHornFormulaI (foldr1 (Binary And) spirit)) = refuse $ indent $ text
         "Als spirit muss eine Liste von Hornklauseln angegeben werden."
-    | extra > length atomics = refuse $ indent $ text $
+    | extraClauses > length atomics = refuse $ indent $ text $
         "Es können nur so viele extra Klauseln hinzugefügt werden, " ++
             "wie in spirit bereits enthalten sind."
     | (atomics \\ ['A' .. 'L']) /= [] = refuse $ indent $ text $
@@ -125,7 +125,7 @@ instance RenderMessage a Label where
 
 getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = fromGen $ do
-    formula <- makeHornFormula spirit extra
+    formula <- makeHornFormula spirit extraClauses
     let (steps, output, model) = startAlgorithm formula
         solution = Solution
             { correctSteps = steps

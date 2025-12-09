@@ -238,6 +238,7 @@ checkers :: SynTree BinOp Char -> String
 checkers fSol = [i|
 
 {-\# language ApplicativeDo \#-}
+{-\# language TupleSections \#-}
 
 module Check (checkSemantics, checkSyntax) where
 
@@ -346,12 +347,12 @@ checkSemantics _ (_,_,nSol) (Table xs,f,n) = do
     yesNo correctNames $ text "Die Auflistung der Begleitenden ist korrekt?"
     let correct = filter id [correctStart, correctFormula, correctNames, correctValues]
     let points = fromIntegral (length correct) % 4
-    res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
+    res <- printSolutionAndAssertWithMinimum (MinimumThreshold (1 % 4)) False maybeAnswer points
     pure res
   where
     (headers,columns) = unzip xs
     maybeAnswer =
-      flip (++) (show nSol) <$>
+      (IndefiniteArticle,) . flip (++) (show nSol) <$>
         #{if showSolution
             then Just ("Formel: " ++ simplestDisplay fSol ++ "\nKorrekte Einträge in Wahrheitstafel.\nBegleitende: ")
             else Nothing
