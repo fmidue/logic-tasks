@@ -27,6 +27,10 @@ Directory `flex` contains some logic themed [Flex-Tasks](https://github.com/fmid
 
 - [composeFormula](flex/composeFormula.flex): Mostly identical to `ComposeFormula`, but with two separate text inputs instead of one (in Autotool).
 - [proplogic](flex/proplogic.flex): Logic puzzle based on a written exam task, not related to any of the ones here.
+- [findliar](flex/findliar.flex): Another logic puzzle taken from a paper exercise.
+- [markierungsalg](flex/markierungsalg.flex): Task based on the marking algorithm.
+- [resStepFlex](flex/resStepFlex.flex): A reverse version of `ResolutionStep` where the result of a resolution step is given instead.
+- [resResolveFlex](flex/resResolveFlex.flex): A version of `ResolutionFull` where steps are already partially filled in with the sample solution.
 
 ## Testing a module
 
