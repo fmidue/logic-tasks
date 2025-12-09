@@ -295,14 +295,14 @@ checkSemantics _ TaskData{..} Submission{..} = do
                (if correctFormula   then 0.2 else 0.0) +
                (if correctLast      then 0.2 else 0.0) +
                (if correctNames     then 0.2 else 0.0)
-  res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
+  res <- printSolutionAndAssertWithMinimum (MinimumThreshold (1 % 4)) False maybeAnswer points
   pure res
   where
     Table xs        = submittedTable
     solutionFormula = foldr1 (Binary And) formulaParts
     listOfLiars     = map fst $ filter (not . snd) (zip allNamen solutionValues)
     columns         = map snd xs
-    maybeAnswer     = #{if showSolution then "Just (" ++ solutionCode ++ ")" else "Nothing"}
+    maybeAnswer     = #{if showSolution then "Just (IndefiniteArticle, " ++ solutionCode ++ ")" else "Nothing"}
 |]
   where
     solutionCode =
