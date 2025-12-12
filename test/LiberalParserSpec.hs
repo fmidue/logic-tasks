@@ -2,6 +2,7 @@
 module LiberalParserSpec (spec) where
 
 import Data.Either (isLeft)
+import Data.Either.Extra (mapLeft)
 import qualified Data.Map as Map (fromList)
 import Data.Maybe (isNothing, fromJust)
 
@@ -10,7 +11,7 @@ import ParsingHelpers (fully)
 
 import Test.Hspec ( describe, it, shouldBe, Spec, shouldSatisfy )
 import Test.Hspec.QuickCheck (prop, modifyMaxSuccess)
-import Test.QuickCheck (forAll, Gen, chooseInt, listOf1, elements, oneof, classify, counterexample)
+import Test.QuickCheck (forAll, Gen, chooseInt, listOf1, elements, oneof, classify, counterexample, (==>))
 
 import Text.Parsec ( ParseError, parse )
 
@@ -19,11 +20,12 @@ import Trees.Generate (genSynTree)
 import Trees.Parsing ( liberalParser )
 import Trees.Print (simplestDisplay)
 import Trees.Types
-    ( PropFormula,
+    ( PropFormula(..),
       SynTree(..),
       BinOp(..),
       showOperator,
-      showOperatorNot )
+      showOperatorNot, toSynTree )
+import Data.Foldable (traverse_)
 
 spec :: Spec
 spec = do
@@ -44,24 +46,50 @@ spec = do
     prop "it should accept simplest formulas of valid syntax trees" $
       forAll simplestTree $ \str ->
         (simplestDisplay <$> parseString str) `shouldBe` Right str
+    prop "it should agree with the result of PropFormula parser if both succeed" $
+      forAll treeWithExtraBrackets $ \(str,_) ->
+        let
+          -- hide error details just in case
+          reference = mapLeft (const ()) $ parsePropFormula str
+          liberalResult = mapLeft (const ()) $ parseString str
+        in
+          classify (isLeft liberalResult) "parser errors" $
+            -- there should be no parser errors here!
+            fmap toSynTree reference == liberalResult
 
     -- negative tests
-    it "should reject \"A ∧ B => C\"" $
-      parseString "A ∧ B => C" `shouldSatisfy` isLeft
-    it "should reject \"A => B => C\"" $
-      parseString "A => B => C" `shouldSatisfy` isLeft
-    it "should reject \"A <= B <= C\"" $
-      parseString "A <= B <= C" `shouldSatisfy` isLeft
-    it "should reject \"A <=> B <=> C\"" $
-      parseString "A <=> B <=> C" `shouldSatisfy` isLeft
-    it "should reject \"A ∧ B ∨ C\"" $
-      parseString "A ∧ B ∨ C" `shouldSatisfy` isLeft
-    it "should reject \"A ∧ not B => C ∧ D\"" $
-      parseString "A ∧ not B => C ∧ D" `shouldSatisfy` isLeft
-    modifyMaxSuccess (*2) $ prop "it should agree with PropFormula-parser on which token sequences are valid formulas" $
+    traverse_
+      (\s -> it ("should reject \""++ s ++"\"") $
+        parseString s `shouldSatisfy` isLeft
+      )
+      [ "A ∧ B => C"
+      , "A => B => C"
+      , "A <= B <= C"
+      , "A <=> B <=> C"
+      , "A ∧ B ∨ C"
+      , "A ∧ not B => C ∧ D"
+      , "(A ∧ B => C) ∧ (A => B => C)"
+      , "(A <= B <= C) ∨ (A <=> B <=> C)"
+      , "(A ∧ B ∨ C) => (A ∧ not B => C ∧ D)"
+      , "(A ∧ not B => C ∧ D) <=> (A => B => C)"
+      , "not (A ∧ B ∨ C)"
+      ]
+    prop "if the simplestDisplay of a Bracket-free formula adds brackets then the liberal parser should fail" $
+    -- This property does not hold for formulas like
+    --    p = Neg (Assoc Or (Atomic 'A') (Atomic 'B'))
+    -- show p = \neg A \or B is accepted by the parser but as
+    -- the tree for Assoc Or (Neg $ Atomic 'A') (Atomic 'B') instead.
+    -- The bracketFreeFormula generator does not produce such formulas.
+      forAll bracketFreeFormula $ \p ->
+        let
+          showDirect = show p
+          showSimple = simplestDisplay (toSynTree p)
+        in counterexample showSimple $ (showDirect /= showSimple)
+          ==> isLeft (parseString showDirect)
+    modifyMaxSuccess (*2) $ prop "token sequences rejected by the PropFormula parser are rejected by the liberal parser as well" $
       forAll tokenSequence $ \str ->
         let
-          reference = parse (fully $ parser @(PropFormula Char)) "(reference)" str
+          reference = parsePropFormula str
           liberalResult = parseString str
           disagreement = compareResults reference liberalResult
         in
@@ -74,12 +102,15 @@ compareResults
   -> Either ParseError (SynTree BinOp Char)
   -> Maybe String
 compareResults (Left _) (Left _) = Nothing
-compareResults (Right _) (Right _) = Nothing
-compareResults (Right _) (Left _) = Just "liberalParser failed, but PropFormula-parser accepts the sequence"
-compareResults (Left _) (Right _) = Just "liberalParser succeeds, but PropFormula-parser rejects the sequence"
+compareResults (Left _) (Right _) = Just "PropFormula-parser rejects the sequence, but liberalParser succeeds"
+-- we only care about the case where the PropFormula parser rejects a token sequence
+compareResults (Right _) _ = Nothing
 
 parseString :: String -> Either ParseError (SynTree BinOp Char)
 parseString = parse (fully liberalParser) "(test case)"
+
+parsePropFormula :: String -> Either ParseError (PropFormula Char)
+parsePropFormula = parse (fully $ parser @(PropFormula Char)) "(reference)"
 
 treeWithExtraBrackets :: Gen (String,SynTree BinOp Char)
 treeWithExtraBrackets = do
@@ -132,6 +163,14 @@ addSomeBrackets :: String -> Gen String
 addSomeBrackets x = do
   n <- chooseInt (0,3)
   pure $ concat [replicate n '(', x, replicate n ')']
+
+bracketFreeFormula :: Gen (PropFormula Char)
+bracketFreeFormula = oneof
+  [ atomic
+  , Neg <$> atomic -- without brackets negations
+  , Assoc <$> elements [And,Or,Impl,BackImpl] <*> bracketFreeFormula <*> bracketFreeFormula
+  ] where
+    atomic = Atomic <$> elements "ABCDE"
 
 tokenSequence :: Gen String
 tokenSequence = unwords <$> listOf1

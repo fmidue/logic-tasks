@@ -141,10 +141,10 @@ descriptionMultipleFields explainEmptySteps resInst@ResolutionInst{..} = baseDes
     (do
       german "Geben Sie die Lösung als eine Auflistung von Schritten an. "
       german "Ein Schritt besteht aus den zwei verwendeten Klauseln sowie der daraus entstehenden Resolvente. "
-      german "Füllen Sie für jeden Schritt die leeren Eingabefelder aus. "
+      german "Füllen Sie die leeren Eingabefelder für Ihre Schritte aus. "
       english "Provide the solution as a sequence of steps. "
       english "A step consists of the two clauses used and the resulting resolvent. "
-      english "Fill in the empty input fields for each step. "
+      english "Fill in the empty input fields for your steps. "
       explainEmptySteps
     )
     (do

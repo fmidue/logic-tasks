@@ -20,7 +20,6 @@ import Control.OutputCapable.Blocks (
   reRefuse,
   Rated,
   multipleChoice,
-  ArticleToUse (IndefiniteArticle),
   )
 import Data.Maybe (fromJust, isNothing)
 
@@ -195,7 +194,6 @@ completeGrade' :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> Rated m
 completeGrade' path ComposeFormulaInst{..} sol = reRefuse (
     multipleChoice
-      IndefiniteArticle
       what
       Nothing
       solution

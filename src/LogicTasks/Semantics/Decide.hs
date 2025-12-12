@@ -213,11 +213,7 @@ completeGrade DecideInst{..} sol = reRefuse
         pure ()
 
       paragraph $ translate $ do
-        english "All of the above table rows given in the above list contain a wrong entry. "
-        english "Every other row of the table contains a correct entry. "
         english "Please compare with the correct table for the given formula:"
-        german "Die obige Liste enthält alle Zeilen der obigen Tafel, welche einen falschen Eintrag enthalten. "
-        german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag. "
         german "Vergleichen Sie mit der richtigen Tafel für die gegebene Formel:"
       code $ show table
       pure ()
@@ -233,7 +229,7 @@ completeGrade DecideInst{..} sol = reRefuse
         Correct -> i `elem` restOf
         _   -> i `elem` changed
 
-      what = translations $ do
+      what = Just $ translations $ do
         german "Antworten"
         english "answers"
 
@@ -242,14 +238,15 @@ withExtendedMultipleChoice
   :: (Ord a, OutputCapable m)
   => Integer
   -> Int
-  -> Map Language String
+  -> Maybe (Map Language String)
   -> Maybe String
   -> Map a Bool
   -> Map a Bool
   -> Rated m
-withExtendedMultipleChoice options changed =
+withExtendedMultipleChoice options changed what =
   extendedMultipleChoice
     (MinimumThreshold (1 % 2))
     (Punishment (1 % options))
     (TargetedCorrect changed)
-    DefiniteArticle
+    what
+  . fmap (DefiniteArticle,)
