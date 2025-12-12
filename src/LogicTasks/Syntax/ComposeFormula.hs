@@ -23,7 +23,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
+import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey')
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
@@ -36,6 +36,7 @@ import Formula.Parsing (Parse(parser), formulaListSymbolParser)
 import Formula.Parsing.Delayed (Delayed, withDelayedSucceeding, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn)
 import qualified Data.Map as Map (fromList)
 import Control.Applicative (Alternative)
+import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => Bool -> FilePath -> ComposeFormulaInst -> LangM m
@@ -76,7 +77,7 @@ description inputHelp path ComposeFormulaInst{..} = do
 
     keyHeading
     basicOpKey unicodeAllowed
-    arrowsKey
+    arrowsKey' arrowOperatorsToShow
 
     when inputHelp $ paragraph $ indent $ do
       translate $ do
@@ -115,7 +116,11 @@ description inputHelp path ComposeFormulaInst{..} = do
 
 
 verifyInst :: OutputCapable m => ComposeFormulaInst -> LangM m
-verifyInst _ = pure ()
+verifyInst ComposeFormulaInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 

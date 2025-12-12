@@ -9,12 +9,10 @@ import Test.QuickCheck (Gen, suchThat)
 
 import Tasks.SuperfluousBrackets.Config (SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay)
-import Tasks.SynTree.Config (SynTreeConfig(binOpFrequencies))
+import Tasks.SynTree.Config (getArrows)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
 import Trees.Print (simplestDisplay)
-import Trees.Types (BinOp(..))
-import qualified Data.Map as Map (keys)
 
 
 
@@ -28,7 +26,7 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {..} = do
       { tree
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
-      , showArrowOperators = any (`elem` Map.keys (binOpFrequencies syntaxTreeConfig)) [Impl, BackImpl, Equi]
+      , arrowOperatorsToShow = getArrows syntaxTreeConfig
       , showSolution = printSolution
       , addText = extraText
       , unicodeAllowed = offerUnicodeInput
