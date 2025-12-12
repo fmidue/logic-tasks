@@ -4,7 +4,7 @@ import Test.Hspec (Spec, describe, it)
 import Control.OutputCapable.Blocks (LangM)
 import TestHelpers (doesNotRefuse)
 import Test.QuickCheck (forAll)
-import Config (StepInst(solution), dStepConf, StepAnswer (StepAnswer))
+import LogicTasks.Config (StepInst(solution), dStepConf, StepAnswer (StepAnswer))
 import LogicTasks.Semantics.Step (verifyQuiz, genStepInst, description, verifyStatic, partialGrade', completeGrade')
 
 

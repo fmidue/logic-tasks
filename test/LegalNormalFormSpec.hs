@@ -12,7 +12,7 @@ import ParsingHelpers (fully)
 import Formula.Types (Cnf, genCnf, genDnf, Dnf)
 import Formula.Parsing (parser)
 import Text.ParserCombinators.Parsec (ParseError, parse)
-import Config (NormalFormConfig(..), BaseConfig(..))
+import LogicTasks.Config (NormalFormConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
 import Tasks.LegalNormalForm.Config (
