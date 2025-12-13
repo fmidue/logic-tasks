@@ -26,7 +26,7 @@ import System.IO.Temp (withSystemTempDirectory)
 validBoundsDecomposeFormulaConfig :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormulaConfig = do
   syntaxTreeConfig <- validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
-    minUniqueBinOperators >= 1 && minUniqueBinOperators < 4 && minNodes > 6
+    minUniqueBinOperators >= 1 && minUniqueBinOperators < 4 && minNodes > 6 && minAmountOfUniqueAtoms >= 2
   return DecomposeFormulaConfig {
     syntaxTreeConfig = syntaxTreeConfig {
       binOpFrequencies = Map.fromList

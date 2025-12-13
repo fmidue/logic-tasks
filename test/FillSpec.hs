@@ -18,7 +18,7 @@ import Config (
  )
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
 import Data.Maybe (fromMaybe)
-import SynTreeSpec (validBoundsSynTreeConfig)
+import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
@@ -58,9 +58,9 @@ validBoundsFillConfig = do
   formulaConfig <- case formulaType of
     "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
-    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
+    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
             maxNodes < 30 &&
-            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+            minAmountOfUniqueAtoms >= 2
 
   percentageOfGaps <- chooseInt (1, 100)
   percentTrueEntriesLow' <- chooseInt (0, 90)

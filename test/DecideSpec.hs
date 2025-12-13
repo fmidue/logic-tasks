@@ -9,7 +9,7 @@ import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
-import SynTreeSpec (validBoundsSynTreeConfig)
+import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio)
@@ -25,9 +25,9 @@ validBoundsDecideConfig = do
   formulaConfig <- case formulaType of
     "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
-    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
+    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
             maxNodes < 30 &&
-            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+            minAmountOfUniqueAtoms >= 2
 
   percentageOfChanged <- chooseInt (1, 100)
   percentTrueEntriesLow' <- chooseInt (1, 90)

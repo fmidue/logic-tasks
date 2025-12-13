@@ -3,13 +3,13 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
 
-module SynTreeSpec (spec, validBoundsSynTreeConfig) where
+module SynTreeSpec (spec, validBoundsSynTreeConfig, validBoundsSynTreeConfig') where
 
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, chooseInteger, elements, forAll, suchThat, sublistOf)
+import Test.QuickCheck (Gen, chooseInteger, elements, forAll, suchThat)
 import Data.List.Extra (nubOrd, isInfixOf)
 
-import TestHelpers (deleteSpaces, doesNotRefuse)
+import TestHelpers (deleteSpaces, doesNotRefuse, genSublistOf)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (
@@ -52,11 +52,16 @@ opFrequenciesNoArrows = Map.fromList
   ]
 
 validBoundsSynTreeConfig :: Gen SynTreeConfig
-validBoundsSynTreeConfig = do
+validBoundsSynTreeConfig = validBoundsSynTreeConfig' True
+
+validBoundsSynTreeConfig' :: Bool -> Gen SynTreeConfig
+validBoundsSynTreeConfig' chooseMinAmountOfUniqueAtoms = do
   binOpFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
   maxConsecutiveNegations <- chooseInteger (0, 3)
-  availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minAmountOfUniqueAtoms <- chooseInteger (1, fromIntegral $ length availableAtoms)
+  availableAtoms <- genSublistOf (2, 26) ['A' .. 'Z']
+  minAmountOfUniqueAtoms <- if chooseMinAmountOfUniqueAtoms
+    then chooseInteger (1, fromIntegral $ length availableAtoms)
+    else pure (fromIntegral $ length availableAtoms)
   minNodes <- chooseInteger (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
