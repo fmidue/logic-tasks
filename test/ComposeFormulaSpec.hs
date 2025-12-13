@@ -25,7 +25,7 @@ import System.IO.Temp (withSystemTempDirectory)
 validBoundsComposeFormulaConfig :: Gen ComposeFormulaConfig
 validBoundsComposeFormulaConfig = do
   syntaxTreeConfig <- validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
-    minUniqueBinOperators >= 1 && minNodes > 6
+    minUniqueBinOperators >= 1 && minNodes > 6 && minAmountOfUniqueAtoms >= 2
   displayModeL <- elements [minBound..maxBound :: TreeDisplayMode]
   displayModeR <- elements [minBound..maxBound :: TreeDisplayMode]
   return ComposeFormulaConfig {

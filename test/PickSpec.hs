@@ -7,7 +7,7 @@ import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Num
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, chooseInt, forAll, suchThat, elements)
-import SynTreeSpec (validBoundsSynTreeConfig)
+import SynTreeSpec (validBoundsSynTreeConfig')
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Formula.Util (isSemanticEqual)
 import Data.List.Extra (nubOrd, nubSort, nubBy)
@@ -25,15 +25,14 @@ validBoundsPickConfig = do
   formulaConfig <- case formulaType of
     "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
-    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
+    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
             amountOfOptions <= 4*2^ length availableAtoms &&
             minAmountOfUniqueAtoms >= 2 &&
-            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms) &&
             maxNodes <= 40
 
   percentTrueEntries' <- (do
     percentTrueEntriesLow' <- chooseInt (1, 90)
-    percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
+    percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow' + 1, 99)
     return (percentTrueEntriesLow', percentTrueEntriesHigh')
     ) `suchThat` \(a,b) -> b - a >= 30
 

@@ -37,7 +37,7 @@ import Util (
   )
 import LogicTasks.Helpers (extra)
 import Trees.Generate (genSynTree)
-import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
+import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
 import qualified Data.Map as Map (fromAscList)
 import GHC.Real ((%))
 import Control.Applicative (Alternative)
@@ -135,6 +135,10 @@ verifyQuiz FillConfig{..}
         refuse $ indent $ translate$ do
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
           english "The percentage of gaps has to be set between 1 and 100."
+
+    | not $ hasMinAmountOfAtoms 2 formulaConfig = refuse $ indent $ translate $ do
+        english "There should be more than one atomic formula for this task type."
+        german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
 
     | not $ usesAllAtoms formulaConfig =
         refuse $ indent $ translate $ do

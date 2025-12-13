@@ -4,7 +4,7 @@ module FillSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat, sublistOf)
+import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (
   dFillConf,
@@ -18,19 +18,19 @@ import Config (
  )
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
 import Data.Maybe (fromMaybe)
-import SynTreeSpec (validBoundsSynTreeConfig)
+import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
-import TestHelpers (doesNotRefuse)
+import TestHelpers (doesNotRefuse, genSublistOf)
 -- jscpd:ignore-end
 
 validBoundsBaseConfig :: Gen BaseConfig
 validBoundsBaseConfig = do
   minClauseLength <- chooseInt (1, 5)
-  maxClauseLength <- chooseInt (2, 10) `suchThat` \x -> minClauseLength <= x
-  usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
+  maxClauseLength <- chooseInt (max 2 minClauseLength, 10)
+  usedAtoms <- genSublistOf (maxClauseLength, 26) ['A' .. 'Z']
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength
@@ -58,13 +58,13 @@ validBoundsFillConfig = do
   formulaConfig <- case formulaType of
     "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
-    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
+    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
             maxNodes < 30 &&
-            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+            minAmountOfUniqueAtoms >= 2
 
   percentageOfGaps <- chooseInt (1, 100)
   percentTrueEntriesLow' <- chooseInt (0, 90)
-  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')
+  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow' + 1, 100)
   percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
 
   pure $ FillConfig {
