@@ -77,7 +77,7 @@ description SuperfluousBracketsInst{..} = do
 
         instruct $ do
           english "Due to the associativity of ∧ and of ∨, brackets that merely determine the order of evaluation for multiple neighboring occurrences of one of these logical operators can be omitted. Example:"
-          german "Aufgrund der Assoziativität von ∧ und von ∨ können Klammern, die lediglich die Auswertungsreihenfolge mehrerer benachbarter Vorkommen eines dieser logischen Operatoten festlegen, weggelassen werden. Beispiel:"
+          german "Aufgrund der Assoziativität von ∧ und von ∨ können Klammern, die lediglich die Auswertungsreihenfolge mehrerer benachbarter Vorkommen eines dieser logischen Operatoren festlegen, weggelassen werden. Beispiel:"
 
         focus "A ∧ B ∧ (C ∨ D ∨ E)"
 
