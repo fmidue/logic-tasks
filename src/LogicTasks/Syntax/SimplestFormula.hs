@@ -82,8 +82,8 @@ description SuperfluousBracketsInst{..} = do
         focus "A ∧ B ∧ (C ∨ D ∨ E)"
 
         instruct $ do
-          english "Since negation is a unary operator and its scope is clearly determined by the formula immediately following it, no additional brackets are required, either for multiple consecutive negations or when applying negation to an atomic formula. Example:"
-          german "Da die Negation ein unärer Operator ist und ihr Wirkungsbereich eindeutig durch die unmittelbar folgende Formel bestimmt wird, sind weder bei mehreren direkt aufeinanderfolgenden Negationen noch bei der Anwendung einer Negation auf eine atomare Formel zusätzliche Klammern erforderlich. Beispiel:"
+          english "Since negation is a unary operator and its scope is clearly determined by the subformula immediately following it, no additional brackets are required, either for multiple consecutive negations or when applying negation to an atomic formula. Example:"
+          german "Da die Negation ein unärer Operator ist und ihr Wirkungsbereich eindeutig durch die unmittelbar folgende Teilformel bestimmt wird, sind weder bei mehreren direkt aufeinanderfolgenden Negationen noch bei der Anwendung einer Negation auf eine atomare Formel zusätzliche Klammern erforderlich. Beispiel:"
 
         focus "¬¬(¬A ∧ ¬¬B)"
 
