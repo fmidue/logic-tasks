@@ -60,7 +60,7 @@ validBoundsSynTreeConfig' chooseMinAmountOfUniqueAtoms = do
   maxConsecutiveNegations <- chooseInteger (0, 3)
   availableAtoms <- genSublistOf (2, 26) ['A' .. 'Z']
   minAmountOfUniqueAtoms <- if chooseMinAmountOfUniqueAtoms
-    then chooseInteger (1, fromIntegral $ length availableAtoms)
+    then chooseInteger (2, fromIntegral $ length availableAtoms)
     else pure (fromIntegral $ length availableAtoms)
   minNodes <- chooseInteger (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)

@@ -28,8 +28,7 @@ import System.IO.Temp (withSystemTempDirectory)
 validBoundsSubTreeConfig :: Gen SubTreeConfig
 validBoundsSubTreeConfig = do
     allowSameSubTree <- elements [True,False]
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTreeConfig `suchThat`
-      (\synTreeConfig -> minAmountOfUniqueAtoms synTreeConfig > 1 && 4<= minNodes synTreeConfig)
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTreeConfig `suchThat` ((4<=) . minNodes)
     subTreeAmount <- chooseInteger (2, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {

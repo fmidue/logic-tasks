@@ -6,14 +6,14 @@ import Test.Hspec (Spec, describe, it)
 import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
-import Test.QuickCheck (Gen, chooseInt, forAll, suchThat, elements)
+import Test.QuickCheck (Gen, chooseInt, forAll, suchThat)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Formula.Util (isSemanticEqual)
 import Data.List.Extra (nubOrd, nubSort, nubBy)
 import Util (withRatio)
 import Formula.Types(atomics)
-import FillSpec (validBoundsNormalFormConfig)
+import FillSpec (validBoundsNormalFormConfig, validBoundsPercentTrueEntries)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse)
 
@@ -27,7 +27,6 @@ validBoundsPickConfig = do
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
     _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
             amountOfOptions <= 4*2^ length availableAtoms &&
-            minAmountOfUniqueAtoms >= 2 &&
             maxNodes <= 40
 
   percentTrueEntries' <- (do
@@ -36,7 +35,9 @@ validBoundsPickConfig = do
     return (percentTrueEntriesLow', percentTrueEntriesHigh')
     ) `suchThat` \(a,b) -> b - a >= 30
 
-  percentTrueEntries <- elements [Just percentTrueEntries', Nothing]
+  percentTrueEntries''@(l,h) <- validBoundsPercentTrueEntries formulaConfig
+
+  let percentTrueEntries = if h - l < 30 then Just percentTrueEntries' else Just percentTrueEntries''
 
   pure $ PickConfig {
       formulaConfig

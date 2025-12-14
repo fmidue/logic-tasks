@@ -29,6 +29,7 @@ import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, with
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
+import LogicTasks.Config (FormulaConfig(..))
 
 
 
@@ -95,7 +96,7 @@ verifyStatic MaxInst{..}
 
 verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..} = do
-  checkTruthValueRange (low,high)
+  checkTruthValueRange (low,high) (FormulaDnf normalFormConf)
   checkNormalFormConfig normalFormConf
   pure ()
   where

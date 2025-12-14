@@ -4,7 +4,7 @@ module FillSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat)
+import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (
   dFillConf,
@@ -51,6 +51,27 @@ validBoundsNormalFormConfig = do
   , maxClauseAmount
   }
 
+validBoundsPercentTrueEntries :: FormulaConfig -> Gen (Int, Int)
+validBoundsPercentTrueEntries formulaConfig = do
+  case formulaConfig of
+    FormulaDnf normalFormConfig -> do
+      let entries = (2 ^ length (usedAtoms (baseConf normalFormConfig))) :: Int
+      validRange entries
+    FormulaCnf normalFormConfig -> do
+      let entries = (2 ^ length (usedAtoms (baseConf normalFormConfig))) :: Int
+      validRange entries
+    FormulaArbitrary synTreeConf -> do
+      let entries = (2 ^ length (availableAtoms synTreeConf)) :: Int
+      validRange entries
+  where
+    validRange entries = do
+      trueEntriesLow <- chooseInt (1,entries - 1)
+      trueEntriesHigh <- chooseInt (trueEntriesLow + 1, entries)
+      pure (
+        floor (fromIntegral (trueEntriesLow * 100) / fromIntegral entries),
+        ceiling (fromIntegral (trueEntriesHigh * 100) / fromIntegral entries)
+        )
+
 validBoundsFillConfig :: Gen FillConfig
 validBoundsFillConfig = do
   -- formulaType <- elements ["Cnf", "Dnf", "Arbitrary"]
@@ -59,13 +80,11 @@ validBoundsFillConfig = do
     "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
     _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
-            maxNodes < 30 &&
-            minAmountOfUniqueAtoms >= 2
+            maxNodes < 30
 
   percentageOfGaps <- chooseInt (1, 100)
-  percentTrueEntriesLow' <- chooseInt (0, 90)
-  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow' + 1, 100)
-  percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
+  percentTrueEntries' <- validBoundsPercentTrueEntries formulaConfig
+  let percentTrueEntries = Just percentTrueEntries'
 
   pure $ FillConfig {
       formulaConfig

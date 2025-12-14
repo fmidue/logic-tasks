@@ -21,7 +21,7 @@ import Test.QuickCheck(Gen, elements, suchThat)
 import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Types (Formula, getTable, lengthBound)
 import Formula.Table (readEntries)
-import Tasks.SynTree.Config (SynTreeConfig, checkSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (availableAtoms), checkSynTreeConfig)
 import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
 import Trees.Helpers (synTreeDependsOnAllAtomics)
 
@@ -81,8 +81,8 @@ withRatio (lower,upper) form =
 
 
 
-checkTruthValueRange :: OutputCapable m => (Int, Int) -> LangM m
-checkTruthValueRange (low,high)
+checkTruthValueRange :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
+checkTruthValueRange (low,high) formulaConfig
     | isOutside 0 100 low || isOutside 0 100 high =
         refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
@@ -98,7 +98,27 @@ checkTruthValueRange (low,high)
           german "Die Beschränkung der Wahr-Einträge sollte ein gewissen Spielraum zulassen."
           english "The given restriction on true entries should allow for some flexibility."
 
+    | checkRangeToSmall =
+        refuse $ indent $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge sollte mindestens eine Ausprägung ermöglichen."
+          english "The restriction of true entries should allow for at least one value."
+
     | otherwise = pure ()
+    where
+      checkRangeToSmall = case formulaConfig of
+        FormulaCnf normalFormConfig -> let
+          atomsAmount = length (usedAtoms (baseConf normalFormConfig))
+          in
+            checkRangeToSmall' atomsAmount
+        FormulaDnf normalFormConfig -> let
+          atomsAmount = length (usedAtoms (baseConf normalFormConfig))
+          in
+            checkRangeToSmall' atomsAmount
+        FormulaArbitrary synTreeConf -> let
+          atomsAmount = length (availableAtoms synTreeConf)
+          in
+            checkRangeToSmall' atomsAmount
+      checkRangeToSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
 
 
 
@@ -171,13 +191,13 @@ checkNormalFormConfig NormalFormConfig {..}
 
 checkTruthValueRangeAndSynTreeConf :: OutputCapable m => (Int,Int) -> SynTreeConfig -> LangM m
 checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
-  checkTruthValueRange range
+  checkTruthValueRange range (FormulaArbitrary synTreeConfig)
   checkSynTreeConfig synTreeConfig
   pure ()
 
 checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
 checkTruthValueRangeAndFormulaConf range formulaConf = do
-  checkTruthValueRange range
+  checkTruthValueRange range formulaConf
   case formulaConf of
     (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
     (FormulaDnf dnfCfg) -> checkNormalFormConfig dnfCfg
