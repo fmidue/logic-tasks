@@ -43,7 +43,7 @@ containsNoTautologies = all ((\theList -> length theList == length (Data.Set.fro
 validBoundsResolutionConfig :: Gen ResolutionConfig
 validBoundsResolutionConfig = do
   baseConf <- validBoundsBaseConfig
-  minSteps <- chooseInt (1, min (if maxClauseLength baseConf > 1 then 10 else 1) (2 * length (usedAtoms baseConf)))
+  minSteps <- chooseInt (1, min (if maxClauseLength baseConf > 1 then 10 else 1) (2 * length (usedAtoms baseConf) - 1))
   pure $ ResolutionConfig {
     baseConf
   , minSteps

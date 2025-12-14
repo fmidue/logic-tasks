@@ -282,7 +282,7 @@ verifyQuiz ResolutionConfig{..}
           german "Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
           english "More than one step using only length 1 clauses is not possible."
 
-    | minSteps > 2 * length (usedAtoms baseConf) =
+    | minSteps >= 2 * length (usedAtoms baseConf) =
         refuse $ indent $ translate $ do
           german "Diese minimale Anzahl Schritte kann mit den gegebenen atomaren Formeln nicht durchgeführt werden."
           english "This amount of steps is impossible with the given amount of atomic formulas."
