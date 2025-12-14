@@ -76,16 +76,16 @@ description SuperfluousBracketsInst{..} = do
         when showArrowOperators arrowsKey
 
         instruct $ do
-          english "Due to associativity, parentheses that merely determine the order of evaluation for operations of the same kind can be omitted. Example:"
-          german "Aufgrund der Assoziativität können Klammern, die nur die Auswertungsreihenfolge gleichartiger Verknüpfungen festlegen, weggelassen werden. Beispiel:"
+          english "Due to associativity of ∧ and ∨, brackets that merely determine the order of evaluation for operations of the same kind can be omitted. Example:"
+          german "Aufgrund der Assoziativität von ∧ and ∨ können Klammern, die nur die Auswertungsreihenfolge gleichartiger Verknüpfungen festlegen, weggelassen werden. Beispiel:"
 
         focus "A ∧ B ∧ (C ∨ D ∨ E)"
 
         instruct $ do
-          english "Because negation is a unary operator and its direct repeated application is unambiguous, no additional parentheses are required when multiple negations occur in sequence. Example:"
-          german "Da die Negation ein unärer Operator ist und seine direkte Hintereinanderausführung eindeutig, werden beim Aufeinanderfolgen dieser, keine zusätzlichen Klammern benötigt. Beispiel:"
+          english "Since negation is a unary operator and its scope is clearly determined by the formula immediately following it, no additional brackets are required, either for multiple consecutive negations or when applying negation to an atomic formula. Example:"
+          german "Da die Negation ein unärer Operator ist und ihr Wirkungsbereich eindeutig durch die unmittelbar folgende Formel bestimmt wird, sind weder bei mehreren direkt aufeinanderfolgenden Negationen noch bei der Anwendung einer Negation auf eine atomare Formel zusätzliche Klammern erforderlich. Beispiel:"
 
-        focus "¬¬(A ∧ ¬¬B)"
+        focus "¬¬(¬A ∧ ¬¬B)"
 
         pure ()
       )
