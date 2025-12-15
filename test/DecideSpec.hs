@@ -6,7 +6,7 @@ module DecideSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat, elements)
 import Control.OutputCapable.Blocks (LangM, Rated)
-import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
+import LogicTasks.Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig)
