@@ -14,6 +14,7 @@ import Data.Maybe (fromJust)
 import Trees.Print (transferToPicture)
 import Trees.Types (BinOp(Equi, Or, And))
 import Data.List.Extra (nubOrd)
+import Tasks.SynTree.Config (getArrows)
 
 
 
@@ -31,6 +32,7 @@ generateComposeFormulaInst ComposeFormulaConfig {..} = do
       , leftTreeImage = if fst treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture leftTree
       , rightTreeImage = if snd treeDisplayModes == FormulaDisplay then Nothing else Just $ transferToPicture rightTree
       , addText = extraText
+      , arrowOperatorsToShow = getArrows syntaxTreeConfig
       , showSolution = printSolution
       , unicodeAllowed = offerUnicodeInput
       }

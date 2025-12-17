@@ -20,7 +20,7 @@ import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..))
 
 import LogicTasks.Helpers (
-  arrowsKey,
+  arrowsKey',
   basicOpKey,
   example,
   extra,
@@ -28,7 +28,7 @@ import LogicTasks.Helpers (
   keyHeading,
   reject,
   )
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
+import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig, checkArrowOperatorsToShow)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
@@ -40,6 +40,7 @@ import Trees.Parsing()
 import Formula.Types (Formula(atomics))
 import Data.List ((\\), intercalate)
 import Data.List.Extra (notNull)
+
 
 
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -60,7 +61,7 @@ description path TreeToFormulaInst{..} = do
 
     keyHeading
     basicOpKey unicodeAllowed
-    when showArrowOperators arrowsKey
+    arrowsKey' arrowOperatorsToShow
 
     extra addText
     pure ()
@@ -68,7 +69,11 @@ description path TreeToFormulaInst{..} = do
 
 
 verifyInst :: OutputCapable m => TreeToFormulaInst -> LangM m
-verifyInst _ = pure ()
+verifyInst TreeToFormulaInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 
