@@ -27,7 +27,8 @@ validBoundsPickConfig = do
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
     _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
             amountOfOptions <= 4*2^ length availableAtoms &&
-            maxNodes <= 40
+            maxNodes <= 40 &&
+            minAmountOfUniqueAtoms >= 3
 
   percentTrueEntries' <- (do
     percentTrueEntriesLow' <- chooseInt (1, 90)

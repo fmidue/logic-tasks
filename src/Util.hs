@@ -98,27 +98,27 @@ checkTruthValueRange (low,high) formulaConfig
           german "Die Beschränkung der Wahr-Einträge sollte ein gewissen Spielraum zulassen."
           english "The given restriction on true entries should allow for some flexibility."
 
-    | checkRangeToSmall =
+    | checkRangeTooSmall =
         refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge sollte mindestens eine Ausprägung ermöglichen."
           english "The restriction of true entries should allow for at least one value."
 
     | otherwise = pure ()
     where
-      checkRangeToSmall = case formulaConfig of
+      checkRangeTooSmall = case formulaConfig of
         FormulaCnf normalFormConfig -> let
           atomsAmount = length (usedAtoms (baseConf normalFormConfig))
           in
-            checkRangeToSmall' atomsAmount
+            checkRangeTooSmall' atomsAmount
         FormulaDnf normalFormConfig -> let
           atomsAmount = length (usedAtoms (baseConf normalFormConfig))
           in
-            checkRangeToSmall' atomsAmount
+            checkRangeTooSmall' atomsAmount
         FormulaArbitrary synTreeConf -> let
           atomsAmount = length (availableAtoms synTreeConf)
           in
-            checkRangeToSmall' atomsAmount
-      checkRangeToSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
+            checkRangeTooSmall' atomsAmount
+      checkRangeTooSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
 
 
 

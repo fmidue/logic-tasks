@@ -57,7 +57,7 @@ validBoundsSynTreeConfig = validBoundsSynTreeConfig' True
 validBoundsSynTreeConfig' :: Bool -> Gen SynTreeConfig
 validBoundsSynTreeConfig' chooseMinAmountOfUniqueAtoms = do
   binOpFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
-  maxConsecutiveNegations <- chooseInteger (0, 3)
+  maxConsecutiveNegations <- chooseInteger (if binOpFrequencies == opFrequenciesNoArrows then 1 else 0, 3)
   availableAtoms <- genSublistOf (2, 26) ['A' .. 'Z']
   minAmountOfUniqueAtoms <- if chooseMinAmountOfUniqueAtoms
     then chooseInteger (2, fromIntegral $ length availableAtoms)
