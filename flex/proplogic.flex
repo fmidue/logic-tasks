@@ -238,6 +238,7 @@ checkers :: SynTree BinOp Char -> String
 checkers fSol = [i|
 
 {-\# language ApplicativeDo \#-}
+{-\# language TupleSections \#-}
 
 module Check (checkSemantics, checkSyntax) where
 
@@ -264,7 +265,6 @@ import Trees.Types (
   SynTree(..),
   BinOp(..),
   )
-import Trees.Print                      (simplestDisplay)
 
 import qualified SAT.MiniSat            as Sat
 
@@ -301,17 +301,6 @@ startingTable = #{startingTable} --ignore-length
 
 checkSyntax :: OutputCapable m => a -> b -> Submission -> LangM m
 checkSyntax _ _ (Table xs,f,n) = do
-    paragraph $ do
-      text "Es wurden Formeln wie folgt gelesen:"
-      when (any (/=Nothing) mColumns) $ indent $ do
-        text "Tabellenspalten"
-        code $ unlines $ map simplestDisplay entered
-        pure ()
-      indent $ do
-        text "Antwortformel"
-        code $ simplestDisplay f
-        pure ()
-      pure ()
     when (atomicColumns == map reverse startingTable) $ refuse $ indent $ text $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
@@ -358,12 +347,12 @@ checkSemantics _ (_,_,nSol) (Table xs,f,n) = do
     yesNo correctNames $ text "Die Auflistung der Begleitenden ist korrekt?"
     let correct = filter id [correctStart, correctFormula, correctNames, correctValues]
     let points = fromIntegral (length correct) % 4
-    res <- printSolutionAndAssertMinimum (MinimumThreshold (1 % 4)) IndefiniteArticle maybeAnswer points
+    res <- printSolutionAndAssertWithMinimum (MinimumThreshold (1 % 4)) False maybeAnswer points
     pure res
   where
     (headers,columns) = unzip xs
     maybeAnswer =
-      flip (++) (show nSol) <$>
+      (IndefiniteArticle,) . flip (++) (show nSol) <$>
         #{if showSolution
             then Just ("Formel: " ++ simplestDisplay fSol ++ "\nKorrekte Einträge in Wahrheitstafel.\nBegleitende: ")
             else Nothing

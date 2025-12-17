@@ -162,7 +162,6 @@ partialGrade PickInst{formulas} (Number (Just index)) = singleChoiceSyntax True 
 
 completeGrade :: OutputCapable m => PickInst -> Number -> LangM m
 completeGrade PickInst{..} (Number index) = singleChoice
-  DefiniteArticle
   what
   displaySolution
   correct
@@ -171,5 +170,5 @@ completeGrade PickInst{..} (Number index) = singleChoice
       what = translations $ do
         german "Index"
         english "index"
-      displaySolution | showSolution = Just $ show correct
+      displaySolution | showSolution = Just (DefiniteArticle, show correct)
                       | otherwise = Nothing

@@ -22,7 +22,6 @@ import Control.OutputCapable.Blocks (
   MinimumThreshold (MinimumThreshold),
   Punishment (Punishment),
   TargetedCorrect (TargetedCorrect),
-  ArticleToUse (IndefiniteArticle),
   reRefuse,
   )
 import Data.List (intercalate, nub, sort)
@@ -173,8 +172,7 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
     (MinimumThreshold (1 % inputTreeAmount))
     (Punishment 0)
     (TargetedCorrect (fromIntegral inputTreeAmount))
-    IndefiniteArticle
-    what
+    (Just what)
     Nothing
     solution
     submission)

@@ -34,7 +34,7 @@ import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable)
 import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Helpers (extra, reject)
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
 import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
@@ -81,15 +81,15 @@ description withDropdowns DecideInst{..} = do
     translate $ do
       english "Decide for each row of the truth table whether the truth value in the last column is correct or incorrect."
       german "Entscheiden Sie für jede Tabellenzeile, ob der Wahrheitswert in der letzten Spalte der Wahrheitstafel korrekt oder fehlerhaft ist."
-    indent $ code $ show (flipAt (getTable formula) changed)
+    unless withDropdowns $ indent $ code $ show (flipAt (getTable formula) changed)
     pure ()
   if withDropdowns
     then do
       paragraph $ do
         translate $ do
-          english "For this, consider the repeated truth table below. "
+          english "For this, consider the truth table below. "
           english "Next to each row a selection menu with these three options is given:"
-          german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
+          german "Betrachten Sie dazu die folgende Darstellung der Wahrheitstafel. "
           german "Neben jeder Zeile befindet sich ein Auswahlmenü mit diesen drei Optionen:"
         translatedCode $ flip localise $ translations $ do
           english $ intercalate ", " $ map (showChoice English) [Correct,Wrong,NoAnswer]
@@ -213,11 +213,7 @@ completeGrade DecideInst{..} sol = reRefuse
         pure ()
 
       paragraph $ translate $ do
-        english "All of the above table rows given in the above list contain a wrong entry. "
-        english "Every other row of the table contains a correct entry. "
         english "Please compare with the correct table for the given formula:"
-        german "Die obige Liste enthält alle Zeilen der obigen Tafel, welche einen falschen Eintrag enthalten. "
-        german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag. "
         german "Vergleichen Sie mit der richtigen Tafel für die gegebene Formel:"
       code $ show table
       pure ()
@@ -233,7 +229,7 @@ completeGrade DecideInst{..} sol = reRefuse
         Correct -> i `elem` restOf
         _   -> i `elem` changed
 
-      what = translations $ do
+      what = Just $ translations $ do
         german "Antworten"
         english "answers"
 
@@ -242,14 +238,15 @@ withExtendedMultipleChoice
   :: (Ord a, OutputCapable m)
   => Integer
   -> Int
-  -> Map Language String
+  -> Maybe (Map Language String)
   -> Maybe String
   -> Map a Bool
   -> Map a Bool
   -> Rated m
-withExtendedMultipleChoice options changed =
+withExtendedMultipleChoice options changed what =
   extendedMultipleChoice
     (MinimumThreshold (1 % 2))
     (Punishment (1 % options))
     (TargetedCorrect changed)
-    DefiniteArticle
+    what
+  . fmap (DefiniteArticle,)

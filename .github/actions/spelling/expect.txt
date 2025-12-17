@@ -1,3 +1,4 @@
 Equi
 ABCD
 ABCDE
+wildcards

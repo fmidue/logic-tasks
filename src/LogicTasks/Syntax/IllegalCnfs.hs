@@ -94,7 +94,6 @@ partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length for
 completeGrade :: (OutputCapable m, Alternative m, Monad m) => LegalNormalFormInst -> [Int] -> Rated m
 completeGrade LegalNormalFormInst{..} sol = reRefuse
   (multipleChoice
-    DefiniteArticle
     what
     simpleSolutionDisplay
     (Map.fromAscList solution)
@@ -152,5 +151,6 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
     solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulaInfos
     hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
     simpleSolutionDisplay
-      | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]
+      | isJust showSolution && not detailedSolution
+      = Just (DefiniteArticle, show [ i | (i,True) <- solution])
       | otherwise = Nothing
