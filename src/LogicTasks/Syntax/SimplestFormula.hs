@@ -77,20 +77,16 @@ description SuperfluousBracketsInst{..} = do
         when showArrowOperators arrowsKey
 
         instruct $ do
-          english "Due to the associativity of ∧ and ∨, it is not necessary to use brackets in subformulas consisting of three or more atomic formulas connected by the same logical operator, for example in:"
-          german "Aufgrund der Assoziativität von ∧ und ∨ muss in Teilformeln, die aus drei oder mehr atomaren Formeln verknüpft mit dem gleichen logischen Operator bestehen, nicht geklammert werden, z.B. bei:"
+          english "Due to the associativity of ∧ and of ∨, brackets that merely determine the order of evaluation for multiple neighboring occurrences of one of these logical operators can be omitted. Example:"
+          german "Aufgrund der Assoziativität von ∧ und von ∨ können Klammern, die lediglich die Auswertungsreihenfolge mehrerer benachbarter Vorkommen eines dieser logischen Operatoren festlegen, weggelassen werden. Beispiel:"
 
-        focus "A ∧ B ∧ C"
-
-        instruct $ do
-          english "Similarly, brackets are not necessary for one or more consecutive negations directly in front of an atomic formula, for example in:"
-          german "Genauso sind Klammern bei einer oder mehreren Negationen direkt vor einer atomaren Formel nicht nötig, z.B. bei"
-
-        focus "¬¬A"
+        focus "A ∧ B ∧ (C ∨ D ∨ E)"
 
         instruct $ do
-          english "Remove all unnecessary pairs of brackets in the given formula (regarding associativity not just concerning atomic formulas)."
-          german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel (hinsichtlich Assoziativität nicht nur atomare Formeln betreffend)."
+          english "Since the negation is a unary operator and its scope is clearly determined by the subformula immediately following it, additional brackets are neither required for multiple directly consecutive negations nor when applying negation to an atomic formula. Example:"
+          german "Da die Negation ein unärer Operator ist und ihr Wirkungsbereich klar durch die unmittelbar folgende Teilformel bestimmt wird, sind weder bei mehreren direkt aufeinanderfolgenden Negationen noch bei der Anwendung von Negation auf eine atomare Formel zusätzliche Klammern erforderlich. Beispiel:"
+
+        focus "¬¬(¬A ∧ ¬¬B)"
 
         pure ()
       )

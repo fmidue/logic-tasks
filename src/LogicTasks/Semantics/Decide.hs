@@ -34,7 +34,7 @@ import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable)
 import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Helpers (extra, reject)
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
 import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
@@ -81,15 +81,15 @@ description withDropdowns DecideInst{..} = do
     translate $ do
       english "Decide for each row of the truth table whether the truth value in the last column is correct or incorrect."
       german "Entscheiden Sie für jede Tabellenzeile, ob der Wahrheitswert in der letzten Spalte der Wahrheitstafel korrekt oder fehlerhaft ist."
-    indent $ code $ show (flipAt (getTable formula) changed)
+    unless withDropdowns $ indent $ code $ show (flipAt (getTable formula) changed)
     pure ()
   if withDropdowns
     then do
       paragraph $ do
         translate $ do
-          english "For this, consider the repeated truth table below. "
+          english "For this, consider the truth table below. "
           english "Next to each row a selection menu with these three options is given:"
-          german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
+          german "Betrachten Sie dazu die folgende Darstellung der Wahrheitstafel. "
           german "Neben jeder Zeile befindet sich ein Auswahlmenü mit diesen drei Optionen:"
         translatedCode $ flip localise $ translations $ do
           english $ intercalate ", " $ map (showChoice English) [Correct,Wrong,NoAnswer]
