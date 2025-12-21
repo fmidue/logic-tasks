@@ -11,7 +11,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   english,
   german,
-  translate, localise, translations,
+  translate, localise, translations, yesNo,
   )
 import Data.Maybe (fromJust, isNothing)
 import Data.List (delete)
@@ -212,16 +212,15 @@ completeGrade' StepInst{..} sol =
 
           pure ()
 
-        Just solClause -> if solClause == snd mSol
-          then pure()
-          else refuse $ indent $ do
-            translate $ do
-              german "Resolvente ist nicht korrekt."
-              english "Resolvent is not correct."
+        Just solClause -> do
+          yesNo (solClause == snd mSol)
+            (translate $ do
+              german "Resolvente ist korrekt?"
+              english "Resolvent is correct?"
+            )
+          displaySolution
 
-            displaySolution
-
-            pure ()
+          pure ()
   where
     mSol = fromJust $ step sol
     displaySolution = when showSolution $ example solToString $ do
