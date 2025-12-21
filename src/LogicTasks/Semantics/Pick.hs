@@ -110,7 +110,7 @@ verifyStatic PickInst{..}
 verifyQuiz :: OutputCapable m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
 
-    | availableAtomsCheck formulaConfig =
+    | tooFewAtoms formulaConfig =
         refuse $ indent $ translate $ do
           german "Es müssen mindestens drei Atome zur Verfügung stehen."
           english "At least three atoms need to be available."
@@ -152,8 +152,8 @@ verifyQuiz PickConfig{..}
       = amountOfOptions > 4*2^ length (usedAtoms (baseConf cnfCfg))
     doesOvershootOptions (FormulaDnf dnfCfg)
       = amountOfOptions > 4*2^ length (usedAtoms (baseConf dnfCfg))
-    availableAtomsCheck (FormulaArbitrary syntaxTreeConfig) = length (availableAtoms syntaxTreeConfig) < 3
-    availableAtomsCheck _ = False
+    tooFewAtoms (FormulaArbitrary syntaxTreeConfig) = length (availableAtoms syntaxTreeConfig) < 3
+    tooFewAtoms _ = False
 
 
 
