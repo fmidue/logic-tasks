@@ -133,7 +133,7 @@ checkSynTreeConfig SynTreeConfig {..}
     | (negOpFrequency == 0) /= (maxConsecutiveNegations == 0) = reject $ do
         english "The maximum number of consecutive negations does not comply with the frequency of the negation operator."
         german "Maximale Anzahl an aufeinanderfolgenden Negationen passt nicht zur Frequenz des Negationsoperators."
-    | length (Map.filter (/= 0) binOpFrequencies) + (if negOpFrequency == 0 then 0 else 1) < 3 = reject $ do
+    | length (Map.filter (/= 0) binOpFrequencies) + (min negOpFrequency 1) < 3 = reject $ do
         english "Among the binary operators and the negation operator, at least three frequencies must be non-zero."
         german "Unter den binären Operatoren und dem Negationsoperator müssen mindestens drei Häufigkeiten ungleich null sein."
     | otherwise = pure ()
