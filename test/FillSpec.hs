@@ -23,14 +23,14 @@ import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (Trut
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
-import TestHelpers (doesNotRefuse, genSublistOf)
+import TestHelpers (doesNotRefuse, genSubsetOf)
 -- jscpd:ignore-end
 
 validBoundsBaseConfig :: Gen BaseConfig
 validBoundsBaseConfig = do
   minClauseLength <- chooseInt (1, 5)
   maxClauseLength <- chooseInt (max 2 minClauseLength, 10)
-  usedAtoms <- genSublistOf (maxClauseLength, 26) ['A' .. 'Z']
+  usedAtoms <- genSubsetOf (maxClauseLength, 26) ['A' .. 'Z']
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength

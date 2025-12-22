@@ -9,7 +9,7 @@ import Test.Hspec (Spec, describe, it, xit)
 import Test.QuickCheck (Gen, chooseInteger, elements, forAll, suchThat)
 import Data.List.Extra (nubOrd, isInfixOf)
 
-import TestHelpers (deleteSpaces, doesNotRefuse, genSublistOf)
+import TestHelpers (deleteSpaces, doesNotRefuse, genSubsetOf)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (
@@ -58,7 +58,7 @@ validBoundsSynTreeConfig' :: Bool -> Gen SynTreeConfig
 validBoundsSynTreeConfig' chooseMinAmountOfUniqueAtoms = do
   binOpFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
   maxConsecutiveNegations <- chooseInteger (if binOpFrequencies == opFrequenciesNoArrows then 1 else 0, 3)
-  availableAtoms <- genSublistOf (2, 26) ['A' .. 'Z']
+  availableAtoms <- genSubsetOf (2, 26) ['A' .. 'Z']
   minAmountOfUniqueAtoms <- if chooseMinAmountOfUniqueAtoms
     then chooseInteger (2, fromIntegral $ length availableAtoms)
     else pure (fromIntegral $ length availableAtoms)

@@ -4,7 +4,7 @@ module TestHelpers (
   deleteSpaces,
   doesNotRefuse,
   doesNotRefuseIO,
-  genSublistOf
+  genSubsetOf
   ) where
 
 import Data.Char (isSpace)
@@ -31,7 +31,7 @@ doesNotRefuseIO thing = do
   (r, _) <- runLangMReport (pure ()) (>>) thing
   pure $ isJust r
 
-genSublistOf :: (Int, Int) -> [a] -> Gen [a]
-genSublistOf (minLength, maxLength) xs = do
+genSubsetOf :: (Int, Int) -> [a] -> Gen [a]
+genSubsetOf (minLength, maxLength) xs = do
   lengthAtoms <- chooseInt (minLength, min maxLength (length xs))
   take lengthAtoms <$> shuffle xs

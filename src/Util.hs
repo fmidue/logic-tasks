@@ -19,7 +19,7 @@ import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), FormulaInst (..))
-import Formula.Types (Formula, getTable, lengthBound)
+import Formula.Types (Formula (atomics), getTable, lengthBound)
 import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig (availableAtoms), checkSynTreeConfig)
 import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
@@ -68,16 +68,18 @@ remove num xs = do
 
 
 withRatio :: Formula a => (Int,Int) -> a -> Bool
+withRatio (0,100) _ = True
 withRatio (lower,upper) form =
-    length trueEntries <= max upperBound (if upper == 0 then 0 else 1)
-        && length trueEntries >= max (if lower == 0 then 0 else 1) lowerBound
+    lengthTrueEntries <= max upperBound (if upper == 0 then 0 else 1)
+        && lengthTrueEntries >= max (if lower == 0 then 0 else 1) lowerBound
   where
     tableEntries = readEntries (getTable form)
     trueEntries = filter (== Just True) tableEntries
     percentage :: Int -> Int
-    percentage num = length tableEntries *num `div` 100
+    percentage num = 2 ^ length (atomics form) *num `div` 100
     upperBound = percentage upper
     lowerBound = percentage lower
+    lengthTrueEntries = length trueEntries
 
 
 
