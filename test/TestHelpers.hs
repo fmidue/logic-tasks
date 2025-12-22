@@ -33,5 +33,5 @@ doesNotRefuseIO thing = do
 
 genSubsetOf :: (Int, Int) -> [a] -> Gen [a]
 genSubsetOf (minLength, maxLength) xs = do
-  lengthAtoms <- chooseInt (minLength, min maxLength (length xs))
+  lengthAtoms <- chooseInt (minLength, maxLength)
   take lengthAtoms <$> shuffle xs
