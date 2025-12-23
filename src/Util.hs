@@ -68,17 +68,15 @@ remove num xs = do
 
 
 withRatio :: Formula a => (Int,Int) -> a -> Bool
-withRatio (0,100) _ = True
-withRatio (lower,upper) form =
-    lengthTrueEntries <= max upperBound (if upper == 0 then 0 else 1)
-        && lengthTrueEntries >= max (if lower == 0 then 0 else 1) lowerBound
+withRatio (0, 100) _ = True
+withRatio (lower, upper) form =
+    lengthTrueEntries <= max (min 1 upper) (percentage upper)
+        && lengthTrueEntries >= max (min 1 lower) (percentage lower)
   where
     tableEntries = readEntries (getTable form)
     trueEntries = filter (== Just True) tableEntries
     percentage :: Int -> Int
     percentage = let totalEntries = 2 ^ length (atomics form) in \num -> totalEntries * num `div` 100
-    upperBound = percentage upper
-    lowerBound = percentage lower
     lengthTrueEntries = length trueEntries
 
 
