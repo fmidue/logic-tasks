@@ -32,6 +32,7 @@ import Trees.Generate (genSynTree)
 import Control.OutputCapable.Blocks (LangM)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, filter)
+import Test.QuickCheck.Property (within)
 
 opFrequencies :: Map BinOp Int
 opFrequencies = Map.fromList
@@ -95,7 +96,7 @@ spec = do
         doesNotRefuse (checkSynTreeConfig synTreeConfig :: LangM Maybe)
   describe "feedback" $
     it "rejects nonsense" $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (tail (display tree)) /= Right tree
   describe "numOfUniqueBinOpsInSynTree" $ do
         it "should return 0 if there is only a leaf" $
@@ -109,35 +110,35 @@ spec = do
             numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (subtree (subtree (Leaf 'c'))))) == 2
   describe "genSynTree" $ do
     it "should generate a random SyntaxTree that satisfies the required amount of unique binary operators" $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \synTree -> numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (display tree) == Right tree
     xit ("should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, " ++
         "even without spaces") $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (deleteSpaces (display tree)) == Right tree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> treeNodes tree >= minNodes && treeNodes tree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> fromIntegral (length (nubOrd (collectLeaves tree))) >= minAmountOfUniqueAtoms
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
-      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
+      within (30 * 1000000) $ forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
                     `isInfixOf` deleteSpaces (display tree))
     it "should generate a random SyntaxTree with fixed nodes and depth" $
-      forAll (validBoundsSynTreeConfig `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
+      within (30 * 1000000) $ forAll (validBoundsSynTreeConfig `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
         \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
             treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
     it "should respect operator frequencies" $
-       forAll (validBoundsSynTreeConfig `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
+       within (30 * 1000000) $ forAll (validBoundsSynTreeConfig `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
         forAll (genSynTree synTreeConfig) $ \tree ->
           any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
 

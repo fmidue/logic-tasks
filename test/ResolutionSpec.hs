@@ -13,6 +13,7 @@ import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', par
 import Control.OutputCapable.Blocks (LangM)
 import FillSpec (validBoundsBaseConfig)
 import TestHelpers (doesNotRefuse)
+import Test.QuickCheck.Property (within)
 
 justA :: Clause
 justA = Clause (Data.Set.fromList [Positive 'A'])
@@ -86,24 +87,24 @@ spec = do
         doesNotRefuse (verifyQuiz resConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsResolutionConfig $ \resConfig ->
+      within (30 * 1000000) $ forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (description resInst :: LangM Maybe)
   describe "genResInst" $ do
     it "should required at least minSteps amount of steps" $
-      forAll validBoundsResolutionConfig $ \resConfig ->
+      within (30 * 1000000) $ forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           minSteps resConfig <= length (solution resInst)
     it "should contain no clause with a literal that appears both positively and negatively" $
-      forAll validBoundsResolutionConfig $ \resConfig ->
+      within (30 * 1000000) $ forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           containsNoTautologies (clauses resInst)
     it "should pass verifyStatic" $
-      forAll validBoundsResolutionConfig $ \resConfig ->
+      within (30 * 1000000) $ forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (verifyStatic resInst :: LangM Maybe)
     it "should generate the correct solution" $
-      forAll validBoundsResolutionConfig $ \resConfig ->
+      within (30 * 1000000) $ forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (partialGrade' resInst (solution resInst) :: LangM Maybe) &&
           doesNotRefuse (completeGrade' resInst (solution resInst) :: LangM Maybe)

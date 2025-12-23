@@ -6,6 +6,7 @@ import TestHelpers (doesNotRefuse)
 import Test.QuickCheck (forAll)
 import Config (StepInst(solution), dStepConf, StepAnswer (StepAnswer))
 import LogicTasks.Semantics.Step (verifyQuiz, genStepInst, description, verifyStatic, partialGrade', completeGrade')
+import Test.QuickCheck.Property (within)
 
 
 
@@ -16,16 +17,16 @@ spec = do
       doesNotRefuse (verifyQuiz dStepConf :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll (genStepInst dStepConf) $ \inst ->
+      within (30 * 1000000) $ forAll (genStepInst dStepConf) $ \inst ->
         doesNotRefuse (description True inst :: LangM Maybe)
   describe "generateStepInst" $ do
     it "should pass verifyStatic" $
-      forAll (genStepInst dStepConf) $ \inst ->
+      within (30 * 1000000) $ forAll (genStepInst dStepConf) $ \inst ->
         doesNotRefuse
           (verifyStatic inst :: LangM Maybe)
     it "possible solution passes partialGrade" $
-      forAll (genStepInst dStepConf) $ \inst ->
+      within (30 * 1000000) $ forAll (genStepInst dStepConf) $ \inst ->
         doesNotRefuse (partialGrade' inst $ StepAnswer $ Just $ solution inst :: LangM Maybe)
     it "possible solution passes completeGrade" $
-      forAll (genStepInst dStepConf) $ \inst ->
+      within (30 * 1000000) $ forAll (genStepInst dStepConf) $ \inst ->
         doesNotRefuse (completeGrade' inst $ StepAnswer $ Just $ solution inst :: LangM Maybe)

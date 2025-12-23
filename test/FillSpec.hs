@@ -24,6 +24,7 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse, genSubsetOf)
+import Test.QuickCheck.Property (within)
 -- jscpd:ignore-end
 
 validBoundsBaseConfig :: Gen BaseConfig
@@ -116,30 +117,30 @@ spec = do
         doesNotRefuse (verifyQuiz fillConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
+      within (30 * 1000000) $ forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
         forAll (genFillInst fillConfig) $ \inst ->
           doesNotRefuse (description False inst :: LangM Maybe)
   describe "genFillInst" $ do
     it "should generate an instance with the right amount of gaps" $
-      forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
+      within (30 * 1000000) $ forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
         forAll (genFillInst fillConfig) $ \FillInst{..} ->
           let tableLen = length (getEntries (getTable formula))
               gapCount = max (tableLen * percentageOfGaps `div` 100) 1 in
           length missing == gapCount
     it "generated formula should depend on all atomics" $
-     forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
+     within (30 * 1000000) $ forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
         forAll (genFillInst fillConfig) $ \FillInst{..} ->
           formulaDependsOnAllAtoms formula
     it "should respect percentTrueEntries" $
-      forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} ->
+      within (30 * 1000000) $ forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} ->
         forAll (genFillInst fillConfig) $ \FillInst{..} ->
           withRatio (fromMaybe (0, 100) percentTrueEntries) formula
     it "the generated instance should pass verifyStatic" $
-      forAll validBoundsFillConfig $ \fillConfig -> do
+      within (30 * 1000000) $ forAll validBoundsFillConfig $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->
           doesNotRefuse (verifyStatic fillInst :: LangM Maybe)
     it "the generated solution should pass grading" $
-      forAll validBoundsFillConfig $ \fillConfig -> do
+      within (30 * 1000000) $ forAll validBoundsFillConfig $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->
           doesNotRefuse (partialGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe) &&
           doesNotRefuse (completeGrade fillInst (map TruthValue (missingValues fillInst))  :: Rated Maybe)
