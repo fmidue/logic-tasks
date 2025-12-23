@@ -52,26 +52,26 @@ spec = do
         doesNotRefuse (checkDecomposeFormulaConfig decomposeFormulaConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsDecomposeFormulaConfig $ \config -> do
+      within (30 * 1000000) $ forAll validBoundsDecomposeFormulaConfig $ \config -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (description inst :: LangM Maybe)
   describe "generateDecomposeFormulaInst" $ do
     it "the generated instance should pass verifyInst" $
-      forAll validBoundsDecomposeFormulaConfig $ \config -> do
+      within (30 * 1000000) $ forAll validBoundsDecomposeFormulaConfig $ \config -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (verifyInst inst :: LangM Maybe)
     it "should pass partialGrade with correct answer" $
-      forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
+      within (30 * 1000000) $ forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (partialGrade' inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst) :: LangM Maybe)
     it "should pass completeGrade with correct answer" $
-      forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
+      within (30 * 1000000) $ forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           ioProperty $
             withSystemTempDirectory "logic-tasks" $ \path ->
               doesNotRefuseIO (completeGrade' path inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst))
     it "should generate an instance with different subtrees" $
-      forAll validBoundsDecomposeFormulaConfig $ \decomposeFormulaConfig ->
+      within (30 * 1000000) $ forAll validBoundsDecomposeFormulaConfig $ \decomposeFormulaConfig ->
         forAll (generateDecomposeFormulaInst decomposeFormulaConfig) $ \DecomposeFormulaInst{..} ->
           let (lk,rk) = bothKids tree
               rootOp = fromJust $ binOp tree

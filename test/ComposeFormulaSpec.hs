@@ -46,25 +46,25 @@ spec = do
         doesNotRefuse (checkComposeFormulaConfig composeFormulaConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsComposeFormulaConfig $ \config ->
+      within (30 * 1000000) $ forAll validBoundsComposeFormulaConfig $ \config ->
         forAll (generateComposeFormulaInst config) $ \inst -> ioProperty $
           withSystemTempDirectory "logic-tasks" $ \path ->
             doesNotRefuseIO (description False path inst)
   describe "generateComposeFormulaInst" $ do
     it "should pass verifyInst" $
-      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
+      within (30 * 1000000) $ forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst ->
           doesNotRefuse
             (verifyInst inst :: LangM Maybe)
     it "possible solution passes partialGrade" $
-      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
+      within (30 * 1000000) $ forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
           let lrTree = Binary operator leftTree rightTree
               rlTree = Binary operator rightTree leftTree
           in doesNotRefuse
             (partialGrade' inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)] :: LangM Maybe)
     it "possible solution passes completeGrade" $
-      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
+      within (30 * 1000000) $ forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
           let lrTree = Binary operator leftTree rightTree
               rlTree = Binary operator rightTree leftTree
@@ -72,7 +72,7 @@ spec = do
             withSystemTempDirectory "logic-tasks" $ \path ->
               doesNotRefuseIO (completeGrade' path inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)])
     it "leftTreeImage and rightTreeImage has the right value" $
-      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
+      within (30 * 1000000) $ forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->
           fst treeDisplayModes == FormulaDisplay || isJust leftTreeImage &&
           snd treeDisplayModes == FormulaDisplay || isJust rightTreeImage
