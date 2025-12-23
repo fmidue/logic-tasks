@@ -134,13 +134,15 @@ spec = do
         forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
                     `isInfixOf` deleteSpaces (display tree))
     it "should generate a random SyntaxTree with fixed nodes and depth" $
-      within (30 * 1000000) $ forAll (validBoundsSynTreeConfig `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
-        \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
-            treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
+      within (30 * 1000000) $
+        forAll (validBoundsSynTreeConfig `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
+          \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
+              treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
     it "should respect operator frequencies" $
-       within (30 * 1000000) $ forAll (validBoundsSynTreeConfig `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
-        forAll (genSynTree synTreeConfig) $ \tree ->
-          any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
+       within (30 * 1000000) $
+        forAll (validBoundsSynTreeConfig `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
+          forAll (genSynTree synTreeConfig) $ \tree ->
+            any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
 
   describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $

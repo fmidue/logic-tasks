@@ -197,12 +197,20 @@ checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
 
 checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
 checkTruthValueRangeAndFormulaConf range formulaConf = do
+  checkFullRangeForSynTrees range formulaConf
   checkTruthValueRange range formulaConf
   case formulaConf of
     (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
     (FormulaDnf dnfCfg) -> checkNormalFormConfig dnfCfg
     (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
+
+checkFullRangeForSynTrees :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
+checkFullRangeForSynTrees (0, 100) (FormulaArbitrary _) = pure ()
+checkFullRangeForSynTrees _ (FormulaArbitrary _) = refuse $ indent $ translate $ do
+          german "Die Wahrheitswerte können bei einem Syntaxbaum nicht eingeschränkt werden. Wählen Sie (0,100)."
+          english "The truth entries cannot be restricted in a syntax tree. Select (0,100)."
+checkFullRangeForSynTrees _ _ = pure ()
 
 vectorOfUniqueBy :: Int -> (a -> a -> Bool) -> Gen a -> Gen [a]
 vectorOfUniqueBy 0 _ _ = pure []

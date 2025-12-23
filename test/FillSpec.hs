@@ -61,9 +61,7 @@ validBoundsPercentTrueEntries formulaConfig = do
     FormulaCnf normalFormConfig -> do
       let entries = (2 ^ length (usedAtoms (baseConf normalFormConfig))) :: Int
       validRange entries
-    FormulaArbitrary synTreeConf -> do
-      let entries = (2 ^ length (availableAtoms synTreeConf)) :: Int
-      validRange entries
+    FormulaArbitrary _ -> pure (0, 100)
   where
     validRange entries = do
       trueEntriesLow <- chooseInt (1,entries - 1)
