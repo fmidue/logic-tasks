@@ -76,7 +76,7 @@ withRatio (lower,upper) form =
     tableEntries = readEntries (getTable form)
     trueEntries = filter (== Just True) tableEntries
     percentage :: Int -> Int
-    percentage num = 2 ^ length (atomics form) *num `div` 100
+    percentage = let totalEntries = 2 ^ length (atomics form) in \num -> totalEntries * num `div` 100
     upperBound = percentage upper
     lowerBound = percentage lower
     lengthTrueEntries = length trueEntries
