@@ -47,8 +47,8 @@ import Data.List.Extra (notNull)
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
 description path TreeToFormulaInst{..} = do
     instruct $ do
-      english "Give the propositional logic formula that is represented by this syntax tree."
-      german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
+      english "Give the propositional logic formula that is represented by the following syntax tree:"
+      german "Geben Sie die aussagenlogische Formel an, die von folgendem Syntaxbaum dargestellt wird:"
 
     image $=<< cacheTree latexImage path
 
@@ -60,10 +60,10 @@ description path TreeToFormulaInst{..} = do
         instruct $ do
           english ("The exact formula of the syntax tree must be given. "
             ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
-            ++ "You are allowed to add arbitrarily many additional pairs of brackets.")
+            ++ "But you are allowed to add arbitrarily many additional pairs of brackets.")
           german ("Es muss die exakte Formel des Syntaxbaums angegeben werden. "
             ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
-            ++ "Sie dürfen beliebig viele zusätzliche Klammerpaare hinzufügen.")
+            ++ "Sie dürfen aber beliebig viele zusätzliche Klammerpaare hinzufügen.")
           pure()
 
         keyHeading
