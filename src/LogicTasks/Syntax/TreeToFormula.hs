@@ -13,6 +13,8 @@ import Control.OutputCapable.Blocks (
   ($=<<),
   english,
   german,
+  collapsed,
+  translations
   )
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
@@ -45,22 +47,31 @@ import Data.List.Extra (notNull)
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
 description path TreeToFormulaInst{..} = do
     instruct $ do
-      english "Consider the following syntax tree:"
-      german "Betrachten Sie den folgenden Syntaxbaum:"
-
-    image $=<< cacheTree latexImage path
-
-    instruct $ do
       english "Give the propositional logic formula that is represented by this syntax tree."
       german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
 
-    instruct $ do
-      english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
-      german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+    image $=<< cacheTree latexImage path
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    when showArrowOperators arrowsKey
+    collapsed False (translations $ do
+      english "Additional hints:"
+      german "Weitere Hinweise:")
+      (do
+
+        instruct $ do
+          english ("The exact formula of the syntax tree must be given. "
+            ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
+            ++ "You are allowed to add arbitrarily many additional pairs of brackets.")
+          german ("Es muss die exakte Formel des Syntaxbaums angegeben werden. "
+            ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
+            ++ "Sie dürfen beliebig viele zusätzliche Klammerpaare hinzufügen.")
+          pure()
+
+        keyHeading
+        basicOpKey unicodeAllowed
+        when showArrowOperators arrowsKey
+
+        pure()
+      )
 
     extra addText
     pure ()
