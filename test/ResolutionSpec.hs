@@ -7,7 +7,7 @@ import Formula.Resolution (applySteps)
 import Data.Maybe (isJust, fromJust, isNothing)
 import Formula.Types (Clause(Clause), Literal (..), Formula (literals))
 import qualified Data.Set
-import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution, clauses))
+import LogicTasks.Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution, clauses))
 import Test.QuickCheck (Gen, chooseInt, suchThat, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM)

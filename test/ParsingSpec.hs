@@ -10,7 +10,7 @@ import Trees.Parsing (formulaParse)
 
 import Text.Parsec (parse)
 import Formula.Types (ResStep)
-import Config (dPickInst, PickInst(..), FormulaInst (InstDnf, InstArbitrary))
+import LogicTasks.Config (dPickInst, PickInst(..), FormulaInst (InstDnf, InstArbitrary))
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Printing ()
 import qualified Trees.Types as TT (SynTree(Binary, Leaf, Not), BinOp (And))
