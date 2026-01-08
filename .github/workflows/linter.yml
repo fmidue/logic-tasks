@@ -30,3 +30,7 @@ jobs:
           YAML_ERROR_ON_WARNING: true
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # disable conflicting linters
+          VALIDATE_YAML_PRETTIER: false
+          VALIDATE_MARKDOWN_PRETTIER: false
+          VALIDATE_JSON_PRETTIER: false
