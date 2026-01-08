@@ -1,4 +1,5 @@
 {
+  "root": false,
   "formatter": {
     "indentStyle": "space"
   }
