@@ -47,25 +47,25 @@ spec = do
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsComposeFormulaConfig $ \config ->
-        forAll (generateComposeFormulaInst config) $ \inst -> ioProperty $
+        within (30 * 1000000) $ forAll (generateComposeFormulaInst config) $ \inst -> ioProperty $
           withSystemTempDirectory "logic-tasks" $ \path ->
             doesNotRefuseIO (description False path inst)
   describe "generateComposeFormulaInst" $ do
     it "should pass verifyInst" $
       forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
-        forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst ->
+        within (30 * 1000000) $ forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst ->
           doesNotRefuse
             (verifyInst inst :: LangM Maybe)
     it "possible solution passes partialGrade" $
       forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
-        forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
+        within (30 * 1000000) $ forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
           let lrTree = Binary operator leftTree rightTree
               rlTree = Binary operator rightTree leftTree
           in doesNotRefuse
             (partialGrade' inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)] :: LangM Maybe)
     it "possible solution passes completeGrade" $
       forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
-        forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
+        within (30 * 1000000) $ forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
           let lrTree = Binary operator leftTree rightTree
               rlTree = Binary operator rightTree leftTree
           in ioProperty $
@@ -73,6 +73,6 @@ spec = do
               doesNotRefuseIO (completeGrade' path inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)])
     it "leftTreeImage and rightTreeImage has the right value" $
       forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
-        forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->
+        within (30 * 1000000) $ forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->
           fst treeDisplayModes == FormulaDisplay || isJust leftTreeImage &&
           snd treeDisplayModes == FormulaDisplay || isJust rightTreeImage

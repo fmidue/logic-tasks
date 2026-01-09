@@ -4,7 +4,7 @@ module FillSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, chooseInt, elements, suchThat, sublistOf)
+import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (
   dFillConf,
@@ -18,19 +18,20 @@ import Config (
  )
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
 import Data.Maybe (fromMaybe)
-import SynTreeSpec (validBoundsSynTreeConfig)
+import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
-import TestHelpers (doesNotRefuse)
+import TestHelpers (doesNotRefuse, genSubsetOf)
+import Test.QuickCheck.Property (within)
 -- jscpd:ignore-end
 
 validBoundsBaseConfig :: Gen BaseConfig
 validBoundsBaseConfig = do
   minClauseLength <- chooseInt (1, 5)
-  maxClauseLength <- chooseInt (2, 10) `suchThat` \x -> minClauseLength <= x
-  usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \xs -> length xs >= maxClauseLength
+  maxClauseLength <- chooseInt (max 2 minClauseLength, 10)
+  usedAtoms <- genSubsetOf (maxClauseLength, 26) ['A' .. 'Z']
   pure $ BaseConfig {
     minClauseLength
   , maxClauseLength
@@ -51,6 +52,25 @@ validBoundsNormalFormConfig = do
   , maxClauseAmount
   }
 
+validBoundsPercentTrueEntries :: FormulaConfig -> Gen (Int, Int)
+validBoundsPercentTrueEntries formulaConfig = do
+  case formulaConfig of
+    FormulaDnf normalFormConfig -> do
+      let entries = (2 ^ length (usedAtoms (baseConf normalFormConfig))) :: Int
+      validRange entries
+    FormulaCnf normalFormConfig -> do
+      let entries = (2 ^ length (usedAtoms (baseConf normalFormConfig))) :: Int
+      validRange entries
+    FormulaArbitrary _ -> pure (0, 100)
+  where
+    validRange entries = do
+      trueEntriesLow <- chooseInt (1,entries - 1)
+      trueEntriesHigh <- chooseInt (trueEntriesLow + 1, entries)
+      pure (
+        floor (fromIntegral (trueEntriesLow * 100) / fromIntegral entries),
+        ceiling (fromIntegral (trueEntriesHigh * 100) / fromIntegral entries)
+        )
+
 validBoundsFillConfig :: Gen FillConfig
 validBoundsFillConfig = do
   -- formulaType <- elements ["Cnf", "Dnf", "Arbitrary"]
@@ -58,14 +78,12 @@ validBoundsFillConfig = do
   formulaConfig <- case formulaType of
     "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
-    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
-            maxNodes < 30 &&
-            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
+            maxNodes < 30
 
   percentageOfGaps <- chooseInt (1, 100)
-  percentTrueEntriesLow' <- chooseInt (0, 90)
-  percentTrueEntriesHigh' <- chooseInt (percentTrueEntriesLow', 100) `suchThat` (/= percentTrueEntriesLow')
-  percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
+  percentTrueEntries' <- validBoundsPercentTrueEntries formulaConfig
+  let percentTrueEntries = Just percentTrueEntries'
 
   pure $ FillConfig {
       formulaConfig
@@ -98,30 +116,30 @@ spec = do
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
-        forAll (genFillInst fillConfig) $ \inst ->
+        within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \inst ->
           doesNotRefuse (description False inst :: LangM Maybe)
   describe "genFillInst" $ do
     it "should generate an instance with the right amount of gaps" $
       forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
-        forAll (genFillInst fillConfig) $ \FillInst{..} ->
+        within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \FillInst{..} ->
           let tableLen = length (getEntries (getTable formula))
               gapCount = max (tableLen * percentageOfGaps `div` 100) 1 in
           length missing == gapCount
     it "generated formula should depend on all atomics" $
      forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
-        forAll (genFillInst fillConfig) $ \FillInst{..} ->
+        within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \FillInst{..} ->
           formulaDependsOnAllAtoms formula
     it "should respect percentTrueEntries" $
       forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} ->
-        forAll (genFillInst fillConfig) $ \FillInst{..} ->
+        within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \FillInst{..} ->
           withRatio (fromMaybe (0, 100) percentTrueEntries) formula
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsFillConfig $ \fillConfig -> do
-        forAll (genFillInst fillConfig) $ \fillInst ->
+        within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \fillInst ->
           doesNotRefuse (verifyStatic fillInst :: LangM Maybe)
     it "the generated solution should pass grading" $
       forAll validBoundsFillConfig $ \fillConfig -> do
-        forAll (genFillInst fillConfig) $ \fillInst ->
+        within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \fillInst ->
           doesNotRefuse (partialGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe) &&
           doesNotRefuse (completeGrade fillInst (map TruthValue (missingValues fillInst))  :: Rated Maybe)
 
