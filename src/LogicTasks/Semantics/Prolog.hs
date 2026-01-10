@@ -14,6 +14,7 @@ import Control.OutputCapable.Blocks (
   translate,
   localise,
   translations,
+  yesNo,
   )
 import Data.Maybe (fromJust)
 import Data.Set (difference, member, toList, union)
@@ -216,16 +217,14 @@ completeGrade' PrologInst{..} sol =
 
           pure ()
 
-        Just solClause -> if solClause == transSol2
-                            then pure ()
-                            else refuse $ indent $ do
-                                    translate $ do
-                                      german "Resolvente ist nicht korrekt."
-                                      english "Resolvent is not correct."
-
-                                    displaySolution
-
-                                    pure ()
+        Just solClause -> do
+          yesNo (solClause == transSol2)
+            (translate $ do
+              german "Resolvente ist korrekt?"
+              english "Resolvent is correct?"
+            )
+          displaySolution
+          pure()
   where
     (clause1, clause2, mapping) = transform (literals1, literals2)
     transSol1 = fromJust $ lookup (fst sol) mapping
