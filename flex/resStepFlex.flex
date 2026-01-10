@@ -41,16 +41,21 @@ validateSettings = verifyQuiz stepConf
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module TaskData (getTask) where
 
 import Control.Monad.Random    (MonadRandom)
+import Data.List                        (isSubsequenceOf)
 import Data.String.Interpolate (i)
 
 import FlexTask.Generic.Form
 import FlexTask.GenUtil        (fromGen)
 import FlexTask.YesodConfig    (Rendered, Widget)
+import LogicTasks.Config                (StepInst(..))
+import LogicTasks.Formula               (Formula(literals))
 import LogicTasks.Semantics.Step (genStepInst)
+import Test.QuickCheck                  (suchThat)
 
 import Global
 import TaskSettings
@@ -58,7 +63,9 @@ import TaskSettings
 
 getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = do
-    resInst <- fromGen $ genStepInst stepConf
+    resInst <- fromGen $ genStepInst stepConf `suchThat` (\StepInst{..} ->
+      not $ literals (snd solution) `isSubsequenceOf` literals clause1
+      )
     pure (resInst, checkers, form)
 
 form :: Rendered Widget

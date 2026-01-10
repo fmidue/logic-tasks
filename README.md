@@ -27,6 +27,10 @@ Directory `flex` contains some logic themed [Flex-Tasks](https://github.com/fmid
 
 - [composeFormula](flex/composeFormula.flex): Mostly identical to `ComposeFormula`, but with two separate text inputs instead of one (in Autotool).
 - [proplogic](flex/proplogic.flex): Logic puzzle based on a written exam task, not related to any of the ones here.
+- [findliar](flex/findliar.flex): Another logic puzzle taken from a paper exercise.
+- [markierungsalg](flex/markierungsalg.flex): Task based on the marking algorithm.
+- [resStepFlex](flex/resStepFlex.flex): A reverse version of `ResolutionStep` where the result of a resolution step is given instead.
+- [resResolveFlex](flex/resResolveFlex.flex): A version of `ResolutionFull` where steps are already partially filled in with the sample solution.
 
 ## Testing a module
 
@@ -34,7 +38,7 @@ You can use the `testModule` function in order to test a module. A sample call l
 
 ```text
 $ stack repl
-ghci> testModule (Just AutoLeijen) German (genFillInst dFillConf) LogicTasks.Semantics.Fill.description LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
+ghci> testModule (Just AutoLeijen) German (genFillInst dFillConf) (LogicTasks.Semantics.Fill.description True) LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
 ```
 
 This specific call tests the `Fill` module (found in `src/LogicTasks/Semantics/Fill.hs`). The output looks like this:
@@ -96,7 +100,7 @@ In more detail:
 - We passed `Just AutoLeijen` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just AutoHughesPJ` or `Manual f` where f is of type `a -> String`. Note that only `Nothing` makes sense for tasks using `Delayed`.
 - We passed `German` to print the german version of the task. The other option would be `English`.
 - We then passed the generator for creating an instance of the specified module. Must be of type `Gen a`.
-- Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description`.
+- Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description` (possibly supplied with Boolean flags or other parameters).
 - Next, we pass the function that checks the input for syntax errors. This is usually `SomeModulePath.partialGrade`.
 - Then, we pass the function that checks the input for semantic errors. This is usually `SomeModulePath.completeGrade`.
 - Lastly, we pass a parser that allows us to parse the users input. This is usually just `parser`. Must be of type `Parser b`, if you define one yourself.

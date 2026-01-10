@@ -55,6 +55,9 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..
     | minNodes < 7 = reject $ do
         english "Minimum number of nodes restricts the number of possible subtrees too much."
         german "Minimale Anzahl an Knoten schränkt die Anzahl der möglichen Teilbäume zu stark ein."
+    | minAmountOfUniqueAtoms < 2 = reject $ do
+        english "There should be more than one atomic formula for this task type."
+        german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
     | all ((== 0) . freq) [And, Or, Equi] = reject $ do
         english "At least one of the following operators must have a frequency greater than 0: And, Or, Equi"
         german "Mindestens einer der folgenden Operatoren muss eine Frequenz größer als 0 besitzen: And, Or, Equi"
