@@ -128,7 +128,8 @@ spec = do
         within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> fromIntegral (length (nubOrd (collectLeaves tree))) >= minAmountOfUniqueAtoms
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree ->
+          fromIntegral (length (nubOrd (collectLeaves tree))) >= minAmountOfUniqueAtoms
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
