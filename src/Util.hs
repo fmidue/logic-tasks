@@ -101,7 +101,7 @@ checkTruthValueRange (low,high) formulaConfig
     | checkRangeTooSmall =
         refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge sollte mindestens eine Ausprägung ermöglichen."
-          english "The restriction of true entries should allow for at least one value."
+          english "The restriction of True entries should allow for at least one value."
 
     | otherwise = pure ()
     where
