@@ -39,11 +39,6 @@ usesAllAtoms _ = True -- Cnf and Dnf always uses all atoms
 hasMinAmountOfAtoms :: Int -> FormulaConfig -> Bool
 hasMinAmountOfAtoms minAmount (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= fromIntegral minAmount
 hasMinAmountOfAtoms _ _ = True
--- hasMinAmountOfAtoms minAmount formulaConfig = case formulaConfig of
---   (FormulaCnf normalFormConf) -> check normalFormConf
---   (FormulaDnf normalFormConf) -> check normalFormConf
---   where
---     check normalFormConf = length (usedAtoms (baseConf normalFormConf)) >= minAmount
 
 isEmptyFormula :: FormulaInst -> Bool
 isEmptyFormula (InstCnf cnf) = isEmptyCnf cnf || hasEmptyClause cnf
