@@ -209,7 +209,7 @@ checkFullRangeForSynTrees :: OutputCapable m => (Int, Int) -> FormulaConfig -> L
 checkFullRangeForSynTrees (0, 100) (FormulaArbitrary _) = pure ()
 checkFullRangeForSynTrees _ (FormulaArbitrary _) = refuse $ indent $ translate $ do
           german "Die Anzahl der Wahr-Werte kann bei per Syntaxbaum generierter Formel nicht eingeschränkt werden. Wählen Sie (0,100)."
-          english "The amount of True values cannot be restricted when generating formulas via arbitrary syntax trees. Select (0,100)."
+          english "The amount of True values cannot be restricted when generating formulas via syntax trees. Select (0,100)."
 checkFullRangeForSynTrees _ _ = pure ()
 
 vectorOfUniqueBy :: Int -> (a -> a -> Bool) -> Gen a -> Gen [a]
