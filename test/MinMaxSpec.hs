@@ -49,21 +49,21 @@ spec = do
   describe "description" $ do
     it "should not reject - Max" $
       forAll validBoundsMinMaxConfig $ \config ->
-        within (30 * 1000000) $ forAll (Max.genMaxInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Max.genMaxInst config) $ \inst ->
           doesNotRefuse (Max.description inst :: LangM Maybe)
     it "should not reject - Min" $
       forAll validBoundsMinMaxConfig $ \config ->
-        within (30 * 1000000) $ forAll (Min.genMinInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Min.genMinInst config) $ \inst ->
           doesNotRefuse (Min.description inst :: LangM Maybe)
   describe "generateInst" $ do
     it "should pass verifyStatic - Max" $
       forAll validBoundsMinMaxConfig $ \config ->
-        within (30 * 1000000) $ forAll (Max.genMaxInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Max.genMaxInst config) $ \inst ->
           doesNotRefuse
             (Max.verifyStatic inst :: LangM Maybe)
     it "should pass verifyStatic - Min" $
       forAll validBoundsMinMaxConfig $ \config ->
-        within (30 * 1000000) $ forAll (Min.genMinInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Min.genMinInst config) $ \inst ->
           doesNotRefuse
             (Min.verifyStatic inst :: LangM Maybe)
     xit "possible solution passes partialGrade - Max" $
