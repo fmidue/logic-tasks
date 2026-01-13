@@ -29,6 +29,7 @@ import Trees.Generate (genSynTree)
 import Formula.Parsing (Parse(parser))
 import Control.OutputCapable.Blocks (LangM, Rated)
 import LogicTasks.Syntax.SimplestFormula (description, partialGrade', completeGrade')
+import Test.QuickCheck.Property (within)
 
 validBoundsSuperfluousBracketsConfig :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBracketsConfig = do
@@ -55,7 +56,7 @@ spec = do
     describe "description" $ do
       it "should not reject" $
        forAll validBoundsSuperfluousBracketsConfig $ \config ->
-          forAll (generateSuperfluousBracketsInst config) $ \inst ->
+          within (30 * 1000000) $ forAll (generateSuperfluousBracketsInst config) $ \inst ->
             doesNotRefuse (description inst :: LangM Maybe)
     describe "sameAssociativeOperatorAdjacent" $ do
         it "should return false if there are no two \\/s or two /\\s as neighbors" $
@@ -67,7 +68,7 @@ spec = do
         it "is a consistent pair of functions" $
             forAll validBoundsSuperfluousBracketsConfig $
               \SuperfluousBracketsConfig {..} ->
-                forAll
+                within (30 * 1000000) $ forAll
                   (genSynTree syntaxTreeConfig) $ \synTree ->
                     sameAssociativeOperatorAdjacent synTree ==>
                       notNull (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing)
@@ -75,7 +76,7 @@ spec = do
         it "simplestDisplay should have less brackets than or equal to normal formula" $
             forAll validBoundsSuperfluousBracketsConfig $
               \SuperfluousBracketsConfig {..} ->
-                forAll
+                within (30 * 1000000) $ forAll
                   (genSynTree syntaxTreeConfig) $ \synTree ->
                     length (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing) *2
                       == length (display synTree) - length (simplestDisplay synTree)
@@ -85,19 +86,19 @@ spec = do
           ) $
             forAll (validBoundsSuperfluousBracketsConfig `suchThat` \cfg -> maxDepth (syntaxTreeConfig cfg) < 6) $
               \SuperfluousBracketsConfig {..} ->
-                forAll
+                within (30 * 1000000) $ forAll
                 (genSynTree syntaxTreeConfig) $
                   \synTree -> not (sameAssociativeOperatorAdjacent synTree) ==>
                     display synTree == simplestDisplay synTree
         it "after remove all bracket two strings should be same" $
             forAll validBoundsSuperfluousBracketsConfig $ \config ->
-                forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
+                within (30 * 1000000) $ forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   deleteBrackets stringWithSuperfluousBrackets == deleteBrackets simplestString
     describe "valid formula" $
         it "the formula Parser can accept when brackets is max number" $
             forAll validBoundsSuperfluousBracketsConfig $
               \SuperfluousBracketsConfig {..} ->
-                forAll
+                within (30 * 1000000) $ forAll
                     (genSynTree syntaxTreeConfig
                       `suchThat` sameAssociativeOperatorAdjacent
                     ) $
@@ -107,16 +108,16 @@ spec = do
     describe "generateSuperfluousBracketsInst" $ do
         it "show and parse are inverse for parsePropForm (?)" $
             forAll validBoundsSuperfluousBracketsConfig $ \config ->
-                forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
+                within (30 * 1000000) $ forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   show (fromRight' (parse (parser @(PropFormula Char)) "" simplestString)) == simplestString
         it "the stringWithSuperfluousBrackets should have right number of SuperfluousBrackets" $
             forAll validBoundsSuperfluousBracketsConfig $ \config@SuperfluousBracketsConfig {..} ->
-                forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
+                within (30 * 1000000) $ forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   fromIntegral (length stringWithSuperfluousBrackets - length simplestString)
                     == superfluousBracketPairs * 2
         it "should pass grading" $
           forAll validBoundsSuperfluousBracketsConfig $ \config ->
-              forAll (generateSuperfluousBracketsInst config) $ \inst ->
+              within (30 * 1000000) $ forAll (generateSuperfluousBracketsInst config) $ \inst ->
                 doesNotRefuse (partialGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe) &&
                  doesNotRefuse (completeGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: Rated Maybe)
 
