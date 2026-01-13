@@ -147,3 +147,7 @@ getArrows syntaxTreeConfig = filter
 
 checkArrowOperatorsToShow :: [BinOp] -> Bool
 checkArrowOperatorsToShow = all (`elem` [Impl, BackImpl, Equi])
+    | length (Map.filter (/= 0) binOpFrequencies) + min negOpFrequency 1 < 3 = reject $ do
+        english "Among the binary operators and the negation operator, at least three frequencies must be non-zero."
+        german "Unter den binären Operatoren und dem Negationsoperator müssen mindestens drei Häufigkeiten ungleich null sein."
+    | otherwise = pure ()

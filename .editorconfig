@@ -8,7 +8,10 @@ indent_style = space
 indent_size = 2
 max_line_length = 140
 
-[**.{yml,yaml,md}]
+[**.{flex,hs}]
+indent_size = unset
+
+[**.{cabal,yml,yaml,md}]
 max_line_length = unset
 
 [src/{LogicTasks/{Semantics,Syntax}/*,Tasks/*/Config.hs}]

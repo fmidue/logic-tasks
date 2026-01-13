@@ -37,7 +37,7 @@ import LogicTasks.Helpers (extra, reject)
 import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
 import Data.Maybe (fromMaybe)
-import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
+import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
 
@@ -158,6 +158,11 @@ verifyQuiz DecideConfig{..}
         refuse $ indent $ translate $ do
           english "The percentage of mistakes has to be set between 1 and 100."
           german "Der prozentuale Anteil an Fehlern muss zwischen 1 und 100 liegen."
+
+    | not $ hasMinAmountOfAtoms 2 formulaConfig =
+        refuse $ indent $ translate $ do
+          english "There should be more than one atomic formula for this task type."
+          german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
 
     | not $ usesAllAtoms formulaConfig =
         refuse $ indent $ translate $ do
