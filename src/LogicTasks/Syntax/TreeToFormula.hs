@@ -69,7 +69,7 @@ description path TreeToFormulaInst{..} = do
 
         keyHeading
         basicOpKey unicodeAllowed
-        when showArrowOperators arrowsKey
+        arrowsKey' arrowOperatorsToShow
 
         pure()
       )
