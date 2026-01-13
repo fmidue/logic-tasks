@@ -6,6 +6,7 @@ module LogicTasks.Util
        , displayFormula
        , usesAllAtoms
        , isEmptyFormula
+       , hasMinAmountOfAtoms
        ) where
 
 
@@ -34,6 +35,10 @@ usesAllAtoms :: FormulaConfig -> Bool
 usesAllAtoms (FormulaArbitrary syntaxTreeConfig)
   = minAmountOfUniqueAtoms syntaxTreeConfig == fromIntegral (length (availableAtoms syntaxTreeConfig))
 usesAllAtoms _ = True -- Cnf and Dnf always uses all atoms
+
+hasMinAmountOfAtoms :: Int -> FormulaConfig -> Bool
+hasMinAmountOfAtoms minAmount (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= fromIntegral minAmount
+hasMinAmountOfAtoms _ _ = True
 
 isEmptyFormula :: FormulaInst -> Bool
 isEmptyFormula (InstCnf cnf) = isEmptyCnf cnf || hasEmptyClause cnf
