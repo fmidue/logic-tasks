@@ -105,19 +105,11 @@ checkTruthValueRange (low,high) formulaConfig
 
     | otherwise = pure ()
     where
-      checkRangeTooSmall = case formulaConfig of
-        FormulaCnf normalFormConfig -> let
-          atomsAmount = length (usedAtoms (baseConf normalFormConfig))
-          in
-            checkRangeTooSmall' atomsAmount
-        FormulaDnf normalFormConfig -> let
-          atomsAmount = length (usedAtoms (baseConf normalFormConfig))
-          in
-            checkRangeTooSmall' atomsAmount
-        FormulaArbitrary synTreeConf -> let
-          atomsAmount = length (availableAtoms synTreeConf)
-          in
-            checkRangeTooSmall' atomsAmount
+      checkRangeTooSmall = checkRangeTooSmall' $ case formulaConfig of
+        FormulaCnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
+        FormulaDnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
+        FormulaArbitrary synTreeConf -> length (availableAtoms synTreeConf)
+
       checkRangeTooSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
 
 
