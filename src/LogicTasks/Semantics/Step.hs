@@ -11,7 +11,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   english,
   german,
-  translate, localise, translations, yesNo,
+  translate, localise, translations,
   )
 import Data.Maybe (fromJust, isNothing)
 import Data.List (delete)
@@ -22,7 +22,7 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
+import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey, instruct)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (when, unless)
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
@@ -212,15 +212,19 @@ completeGrade' StepInst{..} sol =
 
           pure ()
 
-        Just solClause -> do
-          yesNo (solClause == snd mSol)
-            (translate $ do
-              german "Resolvente ist korrekt?"
-              english "Resolvent is correct?"
-            )
-          displaySolution
+        Just solClause -> if solClause == snd mSol
+          then do
+            instruct $ do
+              english "Your solution is correct."
+              german "Ihre Lösung ist korrekt."
+            pure ()
+          else refuse $ indent $ do
+            translate $ do
+              german "Resolvente ist nicht korrekt."
+              english "Resolvent is not correct."
 
-          pure ()
+            displaySolution
+            pure ()
   where
     mSol = fromJust $ step sol
     displaySolution = when showSolution $ example solToString $ do

@@ -13,8 +13,7 @@ import Control.OutputCapable.Blocks (
   german,
   translate,
   localise,
-  translations,
-  yesNo,
+  translations
   )
 import Data.Maybe (fromJust)
 import Data.Set (difference, member, toList, union)
@@ -28,7 +27,7 @@ import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
 import Control.Monad (when)
-import LogicTasks.Helpers (example, extra)
+import LogicTasks.Helpers (example, extra, instruct)
 import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Delayed (Delayed, withDelayed, withDelayedSucceeding, complainAboutWrongNotation)
 import Formula.Parsing (Parse(..), prologClauseSetParser)
@@ -217,14 +216,20 @@ completeGrade' PrologInst{..} sol =
 
           pure ()
 
-        Just solClause -> do
-          yesNo (solClause == transSol2)
-            (translate $ do
-              german "Resolvente ist korrekt?"
-              english "Resolvent is correct?"
-            )
-          displaySolution
-          pure()
+        Just solClause -> if solClause == transSol2
+                    then do
+                      instruct $ do
+                        english "Your solution is correct."
+                        german "Ihre Lösung ist korrekt."
+                      pure ()
+                    else refuse $ indent $ do
+                            translate $ do
+                              german "Resolvente ist nicht korrekt."
+                              english "Resolvent is not correct."
+
+                            displaySolution
+
+                            pure ()
   where
     (clause1, clause2, mapping) = transform (literals1, literals2)
     transSol1 = fromJust $ lookup (fst sol) mapping
