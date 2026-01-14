@@ -13,7 +13,7 @@ import Control.OutputCapable.Blocks (
   german,
   translate,
   localise,
-  translations
+  translations,
   )
 import Data.Maybe (fromJust)
 import Data.Set (difference, member, toList, union)
@@ -217,19 +217,19 @@ completeGrade' PrologInst{..} sol =
           pure ()
 
         Just solClause -> if solClause == transSol2
-                    then do
-                      instruct $ do
-                        english "Your solution is correct."
-                        german "Ihre Lösung ist korrekt."
-                      pure ()
-                    else refuse $ indent $ do
-                            translate $ do
-                              german "Resolvente ist nicht korrekt."
-                              english "Resolvent is not correct."
+                            then do
+                              instruct $ do
+                                english "Your solution is correct."
+                                german "Ihre Lösung ist korrekt."
+                              pure ()
+                            else refuse $ indent $ do
+                                    translate $ do
+                                      german "Resolvente ist nicht korrekt."
+                                      english "Resolvent is not correct."
 
-                            displaySolution
+                                    displaySolution
 
-                            pure ()
+                                    pure ()
   where
     (clause1, clause2, mapping) = transform (literals1, literals2)
     transSol1 = fromJust $ lookup (fst sol) mapping

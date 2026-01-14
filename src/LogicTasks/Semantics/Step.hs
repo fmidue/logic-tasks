@@ -224,6 +224,7 @@ completeGrade' StepInst{..} sol =
               english "Resolvent is not correct."
 
             displaySolution
+
             pure ()
   where
     mSol = fromJust $ step sol
