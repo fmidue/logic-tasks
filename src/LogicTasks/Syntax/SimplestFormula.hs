@@ -164,9 +164,10 @@ completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
 completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
-  | show sol == simplestString inst = reRefuse (rate 1) (translate $ do
-    german "Ihre Abgabe ist korrekt."
-    english "Your submission is correct.")
+  | show sol == simplestString inst = instruct (do
+      german "Ihre Abgabe ist korrekt."
+      english "Your submission is correct."
+    ) *> rate 1
   | synTreeEquivalent && isDerivedByRemovingBrackets (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
     german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
     english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
