@@ -3,13 +3,13 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
 
-module SynTreeSpec (spec, validBoundsSynTreeConfig) where
+module SynTreeSpec (spec, validBoundsSynTreeConfig, validBoundsSynTreeConfig') where
 
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
+import Test.QuickCheck (Gen, chooseInteger, elements, forAll, suchThat)
 import Data.List.Extra (nubOrd, isInfixOf)
 
-import TestHelpers (deleteSpaces, doesNotRefuse)
+import TestHelpers (deleteSpaces, doesNotRefuse, genSubsetOf)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (
@@ -32,6 +32,7 @@ import Trees.Generate (genSynTree)
 import Control.OutputCapable.Blocks (LangM)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, filter)
+import Test.QuickCheck.Property (within)
 
 opFrequencies :: Map BinOp Int
 opFrequencies = Map.fromList
@@ -52,20 +53,25 @@ opFrequenciesNoArrows = Map.fromList
   ]
 
 validBoundsSynTreeConfig :: Gen SynTreeConfig
-validBoundsSynTreeConfig = do
+validBoundsSynTreeConfig = validBoundsSynTreeConfig' True
+
+validBoundsSynTreeConfig' :: Bool -> Gen SynTreeConfig
+validBoundsSynTreeConfig' chooseMinAmountOfUniqueAtoms = do
   binOpFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
-  maxConsecutiveNegations <- choose (0, 3)
-  availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minAmountOfUniqueAtoms <- choose (1, fromIntegral $ length availableAtoms)
-  minNodes <- choose (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
+  maxConsecutiveNegations <- chooseInteger (if binOpFrequencies == opFrequenciesNoArrows then 1 else 0, 3)
+  availableAtoms <- genSubsetOf (2, 26) ['A' .. 'Z']
+  minAmountOfUniqueAtoms <- if chooseMinAmountOfUniqueAtoms
+    then chooseInteger (2, fromIntegral $ length availableAtoms)
+    else pure (fromIntegral $ length availableAtoms)
+  minNodes <- chooseInteger (max 3 (minAmountOfUniqueAtoms * 2), 60) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   let minDepth = 1 + floor (logBase (2 :: Double) $ fromIntegral minNodes)
   let minMaxDepth = max (maxConsecutiveNegations + 1) minDepth
-  maxDepth <- choose (minMaxDepth,max (minMaxDepth+ 3) 10)
-  maxNodes <- choose (minNodes, maxNodesForDepth maxDepth) `suchThat`
+  maxDepth <- chooseInteger (minMaxDepth,max (minMaxDepth+ 3) 10)
+  maxNodes <- chooseInteger (minNodes, maxNodesForDepth maxDepth) `suchThat`
     \maxNodes' -> (maxConsecutiveNegations /= 0 || odd maxNodes')
       && maxDepth <= maxDepthForNodes maxConsecutiveNegations maxNodes'
   let availableBinOpsCount = fromIntegral $ length $ Map.filter (>0) binOpFrequencies
-  minUniqueBinOperators <- choose (1, min availableBinOpsCount ((minNodes - 1) `div` 2))
+  minUniqueBinOperators <- chooseInteger (1, min availableBinOpsCount ((minNodes - 1) `div` 2))
   return $ SynTreeConfig {
     maxNodes,
     minNodes,
@@ -91,7 +97,7 @@ spec = do
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (tail (display tree)) /= Right tree
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (tail (display tree)) /= Right tree
   describe "numOfUniqueBinOpsInSynTree" $ do
         it "should return 0 if there is only a leaf" $
             numOfUniqueBinOpsInSynTree @BinOp (Leaf 'a') == 0
@@ -105,36 +111,38 @@ spec = do
   describe "genSynTree" $ do
     it "should generate a random SyntaxTree that satisfies the required amount of unique binary operators" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \synTree -> numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \synTree -> numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (display tree) == Right tree
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (display tree) == Right tree
     xit ("should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, " ++
         "even without spaces") $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (deleteSpaces (display tree)) == Right tree
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (deleteSpaces (display tree)) == Right tree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> treeNodes tree >= minNodes && treeNodes tree <= maxNodes
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> treeNodes tree >= minNodes && treeNodes tree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> treeDepth tree <= maxDepth
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> fromIntegral (length (nubOrd (collectLeaves tree))) >= minAmountOfUniqueAtoms
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree ->
+          fromIntegral (length (nubOrd (collectLeaves tree))) >= minAmountOfUniqueAtoms
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
       forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
-        forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
+        within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
                     `isInfixOf` deleteSpaces (display tree))
     it "should generate a random SyntaxTree with fixed nodes and depth" $
-      forAll (validBoundsSynTreeConfig `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
-        \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
-            treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
+        forAll (validBoundsSynTreeConfig `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
+          \synTreeConfig@SynTreeConfig {..} ->
+            within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \synTree ->
+              treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
     it "should respect operator frequencies" $
-       forAll (validBoundsSynTreeConfig `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
-        forAll (genSynTree synTreeConfig) $ \tree ->
-          any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
+        forAll (validBoundsSynTreeConfig `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
+          within (30 * 1000000) $ forAll (genSynTree synTreeConfig) $ \tree ->
+            any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
 
   describe "ToSAT instance" $ do
     it "should correctly convert Leaf" $

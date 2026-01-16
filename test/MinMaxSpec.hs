@@ -9,34 +9,24 @@ import Test.QuickCheck (Gen, chooseAny, forAll)
 import qualified LogicTasks.Semantics.Max as Max (verifyQuiz, verifyStatic, genMaxInst, description, partialGrade', completeGrade')
 import qualified LogicTasks.Semantics.Min as Min (verifyQuiz, verifyStatic, genMinInst, description, partialGrade', completeGrade')
 import Config (
-  BaseConfig(..),
-  NormalFormConfig(..),
   MinMaxConfig(..),
   dMinMaxConf,
   MaxInst (cnf),
   MinInst (dnf),
   )
-
-import FormulaSpec (validBoundsNormalFormParams)
+import FillSpec (validBoundsNormalFormConfig)
 import TestHelpers (doesNotRefuse)
+import Test.QuickCheck.Property (within)
 
 
 
 validBoundsMinMaxConfig :: Gen MinMaxConfig
 validBoundsMinMaxConfig = do
-  ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedAtoms) <- validBoundsNormalFormParams
+  normalFormConf <- validBoundsNormalFormConfig
   offerUnicodeInput <- chooseAny
   printSolution <- chooseAny
   pure $ MinMaxConfig
-    { normalFormConf = NormalFormConfig{
-          minClauseAmount,
-          maxClauseAmount,
-          baseConf = BaseConfig{
-              minClauseLength,
-              maxClauseLength,
-              usedAtoms
-          }
-      }
+    { normalFormConf = normalFormConf
     -- Restrictions on this lead to infinite loops.
     -- A satisfying formula is frequently not found, even with large intervals.
     , percentTrueEntries = (0,100)
@@ -59,21 +49,21 @@ spec = do
   describe "description" $ do
     it "should not reject - Max" $
       forAll validBoundsMinMaxConfig $ \config ->
-        forAll (Max.genMaxInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Max.genMaxInst config) $ \inst ->
           doesNotRefuse (Max.description inst :: LangM Maybe)
     it "should not reject - Min" $
       forAll validBoundsMinMaxConfig $ \config ->
-        forAll (Min.genMinInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Min.genMinInst config) $ \inst ->
           doesNotRefuse (Min.description inst :: LangM Maybe)
   describe "generateInst" $ do
     it "should pass verifyStatic - Max" $
       forAll validBoundsMinMaxConfig $ \config ->
-        forAll (Max.genMaxInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Max.genMaxInst config) $ \inst ->
           doesNotRefuse
             (Max.verifyStatic inst :: LangM Maybe)
     it "should pass verifyStatic - Min" $
       forAll validBoundsMinMaxConfig $ \config ->
-        forAll (Min.genMinInst config) $ \inst ->
+        within (30 * 10000000) $ forAll (Min.genMinInst config) $ \inst ->
           doesNotRefuse
             (Min.verifyStatic inst :: LangM Maybe)
     xit "possible solution passes partialGrade - Max" $

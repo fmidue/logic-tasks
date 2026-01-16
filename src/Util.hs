@@ -19,7 +19,7 @@ import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), FormulaInst (..))
-import Formula.Types (Formula, getTable, lengthBound)
+import Formula.Types (Formula (atomics), getTable, lengthBound)
 import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig (availableAtoms), checkSynTreeConfig)
 import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
@@ -68,16 +68,16 @@ remove num xs = do
 
 
 withRatio :: Formula a => (Int,Int) -> a -> Bool
-withRatio (lower,upper) form =
-    length trueEntries <= max upperBound (if upper == 0 then 0 else 1)
-        && length trueEntries >= max (if lower == 0 then 0 else 1) lowerBound
+withRatio (0, 100) _ = True
+withRatio (lower, upper) form =
+    lengthTrueEntries <= max (min 1 upper) (percentage upper)
+        && lengthTrueEntries >= max (min 1 lower) (percentage lower)
   where
     tableEntries = readEntries (getTable form)
     trueEntries = filter (== Just True) tableEntries
     percentage :: Int -> Int
-    percentage num = length tableEntries *num `div` 100
-    upperBound = percentage upper
-    lowerBound = percentage lower
+    percentage = let totalEntries = 2 ^ length (atomics form) in \num -> totalEntries * num `div` 100
+    lengthTrueEntries = length trueEntries
 
 checkTruthValueRange :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
 checkTruthValueRange (low,high) formulaConfig
@@ -96,27 +96,19 @@ checkTruthValueRange (low,high) formulaConfig
           german "Die Beschränkung der Wahr-Einträge sollte ein gewissen Spielraum zulassen."
           english "The given restriction on true entries should allow for some flexibility."
 
-    | checkRangeToSmall =
+    | checkRangeTooSmall =
         refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge sollte mindestens zwei verschiedene Ausprägungen ermöglichen."
-          english "The restriction of true entries should allow for at least two different values."
+          german "Die Beschränkung der Wahr-Einträge sollte mindestens eine Ausprägung ermöglichen."
+          english "The restriction of True entries should allow for at least one value."
 
     | otherwise = pure ()
     where
-      checkRangeToSmall = case formulaConfig of
-        FormulaCnf normalFormConfig -> let
-          atomsAmount = length (usedAtoms (baseConf normalFormConfig))
-          in
-            checkRangeToSmall'' atomsAmount
-        FormulaDnf normalFormConfig -> let
-          atomsAmount = length (usedAtoms (baseConf normalFormConfig))
-          in
-            checkRangeToSmall'' atomsAmount
-        FormulaArbitrary synTreeConf -> let
-          atomsAmount = length (availableAtoms synTreeConf)
-          in
-            checkRangeToSmall'' atomsAmount
-      checkRangeToSmall'' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 2 > 2 ^ atomsAmount * high `div` 100
+      checkRangeTooSmall = checkRangeTooSmall' $ case formulaConfig of
+        FormulaCnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
+        FormulaDnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
+        FormulaArbitrary synTreeConf -> length (availableAtoms synTreeConf)
+
+      checkRangeTooSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
 
 checkBaseConf :: OutputCapable m => BaseConfig -> LangM m
 checkBaseConf BaseConfig{..}
@@ -193,12 +185,19 @@ checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
 
 checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
 checkTruthValueRangeAndFormulaConf range formulaConf = do
-  checkTruthValueRange range formulaConf
+  checkFullRangeForSynTrees range formulaConf
   case formulaConf of
     (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
     (FormulaDnf dnfCfg) -> checkNormalFormConfig dnfCfg
     (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
+
+checkFullRangeForSynTrees :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
+checkFullRangeForSynTrees (0, 100) (FormulaArbitrary _) = pure ()
+checkFullRangeForSynTrees _ (FormulaArbitrary _) = refuse $ indent $ translate $ do
+          german "Die Anzahl der Wahr-Werte kann bei per Syntaxbaum generierter Formel nicht eingeschränkt werden. Wählen Sie (0,100)."
+          english "The amount of True values cannot be restricted when generating formulas via syntax trees. Select (0,100)."
+checkFullRangeForSynTrees _ _ = pure ()
 
 vectorOfUniqueBy :: Int -> (a -> a -> Bool) -> Gen a -> Gen [a]
 vectorOfUniqueBy 0 _ _ = pure []

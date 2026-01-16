@@ -109,6 +109,11 @@ verifyStatic PickInst{..}
 verifyQuiz :: OutputCapable m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
 
+    | tooFewAtoms formulaConfig =
+        refuse $ indent $ translate $ do
+          german "Es müssen mindestens drei Atome zur Verfügung stehen."
+          english "At least three atoms need to be available."
+
     | amountOfOptions < 2 =
         refuse $ indent $ translate $ do
           german "Es muss mindestens zwei Optionen geben."
@@ -146,6 +151,8 @@ verifyQuiz PickConfig{..}
       = amountOfOptions > 4*2^ length (usedAtoms (baseConf cnfCfg))
     doesOvershootOptions (FormulaDnf dnfCfg)
       = amountOfOptions > 4*2^ length (usedAtoms (baseConf dnfCfg))
+    tooFewAtoms (FormulaArbitrary syntaxTreeConfig) = length (availableAtoms syntaxTreeConfig) < 3
+    tooFewAtoms _ = False
 
 
 
@@ -161,7 +168,6 @@ partialGrade PickInst{formulas} (Number (Just index)) = singleChoiceSyntax True 
 
 completeGrade :: OutputCapable m => PickInst -> Number -> LangM m
 completeGrade PickInst{..} (Number index) = singleChoice
-  DefiniteArticle
   what
   displaySolution
   correct
@@ -170,5 +176,5 @@ completeGrade PickInst{..} (Number index) = singleChoice
       what = translations $ do
         german "Index"
         english "index"
-      displaySolution | showSolution = Just $ show correct
+      displaySolution | showSolution = Just (DefiniteArticle, show correct)
                       | otherwise = Nothing

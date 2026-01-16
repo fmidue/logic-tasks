@@ -4,7 +4,7 @@ module LegalNormalFormSpec (spec) where
 
 import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it, xit)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess, within)
+import Test.QuickCheck (Gen, chooseInt, forAll, elements, ioProperty, withMaxSuccess, within)
 import Data.List((\\))
 import Data.Tuple.Extra (thd3)
 
@@ -30,7 +30,7 @@ import Control.OutputCapable.Blocks.Debug(checkConfigWith)
 import FormulaSpec (validBoundsNormalFormParams)
 import qualified LogicTasks.Syntax.IllegalCnfs as IllegalCnfs (description, verifyInst, partialGrade, completeGrade)
 import qualified LogicTasks.Syntax.IllegalDnfs as IllegalDnfs (description, verifyInst, partialGrade, completeGrade)
-import TestHelpers (doesNotRefuse)
+import TestHelpers (doesNotRefuse, genSubsetOf)
 
 validBoundsLegalNormalFormConfig :: Gen LegalNormalFormConfig
 validBoundsLegalNormalFormConfig = do
@@ -42,9 +42,9 @@ validBoundsLegalNormalFormConfig = do
         | maxFormulas < 0 = 15 -- Int overflow
         | otherwise = min 15 maxFormulas
 
-    formulas <- choose
+    formulas <- chooseInt
       (1, formulaUpperBound)
-    illegals <- choose (0, formulas)
+    illegals <- chooseInt (0, formulas)
     let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals > 0
         includeFormWithJustOneLiteralPerClause = minClauseLength == 1 && formulas - illegals > 1
     allowArrowOperators <- elements [True, False]
@@ -72,16 +72,16 @@ validBoundsLegalNormalFormConfig = do
 
 invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
 invalidBoundsLegalCNF = do
-    usedAtoms <- sublistOf ['A' .. 'Z'] `suchThat` \atoms -> not (null atoms) && (10>=length atoms)
-    maxClauseLength <- choose (1, 2 * length usedAtoms)
-    minClauseLength <- choose (maxClauseLength, 100)
+    usedAtoms <- genSubsetOf (1, 10) ['A' .. 'Z']
+    maxClauseLength <- chooseInt (1, 2 * length usedAtoms)
+    minClauseLength <- chooseInt (maxClauseLength, 100)
     let clauses = product (take maxClauseLength (reverse [1 .. (2 * length usedAtoms)]))
-    maxClauseAmount <- choose (1, max 15 clauses)  `suchThat` \amount ->amount > 1 || maxClauseLength > 1
-    minClauseAmount <- choose (1, maxClauseAmount + 20)
-    formulas <- choose (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
-    illegals <- choose (-5, -1)
-    minStringSize <- choose (minClauseLength * (2 + minClauseAmount), 300)
-    maxStringSize <- choose (1, minStringSize)
+    maxClauseAmount <- chooseInt (if maxClauseLength > 1 then 1 else 2, max 15 clauses)
+    minClauseAmount <- chooseInt (1, maxClauseAmount + 20)
+    formulas <- chooseInt (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
+    illegals <- chooseInt (-5, -1)
+    minStringSize <- chooseInt (minClauseLength * (2 + minClauseAmount), 300)
+    maxStringSize <- chooseInt (1, minStringSize)
     return $ LegalNormalFormConfig
         {
           normalFormConfig = NormalFormConfig{
@@ -125,12 +125,12 @@ spec = do
 
     describe "description" $ do
       it "should not reject - CNF" $
-        within timeout $ forAll validBoundsLegalNormalFormConfig $ \config ->
-          forAll (generateLegalCNFInst config) $ \inst ->
+        forAll validBoundsLegalNormalFormConfig $ \config ->
+          within timeout $ forAll (generateLegalCNFInst config) $ \inst ->
             doesNotRefuse (IllegalCnfs.description False inst :: LangM Maybe)
       it "should not reject - DNF" $
-        within timeout $ forAll validBoundsLegalNormalFormConfig $ \config ->
-          forAll (generateLegalDNFInst config) $ \inst ->
+        forAll validBoundsLegalNormalFormConfig $ \config ->
+          within timeout $ forAll (generateLegalDNFInst config) $ \inst ->
             doesNotRefuse (IllegalDnfs.description False inst :: LangM Maybe)
 
     describe "genIllegalCnfSynTree" $
@@ -171,24 +171,24 @@ spec = do
                   (judgeDnfSynTree . dnfToSynTree)
     describe "generateLegalCNFInst" $ do
         it "all of the formulas in the wrong serial should not be Cnf" $
-            within timeout $ forAll validBoundsLegalNormalFormConfig $ \config ->
-                forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
+            forAll validBoundsLegalNormalFormConfig $ \config ->
+                within timeout $ forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
                   let formulaStrings = map thd3 formulaInfos in
                   all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) [i | (i, info,_) <- formulaInfos, treeIsErroneous info]
         it "all of the formulas not in the wrong serial should be Cnf" $
-            within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
-                forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
+            forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
+                within timeout $ forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
                   let formulaStrings = map thd3 formulaInfos in
                   all
                     (\x -> isRight (cnfParse (formulaStrings !! (x - 1))))
                     ([1..formulas] \\ [i | (i, info,_) <- formulaInfos, treeIsErroneous info])
         it "should pass verifyInst" $
-            within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
-                forAll (generateLegalCNFInst config) $ \inst ->
+            forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
+                within timeout $ forAll (generateLegalCNFInst config) $ \inst ->
                   doesNotRefuse (IllegalCnfs.verifyInst inst :: LangM Maybe)
         it "should pass grading with correct answer" $
-          within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
-            forAll (generateLegalCNFInst config) $ \inst@LegalNormalFormInst{..} ->
+          forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
+            within timeout $ forAll (generateLegalCNFInst config) $ \inst@LegalNormalFormInst{..} ->
               doesNotRefuse (
                 IllegalCnfs.partialGrade
                   inst
@@ -200,24 +200,24 @@ spec = do
                 :: Rated Maybe)
     describe "generateLegalDNFInst" $ do
         it "all of the formulas in the wrong serial should not be Dnf" $
-            within timeout $ forAll validBoundsLegalNormalFormConfig $ \config ->
-                forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
+            forAll validBoundsLegalNormalFormConfig $ \config ->
+                within timeout $ forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
                   let formulaStrings = map thd3 formulaInfos in
                   all (\x -> isLeft (dnfParse (formulaStrings !! (x - 1)))) [i | (i, info,_) <- formulaInfos, treeIsErroneous info]
         it "all of the formulas not in the wrong serial should be Dnf" $
-            within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
-                forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
+            forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
+                within timeout $ forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
                   let formulaStrings = map thd3 formulaInfos in
                   all
                     (\x -> isRight (dnfParse (formulaStrings !! (x - 1))))
                     ([1..formulas] \\ [i | (i, info,_) <- formulaInfos, treeIsErroneous info])
         it "should pass verifyInst" $
-            within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
-                forAll (generateLegalDNFInst config) $ \inst ->
+            forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
+                within timeout $ forAll (generateLegalDNFInst config) $ \inst ->
                   doesNotRefuse (IllegalDnfs.verifyInst inst :: LangM Maybe)
         it "should pass grading with correct answer" $
-          within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
-            forAll (generateLegalDNFInst config) $ \inst@LegalNormalFormInst{..} ->
+          forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
+            within timeout $ forAll (generateLegalDNFInst config) $ \inst@LegalNormalFormInst{..} ->
               doesNotRefuse (
                 IllegalDnfs.partialGrade
                   inst

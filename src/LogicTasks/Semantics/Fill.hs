@@ -18,7 +18,6 @@ import Control.OutputCapable.Blocks (
   Punishment (Punishment),
   TargetedCorrect (TargetedCorrect),
   ArticleToUse (DefiniteArticle),
-  translations,
   Rated, reRefuse,
   )
 import Test.QuickCheck(Gen, suchThat)
@@ -37,7 +36,7 @@ import Util (
   )
 import LogicTasks.Helpers (extra)
 import Trees.Generate (genSynTree)
-import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
+import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
 import qualified Data.Map as Map (fromAscList)
 import GHC.Real ((%))
 import Control.Applicative (Alternative)
@@ -135,6 +134,10 @@ verifyQuiz FillConfig{..}
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
           english "The percentage of gaps has to be set between 1 and 100."
 
+    | not $ hasMinAmountOfAtoms 2 formulaConfig = refuse $ indent $ translate $ do
+        english "There should be more than one atomic formula for this task type."
+        german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
+
     | not $ usesAllAtoms formulaConfig =
         refuse $ indent $ translate $ do
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
@@ -171,8 +174,7 @@ completeGrade FillInst{..} sol = reRefuse
     (MinimumThreshold (1 % 2))
     (Punishment 0)
     (TargetedCorrect (length solution))
-    DefiniteArticle
-    what
+    Nothing
     solutionDisplay
     solution
     submission)
@@ -185,10 +187,7 @@ completeGrade FillInst{..} sol = reRefuse
     zippedShort = zip3 boolSol missingValues [1..]
     (_,diff) = pairwiseCheck zippedShort
     displayMistake = show $ length diff
-    what = translations $ do
-      german "Wahr-Werte"
-      english "True values"
-    solutionDisplay | showSolution = Just $ show missingValues
+    solutionDisplay | showSolution = Just (DefiniteArticle, show missingValues)
                     | otherwise = Nothing
     solution = Map.fromAscList $ zip [1 :: Int ..] missingValues
     submission = Map.fromAscList $ zip [1 :: Int ..] boolSol

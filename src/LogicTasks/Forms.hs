@@ -64,18 +64,19 @@ tableForm emptyColumns rows staticStart staticEnd =
     pure ( Singular headerName ++ Singular inputName
          , [whamlet|
               #{extra}
-              <table>
-                <tr>
-                  $forall startHeader <- staticStart
-                    <th>#{startHeader}
-                  $forall inputHeader <- tableHeaders
-                    <th>^{fvInput inputHeader}
-                  $forall endHeader <- staticEnd
-                    <th>#{endHeader}
-                $forall row <- tableRows
+              <div .#{containerClass}>
+                <table>
                   <tr>
-                    $forall input <- row
-                      <td>^{fvInput input}|]
+                    $forall startHeader <- staticStart
+                      <th>#{startHeader}
+                    $forall inputHeader <- tableHeaders
+                      <th>^{fvInput inputHeader}
+                    $forall endHeader <- staticEnd
+                      <th>#{endHeader}
+                  $forall row <- tableRows
+                    <tr>
+                      $forall input <- row
+                        <td>^{fvInput input}|]
          )
   where
     tabIndex i = addAttribute ("tabindex", pack $ show @Int i)
@@ -83,41 +84,44 @@ tableForm emptyColumns rows staticStart staticEnd =
       (tabIndex i $ addNameAndCssClass cl name)
       Nothing
 
+    containerClass :: String
+    containerClass = "truth-table"
     headerClass = "header"
     inputClass = "tableInput"
     headerName = "headers"
     inputName = "cells"
 
     css = [cassius|
-      .#{headerClass}
-        width: 100%
-        text-align: center
-        padding-top: 10px
-        padding-bottom: 10px
+      .#{containerClass}
+        .#{headerClass}
+          width: 100%
+          text-align: center
+          padding-top: 10px
+          padding-bottom: 10px
 
-      .#{inputClass}
-        width: 100%
-        text-align: center
+        .#{inputClass}
+          width: 100%
+          text-align: center
 
-      th, td
-        border: 1px solid black
-        border-collapse: collapse
-        text-align: center
+        th, td
+          border: 1px solid black
+          border-collapse: collapse
+          text-align: center
 
-      table tr th:nth-child(-n+4)
-        width: 2.5%
+        table tr th:nth-child(-n+4)
+          width: 2.5%
 
-      table tr td:nth-child(-n+4)
-        height: 2%
+        table tr td:nth-child(-n+4)
+          height: 2%
 
-      table tr th:nth-child(n+5)
-        width: 3%
+        table tr th:nth-child(n+5)
+          width: 3%
 
-      table tr th:nth-child(n+9)
-        width: 6.5%
+        table tr th:nth-child(n+9)
+          width: 6.5%
 
-      table tr th:nth-child(n+14)
-        width: 10%
+        table tr th:nth-child(n+14)
+          width: 10%
     |]
 
 
@@ -131,7 +135,8 @@ instance RenderMessage FlexForm Label where
   renderMessage _   _        First     = "Erste Klausel"
   renderMessage _   ("en":_) Second    = "Second Clause"
   renderMessage _   _        Second    = "Zweite Klausel"
-  renderMessage _   _        Resolvent = "Resolvent"
+  renderMessage _   ("en":_) Resolvent = "Resolvent"
+  renderMessage _   _        Resolvent = "Resolvente"
 
 
 
@@ -169,13 +174,16 @@ fullResolutionForm steps clauses howToShow prefilledFields = addCss css $ do
     rowDefaults = prefilledFields ++ replicate
       (length rowIndices - length prefilledFields)
       (Nothing,Nothing,Nothing)
+
+    containerClass  :: String
+    containerClass = "full-resolution-form"
     inputClass = "clause-input"
     fSettings x = single . addCssClass inputClass .
       (if isNothing x then id else readOnly) . fieldSettingsLabel
 
     html token widgets = [whamlet|
       #{token}
-      <div .grid-container>
+      <div .#{containerClass}>
         $forall (clause, givenIndex) <- indexZip clauseStrings
           <span .flex-form-span .disabled-clauses>
             <input type=text value="#{clause}" .#{inputClass} disabled>
@@ -190,32 +198,31 @@ fullResolutionForm steps clauses howToShow prefilledFields = addCss css $ do
     |]
 
     css = [cassius|
-      .#{inputClass}
-        width:70%
-        margin-left:1em
+      .#{containerClass}
+          display:grid
+          grid-template-columns: 0.6fr 1.4fr 1.4fr 1.4fr 0.2fr
+          justify-items:center
+          align-items:end
+          column-gap: 0.5em
+          row-gap: 2em
 
-      .flex-form-span > label
-        display:block
+        .#{inputClass}
+          width:70%
+          margin-left:1em
 
-      .grid-container > p, .grid-container > label, .static-num
-        font-weight:bold
+        p, label, .static-num
+          font-weight:bold
 
-      .grid-container
-        display:grid
-        grid-template-columns: 0.6fr 1.4fr 1.4fr 1.4fr 0.2fr
-        justify-items:center
-        align-items:end
-        column-gap: 0.5em
-        row-gap: 2em
+        .flex-form-span
+          width:75%
+          label
+            display:block
 
-      .flex-form-span
-        width:75%
+        .disabled-clauses
+          grid-column-start: 4
+          align-self: start
 
-      .disabled-clauses
-        grid-column-start: 4
-        align-self: start
-
-      .flex-form-span:has(input[type="hidden"])
-        display:flex
-        align-items: center
+        .flex-form-span:has(input[type="hidden"])
+          display:flex
+          align-items: center
     |]
