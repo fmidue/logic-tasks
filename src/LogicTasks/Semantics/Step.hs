@@ -213,11 +213,9 @@ completeGrade' StepInst{..} sol =
           pure ()
 
         Just solClause -> if solClause == snd mSol
-          then do
-            instruct $ do
-              english "Your solution is correct."
+          then instruct $ do
               german "Ihre Lösung ist korrekt."
-            pure ()
+              english "Your solution is correct."
           else refuse $ indent $ do
             translate $ do
               german "Resolvente ist nicht korrekt."
