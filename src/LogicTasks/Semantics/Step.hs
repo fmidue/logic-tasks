@@ -22,7 +22,7 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
+import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey, instruct)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (when, unless)
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
@@ -213,7 +213,9 @@ completeGrade' StepInst{..} sol =
           pure ()
 
         Just solClause -> if solClause == snd mSol
-          then pure()
+          then instruct $ do
+              german "Ihre Lösung ist korrekt."
+              english "Your solution is correct."
           else refuse $ indent $ do
             translate $ do
               german "Resolvente ist nicht korrekt."

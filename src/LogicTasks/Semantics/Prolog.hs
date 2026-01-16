@@ -27,7 +27,7 @@ import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
 import Control.Monad (when)
-import LogicTasks.Helpers (example, extra)
+import LogicTasks.Helpers (example, extra, instruct)
 import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Delayed (Delayed, withDelayed, withDelayedSucceeding, complainAboutWrongNotation)
 import Formula.Parsing (Parse(..), prologClauseSetParser)
@@ -217,7 +217,9 @@ completeGrade' PrologInst{..} sol =
           pure ()
 
         Just solClause -> if solClause == transSol2
-                            then pure ()
+                            then instruct $ do
+                                      german "Ihre Lösung ist korrekt."
+                                      english "Your solution is correct."
                             else refuse $ indent $ do
                                     translate $ do
                                       german "Resolvente ist nicht korrekt."
