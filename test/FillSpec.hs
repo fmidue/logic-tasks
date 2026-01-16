@@ -81,8 +81,7 @@ validBoundsFillConfig = do
             maxNodes < 30
 
   percentageOfGaps <- chooseInt (1, 100)
-  percentTrueEntries' <- validBoundsPercentTrueEntries formulaConfig
-  let percentTrueEntries = Just percentTrueEntries'
+  percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
 
   pure $ FillConfig {
       formulaConfig

@@ -5,7 +5,6 @@ import Control.OutputCapable.Blocks (LangM)
 import Test.Hspec (Spec, describe, it)
 import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
-import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, chooseInt, forAll, suchThat)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -39,7 +38,7 @@ validBoundsPickConfig = do
 
   percentTrueEntries''@(l,h) <- validBoundsPercentTrueEntries formulaConfig
 
-  let percentTrueEntries = if h - l < 30 then Just percentTrueEntries' else Just percentTrueEntries''
+  let percentTrueEntries = if h - l < 30 then percentTrueEntries' else percentTrueEntries''
 
   pure $ PickConfig {
       formulaConfig
@@ -82,7 +81,7 @@ spec = do
     it "should respect percentTrueEntries" $
       forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         within (30 * 1000000) $ forAll (genPickInst pickConfig) $ \PickInst{..} ->
-          all (withRatio (fromMaybe (0, 100) percentTrueEntries)) formulas
+          all (withRatio percentTrueEntries) formulas
     it "the generated solution should pass grading" $
       forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         within (30 * 1000000) $ forAll (genPickInst pickConfig) $ \inst ->
