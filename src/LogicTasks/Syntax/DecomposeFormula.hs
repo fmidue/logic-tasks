@@ -164,11 +164,11 @@ completeGrade' path DecomposeFormulaInst{..} sol
       pure ()
 
     pure ()
-  | otherwise = do
+
+  | otherwise =
       instruct $ do
         english "Your solution is correct."
         german "Ihre Lösung ist korrekt."
-      pure ()
 
     where solTree = fromJust $ maybeTree sol
           swappedTree = swapKids tree
