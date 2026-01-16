@@ -79,6 +79,8 @@ withRatio (lower, upper) form =
     percentage = let totalEntries = 2 ^ length (atomics form) in \num -> totalEntries * num `div` 100
     lengthTrueEntries = length trueEntries
 
+
+
 checkTruthValueRange :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
 checkTruthValueRange (low,high) formulaConfig
     | isOutside 0 100 low || isOutside 0 100 high =
@@ -109,6 +111,8 @@ checkTruthValueRange (low,high) formulaConfig
         FormulaArbitrary synTreeConf -> length (availableAtoms synTreeConf)
 
       checkRangeTooSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
+
+
 
 checkBaseConf :: OutputCapable m => BaseConfig -> LangM m
 checkBaseConf BaseConfig{..}
@@ -186,6 +190,7 @@ checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
 checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
 checkTruthValueRangeAndFormulaConf range formulaConf = do
   checkFullRangeForSynTrees range formulaConf
+  checkTruthValueRange range formulaConf
   case formulaConf of
     (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
     (FormulaDnf dnfCfg) -> checkNormalFormConfig dnfCfg

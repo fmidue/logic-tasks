@@ -17,7 +17,6 @@ import Config (
   dNormalFormConf
  )
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
-import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -132,7 +131,7 @@ spec = do
     it "should respect percentTrueEntries" $
       forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} ->
         within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \FillInst{..} ->
-          withRatio (fromMaybe (0, 100) percentTrueEntries) formula
+          withRatio percentTrueEntries formula
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsFillConfig $ \fillConfig -> do
         within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \fillInst ->
