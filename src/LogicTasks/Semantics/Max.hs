@@ -28,7 +28,6 @@ import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, with
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
-import LogicTasks.Config (FormulaConfig(..))
 
 
 
