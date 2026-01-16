@@ -141,7 +141,7 @@ completeGrade' path inst sol
             german "Eine mögliche Lösung für diese Aufgabe ist:"
 
         pure ()
-    
+
     | otherwise =
         instruct $ do
           english "Your solution is correct."
