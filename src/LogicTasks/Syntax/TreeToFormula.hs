@@ -141,11 +141,12 @@ completeGrade' path inst sol
             german "Eine mögliche Lösung für diese Aufgabe ist:"
 
         pure ()
-    | otherwise = do
+    
+    | otherwise =
         instruct $ do
           english "Your solution is correct."
           german "Ihre Lösung ist korrekt."
-        pure ()
+
   where treeAnswer = fromJust (maybeTree sol)
         correctTree = tree inst
 
