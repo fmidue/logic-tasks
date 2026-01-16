@@ -36,7 +36,6 @@ import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, f
 import LogicTasks.Helpers (extra, reject)
 import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
-import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
