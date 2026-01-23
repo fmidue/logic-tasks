@@ -50,7 +50,7 @@ defaultSuperfluousBracketsConfig =
       }
     , superfluousBracketPairs = 2
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
