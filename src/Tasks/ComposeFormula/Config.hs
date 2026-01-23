@@ -45,7 +45,7 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
       }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
     , extraText = NoExtraText
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 

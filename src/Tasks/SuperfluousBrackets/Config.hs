@@ -49,7 +49,7 @@ defaultSuperfluousBracketsConfig =
       }
     , superfluousBracketPairs = 2
     , extraText = NoExtraText
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
