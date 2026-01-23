@@ -365,7 +365,7 @@ instance Parse PickInst where
         printSol <- lexeme text'
         bonusText <- optionMaybe $ lexeme text'
         char ')'
-        pure $ PickInst cs (read index) (read printSol) (maybe NoExtraText Static (fromList . read <$> bonusText))
+        pure $ PickInst cs (read index) (read printSol) (maybe NoExtraText (Static . fromList . read) bonusText)
           where
             text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
