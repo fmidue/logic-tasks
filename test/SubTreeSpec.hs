@@ -21,7 +21,7 @@ import Trees.Parsing ()
 import Trees.Types (SynTree, BinOp, PropFormula, FormulaAnswer (FormulaAnswer))
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Formula.Parsing (Parse(parser))
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import LogicTasks.Syntax.SubTreeSet (description, verifyInst, partialGrade', completeGrade')
 import System.IO.Temp (withSystemTempDirectory)
 import Test.QuickCheck.Property (within)
@@ -37,7 +37,7 @@ validBoundsSubTreeConfig = do
         syntaxTreeConfig
       , allowSameSubTree
       , subTreeAmount
-      , extraText = Nothing
+      , extraText = NoExtraText
       , printSolution = False
       , offerUnicodeInput = False
       }

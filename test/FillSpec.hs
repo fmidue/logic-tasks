@@ -5,7 +5,7 @@ module FillSpec where
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
-import Control.OutputCapable.Blocks (LangM, Rated)
+import Control.OutputCapable.Blocks (LangM, Rated, ExtraText(NoExtraText))
 import Config (
   dFillConf,
   FillConfig (..),
@@ -90,7 +90,7 @@ validBoundsFillConfig = do
     , percentageOfGaps
     , percentTrueEntries
     , printSolution = False
-    , extraText = Nothing
+    , extraText = NoExtraText
     }
 
 spec :: Spec

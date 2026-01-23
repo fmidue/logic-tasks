@@ -11,10 +11,9 @@ module Tasks.SubTree.Config (
     ) where
 
 
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
 import Data.Set (Set)
 import GHC.Generics (Generic)
-import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
@@ -30,7 +29,7 @@ data SubTreeConfig =
       syntaxTreeConfig :: SynTreeConfig
     , allowSameSubTree :: Bool
     , subTreeAmount :: Integer
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     } deriving (Show,Generic)
@@ -43,7 +42,7 @@ defaultSubTreeConfig =
     { syntaxTreeConfig = defaultSynTreeConfig
     , allowSameSubTree = True
     , subTreeAmount = 3
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = False
     , offerUnicodeInput = False
     }
@@ -81,6 +80,6 @@ data SubTreeInst =
     , inputTreeAmount :: Integer
     , showArrowOperators :: Bool
     , showSolution :: Bool
-    , addText :: Maybe (Map Language String)
+    , addText :: ExtraText
     , unicodeAllowed :: Bool
     } deriving (Show,Generic)

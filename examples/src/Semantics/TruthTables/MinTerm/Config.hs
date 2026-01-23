@@ -8,7 +8,7 @@ import LogicTasks.Config (
 import Test.Hspec
 import LogicTasks.Util (checkNormalFormConfig)
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
 
 -- Weight 0.2
 -- Type: Min
@@ -24,7 +24,7 @@ unused03 = MinMaxConfig
     , maxClauseAmount = 3
     }
   , percentTrueEntries = Just (55, 70)
-  , extraText = Nothing
+  , extraText = NoExtraText
   , printSolution = True
   , offerUnicodeInput = False
   }

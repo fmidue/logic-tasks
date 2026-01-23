@@ -24,7 +24,7 @@ import Tasks.LegalNormalForm.Config (
   )
 import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree, )
 import Tasks.LegalNormalForm.Quiz (generateLegalCNFInst, generateLegalDNFInst)
-import Control.OutputCapable.Blocks (Language(German), LangM, Rated)
+import Control.OutputCapable.Blocks (Language(German), LangM, Rated, ExtraText(NoExtraText))
 import Control.OutputCapable.Blocks.Debug(checkConfigWith)
 
 import FormulaSpec (validBoundsNormalFormParams)
@@ -67,7 +67,7 @@ validBoundsLegalNormalFormConfig = do
           minStringSize = minClauseAmount * ((minClauseLength - 1) * 4 + 1),
           allowArrowOperators,
           printDetailedSolution = Nothing,
-          extraText = Nothing
+          extraText = NoExtraText
         }
 
 invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
@@ -101,7 +101,7 @@ invalidBoundsLegalCNF = do
           minStringSize,
           allowArrowOperators = False,
           printDetailedSolution = Nothing,
-          extraText = Nothing
+          extraText = NoExtraText
         }
 
 timeout :: Int

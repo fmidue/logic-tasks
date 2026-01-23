@@ -19,7 +19,7 @@ import Text.PrettyPrint.Leijen.Text
 import Data.Map (toList)
 import Data.Maybe (isJust, fromJust)
 import Trees.Print ()
-
+import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static, Collapsible))
 
 myText :: String -> Doc
 myText = text . pack
@@ -147,9 +147,13 @@ instance Pretty PickInst where
                            [ nest 2 $ pretty formulas
                            , char ',' <+> pretty correct
                            , myText (", {" ++ show showSolution ++ "}")
-                           , maybe empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
+                           , extraText empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
                            , char ')'
                            ]
+      where
+        extraText onNo _ NoExtraText = onNo
+        extraText _ func (Static s) = func s
+        extraText _ func (Collapsible _ s _) = func s
 
 
 instance Pretty FormulaInst where

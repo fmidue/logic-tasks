@@ -43,6 +43,7 @@ import UniversalParser
 import Trees.Types (SynTree, BinOp)
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
+import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static))
 
 resStepsParser :: Parser Clause -> Parser [ResStep]
 resStepsParser parseClause = (lexeme (listParse (resStepParser parseClause)) <?> "List")
@@ -364,7 +365,7 @@ instance Parse PickInst where
         printSol <- lexeme text'
         bonusText <- optionMaybe $ lexeme text'
         char ')'
-        pure $ PickInst cs (read index) (read printSol) (fromList . read <$> bonusText)
+        pure $ PickInst cs (read index) (read printSol) (maybe NoExtraText Static (fromList . read <$> bonusText))
           where
             text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do

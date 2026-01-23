@@ -14,9 +14,8 @@ module Tasks.LegalProposition.Config (
     ) where
 
 
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
 import GHC.Generics (Generic)
-import Data.Map (Map)
 import qualified Data.Map as Map (filter)
 
 import LogicTasks.Helpers (reject)
@@ -35,7 +34,7 @@ data LegalPropositionConfig =
     , formulas :: Integer
     , illegals :: Integer
     , bracketFormulas :: Integer
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printDetailedSolution :: Maybe Bool
     } deriving (Show,Generic)
 
@@ -47,7 +46,7 @@ defaultLegalPropositionConfig =
     , formulas = 5
     , illegals = 2
     , bracketFormulas = 1
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printDetailedSolution = Nothing
     }
 
@@ -103,5 +102,5 @@ data LegalPropositionInst =
     {
       formulaInfos :: [(Int, PropFormulaInfo, String)]
     , showSolution :: Maybe Bool
-    , addText :: Maybe (Map Language String)
+    , addText :: ExtraText
     } deriving (Show,Generic)
