@@ -147,14 +147,20 @@ instance Pretty PickInst where
                            [ nest 2 $ pretty formulas
                            , char ',' <+> pretty correct
                            , myText (", {" ++ show showSolution ++ "}")
-                           , extraText empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
+                           , char ','
+                           , pretty addText
                            , char ')'
                            ]
-      where
-        extraText onNo _ NoExtraText = onNo
-        extraText _ func (Static s) = func s
-        extraText _ func (Collapsible _ s _) = func s
 
+instance Pretty ExtraText where
+  pretty NoExtraText = text "NoExtraText"
+  pretty (Static s) = myText ("Static({" ++ show (toList s) ++ "})")
+  pretty (Collapsible c s s') = text "Collapsible(" <> vcat
+                           [ myText $ show c
+                           , myText (", {" ++ show (toList s) ++ "}")
+                           , myText (", {" ++ show (toList s') ++ "}")
+                           , char ')'
+                           ]
 
 instance Pretty FormulaInst where
   pretty (InstCnf cnf) = text "Cnf{" <> pretty cnf <> char '}'
