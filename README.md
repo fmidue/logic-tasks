@@ -38,7 +38,7 @@ You can use the `testModule` function in order to test a module. A sample call l
 
 ```text
 $ stack repl --package=autotool-capabilities-io-instances
-ghci> :m + Capabilities.Alloy.IO Capabilities.Cache.IO Capabilities.Diagrams.IO Capabilities.Graphviz.IO Capabilities.LatexSvg.IO Capabilities.PlantUml.IO Capabilities.WriteFile.IO
+ghci> :m + Capabilities.Cache.IO Capabilities.LatexSvg.IO
 ghci> testModule (Just AutoLeijen) German (genFillInst dFillConf) (LogicTasks.Semantics.Fill.description True) LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
 ```
 
