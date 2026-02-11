@@ -9,6 +9,7 @@ import LogicTasks.Config (
 
 import Test.Hspec
 import Util.VerifyConfig
+import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 -- 2023: Weight 0.33
 task08 :: PickConfig
@@ -25,7 +26,7 @@ task08 = PickConfig
                   })
   , amountOfOptions = 3
   , percentTrueEntries = Nothing
-  , extraText = Nothing
+  , extraText = NoExtraText
   , printSolution = True
   }
 
@@ -45,7 +46,7 @@ task12 = PickConfig
   , amountOfOptions = 4
   , percentTrueEntries = Just (30,70)
   , printSolution = True
-  , extraText = Nothing
+  , extraText = NoExtraText
   }
 
 spec :: Spec

@@ -12,7 +12,7 @@ import Tasks.DecomposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import Data.Maybe (fromJust)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
 import Trees.Helpers (bothKids, binOp, swapKids)
@@ -37,7 +37,7 @@ validBoundsDecomposeFormulaConfig = do
         , (Equi, 1)
         ]
     },
-    extraText = Nothing,
+    extraText = NoExtraText,
     printSolution = False,
     offerUnicodeInput = False
   }

@@ -9,7 +9,7 @@ import Tasks.LegalNormalForm.Config (
   )
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
 
 -- 2025: Weight 0.25, used for CNFs
 task08 :: LegalNormalFormConfig
@@ -28,7 +28,7 @@ task08 = LegalNormalFormConfig
   , minStringSize = 12
   , allowArrowOperators = True
   , printDetailedSolution = Just True
-  , extraText = Nothing
+  , extraText = NoExtraText
   }
 
 -- 2025: Weight 0.25, used for DNFs
@@ -48,7 +48,7 @@ task09 = LegalNormalFormConfig
   , minStringSize = 12
   , allowArrowOperators = False
   , printDetailedSolution = Just True
-  , extraText = Nothing
+  , extraText = NoExtraText
   }
 
 -- 2023: Weight 0.25
@@ -67,7 +67,7 @@ task18 = LegalNormalFormConfig
   , maxStringSize = 50
   , minStringSize = 12
   , allowArrowOperators = False
-  , extraText = Nothing
+  , extraText = NoExtraText
   , printDetailedSolution = Just True
   }
 

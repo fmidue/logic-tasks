@@ -43,6 +43,8 @@ import UniversalParser
 import Trees.Types (SynTree, BinOp)
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
+import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static, Collapsible))
+import Text.Parsec ( optional, option )
 
 resStepsParser :: Parser Clause -> Parser [ResStep]
 resStepsParser parseClause = (lexeme (listParse (resStepParser parseClause)) <?> "List")
@@ -362,15 +364,48 @@ instance Parse PickInst where
         tokenSymbol ","
         index <- lexeme $ many1 digit
         printSol <- lexeme text'
-        bonusText <- optionMaybe $ lexeme text'
+        bonusText <- option NoExtraText (tokenSymbol "," *> (parser :: Parser ExtraText))
         char ')'
-        pure $ PickInst cs (read index) (read printSol) (fromList . read <$> bonusText)
+        pure $ PickInst cs (read index) (read printSol) bonusText
           where
             text' = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
               char ','
               spaces
               char '{'
+
+instance Parse ExtraText where
+  parser = lexeme (parseNo <|> parseStatic <|> parseCollapsible <|> parseLegacyAsStatic)
+    where
+      parseNo = do
+        string "NoExtraText"
+        pure NoExtraText
+      parseStatic = do
+        string "Static"
+        spaces
+        tokenSymbol "("
+        s <- lexeme text'
+        tokenSymbol ")"
+        pure $ Static (fromList (read s))
+      parseCollapsible = do
+        string "Collapsible"
+        spaces
+        tokenSymbol "("
+        c <- lexeme parseBool
+        s <- lexeme text'
+        s' <- lexeme text'
+        tokenSymbol ")"
+        pure $ Collapsible c (fromList (read s)) (fromList (read s'))
+      parseLegacyAsStatic = do
+        bonusText <- optionMaybe $ lexeme text'
+        pure $ maybe NoExtraText (Static . fromList . read) bonusText
+      text' = between start (char '}') $ many1 $ satisfy ( /= '}')
+      parseBool =  (string "True"  >> pure True)
+             <|> (string "False" >> pure False)
+      start = do
+        optional (char ',')
+        spaces
+        char '{'
 
 instance Parse FormulaInst where
   parser = lexeme (parseCNF <|> parseDNF <|> parseSynTree)

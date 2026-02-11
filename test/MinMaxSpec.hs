@@ -4,7 +4,7 @@
 module MinMaxSpec where
 
 import Test.Hspec (Spec, describe, it, xit)
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import Test.QuickCheck (Gen, chooseAny, forAll)
 import qualified LogicTasks.Semantics.Max as Max (verifyQuiz, verifyStatic, genMaxInst, description, partialGrade', completeGrade')
 import qualified LogicTasks.Semantics.Min as Min (verifyQuiz, verifyStatic, genMinInst, description, partialGrade', completeGrade')
@@ -31,7 +31,7 @@ validBoundsMinMaxConfig = do
     -- A satisfying formula is frequently not found, even with large intervals.
     , percentTrueEntries = Nothing
     , printSolution
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput
     }
 

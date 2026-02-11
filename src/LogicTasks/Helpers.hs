@@ -15,15 +15,16 @@ import Control.OutputCapable.Blocks (
   translations,
   translatedCode,
   localise,
+  ExtraText,
+  extra
   )
-import Control.Monad.State (State, put)
+import Control.Monad.State (State)
 import Data.Map (Map)
 
 
 
-extra :: OutputCapable m => Maybe (Map Language String) -> LangM m
-extra (Just extraMap) = paragraph $ translate $ put extraMap
-extra _ = pure ()
+extra :: OutputCapable m => ExtraText -> LangM m
+extra = Control.OutputCapable.Blocks.extra
 
 indexed :: [String] -> [String]
 indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])

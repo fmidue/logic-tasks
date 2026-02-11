@@ -14,11 +14,10 @@ module Tasks.ComposeFormula.Config (
 -- jscpd:ignore-start
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
 import Data.Data (Data)
-import Data.Map (Map)
 import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
 import GHC.Generics
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
 import LogicTasks.Helpers (reject)
 -- jscpd:ignore-end
 
@@ -27,7 +26,7 @@ data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bou
 data ComposeFormulaConfig = ComposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
     , treeDisplayModes :: (TreeDisplayMode, TreeDisplayMode)
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
@@ -45,7 +44,7 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
         ]
       }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = True
     , offerUnicodeInput = False
     }
@@ -76,7 +75,7 @@ data ComposeFormulaInst = ComposeFormulaInst
                , rightTree :: SynTree BinOp Char
                , leftTreeImage :: Maybe String
                , rightTreeImage :: Maybe String
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
