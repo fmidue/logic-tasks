@@ -123,17 +123,16 @@ arrowsKey = arrowsKey' [Impl, BackImpl, Equi]
 arrowsKey' :: OutputCapable m => [BinOp] -> LangM m
 arrowsKey' [] = pure ()
 arrowsKey' (op:os)
-  | op == Impl || op == BackImpl =
+  | op == Equi = go "<=>" os $ do
+      english "Bi-Implication:"
+      german "Bi-Implikation:"
+  | otherwise =
     let hasImpl = op == Impl     || Impl     `elem` os
         hasBack = op == BackImpl || BackImpl `elem` os
     in
       go (selectArrow hasImpl hasBack) (filter (`notElem` [Impl, BackImpl]) os) $ do
         english "Implication:"
         german "Implikation:"
-  | op == Equi = go "<=>" os $ do
-      english "Bi-Implication:"
-      german "Bi-Implikation:"
-  | otherwise = arrowsKey' os
   where
     go codeString xs x = do
       paragraph $ indent $ do
