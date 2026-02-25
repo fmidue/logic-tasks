@@ -14,7 +14,7 @@ module Tasks.SynTree.Config (
 import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
-import Data.Map (Map, lookup)
+import Data.Map (Map)
 import qualified Data.Map as Map (fromList, filter, keys)
 
 import LogicTasks.Helpers (reject)
