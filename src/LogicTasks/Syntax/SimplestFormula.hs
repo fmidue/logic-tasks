@@ -43,6 +43,7 @@ import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 
+
 description :: OutputCapable m => SuperfluousBracketsInst -> LangM m
 description SuperfluousBracketsInst{..} = do
     instruct $ do

@@ -39,7 +39,7 @@ opFrequencies = Map.fromList
   [ (And, 1)
   , (Or, 1)
   , (Impl, 1)
-  , (BackImpl, 1) -- should be (BackImpl, 0) in future
+  , (BackImpl, 1)
   , (Equi, 1)
   ]
 

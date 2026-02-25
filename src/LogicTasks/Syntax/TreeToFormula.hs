@@ -44,7 +44,6 @@ import Data.List ((\\), intercalate)
 import Data.List.Extra (notNull)
 
 
-
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
 description path TreeToFormulaInst{..} = do
     instruct $ do

@@ -34,6 +34,7 @@ import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 
+
 description :: OutputCapable m => DecomposeFormulaInst -> LangM m
 description DecomposeFormulaInst{..} = do
 
