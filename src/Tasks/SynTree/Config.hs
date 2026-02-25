@@ -141,12 +141,10 @@ checkSynTreeConfig SynTreeConfig {..}
     | otherwise = pure ()
 
 getArrows :: SynTreeConfig -> [BinOp]
-getArrows syntaxTreeConfig = filter
-  (\x ->
-    case Data.Map.lookup x (binOpFrequencies syntaxTreeConfig) of
-      Nothing -> False
-      Just frequency -> frequency /= 0
-  ) [Impl, BackImpl, Equi]
+getArrows syntaxTreeConfig =
+    let nonZeroOperators =
+            Map.keys (Map.filter (/= 0) (binOpFrequencies syntaxTreeConfig))
+    in filter (`elem` nonZeroOperators) [Impl, BackImpl, Equi]
 
 checkArrowOperatorsToShow :: [BinOp] -> Bool
 checkArrowOperatorsToShow = all (`elem` [Impl, BackImpl, Equi])
