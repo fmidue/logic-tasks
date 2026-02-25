@@ -6,7 +6,9 @@
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
     checkSynTreeConfig,
-    defaultSynTreeConfig
+    defaultSynTreeConfig,
+    getArrows,
+    checkArrowOperatorsToShow
     ) where
 
 import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german)
@@ -137,3 +139,12 @@ checkSynTreeConfig SynTreeConfig {..}
         english "Among the binary operators and the negation operator, at least three frequencies must be non-zero."
         german "Unter den binären Operatoren und dem Negationsoperator müssen mindestens drei Häufigkeiten ungleich null sein."
     | otherwise = pure ()
+
+getArrows :: SynTreeConfig -> [BinOp]
+getArrows syntaxTreeConfig =
+    let nonZeroOperators =
+            Map.keys (Map.filter (/= 0) (binOpFrequencies syntaxTreeConfig))
+    in filter (`elem` nonZeroOperators) [Impl, BackImpl, Equi]
+
+checkArrowOperatorsToShow :: [BinOp] -> Bool
+checkArrowOperatorsToShow = all (`elem` [Impl, BackImpl, Equi])
