@@ -307,13 +307,8 @@ dPickConf :: PickConfig
 dPickConf = PickConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , amountOfOptions = 3
-<<<<<<< Atomanzahl-beschraenken
-    , percentTrueEntries = (30,70)
-    , printSolution = False
-=======
-    , percentTrueEntries = Just (30,70)
+    , percentTrueEntries = (30, 70)
     , printSolution = True
->>>>>>> master
     , extraText = Nothing
     }
 
@@ -332,13 +327,8 @@ dFillConf :: FillConfig
 dFillConf = FillConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfGaps = 40
-<<<<<<< Atomanzahl-beschraenken
-    , percentTrueEntries = (30,70)
-    , printSolution = False
-=======
-    , percentTrueEntries = Just (30,70)
+    , percentTrueEntries = (30, 70)
     , printSolution = True
->>>>>>> master
     , extraText = Nothing
     }
 
@@ -356,13 +346,8 @@ data MinMaxConfig = MinMaxConfig {
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
     { normalFormConf = dNormalFormConf
-<<<<<<< Atomanzahl-beschraenken
-    , percentTrueEntries = (50,70)
-    , printSolution = False
-=======
-    , percentTrueEntries = Just (50,70)
+    , percentTrueEntries = (50, 70)
     , printSolution = True
->>>>>>> master
     , extraText = Nothing
     , offerUnicodeInput = False
     }
@@ -382,13 +367,8 @@ dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfChanged = 40
-<<<<<<< Atomanzahl-beschraenken
-    , percentTrueEntries = (30,70)
-    , printSolution = False
-=======
-    , percentTrueEntries = Just (30,70)
+    , percentTrueEntries = (30, 70)
     , printSolution = True
->>>>>>> master
     , extraText = Nothing
     }
 
