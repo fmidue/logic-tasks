@@ -88,7 +88,7 @@ dPickInst :: PickInst
 dPickInst =  PickInst
           { formulas = [InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']], InstCnf $ mkCnf [mkClause [Negative 'A', Positive 'B']]]
           , correct = 1
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -105,7 +105,7 @@ data MaxInst = MaxInst {
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Positive 'A', Negative 'B']]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           , unicodeAllowed = False
           }
@@ -124,7 +124,7 @@ data MinInst = MinInst {
 dMinInst :: MinInst
 dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Positive 'A', Negative 'B']]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           , unicodeAllowed = False
           }
@@ -145,7 +145,7 @@ dFillInst =  FillInst
           { formula = InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']]
           , missing = [1,4]
           , missingValues = [True, True]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -163,7 +163,7 @@ dDecideInst :: DecideInst
 dDecideInst =  DecideInst
           { formula = InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']]
           , changed = [1,4]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -186,7 +186,7 @@ dStepInst =  StepInst
           , clause2 = mkClause [Positive 'A', Negative 'C']
           , solution = (Positive 'A', mkClause [Negative 'C', Positive 'B'])
           , usesSetNotation = False
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           , unicodeAllowed = False
           }
@@ -253,7 +253,7 @@ dPrologInst =  PrologInst
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
           , solution = (PrologLiteral True "pred" ["fact"], mkPrologClause [])
           , usesSetNotation = False
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -307,8 +307,13 @@ dPickConf :: PickConfig
 dPickConf = PickConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , amountOfOptions = 3
+<<<<<<< Atomanzahl-beschraenken
     , percentTrueEntries = (30,70)
     , printSolution = False
+=======
+    , percentTrueEntries = Just (30,70)
+    , printSolution = True
+>>>>>>> master
     , extraText = Nothing
     }
 
@@ -327,8 +332,13 @@ dFillConf :: FillConfig
 dFillConf = FillConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfGaps = 40
+<<<<<<< Atomanzahl-beschraenken
     , percentTrueEntries = (30,70)
     , printSolution = False
+=======
+    , percentTrueEntries = Just (30,70)
+    , printSolution = True
+>>>>>>> master
     , extraText = Nothing
     }
 
@@ -346,8 +356,13 @@ data MinMaxConfig = MinMaxConfig {
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
     { normalFormConf = dNormalFormConf
+<<<<<<< Atomanzahl-beschraenken
     , percentTrueEntries = (50,70)
     , printSolution = False
+=======
+    , percentTrueEntries = Just (50,70)
+    , printSolution = True
+>>>>>>> master
     , extraText = Nothing
     , offerUnicodeInput = False
     }
@@ -367,8 +382,13 @@ dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfChanged = 40
+<<<<<<< Atomanzahl-beschraenken
     , percentTrueEntries = (30,70)
     , printSolution = False
+=======
+    , percentTrueEntries = Just (30,70)
+    , printSolution = True
+>>>>>>> master
     , extraText = Nothing
     }
 
@@ -387,7 +407,7 @@ dStepConf :: StepConfig
 dStepConf = StepConfig
     { baseConf = dBaseConf
     , useSetNotation = False
-    , printSolution = False
+    , printSolution = True
     , extraText = Nothing
     , offerUnicodeInput = False
     }
@@ -412,7 +432,7 @@ dPrologConf = PrologConfig
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , firstClauseShape = HornClause Query
     , secondClauseShape = HornClause Procedure
     , useSetNotation = False
