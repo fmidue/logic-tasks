@@ -44,7 +44,7 @@ defaultSubTreeConfig =
     , allowSameSubTree = True
     , subTreeAmount = 3
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 

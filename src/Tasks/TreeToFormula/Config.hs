@@ -27,7 +27,7 @@ defaultTreeToFormulaConfig :: TreeToFormulaConfig
 defaultTreeToFormulaConfig = TreeToFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
