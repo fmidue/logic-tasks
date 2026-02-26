@@ -29,7 +29,7 @@ validBoundsMinMaxConfig = do
     { normalFormConf = normalFormConf
     -- Restrictions on this lead to infinite loops.
     -- A satisfying formula is frequently not found, even with large intervals.
-    , percentTrueEntries = (0,100)
+    , percentTrueEntries = (0, 100)
     , printSolution
     , extraText = Nothing
     , offerUnicodeInput

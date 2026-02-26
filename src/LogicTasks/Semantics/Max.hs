@@ -99,7 +99,7 @@ verifyQuiz MinMaxConfig{..} = do
   checkNormalFormConfig normalFormConf
   pure ()
   where
-    (low,high) = percentTrueEntries
+    (low, high) = percentTrueEntries
 
 
 

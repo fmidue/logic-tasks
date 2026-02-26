@@ -297,7 +297,7 @@ dNormalFormConf = NormalFormConfig
 data PickConfig = PickConfig {
        formulaConfig :: FormulaConfig
      , amountOfOptions :: Int
-     , percentTrueEntries :: (Int,Int)
+     , percentTrueEntries :: (Int, Int)
      , printSolution :: Bool
      , extraText :: Maybe (Map Language String)
      }
@@ -317,7 +317,7 @@ dPickConf = PickConfig
 data FillConfig = FillConfig {
       formulaConfig :: FormulaConfig
     , percentageOfGaps :: Int
-    , percentTrueEntries :: (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -336,7 +336,7 @@ dFillConf = FillConfig
 
 data MinMaxConfig = MinMaxConfig {
       normalFormConf :: NormalFormConfig
-    , percentTrueEntries :: (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
@@ -357,7 +357,7 @@ dMinMaxConf = MinMaxConfig
 data DecideConfig = DecideConfig {
       formulaConfig :: FormulaConfig
     , percentageOfChanged :: Int
-    , percentTrueEntries :: (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
