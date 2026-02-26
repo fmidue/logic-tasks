@@ -32,7 +32,7 @@ task11 = DecideConfig
                    , maxClauseAmount = 3
                    })
   , percentageOfChanged = 40
-  , percentTrueEntries = Just (30,70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
   , extraText = Nothing
   }
@@ -60,7 +60,7 @@ task13 = DecideConfig
                         , minUniqueBinOperators = 4
                         })
   , percentageOfChanged = 30
-  , percentTrueEntries = Just (30,70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
   , extraText = Nothing
   }

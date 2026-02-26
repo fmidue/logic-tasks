@@ -36,7 +36,6 @@ import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, f
 import LogicTasks.Helpers (extra, reject)
 import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
-import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
@@ -45,15 +44,14 @@ import GHC.Real ((%))
 
 genDecideInst :: DecideConfig -> Gen DecideInst
 genDecideInst DecideConfig{..} = do
-    let percentTrueEntries' = fromMaybe (0, 100) percentTrueEntries
     -- jscpd:ignore-start
     formula <- flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` withRatio percentTrueEntries'
+        InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` withRatio percentTrueEntries
       (FormulaCnf cnfCfg) ->
-        InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+        InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries
       (FormulaDnf dnfCfg) ->
-        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
+        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries
     -- jscpd:ignore-end
 
     let
@@ -169,9 +167,7 @@ verifyQuiz DecideConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf range formulaConfig
-  where
-    range = fromMaybe (0,100) percentTrueEntries
+    | otherwise = checkTruthValueRangeAndFormulaConf percentTrueEntries formulaConfig
 
 
 
