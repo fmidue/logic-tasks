@@ -30,7 +30,7 @@ import Trees.Types                      (BinOp(..))
 import qualified Data.Map               as Map (fromList)
 
 
--- 2024: Weight 0.33 (in Logik)
+-- 2025: Weight 0.33 (in Logik)
 task03 :: ComposeFormulaConfig
 task03 = ComposeFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -44,7 +44,7 @@ task03 = ComposeFormulaConfig
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
-      , (BackImpl, 1)
+      , (BackImpl, 1) -- should be (BackImpl, 0) in future
       , (Equi, 1)
       ]
     , negOpFrequency = 1
@@ -77,11 +77,12 @@ module TaskData where
 
 import Control.Monad.Random             (MonadRandom)
 import Data.String.Interpolate          (i)
+import FlexTask.FormUtil                (addCss, addCssClass)
 import FlexTask.Generic.Form
 import FlexTask.GenUtil                 (fromGen)
 import FlexTask.YesodConfig             (Rendered, Widget)
 import Tasks.ComposeFormula.Quiz        (generateComposeFormulaInst)
-import Yesod                            (RenderMessage(..), fieldSettingsLabel)
+import Yesod                            (RenderMessage(..), cassius, fieldSettingsLabel)
 
 import Global                           (TaskData)
 import TaskSettings                     (task03)
@@ -102,10 +103,26 @@ getTask = fromGen $ do
     pure (inst, checkers, form)
 
 fields :: [[FieldInfo]]
-fields = [[list Horizontal $ map fieldSettingsLabel [First, Second]]]
+fields = [[list Horizontal $ map (addCssClass "formula-input" . fieldSettingsLabel) [First, Second]]]
 
 form :: Rendered Widget
-form = formify (Nothing :: Maybe [String]) fields
+form = addCss inputCss $ formify (Nothing :: Maybe [String]) fields
+  where
+    inputCss = [cassius|
+      .flex-form-span
+        --margin: 1em
+        display: inline-block
+        margin-top: var(--margin)
+        margin-right: var(--margin)
+        width: min(calc(100% - var(--margin)), 25em)
+
+        .formula-input
+          width: 100%
+          margin-left: 0.5em
+
+        label
+          display: block
+    |]
 
 checkers :: String
 checkers = [i|

@@ -9,7 +9,7 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 
--- 2024: Weight 0.3
+-- 2025: Weight 0.3
 task07 :: FillConfig
 task07 = FillConfig
   { formulaConfig =
@@ -24,7 +24,7 @@ task07 = FillConfig
                   , percentPosLiterals = (0,100)
                   })
   , percentageOfGaps = 60
-  , percentTrueEntries = Just (30, 70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
   , extraText = Nothing
   }
@@ -44,7 +44,7 @@ task20 = FillConfig
                    , percentPosLiterals = (0,100)
                    })
   , percentageOfGaps = 40
-  , percentTrueEntries = Just (35, 65)
+  , percentTrueEntries = (35, 65)
   , extraText = Nothing
   , printSolution = True
   }

@@ -1,17 +1,19 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE LambdaCase #-}
 module ResolutionSpec where
 
 import Test.Hspec
 import Formula.Resolution (applySteps)
 import Data.Maybe (isJust, fromJust, isNothing)
-import Formula.Types (Clause(Clause), Literal (..))
+import Formula.Types (Clause(Clause), Literal (..), Formula (literals))
 import qualified Data.Set
-import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution))
-import Test.QuickCheck (Gen, choose, suchThat, forAll)
+import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution, clauses))
+import Test.QuickCheck (Gen, chooseInt, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM)
 import FillSpec (validBoundsBaseConfig)
 import TestHelpers (doesNotRefuse)
+import Test.QuickCheck.Property (within)
 
 justA :: Clause
 justA = Clause (Data.Set.fromList [Positive 'A'])
@@ -31,11 +33,18 @@ justB = Clause (Data.Set.fromList [Positive 'B'])
 emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
 
+containsNoTautologies :: [Clause] -> Bool
+containsNoTautologies = all ((\theList -> length theList == length (Data.Set.fromList theList)) . list)
+  where
+    list = map (\case
+      Positive y -> y
+      Negative y -> y)
+      . literals
+
 validBoundsResolutionConfig :: Gen ResolutionConfig
 validBoundsResolutionConfig = do
   baseConf <- validBoundsBaseConfig
-  minSteps <- choose (1,10) `suchThat` \ms ->
-    (maxClauseLength baseConf > 1 || ms == 1) && ms <= 2 * length (usedAtoms baseConf)
+  minSteps <- chooseInt (1, min (if maxClauseLength baseConf > 1 then 10 else 1) (2 * length (usedAtoms baseConf) - 1))
   pure $ ResolutionConfig {
     baseConf
   , minSteps
@@ -79,20 +88,24 @@ spec = do
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsResolutionConfig $ \resConfig ->
-        forAll (genResInst resConfig) $ \resInst ->
+        within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (description resInst :: LangM Maybe)
   describe "genResInst" $ do
     it "should required at least minSteps amount of steps" $
       forAll validBoundsResolutionConfig $ \resConfig ->
-        forAll (genResInst resConfig) $ \resInst ->
+        within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
           minSteps resConfig <= length (solution resInst)
+    it "should contain no clause with a literal that appears both positively and negatively" $
+      forAll validBoundsResolutionConfig $ \resConfig ->
+        within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
+          containsNoTautologies (clauses resInst)
     it "should pass verifyStatic" $
       forAll validBoundsResolutionConfig $ \resConfig ->
-        forAll (genResInst resConfig) $ \resInst ->
+        within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (verifyStatic resInst :: LangM Maybe)
     it "should generate the correct solution" $
       forAll validBoundsResolutionConfig $ \resConfig ->
-        forAll (genResInst resConfig) $ \resInst ->
+        within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (partialGrade' resInst (solution resInst) :: LangM Maybe) &&
           doesNotRefuse (completeGrade' resInst (solution resInst) :: LangM Maybe)
 

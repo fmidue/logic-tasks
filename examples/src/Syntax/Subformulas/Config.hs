@@ -16,7 +16,7 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.3
+-- 2025: Weight 0.3
 task04 :: SubTreeConfig
 task04 = SubTreeConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -30,7 +30,7 @@ task04 = SubTreeConfig
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
-      , (BackImpl, 1)
+      , (BackImpl, 1) -- should be (BackImpl, 0) in future
       , (Equi, 1)
       ]
     , negOpFrequency = 1

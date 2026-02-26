@@ -50,7 +50,7 @@ defaultSuperfluousBracketsConfig =
       }
     , superfluousBracketPairs = 2
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
@@ -86,7 +86,7 @@ data SuperfluousBracketsInst =
       tree :: SynTree BinOp Char
     , stringWithSuperfluousBrackets :: String
     , simplestString :: String
-    , showArrowOperators :: Bool
+    , arrowOperatorsToShow :: [BinOp]
     , showSolution :: Bool
     , addText :: Maybe (Map Language String)
     , unicodeAllowed :: Bool

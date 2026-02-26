@@ -27,7 +27,7 @@ import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, Formula (atomics))
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (extra)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
@@ -36,17 +36,16 @@ import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyF
 
 genPickInst :: PickConfig -> Gen PickInst
 genPickInst PickConfig{..} = do
-  let percentTrueEntries' = fromMaybe (0,100) percentTrueEntries
   formulas <- vectorOfUniqueBy
     amountOfOptions
     isSemanticEqual
     $ flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
         (FormulaArbitrary syntaxTreeConfig) ->
-          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
+          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries
         (FormulaCnf cnfCfg) ->
-          InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+          InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries
         (FormulaDnf dnfCfg) ->
-          InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
+          InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries
 
   correct <- elements [1..amountOfOptions]
 
@@ -110,6 +109,11 @@ verifyStatic PickInst{..}
 verifyQuiz :: OutputCapable m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
 
+    | tooFewAtoms formulaConfig =
+        refuse $ indent $ translate $ do
+          german "Es müssen mindestens drei Atome zur Verfügung stehen."
+          english "At least three atoms need to be available."
+
     | amountOfOptions < 2 =
         refuse $ indent $ translate $ do
           german "Es muss mindestens zwei Optionen geben."
@@ -136,9 +140,9 @@ verifyQuiz PickConfig{..}
           german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
           english "The given restriction on True entries should not fall below a range of 30."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf range formulaConfig
+    | otherwise = checkTruthValueRangeAndFormulaConf percentTrueEntries formulaConfig
   where
-    range@(rangeL, rangeH) = fromMaybe (0,100) percentTrueEntries
+    (rangeL, rangeH) = percentTrueEntries
     hasMinUniqueAtoms x (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= x
     hasMinUniqueAtoms _ _ = True
     doesOvershootOptions (FormulaArbitrary syntaxTreeConfig)
@@ -147,6 +151,8 @@ verifyQuiz PickConfig{..}
       = amountOfOptions > 4*2^ length (usedAtoms (baseConf cnfCfg))
     doesOvershootOptions (FormulaDnf dnfCfg)
       = amountOfOptions > 4*2^ length (usedAtoms (baseConf dnfCfg))
+    tooFewAtoms (FormulaArbitrary syntaxTreeConfig) = length (availableAtoms syntaxTreeConfig) < 3
+    tooFewAtoms _ = False
 
 
 
@@ -162,7 +168,6 @@ partialGrade PickInst{formulas} (Number (Just index)) = singleChoiceSyntax True 
 
 completeGrade :: OutputCapable m => PickInst -> Number -> LangM m
 completeGrade PickInst{..} (Number index) = singleChoice
-  DefiniteArticle
   what
   displaySolution
   correct
@@ -171,5 +176,5 @@ completeGrade PickInst{..} (Number index) = singleChoice
       what = translations $ do
         german "Index"
         english "index"
-      displaySolution | showSolution = Just $ show correct
+      displaySolution | showSolution = Just (DefiniteArticle, show correct)
                       | otherwise = Nothing

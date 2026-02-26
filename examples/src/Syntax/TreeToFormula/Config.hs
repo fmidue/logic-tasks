@@ -17,7 +17,7 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.3
+-- 2025: Weight 0.3
 task02 :: TreeToFormulaConfig
 task02 = TreeToFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -39,12 +39,8 @@ task02 = TreeToFormulaConfig
     , minUniqueBinOperators = 2
     }
   , extraText = Just (listToFM
-                        [ (German, "Es muss die exakte Formel des Syntaxbaums angegeben werden. "
-                                ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
-                                ++ "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
-                        , (English, "The exact formula of the syntax tree must be given. "
-                                ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
-                                ++ "Do not try to use associativity in order to omit brackets in this task.")
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
+                        , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])
   , printSolution = True
   , offerUnicodeInput = True
@@ -72,12 +68,8 @@ task04 =  TreeToFormulaConfig
     , minUniqueBinOperators = 2
     }
   , extraText = Just (listToFM
-                        [ (German, "Es muss die exakte Formel des Syntaxbaums angegeben werden. "
-                                ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
-                                ++ "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
-                        , (English, "The exact formula of the syntax tree must be given. "
-                                ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
-                                ++ "Do not try to use associativity in order to omit brackets in this task.")
+                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
+                        , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])
   , printSolution = True
   , offerUnicodeInput = False

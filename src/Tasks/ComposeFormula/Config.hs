@@ -17,7 +17,6 @@ import Data.Data (Data)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
-import Data.Typeable
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import LogicTasks.Helpers (reject)
@@ -32,7 +31,7 @@ data ComposeFormulaConfig = ComposeFormulaConfig {
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 defaultComposeFormulaConfig :: ComposeFormulaConfig
 defaultComposeFormulaConfig = ComposeFormulaConfig
@@ -47,7 +46,7 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
       }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
@@ -62,6 +61,9 @@ checkAdditionalConfig ComposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."
         german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
+    | minAmountOfUniqueAtoms < 2 = reject $ do
+        english "There should be more than one atomic formula for this task type."
+        german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
     | minNodes < 7 = reject $ do
         english "Minimum number of nodes restricts the number of possible subtrees too much."
         german "Minimale Anzahl an Knoten schränkt die Anzahl der möglichen Teilbäume zu stark ein."
@@ -75,8 +77,8 @@ data ComposeFormulaInst = ComposeFormulaInst
                , leftTreeImage :: Maybe String
                , rightTreeImage :: Maybe String
                , addText :: Maybe (Map Language String)
+               , arrowOperatorsToShow :: [BinOp]
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
-               deriving (Data, Show, Typeable, Generic)
-
+  deriving (Data, Generic, Show)

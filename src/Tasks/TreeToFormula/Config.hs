@@ -12,7 +12,6 @@ module Tasks.TreeToFormula.Config (
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
 import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
-import Data.Typeable
 import GHC.Generics
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable)
 
@@ -22,13 +21,13 @@ data TreeToFormulaConfig = TreeToFormulaConfig {
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
-    deriving (Show, Typeable, Generic)
+  deriving (Generic, Show)
 
 defaultTreeToFormulaConfig :: TreeToFormulaConfig
 defaultTreeToFormulaConfig = TreeToFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
@@ -43,10 +42,9 @@ data TreeToFormulaInst = TreeToFormulaInst {
                  tree :: SynTree BinOp Char
                , latexImage :: String
                , correct :: String
-               , showArrowOperators :: Bool
+               , arrowOperatorsToShow :: [BinOp]
                , addText :: Maybe (Map Language String)
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic)
-
+  deriving (Generic, Show)

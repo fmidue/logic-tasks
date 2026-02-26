@@ -4,18 +4,18 @@ module DecideSpec where
 
 -- jscpd:ignore-start
 import Test.Hspec
-import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
+import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
-import Data.Maybe (fromMaybe)
-import SynTreeSpec (validBoundsSynTreeConfig)
+import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio)
-import FillSpec (validBoundsNormalFormConfig)
+import FillSpec (validBoundsNormalFormConfig, validBoundsPercentTrueEntries)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse)
+import Test.QuickCheck.Property (within)
 -- jscpd:ignore-end
 
 validBoundsDecideConfig :: Gen DecideConfig
@@ -25,14 +25,11 @@ validBoundsDecideConfig = do
   formulaConfig <- case formulaType of
     "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
     "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
-    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
-            maxNodes < 30 &&
-            minAmountOfUniqueAtoms == fromIntegral (length availableAtoms)
+    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig' False `suchThat` \SynTreeConfig{..} ->
+            maxNodes < 30
 
-  percentageOfChanged <- choose (1, 100)
-  percentTrueEntriesLow' <- choose (1, 90)
-  percentTrueEntriesHigh' <- choose (percentTrueEntriesLow', 99) `suchThat` (/= percentTrueEntriesLow')
-  percentTrueEntries <- elements [Just (percentTrueEntriesLow', percentTrueEntriesHigh'), Nothing]
+  percentageOfChanged <- chooseInt (1, 100)
+  percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
 
   pure $ DecideConfig {
       formulaConfig
@@ -53,16 +50,16 @@ spec = do
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
-        forAll (genDecideInst decideConfig) $ \inst ->
+        within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \inst ->
           doesNotRefuse (description False inst :: LangM Maybe)
   describe "genDecideInst" $ do
     it "should pass verifyStatic" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
-        forAll (genDecideInst decideConfig) $ \inst ->
+        within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \inst ->
           doesNotRefuse (verifyStatic inst :: LangM Maybe)
     it "should pass grading with correct answer" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
-        forAll (genDecideInst decideConfig) $ \inst ->
+        within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \inst ->
           doesNotRefuse
             (partialGrade
               inst
@@ -75,20 +72,20 @@ spec = do
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: Rated Maybe)
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
-        forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
+        within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
           let tableLen = length (getEntries (getTable formula))
               mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1 in
           length changed == mistakeCount
     it "generated formula should depend on all atomics" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
-        forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
+        within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
           formulaDependsOnAllAtoms formula
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsDecideConfig $ \decideConfig -> do
-        forAll (genDecideInst decideConfig) $ \decideInst ->
+        within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \decideInst ->
           doesNotRefuse (verifyStatic decideInst :: LangM Maybe)
     it "should respect percentTrueEntries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
-        forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
-          withRatio (fromMaybe (0, 100) percentTrueEntries) formula
+        within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
+          withRatio percentTrueEntries formula
 

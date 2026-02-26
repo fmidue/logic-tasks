@@ -13,6 +13,8 @@ import Control.OutputCapable.Blocks (
   ($=<<),
   english,
   german,
+  collapsed,
+  translations
   )
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
@@ -20,7 +22,7 @@ import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..))
 
 import LogicTasks.Helpers (
-  arrowsKey,
+  arrowsKey',
   basicOpKey,
   example,
   extra,
@@ -28,7 +30,7 @@ import LogicTasks.Helpers (
   keyHeading,
   reject,
   )
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
+import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig, checkArrowOperatorsToShow)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
@@ -45,22 +47,31 @@ import Data.List.Extra (notNull)
 description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
 description path TreeToFormulaInst{..} = do
     instruct $ do
-      english "Consider the following syntax tree:"
-      german "Betrachten Sie den folgenden Syntaxbaum:"
+      english "Give the propositional logic formula that is represented by the following syntax tree:"
+      german "Geben Sie die aussagenlogische Formel an, die von folgendem Syntaxbaum dargestellt wird:"
 
     image $=<< cacheTree latexImage path
 
-    instruct $ do
-      english "Give the propositional logic formula that is represented by this syntax tree."
-      german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
+    collapsed False (translations $ do
+      english "Additional hints:"
+      german "Weitere Hinweise:")
+      (do
 
-    instruct $ do
-      english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
-      german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+        instruct $ do
+          english ("The exact formula of the syntax tree must be given. "
+            ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
+            ++ "But you are allowed to add arbitrarily many additional pairs of brackets.")
+          german ("Es muss die exakte Formel des Syntaxbaums angegeben werden. "
+            ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
+            ++ "Sie dürfen aber beliebig viele zusätzliche Klammerpaare hinzufügen.")
+          pure()
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    when showArrowOperators arrowsKey
+        keyHeading
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+
+        pure()
+      )
 
     extra addText
     pure ()
@@ -68,7 +79,11 @@ description path TreeToFormulaInst{..} = do
 
 
 verifyInst :: OutputCapable m => TreeToFormulaInst -> LangM m
-verifyInst _ = pure ()
+verifyInst TreeToFormulaInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 
@@ -130,7 +145,12 @@ completeGrade' path inst sol
             german "Eine mögliche Lösung für diese Aufgabe ist:"
 
         pure ()
-    | otherwise = pure ()
+
+    | otherwise =
+        instruct $ do
+          english "Your solution is correct."
+          german "Ihre Lösung ist korrekt."
+
   where treeAnswer = fromJust (maybeTree sol)
         correctTree = tree inst
 

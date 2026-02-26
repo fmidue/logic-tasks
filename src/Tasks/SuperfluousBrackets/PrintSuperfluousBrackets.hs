@@ -4,7 +4,7 @@ module Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
     )where
 
 
-import Test.QuickCheck (Gen, choose, elements, frequency)
+import Test.QuickCheck (Gen, chooseInteger, elements, frequency)
 
 import Trees.Helpers (treeNodes, numberAllBinaryNodes)
 import Trees.Types (BinOp(..), SynTree (..), showOperator, showOperatorNot)
@@ -76,7 +76,7 @@ allocateBracketToSubtree a b (operator, nowSerial) brackets hasFather fatherOper
                           (fatherOperator == Just operator && (operator == And || operator == Or))
                         then 0
                         else 1)
-                leftBrackets <- choose (max 0 (brackets' - rightNodes) , min leftNodes brackets')
+                leftBrackets <- chooseInteger (max 0 (brackets' - rightNodes) , min leftNodes brackets')
                 leftFormula <- nonRootDisplay a leftBrackets (Just operator) serial
                 rightFormula <- nonRootDisplay b (brackets' - leftBrackets) (Just operator) serial
                 return $

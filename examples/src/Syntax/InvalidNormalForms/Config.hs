@@ -11,7 +11,7 @@ import Test.Hspec
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 
--- 2024: Weight 0.25, used for CNFs
+-- 2025: Weight 0.25, used for CNFs
 task08 :: LegalNormalFormConfig
 task08 = LegalNormalFormConfig
   { normalFormConfig = NormalFormConfig
@@ -32,7 +32,7 @@ task08 = LegalNormalFormConfig
   , extraText = Nothing
   }
 
--- 2024: Weight 0.25, used for DNFs
+-- 2025: Weight 0.25, used for DNFs
 task09 :: LegalNormalFormConfig
 task09 = LegalNormalFormConfig
   { normalFormConfig = NormalFormConfig

@@ -18,9 +18,9 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.3
-task10 :: DecideConfig
-task10 = DecideConfig
+-- 2025: Weight 0.3
+task11 :: DecideConfig
+task11 = DecideConfig
   { formulaConfig =
       FormulaCnf (NormalFormConfig
                    { baseConf = BaseConfig
@@ -33,14 +33,14 @@ task10 = DecideConfig
                    , percentPosLiterals = (0,100)
                    })
   , percentageOfChanged = 40
-  , percentTrueEntries = Just (30,70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
   , extraText = Nothing
   }
 
--- 2024: Weight 0.3
-task12 :: DecideConfig
-task12 = DecideConfig
+-- 2025: Weight 0.3
+task13 :: DecideConfig
+task13 = DecideConfig
   { formulaConfig =
       FormulaArbitrary (SynTreeConfig
                         { minNodes = 10
@@ -61,12 +61,12 @@ task12 = DecideConfig
                         , minUniqueBinOperators = 4
                         })
   , percentageOfChanged = 30
-  , percentTrueEntries = Just (30,70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
   , extraText = Nothing
   }
 
 spec :: Spec
 spec = do
-  describe "task10" $ verifyFormulaConfig (formulaConfig task10)
-  describe "task12" $ verifyFormulaConfig (formulaConfig task12)
+  describe "task11" $ verifyFormulaConfig (formulaConfig task11)
+  describe "task13" $ verifyFormulaConfig (formulaConfig task13)

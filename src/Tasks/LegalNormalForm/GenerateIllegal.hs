@@ -13,7 +13,7 @@ import qualified Formula.Types as SetFormulaDnf (Dnf(..),Con(..))
 import Control.Monad (join)
 import Data.List ((\\))
 import Data.Set (size, toList, Set)
-import Test.QuickCheck (Gen, choose, elements, frequency)
+import Test.QuickCheck (Gen, chooseInt, elements, frequency)
 import Test.QuickCheck.Gen (oneof)
 
 import Trees.Helpers (clauseToSynTree, collectLeaves, literalToSynTree, relabelShape, conToSynTree)
@@ -69,13 +69,13 @@ genIllegalSynTree
           | otherwise = ifUseError
      in if ifUseError'
         then do
-            clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
+            clauses <- chooseInt (max 2 minClauseAmount, maxClauseAmount)
             (firstSyntaxShape, errorReason) <- genIllegalFormulaShape charOpF charOpC allowArrowOperators (clauses - 1)
             clauseList <- toList . getC
               <$> genF (clauses, clauses) (minClauseLength, maxClauseLength) usedAtoms False
             return (genIllegal firstSyntaxShape cToS clauseList, errorReason)
         else do
-            clauses <- choose (minClauseAmount, maxClauseAmount)
+            clauses <- chooseInt (minClauseAmount, maxClauseAmount)
             genWithOneIllegalClause
               genF
               genS
@@ -159,7 +159,7 @@ illegalTree ::
     -> Bool
     -> Gen (SynTree BinOp Char, ErrorReason)
 illegalTree gen getLiterals charOpC fCharOpC (minClauseLength, maxClauseLength) usedAtoms allowArrowOperators = do
-    treeLength <- choose (max 2 minClauseLength, maxClauseLength)
+    treeLength <- chooseInt (max 2 minClauseLength, maxClauseLength)
     (illegalSynTreeShape, errorReason) <- genIllegalShape charOpC fCharOpC True allowArrowOperators (treeLength - 1)
     leaves <- toList . getLiterals <$> gen (treeLength,treeLength) usedAtoms
     return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree, errorReason)
@@ -217,7 +217,7 @@ genIllegalFormulaShape charOpF charOpC allowArrowOperators ands = do
 
 genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp (), ErrorReason)) -> BinOp -> Gen (SynTree BinOp (), ErrorReason)
 genIllegalShapeInSubTree amount illegalFunc operator = do
-    operatorsIllegalSide <- choose (1, amount - 1)
+    operatorsIllegalSide <- chooseInt (1, amount - 1)
     node <- elements [Binary operator, flip (Binary operator)]
     (illegalSubTree, errorReason) <- illegalFunc operatorsIllegalSide
     return (node illegalSubTree (legalShape Or (amount - 1 - operatorsIllegalSide)), errorReason)
@@ -226,7 +226,7 @@ genIllegalOperator :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTre
 genIllegalOperator recF operators restOperators =
     do
         errorOperator <- elements operators
-        leftOperators <- choose (0, restOperators - 1)
+        leftOperators <- chooseInt (0, restOperators - 1)
         return (Binary errorOperator (recF leftOperators) (recF (restOperators - 1 - leftOperators)), IllegalOperator)
 
 

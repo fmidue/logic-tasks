@@ -6,7 +6,6 @@ module Config where
 
 
 import Data.Data (Data)
-import Data.Typeable
 import GHC.Generics
 import Formula.Types
 import Formula.Util
@@ -52,10 +51,12 @@ instance ToSAT FormulaInst where
   convert (InstArbitrary t) = convert t
 
 
-newtype Number = Number {value :: Maybe Int} deriving (Show,Typeable, Generic)
+newtype Number = Number {value :: Maybe Int}
+  deriving (Generic, Show)
 
 
-newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)} deriving (Typeable, Generic)
+newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)}
+  deriving Generic
 
 instance Show StepAnswer where
   show (StepAnswer (Just (b,c))) = '(' : show b ++ ',' : ' ' : show c ++ ")"
@@ -81,13 +82,13 @@ data PickInst = PickInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Data, Show, Eq)
+  deriving (Data, Eq, Generic, Show)
 
 dPickInst :: PickInst
 dPickInst =  PickInst
           { formulas = [InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']], InstCnf $ mkCnf [mkClause [Negative 'A', Positive 'B']]]
           , correct = 1
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -99,12 +100,12 @@ data MaxInst = MaxInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic, Data)
+  deriving (Data, Generic, Show)
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Positive 'A', Negative 'B']]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           , unicodeAllowed = False
           }
@@ -118,12 +119,12 @@ data MinInst = MinInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Generic, Data)
+  deriving (Data, Generic, Show)
 
 dMinInst :: MinInst
 dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Positive 'A', Negative 'B']]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           , unicodeAllowed = False
           }
@@ -137,14 +138,14 @@ data FillInst = FillInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Data, Show)
+  deriving (Data, Generic, Show)
 
 dFillInst :: FillInst
 dFillInst =  FillInst
           { formula = InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']]
           , missing = [1,4]
           , missingValues = [True, True]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -156,13 +157,13 @@ data DecideInst = DecideInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Typeable, Generic, Data, Show)
+  deriving (Data, Generic, Show)
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
           { formula = InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']]
           , changed = [1,4]
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -177,7 +178,7 @@ data StepInst = StepInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Show, Typeable, Data, Generic)
+  deriving (Data, Generic, Show)
 
 dStepInst :: StepInst
 dStepInst =  StepInst
@@ -185,7 +186,7 @@ dStepInst =  StepInst
           , clause2 = mkClause [Positive 'A', Negative 'C']
           , solution = (Positive 'A', mkClause [Negative 'C', Positive 'B'])
           , usesSetNotation = False
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           , unicodeAllowed = False
           }
@@ -201,7 +202,7 @@ data ResolutionInst = ResolutionInst {
                , addText    :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic, Data, Show)
+  deriving (Data, Generic, Show)
 
 dResInst :: ResolutionInst
 dResInst = let
@@ -243,7 +244,7 @@ data PrologInst = PrologInst {
                , showSolution :: Bool
                , addText :: Maybe (Map Language String)
                }
-               deriving (Show, Typeable, Data, Generic)
+  deriving (Data, Generic, Show)
 
 
 dPrologInst :: PrologInst
@@ -252,7 +253,7 @@ dPrologInst =  PrologInst
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
           , solution = (PrologLiteral True "pred" ["fact"], mkPrologClause [])
           , usesSetNotation = False
-          , showSolution = False
+          , showSolution = True
           , addText = Nothing
           }
 
@@ -263,7 +264,8 @@ data BaseConfig = BaseConfig
     { minClauseLength :: Int
     , maxClauseLength :: Int
     , usedAtoms :: String
-    } deriving (Typeable, Generic, Show)
+    }
+  deriving (Generic, Show)
 
 
 dBaseConf :: BaseConfig
@@ -296,18 +298,18 @@ dNormalFormConf = NormalFormConfig
 data PickConfig = PickConfig {
        formulaConfig :: FormulaConfig
      , amountOfOptions :: Int
-     , percentTrueEntries :: Maybe (Int,Int)
+     , percentTrueEntries :: (Int, Int)
      , printSolution :: Bool
      , extraText :: Maybe (Map Language String)
      }
-     deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dPickConf :: PickConfig
 dPickConf = PickConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , amountOfOptions = 3
-    , percentTrueEntries = Just (30,70)
-    , printSolution = False
+    , percentTrueEntries = (30, 70)
+    , printSolution = True
     , extraText = Nothing
     }
 
@@ -316,18 +318,18 @@ dPickConf = PickConfig
 data FillConfig = FillConfig {
       formulaConfig :: FormulaConfig
     , percentageOfGaps :: Int
-    , percentTrueEntries :: Maybe (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dFillConf :: FillConfig
 dFillConf = FillConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfGaps = 40
-    , percentTrueEntries = Just (30,70)
-    , printSolution = False
+    , percentTrueEntries = (30, 70)
+    , printSolution = True
     , extraText = Nothing
     }
 
@@ -335,18 +337,18 @@ dFillConf = FillConfig
 
 data MinMaxConfig = MinMaxConfig {
       normalFormConf :: NormalFormConfig
-    , percentTrueEntries :: Maybe (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Show, Typeable, Generic)
+  deriving (Generic, Show)
 
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
     { normalFormConf = dNormalFormConf
-    , percentTrueEntries = Just (50,70)
-    , printSolution = False
+    , percentTrueEntries = (50, 70)
+    , printSolution = True
     , extraText = Nothing
     , offerUnicodeInput = False
     }
@@ -356,18 +358,18 @@ dMinMaxConf = MinMaxConfig
 data DecideConfig = DecideConfig {
       formulaConfig :: FormulaConfig
     , percentageOfChanged :: Int
-    , percentTrueEntries :: Maybe (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfChanged = 40
-    , percentTrueEntries = Just (30,70)
-    , printSolution = False
+    , percentTrueEntries = (30, 70)
+    , printSolution = True
     , extraText = Nothing
     }
 
@@ -380,13 +382,13 @@ data StepConfig = StepConfig {
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Show, Typeable, Generic)
+  deriving (Generic, Show)
 
 dStepConf :: StepConfig
 dStepConf = StepConfig
     { baseConf = dBaseConf
     , useSetNotation = False
-    , printSolution = False
+    , printSolution = True
     , extraText = Nothing
     , offerUnicodeInput = False
     }
@@ -403,7 +405,7 @@ data PrologConfig = PrologConfig {
     , secondClauseShape :: ClauseShape
     , useSetNotation :: Bool
     }
-    deriving (Show, Typeable, Generic)
+  deriving (Generic, Show)
 
 dPrologConf :: PrologConfig
 dPrologConf = PrologConfig
@@ -411,7 +413,7 @@ dPrologConf = PrologConfig
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = True
     , firstClauseShape = HornClause Query
     , secondClauseShape = HornClause Procedure
     , useSetNotation = False
@@ -427,7 +429,7 @@ data ResolutionConfig = ResolutionConfig {
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic, Show)
+  deriving (Generic, Show)
 
 dResConf :: ResolutionConfig
 dResConf = ResolutionConfig
