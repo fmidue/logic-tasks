@@ -199,7 +199,7 @@ stats (TrueEntries range) form =
       totalEntries = 2 ^ length (atomics form)
   in (range, trueEntries, totalEntries)
 stats (PosLiterals range) form =
-  let allLiterals = literals form -- Literals muss duplikate enthalten => noch ändern
+  let allLiterals = literals form
       posLiterals = length $ filter isPositive allLiterals
       totalLiterals = length allLiterals
   in (range, posLiterals, totalLiterals)
