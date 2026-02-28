@@ -19,8 +19,9 @@ import Config (
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
+import Formula.Util (withPercentRange, PercentRangeMode(TrueEntries))
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Util (withRatio, checkBaseConf, checkNormalFormConfig)
+import Util (checkBaseConf, checkNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse, genSubsetOf)
 import Test.QuickCheck.Property (within)
@@ -82,11 +83,12 @@ validBoundsFillConfig = do
 
   percentageOfGaps <- chooseInt (1, 100)
   percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
+  let percentRangeMode = TrueEntries percentTrueEntries
 
   pure $ FillConfig {
       formulaConfig
     , percentageOfGaps
-    , percentTrueEntries
+    , percentRangeMode
     , printSolution = False
     , extraText = Nothing
     }
@@ -127,10 +129,10 @@ spec = do
      forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} -> do
         within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \FillInst{..} ->
           formulaDependsOnAllAtoms formula
-    it "should respect percentTrueEntries" $
+    it "should respect percentRangeMode" $
       forAll validBoundsFillConfig $ \fillConfig@FillConfig{..} ->
         within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \FillInst{..} ->
-          withRatio percentTrueEntries formula
+          withPercentRange percentRangeMode formula
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsFillConfig $ \fillConfig -> do
         within (30 * 1000000) $ forAll (genFillInst fillConfig) $ \fillInst ->

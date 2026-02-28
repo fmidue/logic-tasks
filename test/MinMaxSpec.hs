@@ -17,6 +17,7 @@ import Config (
 import FillSpec (validBoundsNormalFormConfig)
 import TestHelpers (doesNotRefuse)
 import Test.QuickCheck.Property (within)
+import Formula.Util (PercentRangeMode(TrueEntries))
 
 
 
@@ -29,7 +30,7 @@ validBoundsMinMaxConfig = do
     { normalFormConf = normalFormConf
     -- Restrictions on this lead to infinite loops.
     -- A satisfying formula is frequently not found, even with large intervals.
-    , percentTrueEntries = (0, 100)
+    , percentRangeMode = TrueEntries (0, 100)
     , printSolution
     , extraText = Nothing
     , offerUnicodeInput

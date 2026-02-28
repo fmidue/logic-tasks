@@ -8,6 +8,7 @@ import LogicTasks.Config (
   )
 import Test.Hspec
 import Util.VerifyConfig
+import Formula.Util(PercentRangeMode(TrueEntries))
 
 -- 2025: Weight 0.3
 task07 :: FillConfig
@@ -23,7 +24,7 @@ task07 = FillConfig
                   , maxClauseAmount = 3
                   })
   , percentageOfGaps = 60
-  , percentTrueEntries = (30, 70)
+  , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
   , extraText = Nothing
   }
@@ -42,7 +43,7 @@ task20 = FillConfig
                    , maxClauseAmount = 4
                    })
   , percentageOfGaps = 40
-  , percentTrueEntries = (35, 65)
+  , percentRangeMode = TrueEntries (35, 65)
   , extraText = Nothing
   , printSolution = True
   }

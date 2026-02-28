@@ -10,8 +10,8 @@ import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable)
+import Formula.Util (PercentRangeMode(TrueEntries), withPercentRange)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Util (withRatio)
 import FillSpec (validBoundsNormalFormConfig, validBoundsPercentTrueEntries)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse)
@@ -30,11 +30,12 @@ validBoundsDecideConfig = do
 
   percentageOfChanged <- chooseInt (1, 100)
   percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
+  let percentRangeMode = TrueEntries percentTrueEntries
 
   pure $ DecideConfig {
       formulaConfig
     , percentageOfChanged
-    , percentTrueEntries
+    , percentRangeMode
     , printSolution = False
     , extraText = Nothing
     }
@@ -84,8 +85,8 @@ spec = do
       forAll validBoundsDecideConfig $ \decideConfig -> do
         within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \decideInst ->
           doesNotRefuse (verifyStatic decideInst :: LangM Maybe)
-    it "should respect percentTrueEntries" $
+    it "should respect percentRangeMode" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
         within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
-          withRatio percentTrueEntries formula
+          withPercentRange percentRangeMode formula
 

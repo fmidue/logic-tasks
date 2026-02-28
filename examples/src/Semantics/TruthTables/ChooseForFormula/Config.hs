@@ -9,6 +9,7 @@ import LogicTasks.Config (
 
 import Test.Hspec
 import Util.VerifyConfig
+import Formula.Util(PercentRangeMode(TrueEntries))
 
 -- 2023: Weight 0.33
 task08 :: PickConfig
@@ -24,7 +25,7 @@ task08 = PickConfig
                   , maxClauseAmount = 2
                   })
   , amountOfOptions = 3
-  , percentTrueEntries = (0, 100)
+  , percentRangeMode = TrueEntries (0, 100)
   , extraText = Nothing
   , printSolution = True
   }
@@ -43,7 +44,7 @@ task12 = PickConfig
                    , maxClauseAmount = 4
                    })
   , amountOfOptions = 4
-  , percentTrueEntries = (30, 70)
+  , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
   , extraText = Nothing
   }

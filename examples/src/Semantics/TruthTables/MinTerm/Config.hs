@@ -9,6 +9,7 @@ import Test.Hspec
 import LogicTasks.Util (checkNormalFormConfig)
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
+import Formula.Util(PercentRangeMode(TrueEntries))
 
 -- Weight 0.2
 -- Type: Min
@@ -23,7 +24,7 @@ unused03 = MinMaxConfig
     , minClauseAmount = 2
     , maxClauseAmount = 3
     }
-  , percentTrueEntries = (55, 70)
+  , percentRangeMode = TrueEntries (55, 70)
   , extraText = Nothing
   , printSolution = True
   , offerUnicodeInput = False
