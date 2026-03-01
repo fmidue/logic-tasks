@@ -22,9 +22,8 @@ import Test.QuickCheck (Gen, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..), MinMaxConfig(..), MinInst(..))
 import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
-import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
+import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf, withPercentRange)
 import LogicTasks.Helpers (extra, formulaKey)
-import Util (withRatio)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
 
@@ -41,7 +40,7 @@ genMinInst MinMaxConfig {normalFormConf = NormalFormConfig {baseConf = BaseConfi
     }
    where
      getDnf = genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
-     dnfInRange = getDnf `suchThat` withRatio percentTrueEntries
+     dnfInRange = getDnf `suchThat` withPercentRange percentRangeMode
 
 
 

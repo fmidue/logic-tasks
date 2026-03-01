@@ -22,7 +22,7 @@ import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), Formula
 import Formula.Types (Formula (atomics), getTable, lengthBound)
 import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig (availableAtoms), checkSynTreeConfig)
-import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
+import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics, PercentRangeMode(TrueEntries, PosLiterals), percentRangeModeRange)
 import Trees.Helpers (synTreeDependsOnAllAtomics)
 
 
@@ -66,7 +66,7 @@ remove num xs = do
     remove (num-1) $ delete out xs
 
 
-
+{-# Deprecated withRatio "Use withPercentRange instead" #-}
 withRatio :: Formula a => (Int,Int) -> a -> Bool
 withRatio (0, 100) _ = True
 withRatio (lower, upper) form =
@@ -81,27 +81,27 @@ withRatio (lower, upper) form =
 
 
 
-checkTruthValueRange :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
-checkTruthValueRange (low,high) formulaConfig
+checkTruthValueRange :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
+checkTruthValueRange rangeMode formulaConfig
     | isOutside 0 100 low || isOutside 0 100 high =
         refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
-          english "The given restriction on true entries are not in the range of 0 to 100 percent."
+          german $ "Die Beschränkung der " <> subjDe <> " liegt nicht zwischen 0 und 100 Prozent."
+          english $ "The given restriction on " <> subjEn <> " are not in the range of 0 to 100 percent."
 
     | low > high =
         refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
-          english "The given restriction on true entries are not a valid range."
+          german $ "Die Beschränkung der " <> subjDe <> " liefert keine gültige Reichweite."
+          english $ "The given restriction on " <> subjEn <> " are not a valid range."
 
     | low == high =
         refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge sollte ein gewissen Spielraum zulassen."
-          english "The given restriction on true entries should allow for some flexibility."
+          german $ "Die Beschränkung der " <> subjDe <> " sollte ein gewissen Spielraum zulassen."
+          english $ "The given restriction on " <> subjEn <> " should allow for some flexibility."
 
     | checkRangeTooSmall =
         refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge sollte mindestens eine Ausprägung ermöglichen."
-          english "The restriction of True entries should allow for at least one value."
+          german $ "Die Beschränkung der " <> subjDe <> " sollte mindestens eine Ausprägung ermöglichen."
+          english $ "The restriction of " <> subjEn <> " should allow for at least one value."
 
     | otherwise = pure ()
     where
@@ -112,6 +112,11 @@ checkTruthValueRange (low,high) formulaConfig
 
       checkRangeTooSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
 
+      (low, high) = percentRangeModeRange rangeMode
+
+      (subjDe, subjEn) = case rangeMode of
+        TrueEntries _ -> ("Wahr-Einträge", "True entries")
+        PosLiterals _ -> ("positiven Literale", "positive literals")
 
 
 checkBaseConf :: OutputCapable m => BaseConfig -> LangM m
@@ -181,25 +186,27 @@ checkNormalFormConfig NormalFormConfig {..}
 
     | otherwise = checkBaseConf baseConf
 
-checkTruthValueRangeAndSynTreeConf :: OutputCapable m => (Int,Int) -> SynTreeConfig -> LangM m
-checkTruthValueRangeAndSynTreeConf range synTreeConfig = do
-  checkTruthValueRange range (FormulaArbitrary synTreeConfig)
+checkTruthValueRangeAndSynTreeConf :: OutputCapable m => PercentRangeMode -> SynTreeConfig -> LangM m
+checkTruthValueRangeAndSynTreeConf rangeMode synTreeConfig = do
+  checkTruthValueRange rangeMode (FormulaArbitrary synTreeConfig)
   checkSynTreeConfig synTreeConfig
   pure ()
 
-checkTruthValueRangeAndFormulaConf :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
-checkTruthValueRangeAndFormulaConf range formulaConf = do
-  checkFullRangeForSynTrees range formulaConf
-  checkTruthValueRange range formulaConf
+checkTruthValueRangeAndFormulaConf :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
+checkTruthValueRangeAndFormulaConf rangeMode formulaConf = do
+  checkFullRangeForSynTrees rangeMode formulaConf
+  checkTruthValueRange rangeMode formulaConf
   case formulaConf of
     (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
     (FormulaDnf dnfCfg) -> checkNormalFormConfig dnfCfg
     (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
 
-checkFullRangeForSynTrees :: OutputCapable m => (Int, Int) -> FormulaConfig -> LangM m
-checkFullRangeForSynTrees (0, 100) (FormulaArbitrary _) = pure ()
-checkFullRangeForSynTrees _ (FormulaArbitrary _) = refuse $ indent $ translate $ do
+
+checkFullRangeForSynTrees :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
+checkFullRangeForSynTrees (TrueEntries (0, 100)) (FormulaArbitrary _) = pure ()
+checkFullRangeForSynTrees (PosLiterals (0, 100)) (FormulaArbitrary _) = pure ()
+checkFullRangeForSynTrees (TrueEntries _) (FormulaArbitrary _) = refuse $ indent $ translate $ do
           german "Die Anzahl der Wahr-Werte kann bei per Syntaxbaum generierter Formel nicht eingeschränkt werden. Wählen Sie (0,100)."
           english "The amount of True values cannot be restricted when generating formulas via syntax trees. Select (0,100)."
 checkFullRangeForSynTrees _ _ = pure ()
