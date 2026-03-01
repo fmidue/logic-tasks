@@ -10,9 +10,9 @@ import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable)
-import Formula.Util (PercentRangeMode(TrueEntries), withPercentRange)
+import Formula.Util (withPercentRange)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import FillSpec (validBoundsNormalFormConfig, validBoundsPercentTrueEntries)
+import FillSpec (validBoundsNormalFormConfig, validPercentRangeModes)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse)
 import Test.QuickCheck.Property (within)
@@ -29,8 +29,7 @@ validBoundsDecideConfig = do
             maxNodes < 30
 
   percentageOfChanged <- chooseInt (1, 100)
-  percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
-  let percentRangeMode = TrueEntries percentTrueEntries
+  percentRangeMode <- validPercentRangeModes formulaConfig
 
   pure $ DecideConfig {
       formulaConfig

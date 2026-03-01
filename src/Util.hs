@@ -204,9 +204,10 @@ checkTruthValueRangeAndFormulaConf rangeMode formulaConf = do
     (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
 
--- Sollte auch posLiterals für Syntaxbäume verboten werden
+
 checkFullRangeForSynTrees :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
 checkFullRangeForSynTrees (TrueEntries (0, 100)) (FormulaArbitrary _) = pure ()
+checkFullRangeForSynTrees (PosLiterals (0, 100)) (FormulaArbitrary _) = pure ()
 checkFullRangeForSynTrees (TrueEntries _) (FormulaArbitrary _) = refuse $ indent $ translate $ do
           german "Die Anzahl der Wahr-Werte kann bei per Syntaxbaum generierter Formel nicht eingeschränkt werden. Wählen Sie (0,100)."
           english "The amount of True values cannot be restricted when generating formulas via syntax trees. Select (0,100)."
