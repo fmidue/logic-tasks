@@ -22,7 +22,7 @@ import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), Formula
 import Formula.Types (Formula (atomics), getTable, lengthBound)
 import Formula.Table (readEntries)
 import Tasks.SynTree.Config (SynTreeConfig (availableAtoms), checkSynTreeConfig)
-import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics, PercentRangeMode(TrueEntries, PosLiterals))
+import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics, PercentRangeMode(TrueEntries, PosLiterals), percentRangeModeRange)
 import Trees.Helpers (synTreeDependsOnAllAtomics)
 
 
@@ -112,9 +112,7 @@ checkTruthValueRange rangeMode formulaConfig
 
       checkRangeTooSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
 
-      (low, high) = case rangeMode of
-        TrueEntries range -> range
-        PosLiterals range -> range
+      (low, high) = percentRangeModeRange rangeMode
 
       (subjDe, subjEn) = case rangeMode of
         TrueEntries _ -> ("Wahr-Einträge", "True entries")

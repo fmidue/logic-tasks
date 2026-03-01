@@ -182,7 +182,7 @@ withPercentRange mode form = isFullRange mode || withPercentRange' range count t
   isFullRange (TrueEntries (0,100)) = True
   isFullRange (PosLiterals (0,100)) = True
   isFullRange _ = False
-  (range, count, total) = stats mode form
+  (range, count, total) = percentRangeStats mode form
 
 withPercentRange' :: (Int,Int) -> Int -> Int -> Bool
 withPercentRange' (lower, upper) count total =
@@ -192,13 +192,13 @@ withPercentRange' (lower, upper) count total =
     percentage :: Int -> Int
     percentage n = total * n `div` 100
 
-stats :: Formula a => PercentRangeMode -> a -> ((Int, Int), Int, Int)
-stats (TrueEntries range) form =
+percentRangeStats :: Formula a => PercentRangeMode -> a -> ((Int, Int), Int, Int)
+percentRangeStats (TrueEntries range) form =
   let tableEntries = readEntries (getTable form)
       trueEntries = length $ filter (== Just True) tableEntries
       totalEntries = 2 ^ length (atomics form)
   in (range, trueEntries, totalEntries)
-stats (PosLiterals range) form =
+percentRangeStats (PosLiterals range) form =
   let allLiterals = literals form
       posLiterals = length $ filter isPositive allLiterals
       totalLiterals = length allLiterals
