@@ -178,7 +178,7 @@ withPercentRange :: Formula a => PercentRangeMode -> a -> Bool
 withPercentRange mode form = isFullRange mode || withPercentRange' range count total
  where
   -- isFullRange ensures that the trueEntries are not
-  -- calculated when not restriced
+  -- calculated when not restricted
   isFullRange (TrueEntries (0,100)) = True
   isFullRange (PosLiterals (0,100)) = True
   isFullRange _ = False
