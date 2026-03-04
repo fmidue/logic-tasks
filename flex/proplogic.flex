@@ -299,8 +299,8 @@ startingTable :: [[Maybe TruthValue]]
 startingTable = #{startingTable} --ignore-length
 
 
-checkSyntax :: OutputCapable m => a -> b -> Submission -> LangM m
-checkSyntax _ _ (Table xs,f,n) = do
+checkSyntax :: OutputCapable m => a -> Submission -> LangM m
+checkSyntax _ (Table xs,f,n) = do
     when (atomicColumns == map reverse startingTable) $ refuse $ indent $ text $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."

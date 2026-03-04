@@ -240,8 +240,8 @@ feedbackCompareChosenLiars allocationFromLiars wrongLiar = do
     simplestDisplay wrongLiar ++
     " unter dieser Belegung zu 0 (falsch) aus."
 
-checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ TaskData{..} Submission{..} = do
+checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
+checkSyntax TaskData{..} Submission{..} = do
   assertion (all (all (`elem` ['A','B','C']) . atomics) (submittedFormula : submittedParts)) $ text
     "Alle angegebenen Formeln enthalten nur die bekannten atomaren Aussagen A, B und C?"
   when (nubOrd atomicRows /= atomicRows) $

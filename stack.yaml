@@ -14,12 +14,12 @@ extra-deps:
     subdirs:
       - output-blocks
   - git: https://github.com/fmidue/flex-tasks.git
-    commit: cb17569e668ea839991b657a1d82840584cdb88d
+    commit: be94c9d50297a88385a63d6f9beaa544c14b67c8
     subdirs:
       - flex-tasks
       - flex-tasks-processing
   - git: https://github.com/fmidue/autotool-capabilities.git
-    commit: 8067088f23759d787c049677a26868df26c1676f
+    commit: c9ea223a41c1852d5e5d7ba35bc4f746c3edb634
     subdirs:
       - autotool-capabilities
       - autotool-capabilities-io-instances
