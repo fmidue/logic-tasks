@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: TeX-Live/setup-texlive-action@v3
+      - uses: zauguin/install-texlive@v4
         with:
           packages: |
             scheme-basic
