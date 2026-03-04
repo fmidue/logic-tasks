@@ -101,8 +101,8 @@ import LogicTasks.Semantics.Resolve (partialGrade', completeGrade')
 import Global
 
 
-checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ = partialGrade'
+checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
+checkSyntax = partialGrade'
 
 checkSemantics :: (OutputCapable m, Alternative m) => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submission = do

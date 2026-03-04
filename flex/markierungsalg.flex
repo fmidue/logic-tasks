@@ -193,8 +193,8 @@ displayAllocation :: (Char,Bool) -> String
 displayAllocation (c,w) = "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)
 
 
-checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ TaskData{..} Submission{..} = do
+checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
+checkSyntax TaskData{..} Submission{..} = do
     checking (all isNothing steps && isNothing model) $ do
         german "Es dürfen nicht alle Texteingabefelder leer sein."
         english "Not all text input fields may be left blank."
