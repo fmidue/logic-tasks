@@ -170,7 +170,7 @@ fullResolutionForm steps clauses howToShow prefilledFields = addCss css $ do
     indexZip xs = zip xs [1 :: Int ..]
     clauseStrings = map howToShow $ sort clauses
     firstFreeIndex = length clauseStrings +1
-    rowIndices = [firstFreeIndex .. firstFreeIndex + steps]
+    rowIndices = [firstFreeIndex .. firstFreeIndex + steps -1]
     rowDefaults = prefilledFields ++ replicate
       (length rowIndices - length prefilledFields)
       (Nothing,Nothing,Nothing)
