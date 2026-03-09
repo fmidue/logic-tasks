@@ -91,10 +91,10 @@ spec = do
         within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (description resInst :: LangM Maybe)
   describe "genResInst" $ do
-    it "should required at least minSteps amount of steps" $
+    it "should generate a solution with exactly minSteps steps" $
       forAll validBoundsResolutionConfig $ \resConfig ->
         within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
-          minSteps resConfig <= length (solution resInst)
+          minSteps resConfig == length (solution resInst)
     it "should contain no clause with a literal that appears both positively and negatively" $
       forAll validBoundsResolutionConfig $ \resConfig ->
         within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
