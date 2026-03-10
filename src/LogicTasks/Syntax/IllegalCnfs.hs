@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   Rated,
   multipleChoice,
   ArticleToUse (DefiniteArticle),
+  paragraph,
   translations,
   multipleChoiceSyntax,
   Language (..),
@@ -98,13 +99,13 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)
-  $ when (hasWrongSolution && detailedSolution) $ indent $ do
+  $ when (hasWrongSolution && detailedSolution) $ do
 
     instruct $ do
       german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
       english "The solution for this task looks like this:"
 
-    for_ formulaInfos $ \(i,info, formula) -> do
+    for_ formulaInfos $ \(i,info, formula) -> paragraph $ indent $ do
 
       code (show i ++ ". " ++ formula)
 
