@@ -176,12 +176,12 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
     Nothing
     solution
     submission)
-  $ when showSolution $ indent $ do
+  $ when showSolution $ do
     instruct $ do
       english ("A possible solution for this task contains " ++ show inputTreeAmount ++ " of the following subformulas:")
       german ("Eine mögliche Lösung für diese Aufgabe beinhaltet " ++ show inputTreeAmount ++ " der folgenden Teilformeln:")
 
-    for_ correctTrees $ \x -> do
+    for_ correctTrees $ \x -> paragraph $ indent $ do
       code (display x)
 
       instruct $ do
