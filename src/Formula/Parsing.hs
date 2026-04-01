@@ -394,18 +394,18 @@ instance Parse FormulaInst where
         tokenSymbol "}"
         pure $ InstArbitrary f
 
-instance Parse DecideChoice where
-  parser = lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
+instance Parse DecideAnswer where
+  parser = DecideAnswer <$> lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
     where
-      parseCorrect = Correct <$
+      parseCorrect = Just Correct <$
           ( try (caseInsensitive "Richtig")
         <|> caseInsensitive "Correct"
           )
-      parseWrong = Wrong <$
+      parseWrong = Just Wrong <$
           ( try (caseInsensitive "Fehlerhaft")
         <|> caseInsensitive "Wrong"
           )
-      parseNoAnswer = NoAnswer <$
+      parseNoAnswer = Nothing <$
           ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort")
         <|> (lexeme (caseInsensitive "No") <* caseInsensitive "answer")
           )

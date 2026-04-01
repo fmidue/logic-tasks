@@ -65,16 +65,22 @@ instance Show StepAnswer where
 data DecideChoice
   = Correct
   | Wrong
-  | NoAnswer
   deriving (Show,Ord,Eq,Enum,Bounded,Generic)
+
+newtype DecideAnswer
+  = DecideAnswer { maybeChoice :: Maybe DecideChoice}
+  deriving (Generic)
 
 showChoice :: Language -> DecideChoice -> String
 showChoice German Correct = "Richtig"
 showChoice German Wrong = "Fehlerhaft"
-showChoice German NoAnswer = "Keine Antwort"
 showChoice English Correct = "Correct"
 showChoice English Wrong = "Wrong"
-showChoice English NoAnswer = "No answer"
+
+showDecideAnswer :: Language -> DecideAnswer -> String
+showDecideAnswer German (DecideAnswer Nothing) = "Keine Antwort"
+showDecideAnswer English (DecideAnswer Nothing) = "No answer"
+showDecideAnswer lang (DecideAnswer (Just choice)) = showChoice lang choice
 
 data PickInst = PickInst {
                  formulas :: [FormulaInst]
