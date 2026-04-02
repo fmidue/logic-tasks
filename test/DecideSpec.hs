@@ -6,7 +6,7 @@ module DecideSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated)
-import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
+import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideAnswer(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable)
@@ -63,12 +63,12 @@ spec = do
           doesNotRefuse
             (partialGrade
               inst
-                [ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: LangM Maybe) &&
           doesNotRefuse
             (completeGrade
               inst
-                [ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: Rated Maybe)
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
