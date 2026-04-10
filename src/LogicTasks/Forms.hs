@@ -55,13 +55,17 @@ tableForm emptyColumns rows staticStart staticEnd =
     let headerList = replicate emptyColumns headerName
         cellList = replicate rows inputName
         totalColumns = emptyColumns + length staticStart + length staticEnd
+        fieldIds = map
+          (("hident" <>) . pack . show)
+          [1 .. length cellList*totalColumns+1]
     headersRes <- traverse (field 1 headerClass) headerList
     columnsRes <- traverse
       (\num -> traverse (field num inputClass) cellList)
       [2..totalColumns+1]
     let tableHeaders = map snd headersRes
         tableRows = transpose $ map (map snd) columnsRes
-    pure ( Singular headerName ++ Singular inputName
+    pure ( fieldIds
+         , Singular headerName ++ Singular inputName
          , [whamlet|
               #{extra}
               <div .#{containerClass}>
@@ -164,8 +168,8 @@ fullResolutionForm steps clauses howToShow prefilledFields = addCss css $ do
             )
             $ zip rowIndices rowDefaults
   reader $ \extra -> do
-    (fields,formRows) <- unzip <$> sequence forms
-    pure (concat fields, html extra formRows)
+    (ids,fields,formRows) <- unzip3 <$> sequence forms
+    pure (concat ids, concat fields, html extra formRows)
   where
     indexZip xs = zip xs [1 :: Int ..]
     clauseStrings = map howToShow $ sort clauses
