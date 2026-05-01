@@ -23,7 +23,6 @@ module Trees.Helpers
     conToSynTree,
     literalToSynTree,
     numOfOps,
-    numOfOpsInFormula,
     numOfOpsInAnswer,
     collectLeavesInAnswer,
     numOfUniqueBinOpsInSynTree,
