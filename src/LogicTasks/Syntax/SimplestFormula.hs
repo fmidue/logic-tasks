@@ -150,14 +150,13 @@ partialGrade' SuperfluousBracketsInst{..} f
         english "Your submission contains fewer logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
-    | not $ isDerivedByRemovingBrackets (show pForm) stringWithSuperfluousBrackets =
+    | not $ isDerivedByRemovingBrackets (show f) stringWithSuperfluousBrackets =
       reject $ do
         english "Your submission cannot be obtained from the original formula by removing brackets."
         german "Ihre Abgabe lässt sich nicht durch Entfernen von Klammern aus der ursprünglichen Formel erhalten."
 
     | otherwise = pure()
   where
-    pForm = fromJust $ maybeForm f
     atoms = sort $ nub $ collectLeavesInAnswer f
     opsNum = numOfOpsInAnswer f
     correctAtoms = sort $ nub $ collectLeaves tree
@@ -172,7 +171,7 @@ completeGrade' inst sol
       german "Ihre Abgabe ist korrekt."
       english "Your submission is correct."
     ) *> rate 1
-  | synTreeEquivalent && isDerivedByRemovingBrackets (simplestString inst) (show submission) = reRefuse (rate percentage) (translate $ do
+  | synTreeEquivalent && isDerivedByRemovingBrackets (simplestString inst) (show sol) = reRefuse (rate percentage) (translate $ do
     german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
     english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
   | synTreeEquivalent = reRefuse (rate 0) (translate $ do
@@ -187,7 +186,7 @@ completeGrade' inst sol
     countBracketPairs = fromIntegral . length . filter (== '(')
     submission = fromJust (maybeForm sol)
     synTreeSubmission = toSynTree submission
-    bracketPairsSubmission = countBracketPairs $ show submission
+    bracketPairsSubmission = countBracketPairs $ show sol
     bracketPairsSolution = countBracketPairs $ simplestString inst
     bracketPairsMax = countBracketPairs $ stringWithSuperfluousBrackets inst
     superfluousBracketPairsSubmission = bracketPairsSubmission - bracketPairsSolution
