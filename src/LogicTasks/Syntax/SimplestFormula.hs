@@ -158,7 +158,7 @@ partialGrade' SuperfluousBracketsInst{..} f
     | otherwise = pure()
   where
     atoms = sort $ nub $ collectLeavesInAnswer f
-    opsNum = numOfOpsInAnswer f
+    opsNum = numberOfOperatorsInAnswer f
     correctAtoms = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 

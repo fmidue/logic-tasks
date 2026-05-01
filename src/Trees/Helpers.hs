@@ -23,7 +23,7 @@ module Trees.Helpers
     conToSynTree,
     literalToSynTree,
     numOfOps,
-    numOfOpsInAnswer,
+    numberOfOperatorsInAnswer,
     collectLeavesInAnswer,
     numOfUniqueBinOpsInSynTree,
     binOp,
@@ -168,8 +168,8 @@ numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
 
-numOfOpsInAnswer :: FormulaAnswer -> Integer
-numOfOpsInAnswer = numOfOpsInFormula . fromJust . maybeForm
+numberOfOperatorsInAnswer :: FormulaAnswer -> Integer
+numberOfOperatorsInAnswer = numOfOpsInFormula . fromJust . maybeForm
 
 collectLeavesInAnswer :: FormulaAnswer -> [Char]
 collectLeavesInAnswer = collectLeaves . fromJust . maybeForm

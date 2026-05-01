@@ -148,7 +148,7 @@ partialGrade' SubTreeInst{..} fs
   where
     amount = fromIntegral $ length $ nub fs
     atoms = sort $ nub $ concatMap collectLeavesInAnswer fs
-    opsNum = map numOfOpsInAnswer fs
+    opsNum = map numberOfOperatorsInAnswer fs
     correctAtoms = sort $ nub $ collectLeaves tree
     origOpsNum = numOfOps tree
 
