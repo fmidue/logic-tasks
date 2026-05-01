@@ -184,8 +184,7 @@ completeGrade' inst sol
   where
     countBracketPairs :: String -> Integer
     countBracketPairs = fromIntegral . length . filter (== '(')
-    submission = fromJust (maybeForm sol)
-    synTreeSubmission = toSynTree submission
+    synTreeSubmission = toSynTree $ fromJust (maybeForm sol)
     bracketPairsSubmission = countBracketPairs $ show sol
     bracketPairsSolution = countBracketPairs $ simplestString inst
     bracketPairsMax = countBracketPairs $ stringWithSuperfluousBrackets inst
