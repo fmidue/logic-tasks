@@ -167,11 +167,11 @@ completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
 completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
-  | show sol == simplestString inst = instruct (do
+  | submissionString == simplestSolutionString = instruct (do
       german "Ihre Abgabe ist korrekt."
       english "Your submission is correct."
     ) *> rate 1
-  | synTreeEquivalent && isDerivedByRemovingBrackets (simplestString inst) (show sol) = reRefuse (rate percentage) (translate $ do
+  | synTreeEquivalent && isDerivedByRemovingBrackets simplestSolutionString submissionString = reRefuse (rate percentage) (translate $ do
     german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
     english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
   | synTreeEquivalent = reRefuse (rate 0) (translate $ do
@@ -184,9 +184,11 @@ completeGrade' inst sol
   where
     countBracketPairs :: String -> Integer
     countBracketPairs = fromIntegral . length . filter (== '(')
+    submissionString = show sol
+    simplestSolutionString = simplestString inst
     synTreeSubmission = toSynTree $ fromJust (maybeForm sol)
-    bracketPairsSubmission = countBracketPairs $ show sol
-    bracketPairsSolution = countBracketPairs $ simplestString inst
+    bracketPairsSubmission = countBracketPairs submissionString
+    bracketPairsSolution = countBracketPairs simplestSolutionString
     bracketPairsMax = countBracketPairs $ stringWithSuperfluousBrackets inst
     superfluousBracketPairsSubmission = bracketPairsSubmission - bracketPairsSolution
     superfluousBracketPairsTask = bracketPairsMax - bracketPairsSolution
@@ -196,7 +198,7 @@ completeGrade' inst sol
     rate = printSolutionAndAssertWithMinimum
       (MinimumThreshold (1 % superfluousBracketPairsTask))
       False
-      (if showSolution inst then Just (DefiniteArticle, simplestString inst) else Nothing)
+      (if showSolution inst then Just (DefiniteArticle, simplestSolutionString) else Nothing)
 
 -- | Checks whether the second string can be transformed into
 --   the first string by removing only brackets.
