@@ -23,7 +23,8 @@ module Trees.Helpers
     conToSynTree,
     literalToSynTree,
     numOfOps,
-    numOfOpsInFormula,
+    numberOfOperatorsInAnswer,
+    collectLeavesInAnswer,
     numOfUniqueBinOpsInSynTree,
     binOp,
     bothKids,
@@ -38,9 +39,10 @@ import Control.Monad.State (get, put, runState, evalState)
 import Data.Set (fromList, Set)
 import Data.List.Extra (nubBy, nubOrd)
 import Data.Foldable (toList)
+import Data.Maybe (fromJust)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import qualified Formula.Types as SetFormulaDnf (Dnf(..), Con(..))
-import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+import Trees.Types (SynTree(..), BinOp(..), PropFormula(..), FormulaAnswer(..))
 import Auxiliary (listNoDuplicate)
 import Formula.Util (isSemanticEqual)
 
@@ -165,6 +167,12 @@ numOfOpsInFormula (Atomic _) = 0
 numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
+
+numberOfOperatorsInAnswer :: FormulaAnswer -> Integer
+numberOfOperatorsInAnswer = numOfOpsInFormula . fromJust . maybeForm
+
+collectLeavesInAnswer :: FormulaAnswer -> [Char]
+collectLeavesInAnswer = collectLeaves . fromJust . maybeForm
 
 numOfUniqueBinOpsInSynTree :: (Eq o, Ord o) => SynTree o c -> Integer
 numOfUniqueBinOpsInSynTree = fromIntegral . length . collectUniqueBinOpsInSynTree

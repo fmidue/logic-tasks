@@ -27,7 +27,7 @@ import Control.OutputCapable.Blocks (
 import Data.List (intercalate, nub, sort)
 import qualified Data.Set (map)
 import qualified Data.Map as Map (fromSet, insert, filter)
-import Data.Maybe (isNothing, fromJust)
+import Data.Maybe (isNothing)
 import LogicTasks.Helpers (extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey')
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
@@ -147,8 +147,8 @@ partialGrade' SubTreeInst{..} fs
     | otherwise = pure ()
   where
     amount = fromIntegral $ length $ nub fs
-    atoms = sort $ nub $ concatMap (collectLeaves . fromJust . maybeForm) fs
-    opsNum = map (numOfOpsInFormula . fromJust . maybeForm) fs
+    atoms = sort $ nub $ concatMap collectLeavesInAnswer fs
+    opsNum = map numberOfOperatorsInAnswer fs
     correctAtoms = sort $ nub $ collectLeaves tree
     origOpsNum = numOfOps tree
 
