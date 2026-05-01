@@ -11,7 +11,7 @@ instance Formula (SynTree BinOp Char) where
   literals (Leaf x) = [Positive x]
   literals (Not (Leaf x)) = [Negative x]
   literals (Not x) = literals x
-  literals (Binary _ l r) = nubSort $ literals l ++ literals r
+  literals (Binary _ l r) = literals l ++ literals r
 
   atomics = nubSort . collectLeaves
 

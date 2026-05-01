@@ -23,14 +23,14 @@ import Control.OutputCapable.Blocks (
 import Test.QuickCheck (Gen, suchThat, elements)
 
 import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), FormulaInst (..), BaseConfig (..), NormalFormConfig(..))
-import Formula.Util (isSemanticEqual)
+import Formula.Util (isSemanticEqual, withPercentRange, percentRangeModeRange)
 import Formula.Types (availableLetter, getTable, Formula (atomics))
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (extra)
 import Data.Maybe (fromJust)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
-import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
+import Util (vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 
 
@@ -41,11 +41,11 @@ genPickInst PickConfig{..} = do
     isSemanticEqual
     $ flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
         (FormulaArbitrary syntaxTreeConfig) ->
-          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries
+          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withPercentRange percentRangeMode
         (FormulaCnf cnfCfg) ->
-          InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries
+          InstCnf <$> genCnf' cnfCfg `suchThat` withPercentRange percentRangeMode
         (FormulaDnf dnfCfg) ->
-          InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries
+          InstDnf <$> genDnf' dnfCfg `suchThat` withPercentRange percentRangeMode
 
   correct <- elements [1..amountOfOptions]
 
@@ -140,9 +140,9 @@ verifyQuiz PickConfig{..}
           german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
           english "The given restriction on True entries should not fall below a range of 30."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf percentTrueEntries formulaConfig
+    | otherwise = checkTruthValueRangeAndFormulaConf percentRangeMode formulaConfig
   where
-    (rangeL, rangeH) = percentTrueEntries
+    (rangeL, rangeH) = percentRangeModeRange percentRangeMode
     hasMinUniqueAtoms x (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= x
     hasMinUniqueAtoms _ _ = True
     doesOvershootOptions (FormulaArbitrary syntaxTreeConfig)

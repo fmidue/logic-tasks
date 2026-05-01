@@ -8,9 +8,8 @@ import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, descrip
 import Test.QuickCheck (Gen, chooseInt, forAll, suchThat)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Formula.Util (isSemanticEqual)
+import Formula.Util (isSemanticEqual, PercentRangeMode(TrueEntries), withPercentRange)
 import Data.List.Extra (nubOrd, nubSort, nubBy)
-import Util (withRatio)
 import Formula.Types(atomics)
 import FillSpec (validBoundsNormalFormConfig, validBoundsPercentTrueEntries)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
@@ -38,12 +37,12 @@ validBoundsPickConfig = do
 
   percentTrueEntries''@(l,h) <- validBoundsPercentTrueEntries formulaConfig
 
-  let percentTrueEntries = if h - l < 30 then percentTrueEntries' else percentTrueEntries''
+  let percentRangeMode = if h - l < 30 then TrueEntries percentTrueEntries' else TrueEntries percentTrueEntries''
 
   pure $ PickConfig {
       formulaConfig
     , amountOfOptions
-    , percentTrueEntries
+    , percentRangeMode
     , printSolution = False
     , extraText = Nothing
     }
@@ -78,10 +77,10 @@ spec = do
       forAll validBoundsPickConfig $ \pickConfig -> do
         within (30 * 1000000) $ forAll (genPickInst pickConfig) $ \pickInst ->
           doesNotRefuse (verifyStatic pickInst :: LangM Maybe)
-    it "should respect percentTrueEntries" $
+    it "should respect percentRangeMode" $
       forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         within (30 * 1000000) $ forAll (genPickInst pickConfig) $ \PickInst{..} ->
-          all (withRatio percentTrueEntries) formulas
+          all (withPercentRange percentRangeMode) formulas
     it "the generated solution should pass grading" $
       forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         within (30 * 1000000) $ forAll (genPickInst pickConfig) $ \inst ->
