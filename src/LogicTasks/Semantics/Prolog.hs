@@ -86,14 +86,14 @@ description PrologInst{..} = do
   paragraph $ if usesSetNotation
     then do
       translate $ do
-        german "Nutzen Sie zur Angabe der Resolvente die Mengenschreibweise. Ein Lösungsversuch mit den Klauseln {a(x), b(x)} und {-a(x), b(x), c(x)} könnte beispielsweise so aussehen:"
-        english "Specify the resolvent using set notation. A valid solution with the clauses {a(x), b(x)} and {-a(x), b(x), c(x)} could look like this:"
+        german "Nutzen Sie zur Angabe der Resolvente die Mengenschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen:"
+        english "Specify the resolvent using set notation! A valid solution could look like this:"
       indent $ code "(a(x), { b(x), c(x) })"
       pure ()
     else do
       translate $ do
-        german "Nutzen Sie zur Angabe der Resolvente eine Formel. Ein Lösungsversuch mit den Klauseln 'a(x) oder b(x)' und '-a(x) oder b(x) oder c(x)' könnte beispielsweise so aussehen:"
-        english "Specify the resolvent using a formula. A valid solution with the clauses 'a(x) or b(x)' and '-a(x) or b(x) or c(x)' could look like this:"
+        german "Nutzen Sie zur Angabe der Resolvente eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen:"
+        english "Specify the resolvent using a formula! A valid solution could look like this:"
       indent $ translatedCode $ flip localise $ translations $ do
         english "(a(x), b(x) or c(x))"
         german "(a(x), b(x) oder c(x))"
