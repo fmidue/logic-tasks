@@ -95,7 +95,7 @@ partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length for
 completeGrade :: (OutputCapable m, Alternative m, Monad m) => LegalNormalFormInst -> [Int] -> Rated m
 completeGrade LegalNormalFormInst{..} sol = reRefuse
   (multipleChoice
-    what
+    (Just what)
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)

@@ -99,7 +99,7 @@ completeGrade
   -> Rated m
 completeGrade path LegalPropositionInst{..} sol = reRefuse
   (multipleChoice
-    what
+    (Just what)
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)

@@ -199,7 +199,7 @@ completeGrade' :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> Rated m
 completeGrade' path ComposeFormulaInst{..} sol = reRefuse (
     multipleChoice
-      what
+      (Just what)
       Nothing
       solution
       parsedSol
