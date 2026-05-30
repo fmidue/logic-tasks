@@ -197,8 +197,7 @@ completeGrade' inst sol
     isSingular = superfluousBracketPairsSubmission  == 1
     rate = printSolutionAndAssertWithMinimum
       (MinimumThreshold (1 % superfluousBracketPairsTask))
-      False
-      (if showSolution inst then Just (DefiniteArticle, simplestSolutionString) else Nothing)
+      (if showSolution inst then Just (False, DefiniteArticle, simplestSolutionString) else Nothing)
 
 -- | Checks whether the second string can be transformed into
 --   the first string by removing only brackets.
