@@ -97,7 +97,7 @@ library
     , math-functions
     , minisat-solver
     , mtl
-    , output-blocks >=0.5.0.1
+    , output-blocks >=0.6
     , parsec
     , pretty-simple
     , random
@@ -152,7 +152,7 @@ test-suite src-test
     , math-functions
     , minisat-solver
     , mtl
-    , output-blocks >=0.5.0.1
+    , output-blocks >=0.6
     , parsec
     , pretty-simple
     , random
