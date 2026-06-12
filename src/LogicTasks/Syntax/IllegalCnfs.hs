@@ -24,7 +24,7 @@ import Control.OutputCapable.Blocks (
   )
 import Control.Monad (when)
 import Data.Map as Map (Map,fromAscList)
-import LogicTasks.Helpers hiding (extra)
+import LogicTasks.Helpers
 import Tasks.LegalNormalForm.Config(
   LegalNormalFormConfig(..),
   LegalNormalFormInst(..),
