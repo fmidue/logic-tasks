@@ -91,7 +91,7 @@ instance Pretty Cnf where
 
 
 instance Pretty Dnf where
-    pretty dnf = listShow $ getConjunctions dnf
+    pretty = listShow . getConjunctions
       where
         listShow [] = empty
         listShow [x] = singlePrint x
