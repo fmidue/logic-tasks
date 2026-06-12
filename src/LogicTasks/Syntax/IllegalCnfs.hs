@@ -8,6 +8,7 @@ module LogicTasks.Syntax.IllegalCnfs where
 import Control.OutputCapable.Blocks (
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   Rated,
@@ -23,7 +24,7 @@ import Control.OutputCapable.Blocks (
   )
 import Control.Monad (when)
 import Data.Map as Map (Map,fromAscList)
-import LogicTasks.Helpers
+import LogicTasks.Helpers hiding (extra)
 import Tasks.LegalNormalForm.Config(
   LegalNormalFormConfig(..),
   LegalNormalFormInst(..),

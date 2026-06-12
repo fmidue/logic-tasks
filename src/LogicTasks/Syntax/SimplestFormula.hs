@@ -9,6 +9,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (translatedCode),
   LangM,
   OutputCapable,
+  extra,
   collapsed,
   english,
   german,
@@ -26,7 +27,7 @@ import Control.OutputCapable.Blocks (
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 import GHC.Real ((%))
-import LogicTasks.Helpers (basicOpKey, extra, focus, instruct, reject, arrowsKey')
+import LogicTasks.Helpers (basicOpKey, focus, instruct, reject, arrowsKey')
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
