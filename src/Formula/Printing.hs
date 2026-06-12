@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# OPTIONS_GHC -Wwarn=x-partial #-}
-{-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
 
 module Formula.Printing
@@ -75,7 +74,7 @@ instance Pretty Con where
 
 
 instance Pretty Cnf where
-    pretty cnf = listShow $ getClauses cnf
+    pretty = listShow . getClauses
       where
         listShow [] = empty
         listShow [x] = singlePrint x
