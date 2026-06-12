@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# OPTIONS_GHC -Wwarn=x-partial #-}
-{-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
 
 module Formula.Printing
@@ -16,7 +15,6 @@ import Data.Text.Lazy (pack)
 import qualified Data.Set as Set (null)
 
 import Text.PrettyPrint.Leijen.Text
-import Data.Map (toList)
 import Data.Maybe (isJust, fromJust)
 import Trees.Print ()
 import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static, Collapsible))
@@ -77,7 +75,7 @@ instance Pretty Con where
 
 
 instance Pretty Cnf where
-    pretty cnf = listShow $ getClauses cnf
+    pretty = listShow . getClauses
       where
         listShow [] = empty
         listShow [x] = singlePrint x
@@ -94,7 +92,7 @@ instance Pretty Cnf where
 
 
 instance Pretty Dnf where
-    pretty dnf = listShow $ getConjunctions dnf
+    pretty = listShow . getConjunctions
       where
         listShow [] = empty
         listShow [x] = singlePrint x
@@ -139,34 +137,6 @@ instance Pretty PrologClause where
     pretty pc
         | Set.null (pLiterals pc) = text "{ }"
         | otherwise = hsep $ punctuate (text " ∨ ") $ map pretty $ terms pc
-
-
-
-instance Pretty PickInst where
-  pretty  PickInst{..} =
-      text "PickInst(" <> vcat
-                           [ nest 2 $ pretty formulas
-                           , char ',' <+> pretty correct
-                           , myText (", {" ++ show showSolution ++ "}")
-                           , char ','
-                           , pretty addText
-                           , char ')'
-                           ]
-
-instance Pretty ExtraText where
-  pretty NoExtraText = text "NoExtraText"
-  pretty (Static s) = myText ("Static({" ++ show (toList s) ++ "})")
-  pretty (Collapsible c s s') = text "Collapsible(" <> vcat
-                           [ myText $ show c
-                           , myText (", {" ++ show (toList s) ++ "}")
-                           , myText (", {" ++ show (toList s') ++ "}")
-                           , char ')'
-                           ]
-
-instance Pretty FormulaInst where
-  pretty (InstCnf cnf) = text "Cnf{" <> pretty cnf <> char '}'
-  pretty (InstDnf dnf) = text "Dnf{" <> pretty dnf <> char '}'
-  pretty (InstArbitrary tree) = text "SynTree{" <> pretty tree <> char '}'
 
 
 

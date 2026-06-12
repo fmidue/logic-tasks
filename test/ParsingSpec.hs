@@ -5,17 +5,12 @@ import Data.Either (isLeft, isRight)
 import Test.Hspec ( describe, it, Spec)
 
 import LogicTasks.Parsing (Parse(parser))
-import LogicTasks.Formula (Cnf, Dnf, mkDnf, mkCon, Literal (..))
+import LogicTasks.Formula (Cnf, Dnf)
 import Trees.Parsing (formulaParse)
 
 import Text.Parsec (parse)
 import Formula.Types (ResStep)
-import Config (dPickInst, PickInst(..), FormulaInst (InstDnf, InstArbitrary))
-import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Printing ()
-import qualified Trees.Types as TT (SynTree(Binary, Leaf, Not), BinOp (And))
-import Control.OutputCapable.Blocks (ExtraText(Static, Collapsible), Language (..))
-import Data.Map (fromList)
 
 spec :: Spec
 spec = do
@@ -46,54 +41,3 @@ spec = do
   describe "parser @ResStep" $ do
     it "can handle extra whitespace in resolved clause" $
       isRight $ parse (parser @ResStep) "" "(1, 2, {   A   ,    nicht    B   } = 5)"
-  describe "parser @PickInst" $ do
-    it "correctly parses the pretty representation of a PickInst (cnf)" $
-      either (const False) (== dPickInst) $ parse (parser @PickInst) "" $ show $ pretty dPickInst
-    it "correctly parses the pretty representation of a PickInst (dnf)" $
-      let pickInst = dPickInst { formulas = [InstDnf (mkDnf [mkCon [Positive 'A', Negative 'B']])] } in
-        either (const False) (== pickInst) $ parse (parser @PickInst) "" $ show $ pretty pickInst
-    it "correctly parses the pretty representation of a PickInst (arbitrary)" $
-      let pickInst = dPickInst { formulas = [InstArbitrary (TT.Binary TT.And (TT.Leaf 'A') (TT.Not (TT.Leaf 'B')))] } in
-        either (const False) (== pickInst) $ parse (parser @PickInst) "" $ show $ pretty pickInst
-    it "correctly parses the pretty representation of a PickInst (Static)" $
-      let pickInst = dPickInst { addText = Static (fromList
-                        [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
-                        , (English, "Do not try to use associativity in order to omit brackets in this task.")
-                        ]) } in
-        either (const False) (== pickInst) $ parse (parser @PickInst) "" $ show $ pretty pickInst
-    it "correctly parses the pretty representation of a PickInst (Collapsible)" $
-      let pickInst = dPickInst { addText = Collapsible
-        True
-        (fromList
-          [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
-          , (English, "Do not try to use associativity in order to omit brackets in this task.")
-          ])
-        (fromList
-          [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
-          , (English, "Do not try to use associativity in order to omit brackets in this task.")
-          ]  ) } in
-        either (const False) (== pickInst) $ parse (parser @PickInst) "" $ show $ pretty pickInst
-    it "correctly parses the pretty representation of a PickInst (Legacy to NoExtraText)" $
-      let
-        legacyInput =
-          "PickInst([Cnf{(A \8744 \172B)}\n\
-          \         ,Cnf{(\172A \8744 B)}]\n\
-          \, 1\n\
-          \, {True}\n\
-          \)"
-      in either (const False) (== dPickInst) $ parse (parser @PickInst) "" legacyInput
-    it "correctly parses the pretty representation of a PickInst (Legacy to Static)" $
-      let
-        legacyInput =
-          "PickInst([Cnf{(A \8744 \172B)}\n\
-          \         ,Cnf{(\172A \8744 B)}]\n\
-          \, 1\n\
-          \, {True}\n\
-          \, {[(English,\"Do not try to use associativity in order to omit brackets in this task.\")\
-          \,(German,\"Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.\")]}\n\
-          \)"
-        pickInst = dPickInst { addText = Static (fromList
-                      [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
-                      , (English, "Do not try to use associativity in order to omit brackets in this task.")
-                      ]) }
-      in either (const False) (== pickInst) $ parse (parser @PickInst) "" legacyInput

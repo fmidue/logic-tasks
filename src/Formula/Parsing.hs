@@ -19,7 +19,6 @@ import ParsingHelpers (caseInsensitive, lexeme, tokenSymbol)
 import Formula.Types
 
 import Control.Monad (void)
-import Data.Map (fromList)
 import Text.ParserCombinators.Parsec (
   Parser,
   (<?>),
@@ -40,7 +39,6 @@ import Text.ParserCombinators.Parsec (
   )
 
 import UniversalParser
-import Trees.Types (SynTree, BinOp)
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
 import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static, Collapsible))
@@ -354,80 +352,6 @@ formulaListSymbolParser = void $ many $ logicToken <|> listSymbolParser
 
 instance Parse PrologClause where
  parser = prologClauseFormulaParser
-
-instance Parse PickInst where
-  parser = lexeme instParse
-    where
-      instParse = do
-        string "PickInst("
-        cs <- parser
-        tokenSymbol ","
-        index <- lexeme $ many1 digit
-        printSol <- lexeme text'
-        bonusText <- option NoExtraText (tokenSymbol "," *> (parser :: Parser ExtraText))
-        char ')'
-        pure $ PickInst cs (read index) (read printSol) bonusText
-          where
-            text' = between start (char '}') $ many1 $ satisfy ( /= '}')
-            start = do
-              char ','
-              spaces
-              char '{'
-
-instance Parse ExtraText where
-  parser = lexeme (parseNo <|> parseStatic <|> parseCollapsible <|> parseLegacyAsStatic)
-    where
-      parseNo = do
-        string "NoExtraText"
-        pure NoExtraText
-      parseStatic = do
-        string "Static"
-        spaces
-        tokenSymbol "("
-        s <- lexeme text'
-        tokenSymbol ")"
-        pure $ Static (fromList (read s))
-      parseCollapsible = do
-        string "Collapsible"
-        spaces
-        tokenSymbol "("
-        c <- lexeme parseBool
-        s <- lexeme text'
-        s' <- lexeme text'
-        tokenSymbol ")"
-        pure $ Collapsible c (fromList (read s)) (fromList (read s'))
-      parseLegacyAsStatic = do
-        bonusText <- optionMaybe $ lexeme text'
-        pure $ maybe NoExtraText (Static . fromList . read) bonusText
-      text' = between start (char '}') $ many1 $ satisfy ( /= '}')
-      parseBool =  (string "True"  >> pure True)
-             <|> (string "False" >> pure False)
-      start = do
-        optional (char ',')
-        spaces
-        char '{'
-
-instance Parse FormulaInst where
-  parser = lexeme (parseCNF <|> parseDNF <|> parseSynTree)
-    where
-      parseCNF = do
-        string "Cnf"
-        tokenSymbol "{"
-        f <- (parser :: Parser Cnf)
-        tokenSymbol "}"
-        pure $ InstCnf f
-      parseDNF = do
-        string "Dnf"
-        tokenSymbol "{"
-        f <- (parser :: Parser Dnf)
-        tokenSymbol "}"
-        pure $ InstDnf f
-      parseSynTree = do
-        string "SynTree"
-        tokenSymbol "{"
-        f <- (parser :: Parser (SynTree BinOp Char))
-        tokenSymbol "}"
-        pure $ InstArbitrary f
 
 instance Parse DecideAnswer where
   parser = DecideAnswer <$> lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
