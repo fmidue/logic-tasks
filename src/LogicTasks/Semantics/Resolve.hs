@@ -14,6 +14,7 @@ import Control.OutputCapable.Blocks (
   LangM,
   Language,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -32,7 +33,7 @@ import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
+import LogicTasks.Helpers (example, keyHeading, negationKey, orKey)
 import LogicTasks.Semantics.Step (showClause)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)

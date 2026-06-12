@@ -12,6 +12,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -23,7 +24,7 @@ import Test.QuickCheck (Gen, suchThat)
 import Config (BaseConfig(..), NormalFormConfig(..), MinMaxConfig(..), MinInst(..))
 import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
 import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
-import LogicTasks.Helpers (extra, formulaKey)
+import LogicTasks.Helpers (formulaKey)
 import Util (withRatio)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
