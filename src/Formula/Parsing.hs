@@ -39,7 +39,6 @@ import Text.ParserCombinators.Parsec (
   )
 
 import UniversalParser
-import Trees.Types (SynTree, BinOp)
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
 
