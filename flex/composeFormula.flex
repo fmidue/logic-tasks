@@ -18,7 +18,7 @@ type TaskData = ComposeFormulaInst
 module TaskSettings where
 
 
-import Control.OutputCapable.Blocks     (LangM, Language(..), OutputCapable)
+import Control.OutputCapable.Blocks     (LangM, Language(..), OutputCapable, ExtraText(Static))
 import Data.Map                         (Map)
 import Tasks.ComposeFormula.Config (
   ComposeFormulaConfig(..),
@@ -44,7 +44,7 @@ task03 = ComposeFormulaConfig
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
-      , (BackImpl, 1)
+      , (BackImpl, 1) -- should be (BackImpl, 0) in future
       , (Equi, 1)
       ]
     , negOpFrequency = 1
@@ -52,7 +52,7 @@ task03 = ComposeFormulaConfig
     , minUniqueBinOperators = 2
     }
   , treeDisplayModes = (TreeDisplay, TreeDisplay)
-  , extraText = Just $ listToFM
+  , extraText = Static $ listToFM
       [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
       , (English, "Do not try to use associativity in order to omit brackets in this task.")
       ]
@@ -142,11 +142,10 @@ import Global                           (TaskData, Submission)
 
 checkSyntax
   :: OutputCapable m
-  => a
-  -> TaskData
+  => TaskData
   -> Submission
   -> LangM m
-checkSyntax _ = partialGrade'
+checkSyntax = partialGrade'
 
 checkSemantics
   :: (Alternative m, MonadCache m, MonadLatexSvg m, OutputCapable m)

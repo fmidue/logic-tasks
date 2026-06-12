@@ -11,10 +11,9 @@ module Tasks.SubTree.Config (
     ) where
 
 
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
 import Data.Set (Set)
 import GHC.Generics (Generic)
-import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
@@ -30,7 +29,7 @@ data SubTreeConfig =
       syntaxTreeConfig :: SynTreeConfig
     , allowSameSubTree :: Bool
     , subTreeAmount :: Integer
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     } deriving (Show,Generic)
@@ -43,8 +42,8 @@ defaultSubTreeConfig =
     { syntaxTreeConfig = defaultSynTreeConfig
     , allowSameSubTree = True
     , subTreeAmount = 3
-    , extraText = Nothing
-    , printSolution = False
+    , extraText = NoExtraText
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
@@ -58,6 +57,12 @@ checkSubTreeConfig subConfig@SubTreeConfig {..} =
 
 checkAdditionalConfig :: OutputCapable m => SubTreeConfig -> LangM m
 checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, subTreeAmount}
+    | minAmountOfUniqueAtoms < 2 = reject $ do
+        english "There should be more than one atomic formula for this task type."
+        german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
+    | minAmountOfUniqueAtoms <= maxNodes `div` 4 = reject $ do
+        english "There should be enough atomic formulas to occupy at least half of the leaves in a complete binary tree differently."
+        german "Es sollen genug atomare Formeln vorliegen, um zumindest die Hälfte der Blätter in einem vollständigen binären Baum verschieden zu besetzen."
     | subTreeAmount < 2 = reject $ do
         english "The task makes no sense if not at least two subtrees are generated."
         german "Es müssen mindestens zwei Unterbäume erzeugt werden."
@@ -73,8 +78,8 @@ data SubTreeInst =
     { tree :: SynTree BinOp Char
     , correctTrees :: Set (SynTree BinOp Char)
     , inputTreeAmount :: Integer
-    , showArrowOperators :: Bool
+    , arrowOperatorsToShow :: [BinOp]
     , showSolution :: Bool
-    , addText :: Maybe (Map Language String)
+    , addText :: ExtraText
     , unicodeAllowed :: Bool
     } deriving (Show,Generic)

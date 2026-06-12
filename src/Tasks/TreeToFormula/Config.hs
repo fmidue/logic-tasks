@@ -10,14 +10,13 @@ module Tasks.TreeToFormula.Config (
     ) where
 
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
-import Data.Map (Map)
 import Trees.Types (SynTree(..), BinOp(..))
 import GHC.Generics
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, ExtraText (NoExtraText))
 
 data TreeToFormulaConfig = TreeToFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
@@ -26,8 +25,8 @@ data TreeToFormulaConfig = TreeToFormulaConfig {
 defaultTreeToFormulaConfig :: TreeToFormulaConfig
 defaultTreeToFormulaConfig = TreeToFormulaConfig
     { syntaxTreeConfig = defaultSynTreeConfig
-    , extraText = Nothing
-    , printSolution = False
+    , extraText = NoExtraText
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
@@ -42,8 +41,8 @@ data TreeToFormulaInst = TreeToFormulaInst {
                  tree :: SynTree BinOp Char
                , latexImage :: String
                , correct :: String
-               , showArrowOperators :: Bool
-               , addText :: Maybe (Map Language String)
+               , arrowOperatorsToShow :: [BinOp]
+               , addText :: ExtraText
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }

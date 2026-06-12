@@ -10,16 +10,15 @@ module Tasks.DecomposeFormula.Config (
     ) where
 
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
-import Data.Map (Map)
 import qualified Data.Map as Map (fromList, findWithDefault)
 import Trees.Types (SynTree(..), BinOp(..))
 import GHC.Generics
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, german, english)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, german, english, ExtraText (NoExtraText))
 import LogicTasks.Helpers (reject)
 
 data DecomposeFormulaConfig = DecomposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
@@ -36,7 +35,7 @@ defaultDecomposeFormulaConfig = DecomposeFormulaConfig
         , (Equi, 1)
         ]
       }
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = True
     , offerUnicodeInput = False
     }
@@ -55,6 +54,9 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..
     | minNodes < 7 = reject $ do
         english "Minimum number of nodes restricts the number of possible subtrees too much."
         german "Minimale Anzahl an Knoten schränkt die Anzahl der möglichen Teilbäume zu stark ein."
+    | minAmountOfUniqueAtoms < 2 = reject $ do
+        english "There should be more than one atomic formula for this task type."
+        german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
     | all ((== 0) . freq) [And, Or, Equi] = reject $ do
         english "At least one of the following operators must have a frequency greater than 0: And, Or, Equi"
         german "Mindestens einer der folgenden Operatoren muss eine Frequenz größer als 0 besitzen: And, Or, Equi"
@@ -63,7 +65,8 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..
 
 data DecomposeFormulaInst = DecomposeFormulaInst
                { tree :: SynTree BinOp Char
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
+               , arrowOperatorsToShow :: [BinOp]
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }

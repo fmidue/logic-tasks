@@ -14,6 +14,7 @@ import Control.OutputCapable.Blocks (
   LangM,
   Language,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -32,7 +33,7 @@ import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
+import LogicTasks.Helpers (example, keyHeading, negationKey, orKey)
 import LogicTasks.Semantics.Step (showClause)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
@@ -282,7 +283,7 @@ verifyQuiz ResolutionConfig{..}
           german "Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
           english "More than one step using only length 1 clauses is not possible."
 
-    | minSteps > 2 * length (usedAtoms baseConf) =
+    | minSteps >= 2 * length (usedAtoms baseConf) =
         refuse $ indent $ translate $ do
           german "Diese minimale Anzahl Schritte kann mit den gegebenen atomaren Formeln nicht durchgeführt werden."
           english "This amount of steps is impossible with the given amount of atomic formulas."

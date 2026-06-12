@@ -14,11 +14,10 @@ module Tasks.ComposeFormula.Config (
 -- jscpd:ignore-start
 import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTreeConfig)
 import Data.Data (Data)
-import Data.Map (Map)
 import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
 import GHC.Generics
-import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
 import LogicTasks.Helpers (reject)
 -- jscpd:ignore-end
 
@@ -27,7 +26,7 @@ data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bou
 data ComposeFormulaConfig = ComposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
     , treeDisplayModes :: (TreeDisplayMode, TreeDisplayMode)
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
@@ -45,8 +44,8 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
         ]
       }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
-    , extraText = Nothing
-    , printSolution = False
+    , extraText = NoExtraText
+    , printSolution = True
     , offerUnicodeInput = False
     }
 
@@ -61,6 +60,9 @@ checkAdditionalConfig ComposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..}}
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."
         german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
+    | minAmountOfUniqueAtoms < 2 = reject $ do
+        english "There should be more than one atomic formula for this task type."
+        german "In diesem Aufgabentyp sollte es mehr als eine atomare Formel geben."
     | minNodes < 7 = reject $ do
         english "Minimum number of nodes restricts the number of possible subtrees too much."
         german "Minimale Anzahl an Knoten schränkt die Anzahl der möglichen Teilbäume zu stark ein."
@@ -73,7 +75,8 @@ data ComposeFormulaInst = ComposeFormulaInst
                , rightTree :: SynTree BinOp Char
                , leftTreeImage :: Maybe String
                , rightTreeImage :: Maybe String
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
+               , arrowOperatorsToShow :: [BinOp]
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }

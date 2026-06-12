@@ -19,7 +19,7 @@ type TaskData = StepInst
 module TaskSettings where
 
 import LogicTasks.Config                (dBaseConf, StepConfig(..))
-import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, ExtraText(NoExtraText))
 import LogicTasks.Semantics.Step        (verifyQuiz)
 
 
@@ -28,7 +28,7 @@ stepConf = StepConfig
     { baseConf = dBaseConf
     , useSetNotation = False
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = True
     }
 
@@ -41,16 +41,21 @@ validateSettings = verifyQuiz stepConf
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module TaskData (getTask) where
 
 import Control.Monad.Random    (MonadRandom)
+import Data.List                        (isSubsequenceOf)
 import Data.String.Interpolate (i)
 
 import FlexTask.Generic.Form
 import FlexTask.GenUtil        (fromGen)
 import FlexTask.YesodConfig    (Rendered, Widget)
+import LogicTasks.Config                (StepInst(..))
+import LogicTasks.Formula               (Formula(literals))
 import LogicTasks.Semantics.Step (genStepInst)
+import Test.QuickCheck                  (suchThat)
 
 import Global
 import TaskSettings
@@ -58,7 +63,9 @@ import TaskSettings
 
 getTask :: MonadRandom m => m (TaskData, String, Rendered Widget)
 getTask = do
-    resInst <- fromGen $ genStepInst stepConf
+    resInst <- fromGen $ genStepInst stepConf `suchThat` (\StepInst{..} ->
+      not $ literals (snd solution) `isSubsequenceOf` literals clause1
+      )
     pure (resInst, checkers, form)
 
 form :: Rendered Widget
@@ -80,8 +87,8 @@ import LogicTasks.Semantics.Step (showClause)
 import Global
 
 
-checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ _ _ = pure ()
+checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
+checkSyntax _ _ = pure ()
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submittedClause =

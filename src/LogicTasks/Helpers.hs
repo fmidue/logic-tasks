@@ -16,14 +16,11 @@ import Control.OutputCapable.Blocks (
   translatedCode,
   localise,
   )
-import Control.Monad.State (State, put)
+import Control.Monad.State (State)
 import Data.Map (Map)
+import Trees.Types (BinOp (..))
 
 
-
-extra :: OutputCapable m => Maybe (Map Language String) -> LangM m
-extra (Just extraMap) = paragraph $ translate $ put extraMap
-extra _ = pure ()
 
 indexed :: [String] -> [String]
 indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])
@@ -117,17 +114,30 @@ negationKey allowUnicode =
     pure ()
 
 arrowsKey :: OutputCapable m => LangM m
-arrowsKey = do
-  paragraph $ indent $ do
-    translate $ do
-      english "Implication:"
-      german "Implikation:"
-    code "=>, <="
-    pure ()
-  paragraph $ indent $ do
-    translate $ do
+arrowsKey = arrowsKey' [Impl, BackImpl, Equi]
+
+arrowsKey' :: OutputCapable m => [BinOp] -> LangM m
+arrowsKey' [] = pure ()
+arrowsKey' (op:os)
+  | op == Equi = go "<=>" os $ do
       english "Bi-Implication:"
       german "Bi-Implikation:"
-    code "<=>"
-    pure ()
-  pure ()
+  | otherwise =
+    let hasImpl = op == Impl     || Impl     `elem` os
+        hasBack = op == BackImpl || BackImpl `elem` os
+    in
+      go (selectArrow hasImpl hasBack) (filter (`notElem` [Impl, BackImpl]) os) $ do
+        english "Implication:"
+        german "Implikation:"
+  where
+    go codeString xs x = do
+      paragraph $ indent $ do
+        translate x
+        code codeString
+        pure ()
+      arrowsKey' xs
+      pure ()
+    selectArrow hasImpl hasBack
+      | hasImpl && hasBack = "=>, <="
+      | hasImpl = "=>"
+      | otherwise = "<="

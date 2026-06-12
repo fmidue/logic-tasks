@@ -14,6 +14,7 @@ import Trees.Types (BinOp(..))
 import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
+import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
@@ -32,9 +33,9 @@ task11 = DecideConfig
                    , maxClauseAmount = 3
                    })
   , percentageOfChanged = 40
-  , percentTrueEntries = Just (30,70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
-  , extraText = Nothing
+  , extraText = NoExtraText
   }
 
 -- 2025: Weight 0.3
@@ -60,9 +61,9 @@ task13 = DecideConfig
                         , minUniqueBinOperators = 4
                         })
   , percentageOfChanged = 30
-  , percentTrueEntries = Just (30,70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
-  , extraText = Nothing
+  , extraText = NoExtraText
   }
 
 spec :: Spec

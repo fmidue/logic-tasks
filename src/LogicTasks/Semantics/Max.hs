@@ -10,6 +10,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -17,18 +18,18 @@ import Control.OutputCapable.Blocks (
   localise,
   )
 import Data.List ((\\))
-import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
-import LogicTasks.Helpers (formulaKey, example, extra)
+import LogicTasks.Helpers (formulaKey, example)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, withRatio, checkNormalFormConfig)
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
+import LogicTasks.Config (FormulaConfig(..))
 
 
 
@@ -43,7 +44,7 @@ genMaxInst MinMaxConfig {normalFormConf = NormalFormConfig {baseConf = BaseConfi
     }
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
-    cnfInRange = getCnf `suchThat` withRatio (fromMaybe (0,100) percentTrueEntries)
+    cnfInRange = getCnf `suchThat` withRatio percentTrueEntries
 
 
 
@@ -95,11 +96,11 @@ verifyStatic MaxInst{..}
 
 verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..} = do
-  checkTruthValueRange (low,high)
+  checkTruthValueRange (low,high) (FormulaDnf normalFormConf)
   checkNormalFormConfig normalFormConf
   pure ()
   where
-    (low,high) = fromMaybe (0,100) percentTrueEntries
+    (low, high) = percentTrueEntries
 
 
 
