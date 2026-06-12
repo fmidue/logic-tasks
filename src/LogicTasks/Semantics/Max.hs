@@ -10,6 +10,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -23,7 +24,7 @@ import Config (BaseConfig(..), NormalFormConfig(..),  MaxInst(..), MinMaxConfig(
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
-import LogicTasks.Helpers (formulaKey, example, extra)
+import LogicTasks.Helpers (formulaKey, example)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, withRatio, checkNormalFormConfig)
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)

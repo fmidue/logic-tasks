@@ -12,6 +12,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (code, image, indent),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
@@ -24,7 +25,7 @@ import Control.OutputCapable.Blocks (
   multipleChoiceSyntax,
   )
 import Data.List.Extra (nubSort)
-import LogicTasks.Helpers (example, extra, focus, indexed, instruct)
+import LogicTasks.Helpers (example, focus, indexed, instruct)
 import Tasks.LegalProposition.Config (
   LegalPropositionInst(..),
   LegalPropositionConfig(..),

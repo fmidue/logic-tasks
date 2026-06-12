@@ -10,7 +10,7 @@ import Tasks.TreeToFormula.Config (
   TreeToFormulaConfig(..),checkTreeToFormulaConfig,
   )
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(..))
+import Control.OutputCapable.Blocks (Language(..), ExtraText(Static))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
@@ -38,7 +38,7 @@ task02 = TreeToFormulaConfig
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 2
     }
-  , extraText = Just (listToFM
+  , extraText = Static (listToFM
                         [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
                         , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])
@@ -67,7 +67,7 @@ task04 =  TreeToFormulaConfig
     , maxConsecutiveNegations = 3
     , minUniqueBinOperators = 2
     }
-  , extraText = Just (listToFM
+  , extraText = Static (listToFM
                         [ (German, "Sie dürfen bei dieser Aufgabe nicht Klammern durch Verwendung von Assoziativität weglassen.")
                         , (English, "Do not try to use associativity in order to omit brackets in this task.")
                         ])

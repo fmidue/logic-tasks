@@ -9,7 +9,7 @@ import Tasks.SynTree.Config (
   )
 import Trees.Types (BinOp(..))
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German,English))
+import Control.OutputCapable.Blocks (Language(German,English), ExtraText(Static))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
@@ -39,7 +39,7 @@ task04 = SubTreeConfig
     }
   , allowSameSubTree = False
   , subTreeAmount = 3
-  , extraText = Just (listToFM
+  , extraText = Static (listToFM
                       [ (English, "It does not matter in which order the formulas appear in the listing.")
                       , (German, "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Auflistung stehen.")
                       ])

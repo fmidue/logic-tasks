@@ -10,7 +10,7 @@ import qualified Data.Set
 import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution, clauses))
 import Test.QuickCheck (Gen, chooseInt, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import FillSpec (validBoundsBaseConfig)
 import TestHelpers (doesNotRefuse)
 import Test.QuickCheck.Property (within)
@@ -51,7 +51,7 @@ validBoundsResolutionConfig = do
   , printFeedbackImmediately = False
   , useSetNotation = True
   , printSolution = False
-  , extraText = Nothing
+  , extraText = NoExtraText
   , offerUnicodeInput = False
   }
 

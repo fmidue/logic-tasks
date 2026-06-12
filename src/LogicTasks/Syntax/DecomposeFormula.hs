@@ -11,6 +11,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (paragraph, indent, translatedCode, refuse, image),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
@@ -19,7 +20,7 @@ import Control.OutputCapable.Blocks (
   translations,
   )
 
-import LogicTasks.Helpers (extra, example, instruct, keyHeading, basicOpKey, arrowsKey', reject)
+import LogicTasks.Helpers (example, instruct, keyHeading, basicOpKey, arrowsKey', reject)
 import Trees.Types (TreeFormulaAnswer(..))
 import Tasks.DecomposeFormula.Config (DecomposeFormulaInst(..), DecomposeFormulaConfig, checkDecomposeFormulaConfig)
 import Trees.Print (display, transferToPicture)

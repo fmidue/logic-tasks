@@ -11,6 +11,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
@@ -28,7 +29,7 @@ import Data.List (intercalate, nub, sort)
 import qualified Data.Set (map)
 import qualified Data.Map as Map (fromSet, insert, filter)
 import Data.Maybe (isNothing)
-import LogicTasks.Helpers (extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey')
+import LogicTasks.Helpers (focus, instruct, keyHeading, reject, basicOpKey, arrowsKey')
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
