@@ -11,6 +11,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -26,7 +27,6 @@ import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), For
 import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, Formula (atomics))
 import Formula.Printing (showIndexedList)
-import LogicTasks.Helpers (extra)
 import Data.Maybe (fromJust)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))

@@ -9,6 +9,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate, localise, translations,
@@ -22,7 +23,7 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey, instruct)
+import LogicTasks.Helpers (example, keyHeading, negationKey, orKey, instruct)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (when, unless)
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)

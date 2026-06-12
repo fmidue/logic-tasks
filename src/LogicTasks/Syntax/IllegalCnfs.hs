@@ -8,6 +8,7 @@ module LogicTasks.Syntax.IllegalCnfs where
 import Control.OutputCapable.Blocks (
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   Rated,

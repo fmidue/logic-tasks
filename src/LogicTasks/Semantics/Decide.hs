@@ -12,6 +12,7 @@ import Control.OutputCapable.Blocks (
   LangM,
   Language (..),
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -42,7 +43,7 @@ import Config (
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable)
 import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
-import LogicTasks.Helpers (extra, reject)
+import LogicTasks.Helpers (reject)
 import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)

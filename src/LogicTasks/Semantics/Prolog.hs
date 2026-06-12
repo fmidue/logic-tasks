@@ -9,6 +9,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -27,7 +28,7 @@ import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
 import Control.Monad (when)
-import LogicTasks.Helpers (example, extra, instruct)
+import LogicTasks.Helpers (example, instruct)
 import Formula.Helpers (hasTheClauseShape)
 import Formula.Parsing.Delayed (Delayed, withDelayed, withDelayedSucceeding, complainAboutWrongNotation)
 import Formula.Parsing (Parse(..), prologClauseSetParser)
