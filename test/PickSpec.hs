@@ -3,7 +3,7 @@
 module PickSpec where
 import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import Test.Hspec (Spec, describe, it)
-import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
+import LogicTasks.Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
 import Test.QuickCheck (Gen, chooseInt, forAll, suchThat)
 import SynTreeSpec (validBoundsSynTreeConfig')

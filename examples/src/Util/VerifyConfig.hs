@@ -7,7 +7,7 @@ module Util.VerifyConfig where
 import Control.OutputCapable.Blocks (LangM, OutputCapable, Language(German))
 import Test.Hspec
 import Type.Reflection
-import Config (FormulaConfig(..))
+import LogicTasks.Config (FormulaConfig(..))
 import LogicTasks.Util (checkNormalFormConfig)
 import Tasks.SynTree.Config (checkSynTreeConfig)
 import Control.OutputCapable.Blocks.Debug (checkConfigWith)
