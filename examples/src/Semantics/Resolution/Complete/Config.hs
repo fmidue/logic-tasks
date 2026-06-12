@@ -7,7 +7,7 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 import LogicTasks.Util (checkBaseConf)
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
 
 -- 2025: Weight 0.5
 task17 :: ResolutionConfig
@@ -21,7 +21,7 @@ task17 = ResolutionConfig
     , printFeedbackImmediately = True
     , useSetNotation = True
     , printSolution = False
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = True
     }
 
@@ -37,7 +37,7 @@ task18 = ResolutionConfig
   , printFeedbackImmediately = True
   , useSetNotation = True
   , printSolution = False
-  , extraText = Nothing
+  , extraText = NoExtraText
   , offerUnicodeInput = True
   }
 

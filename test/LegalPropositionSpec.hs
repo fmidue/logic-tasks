@@ -26,7 +26,7 @@ import Trees.Generate (genSynTree)
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Trees.Print (display)
 import TestHelpers (deleteBrackets, deleteSpaces, doesNotRefuse, doesNotRefuseIO)
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import Tasks.LegalProposition.Helpers (formulaAmount)
 import LogicTasks.Syntax.IllegalFormulas (description, partialGrade, verifyInst, completeGrade)
 import System.IO.Temp (withSystemTempDirectory)
@@ -44,7 +44,7 @@ validBoundsLegalPropositionConfig = do
             , formulas
             , illegals
             , bracketFormulas
-            , extraText = Nothing
+            , extraText = NoExtraText
             , printDetailedSolution = Nothing
         }
 

@@ -5,7 +5,7 @@ module DecideSpec where
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
-import Control.OutputCapable.Blocks (LangM, Rated)
+import Control.OutputCapable.Blocks (LangM, Rated, ExtraText(NoExtraText))
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideAnswer(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import SynTreeSpec (validBoundsSynTreeConfig')
@@ -36,7 +36,7 @@ validBoundsDecideConfig = do
     , percentageOfChanged
     , percentTrueEntries
     , printSolution = False
-    , extraText = Nothing
+    , extraText = NoExtraText
     }
 
 spec :: Spec
