@@ -17,7 +17,6 @@ import Control.OutputCapable.Blocks (
   localise,
   )
 import Data.List ((\\))
-import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..),  MaxInst(..), MinMaxConfig(..))
@@ -44,7 +43,7 @@ genMaxInst MinMaxConfig {normalFormConf = NormalFormConfig {baseConf = BaseConfi
     }
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
-    cnfInRange = getCnf `suchThat` withRatio (fromMaybe (0,100) percentTrueEntries)
+    cnfInRange = getCnf `suchThat` withRatio percentTrueEntries
 
 
 
@@ -100,7 +99,7 @@ verifyQuiz MinMaxConfig{..} = do
   checkNormalFormConfig normalFormConf
   pure ()
   where
-    (low,high) = fromMaybe (0,100) percentTrueEntries
+    (low, high) = percentTrueEntries
 
 
 

@@ -44,7 +44,7 @@ task03 = ComposeFormulaConfig
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
-      , (BackImpl, 1)
+      , (BackImpl, 1) -- should be (BackImpl, 0) in future
       , (Equi, 1)
       ]
     , negOpFrequency = 1
@@ -142,11 +142,10 @@ import Global                           (TaskData, Submission)
 
 checkSyntax
   :: OutputCapable m
-  => a
-  -> TaskData
+  => TaskData
   -> Submission
   -> LangM m
-checkSyntax _ = partialGrade'
+checkSyntax = partialGrade'
 
 checkSemantics
   :: (Alternative m, MonadCache m, MonadLatexSvg m, OutputCapable m)

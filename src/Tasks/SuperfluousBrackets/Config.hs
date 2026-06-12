@@ -85,7 +85,7 @@ data SuperfluousBracketsInst =
       tree :: SynTree BinOp Char
     , stringWithSuperfluousBrackets :: String
     , simplestString :: String
-    , showArrowOperators :: Bool
+    , arrowOperatorsToShow :: [BinOp]
     , showSolution :: Bool
     , addText :: ExtraText
     , unicodeAllowed :: Bool

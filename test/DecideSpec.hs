@@ -6,9 +6,8 @@ module DecideSpec where
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
 import Control.OutputCapable.Blocks (LangM, Rated, ExtraText(NoExtraText))
-import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
+import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideAnswer(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
-import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -30,8 +29,7 @@ validBoundsDecideConfig = do
             maxNodes < 30
 
   percentageOfChanged <- chooseInt (1, 100)
-  percentTrueEntries' <- validBoundsPercentTrueEntries formulaConfig
-  let percentTrueEntries = Just percentTrueEntries'
+  percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
 
   pure $ DecideConfig {
       formulaConfig
@@ -65,12 +63,12 @@ spec = do
           doesNotRefuse
             (partialGrade
               inst
-                [ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: LangM Maybe) &&
           doesNotRefuse
             (completeGrade
               inst
-                [ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: Rated Maybe)
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
@@ -89,5 +87,5 @@ spec = do
     it "should respect percentTrueEntries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
         within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
-          withRatio (fromMaybe (0, 100) percentTrueEntries) formula
+          withRatio percentTrueEntries formula
 

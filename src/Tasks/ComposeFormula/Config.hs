@@ -76,6 +76,7 @@ data ComposeFormulaInst = ComposeFormulaInst
                , leftTreeImage :: Maybe String
                , rightTreeImage :: Maybe String
                , addText :: ExtraText
+               , arrowOperatorsToShow :: [BinOp]
                , showSolution :: Bool
                , unicodeAllowed :: Bool
                }

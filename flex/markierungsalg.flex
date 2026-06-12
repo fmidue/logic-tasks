@@ -138,8 +138,7 @@ form :: Rendered Widget
 form = formify (Nothing :: Maybe ([Maybe String], SingleChoiceSelection, Maybe String))
     [ [ list Vertical (map (fieldSettingsLabel . Step) [1..stepFields])]
     , [ dropdown (fieldSettingsLabel Output)
-        [ "---"
-        , SomeMessage Satisfiable
+        [ SomeMessage Satisfiable
         , SomeMessage Unsatisfiable
         ]
     , single (fieldSettingsLabel Model)
@@ -193,18 +192,15 @@ displayAllocation :: (Char,Bool) -> String
 displayAllocation (c,w) = "\\\\alpha(" ++ [c] ++  ")=" ++ show (fromEnum w)
 
 
-checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ TaskData{..} Submission{..} = do
+checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
+checkSyntax TaskData{..} Submission{..} = do
     checking (all isNothing steps && isNothing model) $ do
         german "Es dürfen nicht alle Texteingabefelder leer sein."
         english "Not all text input fields may be left blank."
     checking (any isJust (dropWhile isJust steps)) $ do
         german "Es dürfen keine Schritte übersprungen werden."
         english "Steps cannot be skipped."
-    checking (getAnswer output == Just 1) $ do
-        german "Es muss eine Ausgabe für den Algorithmus ausgewählt werden."
-        english "An output option needs to be selected."
-    checking (getAnswer output == Just 3 && isJust model) $ do
+    checking (getAnswer output == 2 && isJust model) $ do
         german $ "Widerspruch gefunden: " ++
             "Die Formel sei unerfüllbar, dennoch wurde eine erfüllende Belegung (Modell) angegeben."
         english $ "Contradiction found: " ++
@@ -227,9 +223,9 @@ checkSyntax _ TaskData{..} Submission{..} = do
   where
     stepsSubmitted = zip [1..] (map unCharAnswer (catMaybes steps))
     (germanOutput, englishOutput) = case getAnswer output of
-      Just 3 -> ("\\"unerfüllbar\\"","\\"unsatisfiable\\"")
-      Just 2 -> ("\\"erfüllbar\\"","\\"satisfiable\\"")
-      _      -> ("","")
+      2 -> ("\\"unerfüllbar\\"","\\"unsatisfiable\\"")
+      1 -> ("\\"erfüllbar\\"","\\"satisfiable\\"")
+      _ -> ("","")
     (germanWith, englishWith, modelDisplay) = case model of
       Nothing -> ("","",pure ())
       Just m  -> ( ", mit"
@@ -246,7 +242,7 @@ checkSemantics _ TaskData{solution = Solution{..},..} Submission{..} = do
     yesNo stepsCorrect $ translate $ do
         german "Schritte richtig?"
         english "Steps correct?"
-    let outputCorrect = Just (if correctOutput then 2 else 3) == getAnswer output
+    let outputCorrect = (if correctOutput then 1 else 2) == getAnswer output
     yesNo outputCorrect $ translate $ do
         german "Ausgabe richtig?"
         english "Output correct?"

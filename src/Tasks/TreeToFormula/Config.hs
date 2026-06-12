@@ -41,7 +41,7 @@ data TreeToFormulaInst = TreeToFormulaInst {
                  tree :: SynTree BinOp Char
                , latexImage :: String
                , correct :: String
-               , showArrowOperators :: Bool
+               , arrowOperatorsToShow :: [BinOp]
                , addText :: ExtraText
                , showSolution :: Bool
                , unicodeAllowed :: Bool

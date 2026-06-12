@@ -299,8 +299,8 @@ startingTable :: [[Maybe TruthValue]]
 startingTable = #{startingTable} --ignore-length
 
 
-checkSyntax :: OutputCapable m => a -> b -> Submission -> LangM m
-checkSyntax _ _ (Table xs,f,n) = do
+checkSyntax :: OutputCapable m => a -> Submission -> LangM m
+checkSyntax _ (Table xs,f,n) = do
     when (atomicColumns == map reverse startingTable) $ refuse $ indent $ text $
       "Die Spalten der atomaren Formeln sind invertiert. " ++
       "Bitte legen Sie die Tafel so an wie in der Vorlesung vorgegeben."
@@ -347,12 +347,12 @@ checkSemantics _ (_,_,nSol) (Table xs,f,n) = do
     yesNo correctNames $ text "Die Auflistung der Begleitenden ist korrekt?"
     let correct = filter id [correctStart, correctFormula, correctNames, correctValues]
     let points = fromIntegral (length correct) % 4
-    res <- printSolutionAndAssertWithMinimum (MinimumThreshold (1 % 4)) False maybeAnswer points
+    res <- printSolutionAndAssertWithMinimum (MinimumThreshold (1 % 4)) maybeAnswer points
     pure res
   where
     (headers,columns) = unzip xs
     maybeAnswer =
-      (IndefiniteArticle,) . flip (++) (show nSol) <$>
+      (False,IndefiniteArticle,) . flip (++) (show nSol) <$>
         #{if showSolution
             then Just ("Formel: " ++ simplestDisplay fSol ++ "\nKorrekte Einträge in Wahrheitstafel.\nBegleitende: ")
             else Nothing

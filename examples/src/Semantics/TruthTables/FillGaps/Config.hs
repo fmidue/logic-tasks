@@ -24,7 +24,7 @@ task07 = FillConfig
                   , maxClauseAmount = 3
                   })
   , percentageOfGaps = 60
-  , percentTrueEntries = Just (30, 70)
+  , percentTrueEntries = (30, 70)
   , printSolution = True
   , extraText = NoExtraText
   }
@@ -43,7 +43,7 @@ task20 = FillConfig
                    , maxClauseAmount = 4
                    })
   , percentageOfGaps = 40
-  , percentTrueEntries = Just (35, 65)
+  , percentTrueEntries = (35, 65)
   , extraText = NoExtraText
   , printSolution = True
   }

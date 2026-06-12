@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   Rated,
   multipleChoice,
   ArticleToUse (DefiniteArticle),
+  paragraph,
   translations,
   multipleChoiceSyntax,
   Language (..),
@@ -94,17 +95,17 @@ partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length for
 completeGrade :: (OutputCapable m, Alternative m, Monad m) => LegalNormalFormInst -> [Int] -> Rated m
 completeGrade LegalNormalFormInst{..} sol = reRefuse
   (multipleChoice
-    what
+    (Just what)
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)
-  $ when (hasWrongSolution && detailedSolution) $ indent $ do
+  $ when (hasWrongSolution && detailedSolution) $ do
 
     instruct $ do
       german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
       english "The solution for this task looks like this:"
 
-    for_ formulaInfos $ \(i,info, formula) -> do
+    for_ formulaInfos $ \(i,info, formula) -> paragraph $ indent $ do
 
       code (show i ++ ". " ++ formula)
 

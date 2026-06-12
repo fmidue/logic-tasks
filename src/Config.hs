@@ -64,16 +64,22 @@ instance Show StepAnswer where
 data DecideChoice
   = Correct
   | Wrong
-  | NoAnswer
   deriving (Show,Ord,Eq,Enum,Bounded,Generic)
+
+newtype DecideAnswer
+  = DecideAnswer { maybeChoice :: Maybe DecideChoice}
+  deriving (Generic)
 
 showChoice :: Language -> DecideChoice -> String
 showChoice German Correct = "Richtig"
 showChoice German Wrong = "Fehlerhaft"
-showChoice German NoAnswer = "Keine Antwort"
 showChoice English Correct = "Correct"
 showChoice English Wrong = "Wrong"
-showChoice English NoAnswer = "No answer"
+
+showDecideAnswer :: Language -> DecideAnswer -> String
+showDecideAnswer German (DecideAnswer Nothing) = "Keine Antwort"
+showDecideAnswer English (DecideAnswer Nothing) = "No answer"
+showDecideAnswer lang (DecideAnswer (Just choice)) = showChoice lang choice
 
 data PickInst = PickInst {
                  formulas :: [FormulaInst]
@@ -296,7 +302,7 @@ dNormalFormConf = NormalFormConfig
 data PickConfig = PickConfig {
        formulaConfig :: FormulaConfig
      , amountOfOptions :: Int
-     , percentTrueEntries :: Maybe (Int,Int)
+     , percentTrueEntries :: (Int, Int)
      , printSolution :: Bool
      , extraText :: ExtraText
      }
@@ -306,7 +312,7 @@ dPickConf :: PickConfig
 dPickConf = PickConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , amountOfOptions = 3
-    , percentTrueEntries = Just (30,70)
+    , percentTrueEntries = (30, 70)
     , printSolution = True
     , extraText = NoExtraText
     }
@@ -316,7 +322,7 @@ dPickConf = PickConfig
 data FillConfig = FillConfig {
       formulaConfig :: FormulaConfig
     , percentageOfGaps :: Int
-    , percentTrueEntries :: Maybe (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: ExtraText
     }
@@ -326,7 +332,7 @@ dFillConf :: FillConfig
 dFillConf = FillConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfGaps = 40
-    , percentTrueEntries = Just (30,70)
+    , percentTrueEntries = (30, 70)
     , printSolution = True
     , extraText = NoExtraText
     }
@@ -335,7 +341,7 @@ dFillConf = FillConfig
 
 data MinMaxConfig = MinMaxConfig {
       normalFormConf :: NormalFormConfig
-    , percentTrueEntries :: Maybe (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: ExtraText
     , offerUnicodeInput :: Bool
@@ -345,7 +351,7 @@ data MinMaxConfig = MinMaxConfig {
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
     { normalFormConf = dNormalFormConf
-    , percentTrueEntries = Just (50,70)
+    , percentTrueEntries = (50, 70)
     , printSolution = True
     , extraText = NoExtraText
     , offerUnicodeInput = False
@@ -356,7 +362,7 @@ dMinMaxConf = MinMaxConfig
 data DecideConfig = DecideConfig {
       formulaConfig :: FormulaConfig
     , percentageOfChanged :: Int
-    , percentTrueEntries :: Maybe (Int,Int)
+    , percentTrueEntries :: (Int, Int)
     , printSolution :: Bool
     , extraText :: ExtraText
     }
@@ -366,7 +372,7 @@ dDecideConf :: DecideConfig
 dDecideConf = DecideConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfChanged = 40
-    , percentTrueEntries = Just (30,70)
+    , percentTrueEntries = (30, 70)
     , printSolution = True
     , extraText = NoExtraText
     }

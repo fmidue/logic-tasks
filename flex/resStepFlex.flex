@@ -87,8 +87,8 @@ import LogicTasks.Semantics.Step (showClause)
 import Global
 
 
-checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ _ _ = pure ()
+checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
+checkSyntax _ _ = pure ()
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submittedClause =
