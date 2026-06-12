@@ -21,6 +21,7 @@ import Data.Maybe (isJust, fromJust)
 import Trees.Print ()
 import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static, Collapsible))
 
+
 myText :: String -> Doc
 myText = text . pack
 
