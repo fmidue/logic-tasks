@@ -15,17 +15,12 @@ import Control.OutputCapable.Blocks (
   translations,
   translatedCode,
   localise,
-  ExtraText,
-  extra
   )
 import Control.Monad.State (State)
 import Data.Map (Map)
 import Trees.Types (BinOp (..))
 
 
-
-extra :: OutputCapable m => ExtraText -> LangM m
-extra = Control.OutputCapable.Blocks.extra
 
 indexed :: [String] -> [String]
 indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])
