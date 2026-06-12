@@ -11,6 +11,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
@@ -27,8 +28,8 @@ import Control.OutputCapable.Blocks (
 import Data.List (intercalate, nub, sort)
 import qualified Data.Set (map)
 import qualified Data.Map as Map (fromSet, insert, filter)
-import Data.Maybe (isNothing, fromJust)
-import LogicTasks.Helpers (extra, focus, instruct, keyHeading, reject, basicOpKey, arrowsKey')
+import Data.Maybe (isNothing)
+import LogicTasks.Helpers (focus, instruct, keyHeading, reject, basicOpKey, arrowsKey')
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
@@ -147,8 +148,8 @@ partialGrade' SubTreeInst{..} fs
     | otherwise = pure ()
   where
     amount = fromIntegral $ length $ nub fs
-    atoms = sort $ nub $ concatMap (collectLeaves . fromJust . maybeForm) fs
-    opsNum = map (numOfOpsInFormula . fromJust . maybeForm) fs
+    atoms = sort $ nub $ concatMap collectLeavesInAnswer fs
+    opsNum = map numberOfOperatorsInAnswer fs
     correctAtoms = sort $ nub $ collectLeaves tree
     origOpsNum = numOfOps tree
 
@@ -176,12 +177,12 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
     Nothing
     solution
     submission)
-  $ when showSolution $ indent $ do
+  $ when showSolution $ do
     instruct $ do
       english ("A possible solution for this task contains " ++ show inputTreeAmount ++ " of the following subformulas:")
       german ("Eine mögliche Lösung für diese Aufgabe beinhaltet " ++ show inputTreeAmount ++ " der folgenden Teilformeln:")
 
-    for_ correctTrees $ \x -> do
+    for_ correctTrees $ \x -> paragraph $ indent $ do
       code (display x)
 
       instruct $ do

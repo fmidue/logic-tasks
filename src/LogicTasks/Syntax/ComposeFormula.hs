@@ -11,6 +11,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
@@ -23,7 +24,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey')
+import LogicTasks.Helpers (instruct, keyHeading, reject, example, basicOpKey, arrowsKey')
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
@@ -199,7 +200,7 @@ completeGrade' :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m
   FilePath -> ComposeFormulaInst -> [TreeFormulaAnswer] -> Rated m
 completeGrade' path ComposeFormulaInst{..} sol = reRefuse (
     multipleChoice
-      what
+      (Just what)
       Nothing
       solution
       parsedSol

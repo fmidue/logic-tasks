@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 module PickSpec where
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import Test.Hspec (Spec, describe, it)
 import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
@@ -44,7 +44,7 @@ validBoundsPickConfig = do
     , amountOfOptions
     , percentRangeMode
     , printSolution = False
-    , extraText = Nothing
+    , extraText = NoExtraText
     }
 
 spec :: Spec

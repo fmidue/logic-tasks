@@ -97,10 +97,6 @@ instance Show (PropFormula Char) where
   show (Assoc o f1 f2) = show f1 ++ " " ++ showOperator o ++ " " ++ show f2
 
 
-instance ToSAT (PropFormula Char) where
-  convert = convert . toSynTree
-
-
 toSynTree :: PropFormula a -> SynTree BinOp a
 toSynTree (Atomic c) = Leaf c
 toSynTree (Neg p) = Not $ toSynTree p

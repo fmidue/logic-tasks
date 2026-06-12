@@ -93,7 +93,9 @@ genRes (minLen,maxLen) steps atoms = do
     buildClauses :: [Char] -> (Set (Set Literal),[ResStep]) -> Int -> Gen (Set (Set Literal), [ResStep])
     buildClauses xs (ys,rs) runs
         | runs >= 100 = buildClauses xs (empty,[]) 0
-        | Set.size ys >= steps+1  = pure (ys,rs)
+        | Set.size ys > steps = if length rs == steps
+            then pure (ys,rs)
+            else buildClauses xs (empty,[]) 0
         | otherwise =
             if Set.null ys
               then do

@@ -12,6 +12,7 @@ import Control.OutputCapable.Blocks (
   LangM,
   Language (..),
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -29,12 +30,21 @@ import Data.List.Extra ((\\), intercalate)
 import Data.Map (Map, fromList)
 import Test.QuickCheck (Gen, suchThat)
 
-import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..), DecideChoice (..), showChoice)
+import Config (
+  DecideConfig(..),
+  DecideInst(..),
+  FormulaConfig (..),
+  FormulaInst (..),
+  DecideAnswer(..),
+  DecideChoice (..),
+  showChoice,
+  showDecideAnswer
+  )
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable)
 import Formula.Util (withPercentRange)
 import Util (isOutside, remove, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
-import LogicTasks.Helpers (extra, reject)
+import LogicTasks.Helpers (reject)
 import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
@@ -91,8 +101,8 @@ description withDropdowns DecideInst{..} = do
           german "Betrachten Sie dazu die folgende Darstellung der Wahrheitstafel. "
           german "Neben jeder Zeile befindet sich ein Auswahlmenü mit diesen drei Optionen:"
         translatedCode $ flip localise $ translations $ do
-          english $ intercalate ", " $ map (showChoice English) [Correct,Wrong,NoAnswer]
-          german $ intercalate ", " $ map (showChoice German) [Correct,Wrong,NoAnswer]
+          english $ printDecideAnswers English options
+          german $ printDecideAnswers German options
         translate $ do
           english "Choose the appropriate answer for each row."
           german "Wählen Sie für jede Zeile die passende Antwort aus."
@@ -107,8 +117,8 @@ description withDropdowns DecideInst{..} = do
           german "Als Entscheidung stehen Ihnen die folgenden drei Optionen zur Verfügung:"
 
         translatedCode $ flip localise $ translations $ do
-          english $ intercalate ", " $ map (showChoice English) [Correct,Wrong,NoAnswer]
-          german $ intercalate ", " $ map (showChoice German) [Correct,Wrong,NoAnswer]
+          english $ printDecideAnswers English options
+          german $ printDecideAnswers German options
 
         translate $ do
           english "Make sure to assign a decision to each row. "
@@ -118,15 +128,18 @@ description withDropdowns DecideInst{..} = do
           german "Das n-te Listenelement entspricht der n-ten Zeile. "
           german "Ein Lösungsversuch für eine Tabelle mit vier Zeilen könnte so aussehen: "
         translatedCode $ flip localise $ translations $ do
-          english $ "[" ++ intercalate ", " (map (showChoice English) [Correct,Correct,Wrong,NoAnswer]) ++ "]"
-          german $ "[" ++ intercalate ", " (map (showChoice German) [Correct,Correct,Wrong,NoAnswer]) ++ "]"
+          english $ "[" ++ printDecideAnswers English exampleInput ++ "]"
+          german $ "[" ++ printDecideAnswers German exampleInput ++ "]"
 
         pure ()
 
       pure ()
   extra addText
   pure ()
-
+  where
+    printDecideAnswers lang = intercalate ", " . map (showDecideAnswer lang . DecideAnswer)
+    options = [Just Correct, Just Wrong, Nothing]
+    exampleInput = [Just Correct, Just Correct, Just Wrong, Nothing]
 
 verifyStatic :: OutputCapable m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
@@ -172,10 +185,10 @@ verifyQuiz DecideConfig{..}
 
 
 
-start :: [DecideChoice]
-start = replicate 4 NoAnswer
+start :: [DecideAnswer]
+start = replicate 4 $ DecideAnswer Nothing
 
-partialGrade :: OutputCapable m =>  DecideInst -> [DecideChoice] -> LangM m
+partialGrade :: OutputCapable m =>  DecideInst -> [DecideAnswer] -> LangM m
 partialGrade inst sol
   | lengthDiff > 0 = reject $ do
       german "Die Anzahl der Listenelemente stimmt nicht mit der Anzahl an Zeilen überein. "
@@ -191,7 +204,7 @@ partialGrade inst sol
 completeGrade
   :: (OutputCapable m,Alternative m, Monad m)
   => DecideInst
-  -> [DecideChoice]
+  -> [DecideAnswer]
   -> Rated m
 completeGrade DecideInst{..} sol = reRefuse
   (withExtendedMultipleChoice
@@ -220,7 +233,7 @@ completeGrade DecideInst{..} sol = reRefuse
       code $ show table
       pure ()
     where
-      indexed = filter ((/=NoAnswer) . snd) $ zip [1..] sol
+      indexed = [ (index,c) | (index, DecideAnswer (Just c)) <- zip [1..] sol]
       solMap = fromList $ map (,True) indexed
       table = getTable formula
       tableLen = length $ readEntries table

@@ -12,18 +12,20 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (code, image, indent),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
   Rated,
   multipleChoice,
   ArticleToUse (DefiniteArticle),
+  paragraph,
   translations,
   reRefuse,
   multipleChoiceSyntax,
   )
 import Data.List.Extra (nubSort)
-import LogicTasks.Helpers (example, extra, focus, indexed, instruct)
+import LogicTasks.Helpers (example, focus, indexed, instruct)
 import Tasks.LegalProposition.Config (
   LegalPropositionInst(..),
   LegalPropositionConfig(..),
@@ -98,17 +100,17 @@ completeGrade
   -> Rated m
 completeGrade path LegalPropositionInst{..} sol = reRefuse
   (multipleChoice
-    what
+    (Just what)
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)
-  $ when (hasWrongSolution && detailedSolution) $ indent $ do
+  $ when (hasWrongSolution && detailedSolution) $ do
 
     instruct $ do
       german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
       english "The solution for this task looks like this:"
 
-    for_ formulaInfos $ \(i,info, formula) -> do
+    for_ formulaInfos $ \(i,info, formula) -> paragraph $ indent $ do
 
       code (show i ++ ". " ++ formula)
 

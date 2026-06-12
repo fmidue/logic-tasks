@@ -9,8 +9,7 @@ import Data.Data (Data)
 import GHC.Generics
 import Formula.Types
 import Formula.Util
-import Data.Map (Map)
-import Control.OutputCapable.Blocks (Language (..))
+import Control.OutputCapable.Blocks (Language (..), ExtraText (NoExtraText))
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import qualified Trees.Types as ST (BinOp(..), SynTree(..))
 import Trees.Formula ()
@@ -65,22 +64,28 @@ instance Show StepAnswer where
 data DecideChoice
   = Correct
   | Wrong
-  | NoAnswer
   deriving (Show,Ord,Eq,Enum,Bounded,Generic)
+
+newtype DecideAnswer
+  = DecideAnswer { maybeChoice :: Maybe DecideChoice}
+  deriving (Generic)
 
 showChoice :: Language -> DecideChoice -> String
 showChoice German Correct = "Richtig"
 showChoice German Wrong = "Fehlerhaft"
-showChoice German NoAnswer = "Keine Antwort"
 showChoice English Correct = "Correct"
 showChoice English Wrong = "Wrong"
-showChoice English NoAnswer = "No answer"
+
+showDecideAnswer :: Language -> DecideAnswer -> String
+showDecideAnswer German (DecideAnswer Nothing) = "Keine Antwort"
+showDecideAnswer English (DecideAnswer Nothing) = "No answer"
+showDecideAnswer lang (DecideAnswer (Just choice)) = showChoice lang choice
 
 data PickInst = PickInst {
                  formulas :: [FormulaInst]
                , correct :: !Int
                , showSolution :: Bool
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                }
   deriving (Data, Eq, Generic, Show)
 
@@ -89,7 +94,7 @@ dPickInst =  PickInst
           { formulas = [InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']], InstCnf $ mkCnf [mkClause [Negative 'A', Positive 'B']]]
           , correct = 1
           , showSolution = True
-          , addText = Nothing
+          , addText = NoExtraText
           }
 
 
@@ -97,7 +102,7 @@ dPickInst =  PickInst
 data MaxInst = MaxInst {
                  cnf     :: !Cnf
                , showSolution :: Bool
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
@@ -106,7 +111,7 @@ dMaxInst :: MaxInst
 dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Positive 'A', Negative 'B']]
           , showSolution = True
-          , addText = Nothing
+          , addText = NoExtraText
           , unicodeAllowed = False
           }
 
@@ -116,7 +121,7 @@ dMaxInst =  MaxInst
 data MinInst = MinInst {
                  dnf :: !Dnf
                , showSolution :: Bool
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
@@ -125,7 +130,7 @@ dMinInst :: MinInst
 dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Positive 'A', Negative 'B']]
           , showSolution = True
-          , addText = Nothing
+          , addText = NoExtraText
           , unicodeAllowed = False
           }
 
@@ -136,7 +141,7 @@ data FillInst = FillInst {
                , missing :: ![Int]
                , missingValues :: [Bool]
                , showSolution :: Bool
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                }
   deriving (Data, Generic, Show)
 
@@ -146,7 +151,7 @@ dFillInst =  FillInst
           , missing = [1,4]
           , missingValues = [True, True]
           , showSolution = True
-          , addText = Nothing
+          , addText = NoExtraText
           }
 
 
@@ -155,7 +160,7 @@ data DecideInst = DecideInst {
                  formula :: FormulaInst
                , changed :: ![Int]
                , showSolution :: Bool
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                }
   deriving (Data, Generic, Show)
 
@@ -164,7 +169,7 @@ dDecideInst =  DecideInst
           { formula = InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']]
           , changed = [1,4]
           , showSolution = True
-          , addText = Nothing
+          , addText = NoExtraText
           }
 
 
@@ -175,7 +180,7 @@ data StepInst = StepInst {
                , solution :: (Literal, Clause)
                , usesSetNotation :: Bool
                , showSolution :: Bool
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
@@ -187,7 +192,7 @@ dStepInst =  StepInst
           , solution = (Positive 'A', mkClause [Negative 'C', Positive 'B'])
           , usesSetNotation = False
           , showSolution = True
-          , addText = Nothing
+          , addText = NoExtraText
           , unicodeAllowed = False
           }
 
@@ -199,7 +204,7 @@ data ResolutionInst = ResolutionInst {
                , printFeedbackImmediately :: Bool
                , usesSetNotation :: Bool
                , showSolution :: Bool
-               , addText    :: Maybe (Map Language String)
+               , addText    :: ExtraText
                , unicodeAllowed :: Bool
                }
   deriving (Data, Generic, Show)
@@ -229,7 +234,7 @@ dResInst = let
                 , printFeedbackImmediately = True
                 , usesSetNotation = True
                 , showSolution = False
-                , addText = Nothing
+                , addText = NoExtraText
                 , unicodeAllowed = False
                 }
 
@@ -242,7 +247,7 @@ data PrologInst = PrologInst {
                , solution :: (PrologLiteral, PrologClause)
                , usesSetNotation :: Bool
                , showSolution :: Bool
-               , addText :: Maybe (Map Language String)
+               , addText :: ExtraText
                }
   deriving (Data, Generic, Show)
 
@@ -254,7 +259,7 @@ dPrologInst =  PrologInst
           , solution = (PrologLiteral True "pred" ["fact"], mkPrologClause [])
           , usesSetNotation = False
           , showSolution = True
-          , addText = Nothing
+          , addText = NoExtraText
           }
 
 
@@ -299,7 +304,7 @@ data PickConfig = PickConfig {
      , amountOfOptions :: Int
      , percentRangeMode :: PercentRangeMode
      , printSolution :: Bool
-     , extraText :: Maybe (Map Language String)
+     , extraText :: ExtraText
      }
   deriving (Generic, Show)
 
@@ -309,7 +314,7 @@ dPickConf = PickConfig
     , amountOfOptions = 3
     , percentRangeMode = TrueEntries (30, 70)
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     }
 
 
@@ -319,7 +324,7 @@ data FillConfig = FillConfig {
     , percentageOfGaps :: Int
     , percentRangeMode :: PercentRangeMode
     , printSolution :: Bool
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     }
   deriving (Generic, Show)
 
@@ -329,7 +334,7 @@ dFillConf = FillConfig
     , percentageOfGaps = 40
     , percentRangeMode = TrueEntries (30, 70)
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     }
 
 
@@ -338,7 +343,7 @@ data MinMaxConfig = MinMaxConfig {
       normalFormConf :: NormalFormConfig
     , percentRangeMode :: PercentRangeMode
     , printSolution :: Bool
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , offerUnicodeInput :: Bool
     }
   deriving (Generic, Show)
@@ -348,7 +353,7 @@ dMinMaxConf = MinMaxConfig
     { normalFormConf = dNormalFormConf
     , percentRangeMode = TrueEntries (50, 70)
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = False
     }
 
@@ -359,7 +364,7 @@ data DecideConfig = DecideConfig {
     , percentageOfChanged :: Int
     , percentRangeMode :: PercentRangeMode
     , printSolution :: Bool
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     }
   deriving (Generic, Show)
 
@@ -369,7 +374,7 @@ dDecideConf = DecideConfig
     , percentageOfChanged = 40
     , percentRangeMode = TrueEntries (30, 70)
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     }
 
 
@@ -378,7 +383,7 @@ data StepConfig = StepConfig {
       baseConf :: BaseConfig
     , useSetNotation :: Bool
     , printSolution :: Bool
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , offerUnicodeInput :: Bool
     }
   deriving (Generic, Show)
@@ -388,7 +393,7 @@ dStepConf = StepConfig
     { baseConf = dBaseConf
     , useSetNotation = False
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = False
     }
 
@@ -398,7 +403,7 @@ data PrologConfig = PrologConfig {
       minClauseLength :: Int
     , maxClauseLength :: Int
     , usedPredicates :: [PrologLiteral]
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , printSolution :: Bool
     , firstClauseShape :: ClauseShape
     , secondClauseShape :: ClauseShape
@@ -411,7 +416,7 @@ dPrologConf = PrologConfig
     { minClauseLength = 1
     , maxClauseLength = 3
     , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = True
     , firstClauseShape = HornClause Query
     , secondClauseShape = HornClause Procedure
@@ -425,7 +430,7 @@ data ResolutionConfig = ResolutionConfig {
     , printFeedbackImmediately :: Bool
     , useSetNotation :: Bool
     , printSolution :: Bool
-    , extraText :: Maybe (Map Language String)
+    , extraText :: ExtraText
     , offerUnicodeInput :: Bool
     }
   deriving (Generic, Show)
@@ -437,6 +442,6 @@ dResConf = ResolutionConfig
     , printFeedbackImmediately = True
     , useSetNotation = True
     , printSolution = False
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = False
     }

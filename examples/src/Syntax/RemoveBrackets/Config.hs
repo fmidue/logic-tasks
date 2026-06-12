@@ -7,7 +7,7 @@ import Tasks.SynTree.Config (
   SynTreeConfig(..)
   )
 import Trees.Types (BinOp(..))
-import Control.OutputCapable.Blocks (Language (..))
+import Control.OutputCapable.Blocks (Language (..), ExtraText(NoExtraText))
 import Test.Hspec
 import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
@@ -38,7 +38,7 @@ task06 = SuperfluousBracketsConfig
     , minUniqueBinOperators = 2
     }
   , superfluousBracketPairs = 3
-  , extraText = Nothing
+  , extraText = NoExtraText
   , printSolution = True
   , offerUnicodeInput = True
   }
@@ -66,7 +66,7 @@ task05 = SuperfluousBracketsConfig
     , minUniqueBinOperators = 3
     }
   , superfluousBracketPairs = 4
-  , extraText = Nothing
+  , extraText = NoExtraText
   , printSolution = True
   , offerUnicodeInput = False
   }

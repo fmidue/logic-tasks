@@ -19,7 +19,7 @@ type TaskData = StepInst
 module TaskSettings where
 
 import LogicTasks.Config                (dBaseConf, StepConfig(..))
-import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import Control.OutputCapable.Blocks (LangM, OutputCapable, ExtraText(NoExtraText))
 import LogicTasks.Semantics.Step        (verifyQuiz)
 
 
@@ -28,7 +28,7 @@ stepConf = StepConfig
     { baseConf = dBaseConf
     , useSetNotation = False
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = True
     }
 
@@ -87,8 +87,8 @@ import LogicTasks.Semantics.Step (showClause)
 import Global
 
 
-checkSyntax :: OutputCapable m => FilePath -> TaskData -> Submission -> LangM m
-checkSyntax _ _ _ = pure ()
+checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
+checkSyntax _ _ = pure ()
 
 checkSemantics :: OutputCapable m => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submittedClause =

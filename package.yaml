@@ -16,7 +16,7 @@ dependencies:
   - parsec
   - text
   - flex-tasks
-  - output-blocks >= 0.5.0.1
+  - output-blocks >= 0.6
   - pretty-simple
   - latex-svg-image >= 0.2
   - bytestring

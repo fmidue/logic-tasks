@@ -10,6 +10,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate,
@@ -34,7 +35,6 @@ import Util (
   checkTruthValueRangeAndFormulaConf,
   formulaDependsOnAllAtoms
   )
-import LogicTasks.Helpers (extra)
 import Trees.Generate (genSynTree)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula, hasMinAmountOfAtoms)
 import qualified Data.Map as Map (fromAscList)

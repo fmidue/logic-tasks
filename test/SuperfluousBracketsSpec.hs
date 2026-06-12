@@ -27,7 +27,7 @@ import Trees.Parsing(formulaParse)
 import TestHelpers (deleteBrackets, doesNotRefuse)
 import Trees.Generate (genSynTree)
 import Formula.Parsing (Parse(parser))
-import Control.OutputCapable.Blocks (LangM, Rated)
+import Control.OutputCapable.Blocks (LangM, Rated, ExtraText(NoExtraText))
 import LogicTasks.Syntax.SimplestFormula (description, partialGrade', completeGrade')
 import Test.QuickCheck.Property (within)
 
@@ -40,7 +40,7 @@ validBoundsSuperfluousBracketsConfig = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
-        , extraText = Nothing
+        , extraText = NoExtraText
         , printSolution = False
         , offerUnicodeInput = False
         }
