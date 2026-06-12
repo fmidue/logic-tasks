@@ -41,8 +41,6 @@ import Text.ParserCombinators.Parsec (
 import UniversalParser
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
-import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static, Collapsible))
-import Text.Parsec ( optional, option )
 
 resStepsParser :: Parser Clause -> Parser [ResStep]
 resStepsParser parseClause = (lexeme (listParse (resStepParser parseClause)) <?> "List")
