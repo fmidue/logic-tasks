@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 module DecomposeFormulaSpec where
 
+import Capabilities.Cache.IO ()
+import Capabilities.LatexSvg.IO ()
 import Test.Hspec
 import Tasks.DecomposeFormula.Config (
   DecomposeFormulaConfig(..),
@@ -10,7 +12,7 @@ import Tasks.DecomposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import Data.Maybe (fromJust)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
 import Trees.Helpers (bothKids, binOp, swapKids)
@@ -35,7 +37,7 @@ validBoundsDecomposeFormulaConfig = do
         , (Equi, 1)
         ]
     },
-    extraText = Nothing,
+    extraText = NoExtraText,
     printSolution = False,
     offerUnicodeInput = False
   }
@@ -51,26 +53,26 @@ spec = do
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsDecomposeFormulaConfig $ \config -> do
-        forAll (generateDecomposeFormulaInst config) $ \inst ->
+        within (30 * 1000000) $ forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (description inst :: LangM Maybe)
   describe "generateDecomposeFormulaInst" $ do
     it "the generated instance should pass verifyInst" $
       forAll validBoundsDecomposeFormulaConfig $ \config -> do
-        forAll (generateDecomposeFormulaInst config) $ \inst ->
+        within (30 * 1000000) $ forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (verifyInst inst :: LangM Maybe)
     it "should pass partialGrade with correct answer" $
       forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
-        forAll (generateDecomposeFormulaInst config) $ \inst ->
+        within (30 * 1000000) $ forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (partialGrade' inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst) :: LangM Maybe)
     it "should pass completeGrade with correct answer" $
       forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
-        forAll (generateDecomposeFormulaInst config) $ \inst ->
+        within (30 * 1000000) $ forAll (generateDecomposeFormulaInst config) $ \inst ->
           ioProperty $
             withSystemTempDirectory "logic-tasks" $ \path ->
               doesNotRefuseIO (completeGrade' path inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst))
     it "should generate an instance with different subtrees" $
       forAll validBoundsDecomposeFormulaConfig $ \decomposeFormulaConfig ->
-        forAll (generateDecomposeFormulaInst decomposeFormulaConfig) $ \DecomposeFormulaInst{..} ->
+        within (30 * 1000000) $ forAll (generateDecomposeFormulaInst decomposeFormulaConfig) $ \DecomposeFormulaInst{..} ->
           let (lk,rk) = bothKids tree
               rootOp = fromJust $ binOp tree
           in notElem (display (Binary rootOp lk rk)) [display (Binary rootOp rk lk), reverse (display (Binary rootOp lk rk))]

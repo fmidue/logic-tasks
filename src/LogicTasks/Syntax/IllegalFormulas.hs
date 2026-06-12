@@ -6,22 +6,26 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
+import Capabilities.Cache (MonadCache)
+import Capabilities.LatexSvg (MonadLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (code, image, indent),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
   Rated,
   multipleChoice,
   ArticleToUse (DefiniteArticle),
+  paragraph,
   translations,
   reRefuse,
   multipleChoiceSyntax,
   )
 import Data.List.Extra (nubSort)
-import LogicTasks.Helpers (example, extra, focus, indexed, instruct)
+import LogicTasks.Helpers (example, focus, indexed, instruct)
 import Tasks.LegalProposition.Config (
   LegalPropositionInst(..),
   LegalPropositionConfig(..),
@@ -32,7 +36,6 @@ import Tasks.LegalProposition.Config (
   )
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Data.Maybe (isJust, fromMaybe)
@@ -90,25 +93,24 @@ partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length fo
 
 -- jscpd:ignore-start
 completeGrade
-  :: (OutputCapable m, MonadIO m, Alternative m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m, Alternative m)
   => FilePath
   -> LegalPropositionInst
   -> [Int]
   -> Rated m
 completeGrade path LegalPropositionInst{..} sol = reRefuse
   (multipleChoice
-    DefiniteArticle
-    what
+    (Just what)
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)
-  $ when (hasWrongSolution && detailedSolution) $ indent $ do
+  $ when (hasWrongSolution && detailedSolution) $ do
 
     instruct $ do
       german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
       english "The solution for this task looks like this:"
 
-    for_ formulaInfos $ \(i,info, formula) -> do
+    for_ formulaInfos $ \(i,info, formula) -> paragraph $ indent $ do
 
       code (show i ++ ". " ++ formula)
 
@@ -120,7 +122,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
             english "is correctly formed. "
             english "The corresponding syntax tree looks like this:"
 
-          image $=<< liftIO $ cacheTree (transferToPicture tree) path
+          image $=<< cacheTree (transferToPicture tree) path
 
           pure ()
         Erroneous err -> do
@@ -138,7 +140,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
                 german "Nicht alle Operatoren verfügen über gültige Teilformeln."
                 english "Not all operators have valid subformulas."
               MissingOperator -> do
-                german "Nicht alle Teilformen werden verknüpft."
+                german "Nicht alle Teilformeln werden verknüpft."
                 english "There are uncombined subformulas."
               MissingOperand -> do
                 german "Nicht alle Operatoren verfügen über die korrekte Anzahl an Teilformeln."
@@ -160,6 +162,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
       solution = map (\(i,info,_) -> (i, not (propFormulaIsErroneous info))) formulaInfos
       hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
       simpleSolutionDisplay
-        | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]
+        | isJust showSolution && not detailedSolution
+        = Just (DefiniteArticle, show [ i | (i,True) <- solution])
         | otherwise = Nothing
 -- jscpd:ignore-end

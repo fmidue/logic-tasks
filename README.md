@@ -4,12 +4,12 @@
 
 | in Autotool inventory (on <https://autotool.fmi.uni-due.de>)        | Forms | Direct | Quiz | Supports fractional points? | Autotool module (in [`collection/src`](https://git.uni-due.de/fmi/autotool-dev/-/tree/HEAD/collection/src)) | `logic-tasks` module(s)                                                                                                                                    |
 | :------------------------------------------------------------------ | :---: | :----: | :--: | :-----------------------: | :---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Aussagenlogik/Syntax/LogicComposeFormula                            |       |        |  x   |                           | `Logic.Syntax.ComposeFormula`                                                                               | [`LogicTasks.Syntax.ComposeFormula`](src/LogicTasks/Syntax/ComposeFormula.hs), [`Tasks.ComposeFormula.Quiz`](src/Tasks/ComposeFormula/Quiz.hs)             |
+| Aussagenlogik/Syntax/LogicComposeFormula                            |       |        |  x   | x                         | `Logic.Syntax.ComposeFormula`                                                                               | [`LogicTasks.Syntax.ComposeFormula`](src/LogicTasks/Syntax/ComposeFormula.hs), [`Tasks.ComposeFormula.Quiz`](src/Tasks/ComposeFormula/Quiz.hs)             |
 | Aussagenlogik/Syntax/LogicDecomposeFormula                          |       |        |  x   |                           | `Logic.Syntax.DecomposeFormula`                                                                             | [`LogicTasks.Syntax.DecomposeFormula`](src/LogicTasks/Syntax/DecomposeFormula.hs), [`Tasks.DecomposeFormula.Quiz`](src/Tasks/DecomposeFormula/Quiz.hs)     |
 | Aussagenlogik/Syntax/LogicInvalidCnfs                               |   x   |        |  x   | x                         | `Logic.Syntax.LegalCnf`                                                                                     | [`LogicTasks.Syntax.IllegalCnfs`](src/LogicTasks/Syntax/IllegalCnfs.hs), [`Tasks.LegalNormalForm.Quiz`](src/Tasks/LegalNormalForm/Quiz.hs)                 |
 | Aussagenlogik/Syntax/LogicInvalidDnfs                               |   x   |        |  x   | x                         | `Logic.Syntax.LegalDnf`                                                                                     | [`LogicTasks.Syntax.IllegalDnfs`](src/LogicTasks/Syntax/IllegalDnfs.hs), [`Tasks.LegalNormalForm.Quiz`](src/Tasks/LegalNormalForm/Quiz.hs)                 |
 | Aussagenlogik/Syntax/LogicInvalidFormulas                           |   x   |        |  x   | x                         | `Logic.Syntax.LegalFormula`                                                                                 | [`LogicTasks.Syntax.IllegalFormulas`](src/LogicTasks/Syntax/IllegalFormulas.hs), [`Tasks.LegalProposition.Quiz`](src/Tasks/LegalProposition/Quiz.hs)       |
-| Aussagenlogik/Syntax/LogicRemoveBrackets                            |       |        |  x   |                           | `Logic.Syntax.SimplestFormula`                                                                              | [`LogicTasks.Syntax.SimplestFormula`](src/LogicTasks/Syntax/SimplestFormula.hs), [`Tasks.SuperfluousBrackets.Quiz`](src/Tasks/SuperfluousBrackets/Quiz.hs) |
+| Aussagenlogik/Syntax/LogicRemoveBrackets                            |       |        |  x   | x                         | `Logic.Syntax.SimplestFormula`                                                                              | [`LogicTasks.Syntax.SimplestFormula`](src/LogicTasks/Syntax/SimplestFormula.hs), [`Tasks.SuperfluousBrackets.Quiz`](src/Tasks/SuperfluousBrackets/Quiz.hs) |
 | Aussagenlogik/Syntax/LogicSubformulas                               |   x   |        |  x   | x                         | `Logic.Syntax.SubFormula`                                                                                   | [`LogicTasks.Syntax.SubTreeSet`](src/LogicTasks/Syntax/SubTreeSet.hs), [`Tasks.SubTree.Quiz`](src/Tasks/SubTree/Quiz.hs)                                   |
 | Aussagenlogik/Syntax/LogicTreeToFormula                             |       |        |  x   |                           | `Logic.Syntax.TreeToFormula`                                                                                | [`LogicTasks.Syntax.TreeToFormula`](src/LogicTasks/Syntax/TreeToFormula.hs), [`Tasks.TreeToFormula.Quiz`](src/Tasks/TreeToFormula/Quiz.hs)                 |
 | Aussagenlogik/Semantik/Wahrheitstabellen/TruthTableFillGaps         |   x   |   x    |  x   | x                         | `Logic.Semantics.FillGaps`                                                                                  | [`LogicTasks.Semantics.Fill`](src/LogicTasks/Semantics/Fill.hs)                                                                                            |
@@ -21,13 +21,25 @@
 | Aussagenlogik/Semantik/Resolution/LogicResolutionComplete           |   x   |   x    |  x   |                           | `Logic.Semantics.ResolutionFull`                                                                            | [`LogicTasks.Semantics.Resolve`](src/LogicTasks/Semantics/Resolve.hs)                                                                                      |
 | Aussagenlogik/Semantik/Resolution/PrologResolutionStep              |       |   x    |  x   |                           | `Logic.Semantics.ResolutionStepProlog`                                                                      | [`LogicTasks.Semantics.Prolog`](src/LogicTasks/Semantics/Prolog.hs)                                                                                        |
 
+## Flex-Tasks
+
+Directory `flex` contains some logic themed [Flex-Tasks](https://github.com/fmidue/flex-tasks) using code from this repository. Namely:
+
+- [composeFormula](flex/composeFormula.flex): Mostly identical to `ComposeFormula`, but with two separate text inputs instead of one (in Autotool).
+- [proplogic](flex/proplogic.flex): Logic puzzle based on a written exam task, not related to any of the ones here.
+- [findliar](flex/findliar.flex): Another logic puzzle taken from a paper exercise.
+- [markierungsalg](flex/markierungsalg.flex): Task based on the marking algorithm.
+- [resStepFlex](flex/resStepFlex.flex): A reverse version of `ResolutionStep` where the result of a resolution step is given instead.
+- [resResolveFlex](flex/resResolveFlex.flex): A version of `ResolutionFull` where steps are already partially filled in with the sample solution.
+
 ## Testing a module
 
 You can use the `testModule` function in order to test a module. A sample call looks like this:
 
 ```text
-$ stack repl
-ghci> testModule (Just AutoLeijen) German (genFillInst dFillConf) LogicTasks.Semantics.Fill.description LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
+$ stack repl --package=autotool-capabilities-io-instances
+ghci> :m + Capabilities.Cache.IO Capabilities.LatexSvg.IO
+ghci> testModule (Just AutoLeijen) German (genFillInst dFillConf) (LogicTasks.Semantics.Fill.description True) LogicTasks.Semantics.Fill.partialGrade LogicTasks.Semantics.Fill.completeGrade parser
 ```
 
 This specific call tests the `Fill` module (found in `src/LogicTasks/Semantics/Fill.hs`). The output looks like this:
@@ -89,7 +101,7 @@ In more detail:
 - We passed `Just AutoLeijen` to format the input with the specified pretty printer. Other options are: `Nothing`, `Just AutoHughesPJ` or `Manual f` where f is of type `a -> String`. Note that only `Nothing` makes sense for tasks using `Delayed`.
 - We passed `German` to print the german version of the task. The other option would be `English`.
 - We then passed the generator for creating an instance of the specified module. Must be of type `Gen a`.
-- Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description`.
+- Furthermore, we pass the function that prints the task description. This is usually `SomeModulePath.description` (possibly supplied with Boolean flags or other parameters).
 - Next, we pass the function that checks the input for syntax errors. This is usually `SomeModulePath.partialGrade`.
 - Then, we pass the function that checks the input for semantic errors. This is usually `SomeModulePath.completeGrade`.
 - Lastly, we pass a parser that allows us to parse the users input. This is usually just `parser`. Must be of type `Parser b`, if you define one yourself.

@@ -10,10 +10,8 @@ import Trees.Generate (genSynTree)
 import Test.QuickCheck (Gen, suchThat)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
-import Tasks.SynTree.Config (SynTreeConfig(binOpFrequencies))
+import Tasks.SynTree.Config (getArrows)
 import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
-import Trees.Types (BinOp(..))
-import qualified Data.Map as Map (keys)
 
 
 
@@ -28,7 +26,7 @@ generateSubTreeInst SubTreeConfig {..} = do
       { tree
       , inputTreeAmount = subTreeAmount
       , correctTrees = correctTrees
-      , showArrowOperators = any (`elem` Map.keys (binOpFrequencies syntaxTreeConfig)) [Impl, BackImpl, Equi]
+      , arrowOperatorsToShow = getArrows syntaxTreeConfig
       , showSolution = printSolution
       , addText = extraText
       , unicodeAllowed = offerUnicodeInput

@@ -6,20 +6,28 @@ module LogicTasks.Syntax.SimplestFormula where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse, indent, translatedCode),
+  GenericOutputCapable (translatedCode),
   LangM,
   OutputCapable,
+  extra,
+  collapsed,
   english,
   german,
   paragraph,
   translate,
   localise,
   translations,
+  MinimumThreshold (MinimumThreshold),
+  ArticleToUse (DefiniteArticle),
+  translations,
+  Rated,
+  reRefuse,
+  printSolutionAndAssertWithMinimum,
   )
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
-
-import LogicTasks.Helpers (basicOpKey, example, extra, focus, instruct, reject, arrowsKey)
+import GHC.Real ((%))
+import LogicTasks.Helpers (basicOpKey, focus, instruct, reject, arrowsKey')
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig,
     SuperfluousBracketsConfig(..),
@@ -27,10 +35,12 @@ import Tasks.SuperfluousBrackets.Config (
     )
 import Trees.Helpers
 import Trees.Types
-import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..), formulaSymbolParser)
+import Formula.Util (isSemanticEqual)
 import Trees.Parsing()
+import Control.Applicative (Alternative)
+import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 
 
 
@@ -38,39 +48,49 @@ import Trees.Parsing()
 description :: OutputCapable m => SuperfluousBracketsInst -> LangM m
 description SuperfluousBracketsInst{..} = do
     instruct $ do
-      english "Consider the following propositional logic formula:"
-      german "Betrachten Sie die folgende aussagenlogische Formel:"
+      english "Remove all unnecessary pairs of brackets in the given formula."
+      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel."
 
     focus stringWithSuperfluousBrackets
 
     instruct $ do
-      english "Since ∧ and ∨ are associative, it is not necessary to use brackets in subformulas with three or more atomic formulas and the same logical operators, for example in:"
-      german "Aufgrund der Assoziativität von ∧ und ∨ muss in Teilformeln mit drei oder mehr atomaren Formeln und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
+      english "Give your answer as a propositional logic formula again."
+      german "Geben Sie die Lösung wieder in Form einer aussagenlogischen Formel an."
 
-    focus "A ∧ B ∧ C"
+    collapsed False (translations $ do
+      english "Additional hints:"
+      german "Weitere Hinweise:")
+      (do
 
-    instruct $ do
-      english "Similarly, brackets are not necessary for one or more consecutive negations directly in front of an atomic formula, for example in:"
-      german "Genauso sind Klammern bei einer oder mehreren Negationen direkt vor einer atomaren Formel nicht nötig, z.B. bei"
+        paragraph $ do
+          translate $ do
+            english "For example, if (A ∨ B) is the given formula, then the following solution is correct:"
+            german "Ist z.B. (A ∨ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
+          translatedCode $ flip localise $ translations exampleCode
+          pure ()
 
-    focus "¬¬A"
+        paragraph $ translate $ do
+          german "Sie können dafür die ursprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
+          english "You can copy the original formula into the submission field and remove unnecessary brackets, or start from scratch and use the following syntax:"
 
-    instruct $ do
-      english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
-      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer aussagenlogischen Formel an."
+        basicOpKey unicodeAllowed
 
-    paragraph $ indent $ do
-      translate $ do
-        english "For example, if (A ∨ B) is the given formula, then the following solution is correct:"
-        german "Ist z.B. (A ∨ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
-      translatedCode $ flip localise $ translations exampleCode
-      pure ()
+        arrowsKey' arrowOperatorsToShow
 
-    paragraph $ translate $ do
-      german "Sie können dafür die ürsprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
-      english "You can copy the original formula into the submission field and remove unnecessary brackets, or start from scratch and use the following syntax:"
-    basicOpKey unicodeAllowed
-    when showArrowOperators arrowsKey
+        instruct $ do
+          english "Due to the associativity of ∧ and of ∨, brackets that merely determine the order of evaluation for multiple neighboring occurrences of one of these logical operators can be omitted. Example:"
+          german "Aufgrund der Assoziativität von ∧ und von ∨ können Klammern, die lediglich die Auswertungsreihenfolge mehrerer benachbarter Vorkommen eines dieser logischen Operatoren festlegen, weggelassen werden. Beispiel:"
+
+        focus "A ∧ B ∧ (C ∨ D ∨ E)"
+
+        instruct $ do
+          english "Since the negation is a unary operator and its scope is clearly determined by the subformula immediately following it, additional brackets are neither required for multiple directly consecutive negations nor when applying negation to an atomic formula. Example:"
+          german "Da die Negation ein unärer Operator ist und ihr Wirkungsbereich klar durch die unmittelbar folgende Teilformel bestimmt wird, sind weder bei mehreren direkt aufeinanderfolgenden Negationen noch bei der Anwendung von Negation auf eine atomare Formel zusätzliche Klammern erforderlich. Beispiel:"
+
+        focus "¬¬(¬A ∧ ¬¬B)"
+
+        pure ()
+      )
 
     extra addText
     pure ()
@@ -84,7 +104,11 @@ description SuperfluousBracketsInst{..} = do
 
 
 verifyInst :: OutputCapable m => SuperfluousBracketsInst -> LangM m
-verifyInst _ = pure()
+verifyInst SuperfluousBracketsInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 
@@ -124,31 +148,69 @@ partialGrade' SuperfluousBracketsInst{..} f
 
     | opsNum < correctOpsNum =
       reject $ do
-        english "Your submission contains less logical operators than the original formula."
+        english "Your submission contains fewer logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
+
+    | not $ isDerivedByRemovingBrackets (show f) stringWithSuperfluousBrackets =
+      reject $ do
+        english "Your submission cannot be obtained from the original formula by removing brackets."
+        german "Ihre Abgabe lässt sich nicht durch Entfernen von Klammern aus der ursprünglichen Formel erhalten."
 
     | otherwise = pure()
   where
-    pForm = fromJust $ maybeForm f
-    atoms = sort $ nub $ collectLeaves pForm
-    opsNum = numOfOpsInFormula pForm
+    atoms = sort $ nub $ collectLeavesInAnswer f
+    opsNum = numberOfOperatorsInAnswer f
     correctAtoms = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
-completeGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> Delayed FormulaAnswer -> Rated m
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
-completeGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
+completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
-    | show (fromJust (maybeForm sol)) /= simplestString inst = refuse $ do
-      instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
+  | submissionString == simplestSolutionString = instruct (do
+      german "Ihre Abgabe ist korrekt."
+      english "Your submission is correct."
+    ) *> rate 1
+  | synTreeEquivalent && isDerivedByRemovingBrackets simplestSolutionString submissionString = reRefuse (rate percentage) (translate $ do
+    german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")
+    english ("You left " ++ show superfluousBracketPairsSubmission ++ " superfluous pair" ++ (if isSingular then " " else "s ") ++ "of brackets in your submission."))
+  | synTreeEquivalent = reRefuse (rate 0) (translate $ do
+    german "Ihre Formel ist semantisch äquivalent zur ursprünglich gegebenen, aber Sie haben nicht nur überflüssige Klammern entfernt."
+    english "Your formula is semantically equivalent to the original one, but you have not just removed superfluous brackets.")
+  | otherwise = reRefuse (rate 0) (translate $ do
+    german "Sie haben die Formel verändert."
+    english "You changed the formula.")
 
-      when (showSolution inst) $ do
-        example (simplestString inst) $ do
-          english "The solution for this task is:"
-          german "Die Lösung für diese Aufgabe ist:"
+  where
+    countBracketPairs :: String -> Integer
+    countBracketPairs = fromIntegral . length . filter (== '(')
+    submissionString = show sol
+    simplestSolutionString = simplestString inst
+    synTreeSubmission = toSynTree $ fromJust (maybeForm sol)
+    bracketPairsSubmission = countBracketPairs submissionString
+    bracketPairsSolution = countBracketPairs simplestSolutionString
+    bracketPairsMax = countBracketPairs $ stringWithSuperfluousBrackets inst
+    superfluousBracketPairsSubmission = bracketPairsSubmission - bracketPairsSolution
+    superfluousBracketPairsTask = bracketPairsMax - bracketPairsSolution
+    synTreeEquivalent = isSemanticEqual synTreeSubmission (tree inst)
+    percentage = (superfluousBracketPairsTask - superfluousBracketPairsSubmission) % superfluousBracketPairsTask
+    isSingular = superfluousBracketPairsSubmission  == 1
+    rate = printSolutionAndAssertWithMinimum
+      (MinimumThreshold (1 % superfluousBracketPairsTask))
+      (if showSolution inst then Just (False, DefiniteArticle, simplestSolutionString) else Nothing)
 
-      pure ()
-    | otherwise = pure()
+-- | Checks whether the second string can be transformed into
+--   the first string by removing only brackets.
+--   Spaces are ignored.
+isDerivedByRemovingBrackets :: String -> String -> Bool
+isDerivedByRemovingBrackets [] [] = True
+isDerivedByRemovingBrackets _ [] = False
+isDerivedByRemovingBrackets [] (')' : ys) = isDerivedByRemovingBrackets [] ys
+isDerivedByRemovingBrackets [] _ = False
+isDerivedByRemovingBrackets (x : xs) (y : ys)
+  | x == y = isDerivedByRemovingBrackets xs ys
+  | y == '(' || y == ')' = isDerivedByRemovingBrackets (x : xs) ys
+  | x == ' ' = isDerivedByRemovingBrackets xs (y : ys)
+  | y == ' ' = isDerivedByRemovingBrackets (x:xs) ys
+  |otherwise = False

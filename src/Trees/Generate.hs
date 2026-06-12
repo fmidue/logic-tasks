@@ -4,7 +4,7 @@ module Trees.Generate (
  syntaxShape,
 ) where
 
-import Test.QuickCheck (choose, Gen, shuffle, suchThat, elements, frequency)
+import Test.QuickCheck (chooseInteger, Gen, shuffle, suchThat, elements, frequency)
 import Test.QuickCheck.Gen (vectorOf)
 
 import Trees.Types (SynTree(..), BinOp(..))
@@ -32,7 +32,7 @@ randomList availableLetters atLeastOccurring listLength = let
 genSynTree :: SynTreeConfig -> Gen (SynTree BinOp Char)
 genSynTree SynTreeConfig{..} = do
     sample <-
-      (do nodes <- choose (minNodes, maxNodes) `suchThat` if hasNegations then const True else odd
+      (do nodes <- chooseInteger (minNodes, maxNodes) `suchThat` if hasNegations then const True else odd
           syntaxShape nodes maxDepth binOpFrequencies negOpFrequency
             `suchThat` \synTree ->
               checkMinAmountOfUniqueAtoms synTree &&
@@ -74,7 +74,7 @@ binaryOperator nodes maxDepth binOpFrequencies negOpFrequency operator =
         restNodes = nodes - 1
         newMaxDepth = maxDepth - 1
     in  do
-        leftNodes <- choose (minNodesPerSide , restNodes - minNodesPerSide)
+        leftNodes <- chooseInteger (minNodesPerSide , restNodes - minNodesPerSide)
           `suchThat` \leftNodes -> negOpFrequency > 0 || odd leftNodes
         leftTree <- syntaxShape leftNodes newMaxDepth binOpFrequencies negOpFrequency
         rightTree <- syntaxShape (restNodes - leftNodes) newMaxDepth binOpFrequencies negOpFrequency

@@ -9,14 +9,14 @@ import Tasks.SynTree.Config (
 import Trees.Types (BinOp(..))
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.3
+-- 2025: Weight 0.3
 task01 :: LegalPropositionConfig
 task01 = LegalPropositionConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -40,7 +40,7 @@ task01 = LegalPropositionConfig
   , formulas = 7
   , illegals = 3
   , bracketFormulas = 0
-  , extraText = Nothing
+  , extraText = NoExtraText
   , printDetailedSolution = Just True
   }
 
@@ -68,7 +68,7 @@ task17 = LegalPropositionConfig
   , formulas = 8
   , illegals = 3
   , bracketFormulas = 1
-  , extraText = Nothing
+  , extraText = NoExtraText
   , printDetailedSolution = Just True
   }
 
