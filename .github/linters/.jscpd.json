@@ -1,12 +1,7 @@
 {
-  "threshold": 0,
-  "reporters": [
-    "consoleFull"
-  ],
-  "ignore": [
-    "**/__snapshots__/**",
-    "**/examples/**"
-  ],
+  "threshold": 0.5,
+  "reporters": ["consoleFull"],
+  "ignore": ["**/__snapshots__/**", "**/examples/**"],
   "minLines": 5,
   "max-lines": 1000,
   "absolute": true

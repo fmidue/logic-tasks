@@ -7,7 +7,7 @@ import Tasks.SynTree.Config (
   SynTreeConfig(..)
   )
 import Trees.Types (BinOp(..))
-import Control.OutputCapable.Blocks (Language (..))
+import Control.OutputCapable.Blocks (Language (..), ExtraText(NoExtraText))
 import Test.Hspec
 import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
@@ -16,7 +16,7 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.3
+-- 2025: Weight 0.3
 task06 :: SuperfluousBracketsConfig
 task06 = SuperfluousBracketsConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -38,10 +38,7 @@ task06 = SuperfluousBracketsConfig
     , minUniqueBinOperators = 2
     }
   , superfluousBracketPairs = 3
-  , extraText = Just (listToFM
-                       [(German, "Hinweis: Es sollen ALLE nicht nötigen Klammern entfernt werden. Nicht nur die wegen Assoziativität überflüssigen!"),  {- german -}
-                        (English,"Hint: You need to remove ALL unnecessary pairs of brackets. Not just the ones that are not needed due to associativity.")
-                       ])
+  , extraText = NoExtraText
   , printSolution = True
   , offerUnicodeInput = True
   }
@@ -61,7 +58,7 @@ task05 = SuperfluousBracketsConfig
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
-      , (BackImpl, 1)
+      , (BackImpl, 1) -- should be (BackImpl, 0) in future
       , (Equi, 1)
       ]
     , negOpFrequency = 1
@@ -69,10 +66,7 @@ task05 = SuperfluousBracketsConfig
     , minUniqueBinOperators = 3
     }
   , superfluousBracketPairs = 4
-  , extraText = Just (listToFM
-                       [(German, "Hinweis: Es sollen ALLE nicht nötigen Klammern entfernt werden. Nicht nur die wegen Assoziativität überflüssigen!"), {- german -}
-                        (English, "Hint: You need to remove ALL unnecessary pairs of brackets. Not just the ones that are not needed due to associativity.")
-                       ])
+  , extraText = NoExtraText
   , printSolution = True
   , offerUnicodeInput = False
   }

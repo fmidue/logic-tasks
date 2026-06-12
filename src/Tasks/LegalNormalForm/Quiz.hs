@@ -13,7 +13,7 @@ import Data.List ((\\))
 import Formula.Types (genCnf, genDnf)
 import Tasks.LegalNormalForm.Config (LegalNormalFormConfig (..), LegalNormalFormInst (..), ErrorReason, TreeInfo(..))
 import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree)
-import Test.QuickCheck (Gen, choose, elements, suchThat, vectorOf)
+import Test.QuickCheck (Gen, chooseInt, elements, suchThat, vectorOf)
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
 import Trees.Print (simplestDisplay)
 import Trees.Types (BinOp (..), SynTree (..))
@@ -32,7 +32,7 @@ generateLegalNormalFormInst ::
   LegalNormalFormConfig ->
   Gen LegalNormalFormInst
 generateLegalNormalFormInst gen toSynTree genIllegal config@LegalNormalFormConfig {..} = do
-  serialsOfWrong <- vectorOf illegals (choose (1, formulas)) `suchThat` listNoDuplicate
+  serialsOfWrong <- vectorOf illegals (chooseInt (1, formulas)) `suchThat` listNoDuplicate
   let serial1 = [1 .. formulas] \\ serialsOfWrong
   serialsOfJustOneClause <- vectorOf (if includeFormWithJustOneClause then 1 else 0) (elements serial1)
   let serial2 = serial1 \\ serialsOfJustOneClause

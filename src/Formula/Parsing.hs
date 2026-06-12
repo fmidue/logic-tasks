@@ -19,7 +19,6 @@ import ParsingHelpers (caseInsensitive, lexeme, tokenSymbol)
 import Formula.Types
 
 import Control.Monad (void)
-import Data.Map (fromList)
 import Text.ParserCombinators.Parsec (
   Parser,
   (<?>),
@@ -40,7 +39,6 @@ import Text.ParserCombinators.Parsec (
   )
 
 import UniversalParser
-import Trees.Types (SynTree, BinOp)
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
 
@@ -149,7 +147,7 @@ instance Parse TruthValue where
               where
                 parseTrue = do
                   string "1" <|> try (single "w") <|> try (single "t")
-                    <|> caseInsensitive "wahr" -- no-spell-check
+                    <|> caseInsensitive "wahr"
                     <|> caseInsensitive "true"
                   pure $ TruthValue True
                 parseFalse = do
@@ -353,59 +351,18 @@ formulaListSymbolParser = void $ many $ logicToken <|> listSymbolParser
 instance Parse PrologClause where
  parser = prologClauseFormulaParser
 
-instance Parse PickInst where
-  parser = lexeme instParse
+instance Parse DecideAnswer where
+  parser = DecideAnswer <$> lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
     where
-      instParse = do
-        string "PickInst("
-        cs <- parser
-        tokenSymbol ","
-        index <- lexeme $ many1 digit
-        printSol <- lexeme text'
-        bonusText <- optionMaybe $ lexeme text'
-        char ')'
-        pure $ PickInst cs (read index) (read printSol) (fromList . read <$> bonusText)
-          where
-            text' = between start (char '}') $ many1 $ satisfy ( /= '}')
-            start = do
-              char ','
-              spaces
-              char '{'
-
-instance Parse FormulaInst where
-  parser = lexeme (parseCNF <|> parseDNF <|> parseSynTree)
-    where
-      parseCNF = do
-        string "Cnf"
-        tokenSymbol "{"
-        f <- (parser :: Parser Cnf)
-        tokenSymbol "}"
-        pure $ InstCnf f
-      parseDNF = do
-        string "Dnf"
-        tokenSymbol "{"
-        f <- (parser :: Parser Dnf)
-        tokenSymbol "}"
-        pure $ InstDnf f
-      parseSynTree = do
-        string "SynTree"
-        tokenSymbol "{"
-        f <- (parser :: Parser (SynTree BinOp Char))
-        tokenSymbol "}"
-        pure $ InstArbitrary f
-
-instance Parse DecideChoice where
-  parser = lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
-    where
-      parseCorrect = Correct <$
-          ( try (caseInsensitive "Richtig") -- no-spell-check
+      parseCorrect = Just Correct <$
+          ( try (caseInsensitive "Richtig")
         <|> caseInsensitive "Correct"
           )
-      parseWrong = Wrong <$
-          ( try (caseInsensitive "Fehlerhaft") -- no-spell-check
+      parseWrong = Just Wrong <$
+          ( try (caseInsensitive "Fehlerhaft")
         <|> caseInsensitive "Wrong"
           )
-      parseNoAnswer = NoAnswer <$
-          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort") -- no-spell-check
+      parseNoAnswer = Nothing <$
+          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort")
         <|> (lexeme (caseInsensitive "No") <* caseInsensitive "answer")
           )

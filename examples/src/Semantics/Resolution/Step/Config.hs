@@ -7,11 +7,11 @@ import LogicTasks.Config (
 import LogicTasks.Util (checkBaseConf)
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
 
--- 2024: Weight 0.1
-task14 :: StepConfig
-task14 =
+-- 2025: Weight 0.1
+task15 :: StepConfig
+task15 =
   StepConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
@@ -20,7 +20,7 @@ task14 =
       }
     , useSetNotation = True
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = True
     }
 
@@ -33,14 +33,14 @@ task13 = StepConfig
       , usedAtoms = "ABCD"
       }
     , useSetNotation = False
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = True
     , offerUnicodeInput = False
     }
 
--- 2024: Weight 0.1
-task15 :: StepConfig
-task15 =
+-- 2025: Weight 0.1
+task16 :: StepConfig
+task16 =
   StepConfig
     { baseConf = BaseConfig
       { minClauseLength = 3
@@ -49,12 +49,12 @@ task15 =
       }
     , useSetNotation = True
     , printSolution = True
-    , extraText = Nothing
+    , extraText = NoExtraText
     , offerUnicodeInput = True
     }
 
 spec :: Spec
 spec = do
   describe "task13" $ verifyConfig German (baseConf task13) checkBaseConf
-  describe "task14" $ verifyConfig German (baseConf task14) checkBaseConf
   describe "task15" $ verifyConfig German (baseConf task15) checkBaseConf
+  describe "task16" $ verifyConfig German (baseConf task16) checkBaseConf

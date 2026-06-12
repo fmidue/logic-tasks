@@ -4,23 +4,33 @@
 
 module LogicTasks.Syntax.TreeToFormula where
 
-
-import Control.Monad.IO.Class(MonadIO (liftIO))
+import Capabilities.Cache (MonadCache, cache)
+import Capabilities.LatexSvg (MonadLatexSvg, renderLatexSvg)
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   ($=<<),
   english,
   german,
+  collapsed,
+  translations
   )
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
-import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
+import Image.LaTeX.Render (FormulaOptions(..))
 
-import LogicTasks.Helpers (cacheIO, extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
-import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig)
+import LogicTasks.Helpers (
+  arrowsKey',
+  basicOpKey,
+  example,
+  instruct,
+  keyHeading,
+  reject,
+  )
+import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeConfig, checkArrowOperatorsToShow)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
@@ -34,25 +44,34 @@ import Data.List ((\\), intercalate)
 import Data.List.Extra (notNull)
 
 
-description :: (OutputCapable m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
+description :: (OutputCapable m, MonadCache m, MonadLatexSvg m) => FilePath -> TreeToFormulaInst -> LangM m
 description path TreeToFormulaInst{..} = do
     instruct $ do
-      english "Consider the following syntax tree:"
-      german "Betrachten Sie den folgenden Syntaxbaum:"
+      english "Give the propositional logic formula that is represented by the following syntax tree:"
+      german "Geben Sie die aussagenlogische Formel an, die von folgendem Syntaxbaum dargestellt wird:"
 
-    image $=<< liftIO $ cacheTree latexImage path
+    image $=<< cacheTree latexImage path
 
-    instruct $ do
-      english "Give the propositional logic formula that is represented by this syntax tree."
-      german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
+    collapsed False (translations $ do
+      english "Additional hints:"
+      german "Weitere Hinweise:")
+      (do
 
-    instruct $ do
-      english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
-      german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+        instruct $ do
+          english ("The exact formula of the syntax tree must be given. "
+            ++ "Other formulas that are semantically equivalent to this formula are incorrect solutions! "
+            ++ "But you are allowed to add arbitrarily many additional pairs of brackets.")
+          german ("Es muss die exakte Formel des Syntaxbaums angegeben werden. "
+            ++ "Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! "
+            ++ "Sie dürfen aber beliebig viele zusätzliche Klammerpaare hinzufügen.")
+          pure()
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    when showArrowOperators arrowsKey
+        keyHeading
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+
+        pure()
+      )
 
     extra addText
     pure ()
@@ -60,7 +79,11 @@ description path TreeToFormulaInst{..} = do
 
 
 verifyInst :: OutputCapable m => TreeToFormulaInst -> LangM m
-verifyInst _ = pure ()
+verifyInst TreeToFormulaInst {..}
+  | not $ checkArrowOperatorsToShow arrowOperatorsToShow = reject $ do
+      english "The field arrowOperatorsToShow contains a binary operator which is no arrow."
+      german "Das Feld arrowOperatorsToShow enthält einen binären Operator, der kein Pfeil ist."
+  | otherwise = pure ()
 
 
 
@@ -90,7 +113,7 @@ partialGrade' inst sol
         diffDisplay = intercalate ", " (map show atomicsDiff)
 
 completeGrade
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m)
   => FilePath
   -> TreeToFormulaInst
   -> Delayed TreeFormulaAnswer
@@ -98,7 +121,7 @@ completeGrade
 completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadCache m, MonadLatexSvg m)
   => FilePath
   -> TreeToFormulaInst
   -> TreeFormulaAnswer
@@ -109,7 +132,7 @@ completeGrade' path inst sol
           english "Your submission is not correct. The syntax tree for your submitted formula looks like this:"
           german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
-        image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
+        image $=<< cacheTree (transferToPicture treeAnswer) path
 
         when (isSemanticEqual treeAnswer correctTree) $
           instruct $ do
@@ -122,34 +145,20 @@ completeGrade' path inst sol
             german "Eine mögliche Lösung für diese Aufgabe ist:"
 
         pure ()
-    | otherwise = pure ()
+
+    | otherwise =
+        instruct $ do
+          english "Your solution is correct."
+          german "Ihre Lösung ist korrekt."
+
   where treeAnswer = fromJust (maybeTree sol)
         correctTree = tree inst
 
 
 
-treeOptions :: FormulaOptions
-treeOptions = FormulaOptions "\\usepackage[linguistics]{forest}" Nothing
-
-
-
-getImage :: String -> IO SVG
-getImage s = do
-  let iTree = "\\begin{forest}" ++ s ++ "\\end{forest}"
-  render <- imageForFormula defaultEnv treeOptions iTree
-  case render of (Left err) -> error $ unlines ["failed to render an image with the given formula: ", show err]
-                 (Right svg) -> pure svg
-
-
-
-outputImage :: FilePath -> String -> IO FilePath
-outputImage path tree = do
-  picture <- getImage tree
-  writeFile path picture
-  pure path
-
-
-
-cacheTree :: String -> FilePath -> IO FilePath
-cacheTree tree path = cacheIO path ext "tree-" tree outputImage
-  where ext = showDigest (sha1 . fromString $ tree) ++ ".svg"
+cacheTree :: (MonadCache m, MonadLatexSvg m) => String -> FilePath -> m FilePath
+cacheTree tree path = cache path ext "tree-" withTreeEnv $ renderLatexSvg Nothing $ Just treeOptions
+  where
+    ext = showDigest (sha1 . fromString $ tree) ++ ".svg"
+    withTreeEnv = "\\begin{forest}" ++ tree ++ "\\end{forest}"
+    treeOptions = FormulaOptions "\\usepackage[linguistics]{forest}" Nothing

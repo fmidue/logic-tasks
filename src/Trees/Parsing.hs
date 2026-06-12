@@ -5,10 +5,15 @@ module Trees.Parsing (
   formulaParse,
   parseFormulaAnswer,
   parsePropForm,
-  parseTreeFormulaAnswer
+  parseTreeFormulaAnswer,
+  liberalParser,
   ) where
 
 import qualified Control.Applicative as Alternative (optional)
+
+import Data.List (nub, intercalate)
+import Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 
 import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
@@ -17,7 +22,7 @@ import Trees.Types as Formula (PropFormula(..), BinOp(..))
 import Trees.Types as Tree
     ( SynTree(..)
     , FormulaAnswer(..)
-    , TreeFormulaAnswer(..)
+    , TreeFormulaAnswer(..), toLayeredTree, validateLayers, unfoldLayers, showOperator,
     )
 
 import Formula.Parsing.Type (Parse(..))
@@ -69,9 +74,44 @@ instance Parse TreeFormulaAnswer where
 parseTreeFormulaAnswer :: Parser TreeFormulaAnswer
 parseTreeFormulaAnswer = parser
 
+--------------------
+
+-- Parser for formulas with more liberal bracket requirements:
+-- Sequences of only conjunctions or disjunctions can be written
+-- without brackets, i.e., A ∧ B ∧ C instead of (A ∧ B) ∧ C.
+-- No operator precedence!
+liberalParser :: Parser (SynTree BinOp Char)
+liberalParser = do
+  f <- parser :: Parser (PropFormula Char)
+  case validateLayers isValidLayer (toLayeredTree f) of
+    Right t -> pure $ unfoldLayers t
+    Left err -> fail err
+
+isValidLayer :: NonEmpty BinOp -> Maybe String
+isValidLayer (_ :| []) = Nothing
+isValidLayer (Formula.And :| xs)
+  | isConjunction xs = Nothing
+  | otherwise = Just $ reportError $ Formula.And:xs
+isValidLayer (Formula.Or :| xs)
+  | isDisjunction xs = Nothing
+  | otherwise = Just $ reportError $ Formula.Or:xs
+isValidLayer xs = Just $ reportError $ NonEmpty.toList xs
+
+isConjunction :: [BinOp] -> Bool
+isConjunction = all (== Formula.And)
+
+isDisjunction :: [BinOp] -> Bool
+isDisjunction = all (== Formula.Or)
+
+reportError :: [BinOp] -> String
+reportError xs =
+  "unexpected mixing of operators without parenthesis: " <>
+  intercalate ", " (map showOperator $ nub xs)
+
 --------------------------------------
 
 -- Parsers for formulas with reduced brackets
+-- (missing) brackets are inferred through operator precedence
 instance Parse (PropFormula Char)
 instance FromGrammar (PropFormula Char) where
   topLevelSpec = spec where

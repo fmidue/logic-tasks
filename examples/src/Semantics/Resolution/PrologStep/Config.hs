@@ -7,13 +7,14 @@ import Config (
   )
 import Formula.Types (positivePLit, queryClause, procedureClause)
 import Util.VerifyConfig (noChecker)
+import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 small :: PrologConfig
 small = PrologConfig
     { minClauseLength = 1
     , maxClauseLength = 3
     , usedPredicates = [positivePLit "f" ["a"], positivePLit "f" ["b"], positivePLit "g" ["a"], positivePLit "g" ["b"]]
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = True
     , firstClauseShape = queryClause
     , secondClauseShape = procedureClause
@@ -25,7 +26,7 @@ medium = PrologConfig
     { minClauseLength = 2
     , maxClauseLength = 4
     , usedPredicates = [positivePLit "f" ["a","c"], positivePLit "f" ["b","a"], positivePLit "g" ["a"], positivePLit "g" ["c"]]
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = True
     , firstClauseShape = queryClause
     , secondClauseShape = procedureClause

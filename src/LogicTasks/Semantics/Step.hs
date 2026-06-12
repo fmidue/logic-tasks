@@ -9,6 +9,7 @@ import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   translate, localise, translations,
@@ -22,7 +23,7 @@ import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
-import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
+import LogicTasks.Helpers (example, keyHeading, negationKey, orKey, instruct)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (when, unless)
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
@@ -68,6 +69,19 @@ description oneInput StepInst{..} = do
     german $ "Geben Sie das in dem Resolutionsschritt genutzte Literal (in positiver oder negativer Form) und das Ergebnis" ++ gerEnd
     english $ "Provide the literal (in positive or negative form) used for the step and the resolvent" ++ engEnd
 
+  when usesSetNotation $ paragraph $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Resolvente die Mengenschreibweise! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the resolvent using set notation! A solution attempt could, for example, look like this: "
+    indent $ translatedCode $ flip localise $ translations setExample
+    pure ()
+
+  unless usesSetNotation $ paragraph $ do
+    translate $ do
+      german "Nutzen Sie zur Angabe der Resolvente eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "Specify the resolvent using a formula! A solution attempt could, for example, look like this: "
+    indent $ translatedCode $ flip localise $ translations exampleCode
+    pure ()
 
   keyHeading
   negationKey unicodeAllowed
@@ -80,28 +94,13 @@ description oneInput StepInst{..} = do
     code "{ ... }"
     pure ()
 
-  when usesSetNotation $ paragraph $ indent $ do
-    translate $ do
-      german "Nutzen Sie zur Angabe der Resolvente die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "Specify the resolvent using set notation! A valid solution could look like this: "
-    translatedCode $ flip localise $ translations setExample
-    pure ()
-
-  unless usesSetNotation $ paragraph $ indent $ do
-    translate $ do
-      german "Nutzen Sie zur Angabe der Resolvente eine Formel! Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "Specify the resolvent using a formula! A valid solution could look like this: "
-    translatedCode $ flip localise $ translations exampleCode
-    pure ()
-
-
   extra addText
   pure ()
     where
       show' = showClause usesSetNotation
 
       (gerEnd, engEnd)
-        | oneInput = (" in der folgenden Tupelform an: (Literal, Resolvente)." -- no-spell-check
+        | oneInput = (" in der folgenden Tupelform an: (Literal, Resolvente)."
                      , " in the following tuple form: (literal, resolvent)."
                      )
         | otherwise = (" an.",".")
@@ -215,7 +214,9 @@ completeGrade' StepInst{..} sol =
           pure ()
 
         Just solClause -> if solClause == snd mSol
-          then pure()
+          then instruct $ do
+              german "Ihre Lösung ist korrekt."
+              english "Your solution is correct."
           else refuse $ indent $ do
             translate $ do
               german "Resolvente ist nicht korrekt."

@@ -8,11 +8,13 @@ module LogicTasks.Syntax.IllegalCnfs where
 import Control.OutputCapable.Blocks (
   LangM,
   OutputCapable,
+  extra,
   english,
   german,
   Rated,
   multipleChoice,
   ArticleToUse (DefiniteArticle),
+  paragraph,
   translations,
   multipleChoiceSyntax,
   Language (..),
@@ -94,18 +96,17 @@ partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length for
 completeGrade :: (OutputCapable m, Alternative m, Monad m) => LegalNormalFormInst -> [Int] -> Rated m
 completeGrade LegalNormalFormInst{..} sol = reRefuse
   (multipleChoice
-    DefiniteArticle
-    what
+    (Just what)
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)
-  $ when (hasWrongSolution && detailedSolution) $ indent $ do
+  $ when (hasWrongSolution && detailedSolution) $ do
 
     instruct $ do
       german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
       english "The solution for this task looks like this:"
 
-    for_ formulaInfos $ \(i,info, formula) -> do
+    for_ formulaInfos $ \(i,info, formula) -> paragraph $ indent $ do
 
       code (show i ++ ". " ++ formula)
 
@@ -152,5 +153,6 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
     solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulaInfos
     hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
     simpleSolutionDisplay
-      | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]
+      | isJust showSolution && not detailedSolution
+      = Just (DefiniteArticle, show [ i | (i,True) <- solution])
       | otherwise = Nothing

@@ -9,14 +9,14 @@ import Tasks.SynTree.Config (
   )
 import Trees.Types (BinOp(..))
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German,English))
+import Control.OutputCapable.Blocks (Language(German,English), ExtraText(Static))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- 2024: Weight 0.3
+-- 2025: Weight 0.3
 task04 :: SubTreeConfig
 task04 = SubTreeConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -30,7 +30,7 @@ task04 = SubTreeConfig
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
-      , (BackImpl, 1)
+      , (BackImpl, 1) -- should be (BackImpl, 0) in future
       , (Equi, 1)
       ]
     , negOpFrequency = 1
@@ -39,9 +39,9 @@ task04 = SubTreeConfig
     }
   , allowSameSubTree = False
   , subTreeAmount = 3
-  , extraText = Just (listToFM
+  , extraText = Static (listToFM
                       [ (English, "It does not matter in which order the formulas appear in the listing.")
-                      , (German, "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Auflistung stehen.") {- german -}
+                      , (German, "Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Auflistung stehen.")
                       ])
   , printSolution = True
   , offerUnicodeInput = True

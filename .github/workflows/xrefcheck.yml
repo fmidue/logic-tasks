@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: ['**']
 
+permissions:
+  contents: read
+
 jobs:
   xrefcheck:
     name: Check references
@@ -15,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Run Link Checker
         uses: serokell/xrefcheck-action@v1
