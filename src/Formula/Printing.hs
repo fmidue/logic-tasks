@@ -16,7 +16,6 @@ import Data.Text.Lazy (pack)
 import qualified Data.Set as Set (null)
 
 import Text.PrettyPrint.Leijen.Text
-import Data.Map (toList)
 import Data.Maybe (isJust, fromJust)
 import Trees.Print ()
 
@@ -138,24 +137,6 @@ instance Pretty PrologClause where
     pretty pc
         | Set.null (pLiterals pc) = text "{ }"
         | otherwise = hsep $ punctuate (text " ∨ ") $ map pretty $ terms pc
-
-
-
-instance Pretty PickInst where
-  pretty  PickInst{..} =
-      text "PickInst(" <> vcat
-                           [ nest 2 $ pretty formulas
-                           , char ',' <+> pretty correct
-                           , myText (", {" ++ show showSolution ++ "}")
-                           , maybe empty (\s -> myText (", {" ++ show (toList s) ++ "}")) addText
-                           , char ')'
-                           ]
-
-
-instance Pretty FormulaInst where
-  pretty (InstCnf cnf) = text "Cnf{" <> pretty cnf <> char '}'
-  pretty (InstDnf dnf) = text "Dnf{" <> pretty dnf <> char '}'
-  pretty (InstArbitrary tree) = text "SynTree{" <> pretty tree <> char '}'
 
 
 
