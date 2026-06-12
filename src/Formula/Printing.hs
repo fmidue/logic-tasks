@@ -17,7 +17,6 @@ import qualified Data.Set as Set (null)
 import Text.PrettyPrint.Leijen.Text
 import Data.Maybe (isJust, fromJust)
 import Trees.Print ()
-import Control.OutputCapable.Blocks (ExtraText(NoExtraText, Static, Collapsible))
 
 
 myText :: String -> Doc
