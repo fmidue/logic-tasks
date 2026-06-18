@@ -14,7 +14,7 @@ import Trees.Types (BinOp(..))
 import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
-import Formula.Util(PercentRangeMode(TrueEntries))
+import Formula.Util (PercentRangeMode(TrueEntries))
 import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 listToFM :: Ord k => [(k, a)] -> Map k a

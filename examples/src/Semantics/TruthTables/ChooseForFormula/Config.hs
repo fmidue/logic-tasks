@@ -9,7 +9,7 @@ import LogicTasks.Config (
 
 import Test.Hspec
 import Util.VerifyConfig
-import Formula.Util(PercentRangeMode(TrueEntries))
+import Formula.Util (PercentRangeMode(TrueEntries))
 import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 -- 2023: Weight 0.33

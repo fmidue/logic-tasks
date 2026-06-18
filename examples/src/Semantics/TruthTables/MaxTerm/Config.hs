@@ -9,7 +9,7 @@ import Test.Hspec
 import LogicTasks.Util (checkNormalFormConfig)
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
-import Formula.Util(PercentRangeMode(TrueEntries))
+import Formula.Util (PercentRangeMode(TrueEntries))
 
 -- Weight 0.33
 -- Type: Max
