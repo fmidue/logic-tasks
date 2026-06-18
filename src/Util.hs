@@ -19,8 +19,7 @@ import Data.List (delete)
 import Test.QuickCheck(Gen, elements, suchThat)
 
 import Config (BaseConfig(..), NormalFormConfig(..), FormulaConfig (..), FormulaInst (..))
-import Formula.Types (Formula (atomics), getTable, lengthBound)
-import Formula.Table (readEntries)
+import Formula.Types (lengthBound)
 import Tasks.SynTree.Config (SynTreeConfig (availableAtoms), checkSynTreeConfig)
 import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics, PercentRangeMode(TrueEntries, PosLiterals), percentRangeModeRange)
 import Trees.Helpers (synTreeDependsOnAllAtomics)
@@ -64,21 +63,6 @@ remove 0 xs = pure xs
 remove num xs = do
     out <- elements xs
     remove (num-1) $ delete out xs
-
-
-{-# Deprecated withRatio "Use withPercentRange instead" #-}
-withRatio :: Formula a => (Int,Int) -> a -> Bool
-withRatio (0, 100) _ = True
-withRatio (lower, upper) form =
-    lengthTrueEntries <= max (min 1 upper) (percentage upper)
-        && lengthTrueEntries >= max (min 1 lower) (percentage lower)
-  where
-    tableEntries = readEntries (getTable form)
-    trueEntries = filter (== Just True) tableEntries
-    percentage :: Int -> Int
-    percentage = let totalEntries = 2 ^ length (atomics form) in \num -> totalEntries * num `div` 100
-    lengthTrueEntries = length trueEntries
-
 
 
 checkTruthValueRange :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m

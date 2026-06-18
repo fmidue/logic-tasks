@@ -24,7 +24,7 @@ import Control.OutputCapable.Blocks (
 import Test.QuickCheck (Gen, suchThat, elements)
 
 import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), FormulaInst (..), BaseConfig (..), NormalFormConfig(..))
-import Formula.Util (isSemanticEqual, withPercentRange, percentRangeModeRange)
+import Formula.Util (isSemanticEqual, withPercentRange, PercentRangeMode (TrueEntries))
 import Formula.Types (availableLetter, getTable, Formula (atomics))
 import Formula.Printing (showIndexedList)
 import Data.Maybe (fromJust)
@@ -135,14 +135,13 @@ verifyQuiz PickConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | rangeH - rangeL < 30 =
+    | notInRangeForTrueEntries percentRangeMode =
         refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
           english "The given restriction on True entries should not fall below a range of 30."
 
     | otherwise = checkTruthValueRangeAndFormulaConf percentRangeMode formulaConfig
   where
-    (rangeL, rangeH) = percentRangeModeRange percentRangeMode
     hasMinUniqueAtoms x (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= x
     hasMinUniqueAtoms _ _ = True
     doesOvershootOptions (FormulaArbitrary syntaxTreeConfig)
@@ -153,6 +152,8 @@ verifyQuiz PickConfig{..}
       = amountOfOptions > 4*2^ length (usedAtoms (baseConf dnfCfg))
     tooFewAtoms (FormulaArbitrary syntaxTreeConfig) = length (availableAtoms syntaxTreeConfig) < 3
     tooFewAtoms _ = False
+    notInRangeForTrueEntries (TrueEntries (rangeL, rangeH)) = rangeH - rangeL < 30
+    notInRangeForTrueEntries _ = False
 
 
 
