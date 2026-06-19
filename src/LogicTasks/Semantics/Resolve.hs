@@ -338,12 +338,12 @@ gradeSteps setNotation steps appliedIsNothing = do
       checkEmptyClause = null steps || not (isEmptyClause $ thd3 $ last steps)
 
 partialGrade :: OutputCapable m => Bool -> ResolutionInst -> Delayed [ResStep] -> LangM m
-partialGrade formVersion inst = (partialGrade' formVersion inst `withDelayed` resStepsParser clauseParser) (const complainAboutWrongNotation)
+partialGrade standardInput inst = (partialGrade' standardInput inst `withDelayed` resStepsParser clauseParser) (const complainAboutWrongNotation)
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 
 partialGrade' :: OutputCapable m => Bool -> ResolutionInst -> [ResStep] -> LangM m
-partialGrade' formVersion ResolutionInst{..} sol = do
+partialGrade' standardInput ResolutionInst{..} sol = do
   checkMapping
 
   preventWithHint (not $ null wrongLitsSteps)
@@ -364,7 +364,7 @@ partialGrade' formVersion ResolutionInst{..} sol = do
 
   pure ()
   where
-    checkMapping = correctMapping formVersion (zip [1..] sol) $ baseMapping clauses
+    checkMapping = correctMapping standardInput (zip [1..] sol) $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
     availLits = unions (map (fromList . literals) clauses)
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
@@ -408,7 +408,7 @@ baseMapping xs = zip [1..] $ sort xs
 
 
 correctMapping :: OutputCapable m => Bool -> [(Int,ResStep)] -> [(Int,Clause)] -> LangM m
-correctMapping assumeNoDuplicates = check
+correctMapping checkForDuplicates = check
   where
     check [] _ = pure()
     check ((j, Res (c1,c2,(c3,i))): rest) mapping = do
@@ -417,7 +417,7 @@ correctMapping assumeNoDuplicates = check
           german $ show j ++ ". Schritt verwendet nur existierende Indizes?"
           english $ "Step " ++ show j ++ " uses only existing indices?"
 
-      unless assumeNoDuplicates $ prevent (alreadyUsed i) $
+      when checkForDuplicates $ prevent (alreadyUsed i) $
         translate $ do
           german $ show j ++ ". Schritt vergibt keinen Index wiederholt?"
           english $ "Step " ++ show j ++ " does not assign an index repeatedly?"
