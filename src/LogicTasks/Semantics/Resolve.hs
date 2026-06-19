@@ -408,29 +408,32 @@ baseMapping xs = zip [1..] $ sort xs
 
 
 correctMapping :: OutputCapable m => Bool -> [(Int,ResStep)] -> [(Int,Clause)] -> LangM m
-correctMapping _ [] _ = pure()
-correctMapping assumeNoDuplicates ((j, Res (c1,c2,(c3,i))): rest) mapping = do
-  prevent checkIndices $
-    translate $ do
-      german $ show j ++ ". Schritt verwendet nur existierende Indizes?"
-      english $ "Step " ++ show j ++ " uses only existing indices?"
-
-  unless assumeNoDuplicates $ prevent (alreadyUsed i) $
-    translate $ do
-      german $ show j ++ ". Schritt vergibt keinen Index wiederholt?"
-      english $ "Step " ++ show j ++ " does not assign an index repeatedly?"
-
-  correctMapping assumeNoDuplicates rest newMapping
-  pure ()
+correctMapping assumeNoDuplicates = check
   where
-    newMapping = case i of Nothing      -> mapping
-                           (Just index) -> (index,c3) : mapping
+    check [] _ = pure()
+    check ((j, Res (c1,c2,(c3,i))): rest) mapping = do
+      prevent checkIndices $
+        translate $ do
+          german $ show j ++ ". Schritt verwendet nur existierende Indizes?"
+          english $ "Step " ++ show j ++ " uses only existing indices?"
 
-    unknown (Left _) = False
-    unknown (Right n) = n `notElem` map fst mapping
-    checkIndices = unknown c1 || unknown c2
-    alreadyUsed Nothing = False
-    alreadyUsed (Just n) = n `elem` map fst mapping
+      unless assumeNoDuplicates $ prevent (alreadyUsed i) $
+        translate $ do
+          german $ show j ++ ". Schritt vergibt keinen Index wiederholt?"
+          english $ "Step " ++ show j ++ " does not assign an index repeatedly?"
+
+      check rest newMapping
+      pure ()
+        where
+          newMapping = case i of
+            Nothing      -> mapping
+            (Just index) -> (index,c3) : mapping
+
+          unknown (Left _) = False
+          unknown (Right n) = n `notElem` map fst mapping
+          checkIndices = unknown c1 || unknown c2
+          alreadyUsed Nothing = False
+          alreadyUsed (Just n) = n `elem` map fst mapping
 
 
 
