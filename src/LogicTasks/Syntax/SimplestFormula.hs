@@ -58,8 +58,8 @@ description SuperfluousBracketsInst{..} = do
       german "Geben Sie die Lösung wieder in Form einer aussagenlogischen Formel an."
 
     collapsed False (translations $ do
-      english "Additional hints:"
-      german "Weitere Hinweise:")
+      english "Hints:"
+      german "Hinweise:")
       (do
 
         paragraph $ do
