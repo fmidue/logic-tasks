@@ -173,23 +173,23 @@ formulaAndHints a b c d (aN,bN,cN,dN) = do
   where
     namesLegend = [i|Sie fragt ihre Freunde #{aN} (A), #{bN} (B), #{cN} (C) und #{dN} (D), |]
     hint1 = (if b == d
-              then [i|Falls #{bN} und #{dN}#{nicht b} kommen,|]
+              then [i|Falls #{bN} und #{dN}#{nicht b} mitkommen,|]
               else
                 if b
-                  then [i|Falls #{bN} nicht, aber #{dN} kommt,|]
-                  else [i|Falls #{bN}, aber nicht #{dN} kommt,|]
+                  then [i|Falls #{bN} nicht, aber #{dN} mitkommt,|]
+                  else [i|Falls #{bN}, aber nicht #{dN} mitkommt,|]
             )
-            ++ [i| kommt #{cN}#{nicht (not c)}.|]
+            ++ [i| kommt #{cN}#{nicht (not c)} mit.|]
     hint2 = [i|#{bN} kommt#{nicht b} mit, wenn #{aN}#{nicht a} mitkommt.|]
-    hint3 = [i|Wenn #{bN}#{nicht b} kommt, kommt #{if b == c then auch else ""} #{cN}#{nicht c}.|]
-    hint4 = [i|Wenn #{cN}#{nicht c} kommt, kommt #{if c == d then auch else ""} #{dN}#{nicht d}.|]
-    hint5 = [i|Wenn #{dN}#{nicht d} kommt, |]
+    hint3 = [i|Wenn #{bN}#{nicht b} mitkommt, kommt #{if b == c then auch else ""} #{cN}#{nicht c} mit.|]
+    hint4 = [i|Wenn #{cN}#{nicht c} mitkommt, kommt #{if c == d then auch else ""} #{dN}#{nicht d} mit.|]
+    hint5 = [i|Wenn #{dN}#{nicht d} mitkommt, |]
          ++ if a == b
-              then [i|kommen #{if d == a then auch else ""} #{aN} oder #{bN}#{nicht a}.|]
+              then [i|kommen #{if d == a then auch else ""} #{aN} oder #{bN}#{nicht a} mit.|]
               else
                 if a
-                  then [i|kommt #{if d then auch else ""} #{aN} nicht oder #{bN} kommt.|]
-                  else [i|kommt #{if d then "" else auch} #{aN} oder #{bN} kommt nicht.|]
+                  then [i|kommt #{if d then auch else ""} #{aN} nicht mit oder #{bN} kommt mit.|]
+                  else [i|kommt #{if d then "" else auch} #{aN} mit oder #{bN} kommt nicht mit.|]
 
     nicht :: Bool -> String
     nicht f = if f then " nicht" else ""
@@ -213,8 +213,8 @@ formulaAndHints a b c d (aN,bN,cN,dN) = do
 
 nonTableFields :: (String,String,String,String) -> [[FieldInfo]]
 nonTableFields (a,b,c,d) = [
-      [single $ addCssClass formulaClass "Formel F"]
-    , [buttonsEnum Vertical "Wer kommt?" getName]
+      [single $ addCssClass formulaClass "Formel F ="]
+    , [buttonsEnum Vertical "Wer kommt mit?" getName]
     ]
   where
     nameMatching = [(A, a), (B, b), (C, c), (D, d)]
