@@ -73,7 +73,7 @@ newtype DecideAnswer
 showChoice :: Language -> DecideChoice -> String
 showChoice German Correct = "Richtig"
 showChoice German Wrong = "Fehlerhaft"
-showChoice English Correct = "Correct"
+showChoice English Correct = "Right"
 showChoice English Wrong = "Wrong"
 
 showDecideAnswer :: Language -> DecideAnswer -> String
