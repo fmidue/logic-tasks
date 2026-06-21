@@ -87,8 +87,8 @@ description withDropdowns DecideInst{..} = do
     pure ()
   paragraph $ do
     translate $ do
-      english "Decide for each row of the truth table whether the truth value in the last column is correct or incorrect."
-      german "Entscheiden Sie für jede Tabellenzeile, ob der Wahrheitswert in der letzten Spalte der Wahrheitstafel korrekt oder fehlerhaft ist."
+      english "Decide for each row of the truth table whether the truth value in the last column is right or wrong."
+      german "Entscheiden Sie für jede Tabellenzeile, ob der Wahrheitswert in der letzten Spalte der Wahrheitstafel richtig oder fehlerhaft ist."
     unless withDropdowns $ indent $ code $ show (flipAt (getTable formula) changed)
     pure ()
   if withDropdowns
