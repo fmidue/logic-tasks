@@ -53,8 +53,8 @@ description path TreeToFormulaInst{..} = do
     image $=<< cacheTree latexImage path
 
     collapsed False (translations $ do
-      english "Additional hints:"
-      german "Weitere Hinweise:")
+      english "Hints:"
+      german "Hinweise:")
       (do
 
         instruct $ do
