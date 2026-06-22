@@ -14,7 +14,7 @@ module Formula.Parsing (
   ) where
 
 import Config hiding (Right)
-import qualified Config as DecideChoice (Right)
+import qualified Config as DecideChoice (DecideChoice(Right))
 import Formula.Util
 import ParsingHelpers (caseInsensitive, lexeme, tokenSymbol)
 import Formula.Types
