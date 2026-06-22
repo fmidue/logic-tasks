@@ -13,7 +13,8 @@ module Formula.Parsing (
   prologClauseSetParser
   ) where
 
-import Config
+import Config hiding (Right)
+import qualified Config as DecideChoice (Right)
 import Formula.Util
 import ParsingHelpers (caseInsensitive, lexeme, tokenSymbol)
 import Formula.Types
@@ -354,9 +355,9 @@ instance Parse PrologClause where
 instance Parse DecideAnswer where
   parser = DecideAnswer <$> lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
     where
-      parseCorrect = Just Correct <$
+      parseCorrect = Just DecideChoice.Right <$
           ( try (caseInsensitive "Richtig")
-        <|> caseInsensitive "Correct"
+        <|> caseInsensitive "Right"
           )
       parseWrong = Just Wrong <$
           ( try (caseInsensitive "Fehlerhaft")

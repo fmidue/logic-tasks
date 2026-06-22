@@ -137,8 +137,8 @@ description withDropdowns DecideInst{..} = do
   pure ()
   where
     printDecideAnswers lang = intercalate ", " . map (showDecideAnswer lang . DecideAnswer)
-    options = [Nothing, Just Correct, Just Wrong]
-    exampleInput = [Just Correct, Just Correct, Just Wrong, Nothing]
+    options = [Nothing, Just Right, Just Wrong]
+    exampleInput = [Just Right, Just Right, Just Wrong, Nothing]
 
 verifyStatic :: OutputCapable m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
@@ -221,9 +221,9 @@ completeGrade DecideInst{..} sol = reRefuse
           german "Die korrekte Lösung ist:"
         translatedCode $ flip localise $ translations $ do
           english $
-            "[" ++ intercalate ", " (map (\i -> showChoice English $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
+            "[" ++ intercalate ", " (map (\i -> showChoice English $ if i `elem` changed then Wrong else Right) [1..tableLen]) ++ "]"
           german $
-            "[" ++ intercalate ", " (map (\i -> showChoice German $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
+            "[" ++ intercalate ", " (map (\i -> showChoice German $ if i `elem` changed then Wrong else Right) [1..tableLen]) ++ "]"
         pure ()
 
       paragraph $ translate $ do
@@ -238,9 +238,9 @@ completeGrade DecideInst{..} sol = reRefuse
       tableLen = length $ readEntries table
       restOf = [1..tableLen] \\ changed
       answerListWrong = map ((,True) . (,Wrong)) changed ++ map ((,False) . (,Wrong)) restOf
-      answerListCorrect = map ((,False) . (,Correct)) changed ++ map ((,True) . (,Correct)) restOf
+      answerListCorrect = map ((,False) . (,Right)) changed ++ map ((,True) . (,Right)) restOf
       correctOption (i,c) = case c of
-        Correct -> i `elem` restOf
+        Right -> i `elem` restOf
         _   -> i `elem` changed
 
       what = Just $ translations $ do

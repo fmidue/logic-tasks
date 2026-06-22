@@ -62,7 +62,7 @@ instance Show StepAnswer where
   show _ = ""
 
 data DecideChoice
-  = Correct
+  = Right
   | Wrong
   deriving (Show,Ord,Eq,Enum,Bounded,Generic)
 
@@ -71,9 +71,9 @@ newtype DecideAnswer
   deriving (Generic)
 
 showChoice :: Language -> DecideChoice -> String
-showChoice German Correct = "Richtig"
+showChoice German Right = "Richtig"
 showChoice German Wrong = "Fehlerhaft"
-showChoice English Correct = "Right"
+showChoice English Right = "Right"
 showChoice English Wrong = "Wrong"
 
 showDecideAnswer :: Language -> DecideAnswer -> String
