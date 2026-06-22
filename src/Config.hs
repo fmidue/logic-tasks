@@ -73,12 +73,12 @@ newtype DecideAnswer
 showChoice :: Language -> DecideChoice -> String
 showChoice German Correct = "Richtig"
 showChoice German Wrong = "Fehlerhaft"
-showChoice English Correct = "Right"
+showChoice English Correct = "Correct"
 showChoice English Wrong = "Wrong"
 
 showDecideAnswer :: Language -> DecideAnswer -> String
-showDecideAnswer German (DecideAnswer Nothing) = "Keine Antwort"
-showDecideAnswer English (DecideAnswer Nothing) = "No answer"
+showDecideAnswer German (DecideAnswer Nothing) = "Nichts"
+showDecideAnswer English (DecideAnswer Nothing) = "None"
 showDecideAnswer lang (DecideAnswer (Just choice)) = showChoice lang choice
 
 data PickInst = PickInst {

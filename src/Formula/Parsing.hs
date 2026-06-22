@@ -363,6 +363,6 @@ instance Parse DecideAnswer where
         <|> caseInsensitive "Wrong"
           )
       parseNoAnswer = Nothing <$
-          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort")
-        <|> (lexeme (caseInsensitive "No") <* caseInsensitive "answer")
+          ( try (caseInsensitive "Nichts")
+        <|> caseInsensitive "None"
           )

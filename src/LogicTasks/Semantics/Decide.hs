@@ -137,7 +137,7 @@ description withDropdowns DecideInst{..} = do
   pure ()
   where
     printDecideAnswers lang = intercalate ", " . map (showDecideAnswer lang . DecideAnswer)
-    options = [Just Correct, Just Wrong, Nothing]
+    options = [Nothing, Just Correct, Just Wrong]
     exampleInput = [Just Correct, Just Correct, Just Wrong, Nothing]
 
 verifyStatic :: OutputCapable m => DecideInst -> LangM m
