@@ -102,7 +102,7 @@ import Global
 
 
 checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
-checkSyntax = partialGrade'
+checkSyntax = partialGrade' False
 
 checkSemantics :: (OutputCapable m, Alternative m) => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submission = do
