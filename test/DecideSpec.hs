@@ -2,6 +2,8 @@
 {-# LANGUAGE RecordWildCards #-}
 module DecideSpec where
 
+import Prelude hiding (Right)
+
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
@@ -63,12 +65,12 @@ spec = do
           doesNotRefuse
             (partialGrade
               inst
-                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Right
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: LangM Maybe) &&
           doesNotRefuse
             (completeGrade
               inst
-                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Right
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: Rated Maybe)
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
