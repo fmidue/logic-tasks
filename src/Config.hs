@@ -5,6 +5,7 @@
 module Config where
 
 
+import Prelude hiding (Right)
 import Data.Data (Data)
 import GHC.Generics
 import Formula.Types
