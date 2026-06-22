@@ -30,6 +30,7 @@ import Data.List.Extra ((\\), intercalate)
 import Data.Map (Map, fromList)
 import Test.QuickCheck (Gen, suchThat)
 
+import Prelude hiding (Right)
 import Config (
   DecideConfig(..),
   DecideInst(..),

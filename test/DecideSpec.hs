@@ -2,6 +2,8 @@
 {-# LANGUAGE RecordWildCards #-}
 module DecideSpec where
 
+import Prelude hiding (Right)
+
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
