@@ -229,7 +229,7 @@ completeGrade DecideInst{..} sol = reRefuse
 
       paragraph $ translate $ do
         english "Please compare with the correct table for the given formula:"
-        german "Vergleichen Sie mit der richtigen Tafel für die gegebene Formel:"
+        german "Vergleichen Sie mit der korrekten Tafel für die gegebene Formel:"
       code $ show table
       pure ()
     where
