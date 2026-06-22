@@ -171,7 +171,7 @@ formulaAndHints a b c d (aN,bN,cN,dN) = do
     let formula = foldr1 (Binary And) parts
     pure (formula, namesLegend, hints)
   where
-    namesLegend = [i|Sie fragt ihre Freunde #{aN} (A), #{bN} (B), #{cN} (C) und #{dN} (D), |]
+    namesLegend = [i|Sie fragt ihre Bekannten #{aN} (A), #{bN} (B), #{cN} (C) und #{dN} (D), |]
     hint1 = (if b == d
               then [i|Falls #{bN} und #{dN}#{nicht b} mitkommen,|]
               else
