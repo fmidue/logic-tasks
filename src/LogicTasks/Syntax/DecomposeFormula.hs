@@ -101,19 +101,19 @@ partialGrade' DecomposeFormulaInst{..} sol = do
 
   when (isNothing solTree) $ reject $ do
     english "You did not submit a solution."
-    german "Die Abgabe ist leer."
+    german "Die eingereichte Abgabe ist leer."
 
   when (any (`notElem` origLiterals) solLiterals) $ reject $ do
-    english "Your submission contains unknown atomic formulas."
-    german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
+    english "The submitted solution contains unknown atomic formulas."
+    german "Die eingereichte Lösung beinhaltet unbekannte atomare Formeln."
 
   unless (length origLiterals == length solLiterals) $ reject $ do
-    english "Your submission does not contain all atomic formulas present in the original formula."
-    german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus der ursprünglichen Formel."
+    english "The submitted solution does not contain all atomic formulas present in the original formula."
+    german "Die eingereichte Lösung beinhaltet nicht alle atomaren Formeln aus der ursprünglichen Formel."
 
   unless (length origOperators == length solOperators) $ reject $ do
-    english "Your submission does not contain the right amount of different operators."
-    german "Ihre Abgabe beinhaltet nicht die richtige Anzahl an unterschiedlichen Operatoren."
+    english "The submitted solution does not contain the right amount of different operators."
+    german "Die eingereichte Lösung beinhaltet nicht die richtige Anzahl an unterschiedlichen Operatoren."
 
   pure ()
     where solTree = maybeTree sol
@@ -141,8 +141,8 @@ completeGrade'
 completeGrade' path DecomposeFormulaInst{..} sol
   | solTree /= swappedTree = refuse $ do
     instruct $ do
-      english "Your solution is not correct."
-      german "Ihre Abgabe ist nicht die korrekte Lösung."
+      english "The submitted solution is not correct."
+      german "Die eingereichte Lösung ist nicht korrekt."
 
     instruct $ do
       english "The original syntax tree looks like this:"
@@ -173,8 +173,8 @@ completeGrade' path DecomposeFormulaInst{..} sol
 
   | otherwise =
       instruct $ do
-        english "Your solution is correct."
-        german "Ihre Lösung ist korrekt."
+        english "The submitted solution is correct."
+        german "Die eingereichte Lösung ist korrekt."
 
     where solTree = fromJust $ maybeTree sol
           swappedTree = swapKids tree

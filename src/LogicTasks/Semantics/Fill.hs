@@ -154,8 +154,8 @@ partialGrade :: OutputCapable m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
   preventWithHint (solLen /= missingLen)
     (translate $ do
-      german "Ihre Abgabe hat die korrekte Länge?"
-      english "Your submission has the correct length?"
+      german "Die eingereichte Lösung hat die korrekte Länge?"
+      english "The submitted solution has the correct length?"
     )
     (translate $ do
       german $ "Ihre Abgabe muss genau " ++ show missingLen ++ " Einträge enthalten."
@@ -179,8 +179,8 @@ completeGrade FillInst{..} sol = reRefuse
     solution
     submission)
   $ when (notNull diff && not showSolution) $ translate $ do
-    german $ "Ihre Abgabe enthält " ++ displayMistake ++ " Fehler."
-    english $ "Your submission contains " ++ displayMistake ++ " mistakes."
+    german $ "Die eingereichte Lösung enthält " ++ displayMistake ++ " Fehler."
+    english $ "The submitted solution contains " ++ displayMistake ++ " mistakes."
 
   where
     boolSol = map truth sol

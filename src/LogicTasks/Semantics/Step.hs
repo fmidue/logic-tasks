@@ -168,8 +168,8 @@ partialGrade' StepInst{..} sol = do
 
   prevent (isNothing $ step sol) $
     translate $ do
-      german "Lösung ist nicht leer?"
-      english "The solution is not empty?"
+      german "Die eingereichte Lösung ist nicht leer?"
+      english "The submitted solution is not empty?"
 
   prevent (not (fst mSol `member` availLits)) $
     translate $ do
@@ -215,8 +215,8 @@ completeGrade' StepInst{..} sol =
 
         Just solClause -> if solClause == snd mSol
           then instruct $ do
-              german "Ihre Lösung ist korrekt."
-              english "Your solution is correct."
+              german "Die eingereichte Lösung ist korrekt."
+              english "The submitted solution is correct."
           else refuse $ indent $ do
             translate $ do
               german "Resolvente ist nicht korrekt."
