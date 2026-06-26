@@ -149,7 +149,7 @@ partialGrade' SuperfluousBracketsInst{..} f
     | opsNum < correctOpsNum =
       reject $ do
         english "The submitted solution contains fewer logical operators than the original formula."
-        german "Die eingereichte Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
+        german "Die eingereichte Lösung beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
     | not $ isDerivedByRemovingBrackets (show f) stringWithSuperfluousBrackets =
       reject $ do
