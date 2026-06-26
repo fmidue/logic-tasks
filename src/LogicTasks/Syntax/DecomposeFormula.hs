@@ -101,7 +101,7 @@ partialGrade' DecomposeFormulaInst{..} sol = do
 
   when (isNothing solTree) $ reject $ do
     english "You did not submit a solution."
-    german "Die eingereichte Abgabe ist leer."
+    german "Die eingereichte Lösung ist leer."
 
   when (any (`notElem` origLiterals) solLiterals) $ reject $ do
     english "The submitted solution contains unknown atomic formulas."
