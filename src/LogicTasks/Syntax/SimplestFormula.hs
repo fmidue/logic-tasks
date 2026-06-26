@@ -128,33 +128,33 @@ partialGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> 
 partialGrade' SuperfluousBracketsInst{..} f
     | isNothing $ maybeForm f =
       reject $ do
-        english "Your submission is empty."
+        english "The submitted solution is empty."
         german "Sie haben keine Formel angegeben."
 
     | any (`notElem` correctAtoms) atoms =
       reject $ do
-        english "Your submission contains unknown atomic formulas."
-        german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
+        english "The submitted solution contains unknown atomic formulas."
+        german "Die eingereichte Lösung beinhaltet unbekannte atomare Formeln."
 
     | any (`notElem` atoms) correctAtoms =
       reject $ do
-        english "Your submission does not contain all atomic formulas present in the original formula."
-        german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus der ursprünglichen Formel."
+        english "The submitted solution does not contain all atomic formulas present in the original formula."
+        german "Die eingereichte Lösung beinhaltet nicht alle atomaren Formeln aus der ursprünglichen Formel."
 
     | opsNum > correctOpsNum =
       reject $ do
-        english "Your submission contains more logical operators than the original formula."
-        german "Ihre Abgabe beinhaltet mehr logische Operatoren als die ursprüngliche Formel."
+        english "The submitted solution contains more logical operators than the original formula."
+        german "Die eingereichte Lösung beinhaltet mehr logische Operatoren als die ursprüngliche Formel."
 
     | opsNum < correctOpsNum =
       reject $ do
-        english "Your submission contains fewer logical operators than the original formula."
-        german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
+        english "The submitted solution contains fewer logical operators than the original formula."
+        german "Die eingereichte Lösung beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
     | not $ isDerivedByRemovingBrackets (show f) stringWithSuperfluousBrackets =
       reject $ do
-        english "Your submission cannot be obtained from the original formula by removing brackets."
-        german "Ihre Abgabe lässt sich nicht durch Entfernen von Klammern aus der ursprünglichen Formel erhalten."
+        english "The submitted solution cannot be obtained from the original formula by removing brackets."
+        german "Die eingereichte Lösung lässt sich nicht durch Entfernen von Klammern aus der ursprünglichen Formel erhalten."
 
     | otherwise = pure()
   where
@@ -169,8 +169,8 @@ completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 completeGrade' :: (OutputCapable m, Alternative m, Monad m) => SuperfluousBracketsInst -> FormulaAnswer -> Rated m
 completeGrade' inst sol
   | submissionString == simplestSolutionString = instruct (do
-      german "Ihre Abgabe ist korrekt."
-      english "Your submission is correct."
+      german "Die eingereichte Lösung ist korrekt."
+      english "The submitted solution is correct."
     ) *> rate 1
   | synTreeEquivalent && isDerivedByRemovingBrackets simplestSolutionString submissionString = reRefuse (rate percentage) (translate $ do
     german ("Sie haben " ++ show superfluousBracketPairsSubmission ++ " überflüssige" ++ (if isSingular then "s " else " ") ++ "Klammerpaar" ++ (if isSingular then " " else "e ") ++ "in der Abgabe.")

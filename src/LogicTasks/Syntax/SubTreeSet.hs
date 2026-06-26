@@ -125,25 +125,25 @@ partialGrade' SubTreeInst{..} fs
 
     | any (`notElem` correctAtoms) atoms =
       reject $ do
-        english "At least one formula in your submission contains unknown atomic formulas."
-        german "Ihre Abgabe beinhaltet mindestens eine Formel mit unbekannten atomaren Formeln."
+        english "At least one formula in your submitted solution contains unknown atomic formulas."
+        german "Die eingereichte Lösung beinhaltet mindestens eine Formel mit unbekannten atomaren Formeln."
 
     | any (> origOpsNum) opsNum =
       reject $ do
-        english "Your submission contains at least one formula with more logical operators than the original formula."
-        german "Ihre Abgabe beinhaltet mindestens eine Formel mit mehr logische Operatoren als die ursprüngliche Formel."
+        english "The submitted solution contains at least one formula with more logical operators than the original formula."
+        german "Die eingereichte Lösung beinhaltet mindestens eine Formel mit mehr logische Operatoren als die ursprüngliche Formel."
 
     | amount < inputTreeAmount =
       reject $ do
-        english "Your submission does not contain enough different subformulas. "
+        english "The submitted solution does not contain enough different subformulas. "
         english $ "Add " ++ show (inputTreeAmount - amount) ++ "."
-        german "Ihre Abgabe beinhaltet nicht genügend verschiedene Teilformeln. "
+        german "Die eingereichte Lösung beinhaltet nicht genügend verschiedene Teilformeln. "
         german $ "Fügen Sie " ++ show (inputTreeAmount - amount) ++ " hinzu."
 
     | amount > inputTreeAmount =
       reject $ do
-        english "Your submission contains too many formulas."
-        german "Ihre Abgabe enthält zu viele Formeln."
+        english "The submitted solution contains too many formulas."
+        german "Die eingereichte Lösung enthält zu viele Formeln."
 
     | otherwise = pure ()
   where

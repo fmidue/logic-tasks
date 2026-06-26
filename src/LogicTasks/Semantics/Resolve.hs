@@ -383,8 +383,8 @@ completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
       recoverFrom stepsGraded
 
     yesNo isCorrect $ translate $ do
-      german "Lösung ist korrekt und vollständig?"
-      english "Solution is correct and complete?"
+      german "Die eingereichte Lösung ist korrekt und vollständig?"
+      english "The submitted solution is correct and complete?"
 
     when (showSolution && not isCorrect) $
       example solutionDisplay $ do

@@ -141,7 +141,7 @@ partialGrade' :: OutputCapable m => ComposeFormulaInst -> [TreeFormulaAnswer] ->
 partialGrade' ComposeFormulaInst{..} sol
   | length (nubOrd sol) /= 2 =
     reject $ do
-      english "Your submission does not contain the right amount of unique formulas. There need to be exactly two different formulas."
+      english "The submitted solution does not contain the right amount of unique formulas. There need to be exactly two different formulas."
       german  "Sie haben nicht die richtige Anzahl an einzigartigen Formeln eingegeben. Es werden genau zwei unterschiedliche Formeln erwartet."
   | any (isNothing . maybeTree) sol =
     reject $ do
@@ -153,16 +153,16 @@ partialGrade' ComposeFormulaInst{..} sol
       german "Mindestens eine Ihrer Formeln beinhaltet nicht den vorgegebenen Operator."
   | any (`notElem` correctAtoms) atoms =
     reject $ do
-      english "Your submission contains unknown atomic formulas."
-      german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
+      english "The submitted solution contains unknown atomic formulas."
+      german "Die eingereichte Lösung beinhaltet unbekannte atomare Formeln."
   | any (`notElem` atoms) correctAtoms =
     reject $ do
-      english "Your submission does not contain all atomic formulas present in the original syntax trees/formulas."
-      german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus den ursprünglichen Syntaxbäumen/Formeln."
+      english "The submitted solution does not contain all atomic formulas present in the original syntax trees/formulas."
+      german "Die eingereichte Lösung beinhaltet nicht alle atomaren Formeln aus den ursprünglichen Syntaxbäumen/Formeln."
   | usedOperators > correctOperators =
     reject $ do
-      english "Your submission contains too many different operators."
-      german "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren."
+      english "The submitted solution contains too many different operators."
+      german "Die eingereichte Lösung beinhaltet zu viele unterschiedliche Operatoren."
   | any (\s -> s == leftTree || s == rightTree) parsedSol =
     reject $ do
       english $ "At least one of your inputs corresponds to one of the " ++ eTreesOrFormulas ++ " already given. "
