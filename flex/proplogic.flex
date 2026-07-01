@@ -395,9 +395,15 @@ description _ (legend,hints,_) = do
       "Geben Sie diese Formel in das entsprechend benannte Textfeld ein. " ++
       "Verwenden Sie dabei die atomaren Formeln A, B, C, D mit der Interpretation, " ++
       "dass eine Zuordnung von 'wahr' dafür steht, dass die entsprechende Person mitkommt."
-    keyHeading
-    basicOpKey True
-    arrowsKey
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        keyHeading
+        basicOpKey True
+        arrowsKey
+        pure()
+      )
     paragraph $ text $
       "Wer geht mit Eva zum Konzert? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. " ++
       "Kreuzen Sie dann alle Begleitenden in der Namensliste an."

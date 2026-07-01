@@ -72,12 +72,18 @@ description withListInput SubTreeInst{..} = do
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen oder leer starten."
-      english "You can copy the original formula into the submission several times and remove parts or start from scratch."
+      german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
+      english "You can copy the original formula into the submission several times and remove parts, or start from scratch and use the following syntax:"
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    arrowsKey' arrowOperatorsToShow
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        keyHeading
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+        pure()
+      )
 
     extra addText
     pure ()

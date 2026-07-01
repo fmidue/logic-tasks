@@ -365,9 +365,15 @@ description _ TaskData{..} = do
   paragraph $ text
     ("Verwenden Sie dabei die atomaren Formeln A, B, C mit der Interpretation, " ++
     "dass eine Zuordnung von 'wahr' dafür steht, dass die entsprechende Person die Wahrheit sagt.")
-  keyHeading
-  basicOpKey True
-  arrowsKey
+  collapsed True (translations $ do
+    english "Notes on notation:"
+    german "Notationshinweise:")
+    (do
+      keyHeading
+      basicOpKey True
+      arrowsKey
+      pure()
+    )
   pure ()
 
 

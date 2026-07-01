@@ -73,18 +73,17 @@ description inputHelp path ComposeFormulaInst{..} = do
       german $ "Bilden Sie für die beiden entstehenden Bäume die repräsentierenden Formeln" ++ onListsGer ++ ". "
       german $ "Es spielt keine Rolle, in welcher Reihenfolge die Formeln " ++ onOrderGer ++ "."
 
-    collapsed True (translations $ do
-      english "Additional hints:"
-      german "Weitere Hinweise:")
-      (do
-        instruct $ do
-          english "(You are allowed to add arbitrarily many additional pairs of brackets in the formulas.)"
-          german "(In den Formeln dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+    instruct $ do
+      english "(You are allowed to add arbitrarily many additional pairs of brackets in the formulas.)"
+      german "(In den Formeln dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
         keyHeading
         basicOpKey unicodeAllowed
         arrowsKey' arrowOperatorsToShow
-
         pure()
       )
 

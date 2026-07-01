@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   extra,
   ($=<<),
+  collapsed,
   english,
   german,
   localise,
@@ -53,9 +54,15 @@ description DecomposeFormulaInst{..} = do
       english "(You are allowed to add arbitrarily many additional pairs of brackets in the formula.)"
       german "(In der Formel dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    arrowsKey' arrowOperatorsToShow
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        keyHeading
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+        pure()
+      )
 
     paragraph $ indent $ do
       translate $ do
