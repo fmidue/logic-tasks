@@ -14,6 +14,7 @@ import Control.OutputCapable.Blocks (
   extra,
   ($=<<),
   english,
+  collapsed,
   german,
   translate,
   localise,
@@ -72,13 +73,20 @@ description inputHelp path ComposeFormulaInst{..} = do
       german $ "Bilden Sie für die beiden entstehenden Bäume die repräsentierenden Formeln" ++ onListsGer ++ ". "
       german $ "Es spielt keine Rolle, in welcher Reihenfolge die Formeln " ++ onOrderGer ++ "."
 
-    instruct $ do
-      english "(You are allowed to add arbitrarily many additional pairs of brackets in the formulas.)"
-      german "(In den Formeln dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+    collapsed True (translations $ do
+      english "Additional hints:"
+      german "Weitere Hinweise:")
+      (do
+        instruct $ do
+          english "(You are allowed to add arbitrarily many additional pairs of brackets in the formulas.)"
+          german "(In den Formeln dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    arrowsKey' arrowOperatorsToShow
+        keyHeading
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+
+        pure()
+      )
 
     when inputHelp $ paragraph $ indent $ do
       translate $ do
