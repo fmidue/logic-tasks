@@ -20,7 +20,7 @@ import Control.OutputCapable.Blocks (
   translations,
   )
 
-import LogicTasks.Helpers (example, instruct, keyHeading, basicOpKey, arrowsKey', reject)
+import LogicTasks.Helpers (example, focus, instruct, keyHeading, basicOpKey, arrowsKey', reject)
 import Trees.Types (TreeFormulaAnswer(..))
 import Tasks.DecomposeFormula.Config (DecomposeFormulaInst(..), DecomposeFormulaConfig, checkDecomposeFormulaConfig)
 import Trees.Print (display, transferToPicture)
@@ -39,9 +39,11 @@ import Tasks.SynTree.Config (checkArrowOperatorsToShow)
 description :: OutputCapable m => DecomposeFormulaInst -> LangM m
 description DecomposeFormulaInst{..} = do
 
-    example (display tree) $ do
-      english "The following formula is given:"
-      german "Die folgende Formel ist gegeben:"
+    instruct $ do
+      english "Consider the following propositional logic formula:"
+      german "Betrachten Sie die folgende aussagenlogische Formel:"
+
+    focus (display tree)
 
     instruct $ do
       english "Create the syntax tree for this formula and swap the two subtrees at the root. "
