@@ -102,7 +102,7 @@ import Global
 
 
 checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
-checkSyntax = partialGrade'
+checkSyntax = partialGrade' False
 
 checkSemantics :: (OutputCapable m, Alternative m) => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submission = do
@@ -127,7 +127,9 @@ import Global
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
 description _ =
     descriptionMultipleFields
-    (do german "Unvollständig ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
+    (do german "Bestimmte Felder sind schon ausgefüllt. Sie machen den Rest."
+        german "Unvollständig ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
+        english "Certain fields are already filled in. You do the rest."
         english "Incomplete resolution steps will not be taken into account.")
 
 

@@ -144,8 +144,8 @@ partialMinMax correctAtoms correct solution allValidTerms isMaxTermTask = do
 
   preventWithHint (solLen < corrLen)
     (translate $ do
-      german $ "Genügend " ++ gTerms ++ " in Lösung?"
-      english $ "Solution contains enough " ++ eTerms ++ "?"
+      german $ "Genügend " ++ gTerms ++ " in eingereichter Lösung?"
+      english $ "Submitted solution contains enough " ++ eTerms ++ "?"
     )
 
     (paragraph $ do
@@ -161,8 +161,8 @@ partialMinMax correctAtoms correct solution allValidTerms isMaxTermTask = do
 
   preventWithHint (solLen > corrLen)
     (translate $ do
-      german $ "Nicht zu viele " ++ gTerms ++ " in Lösung?"
-      english $ "Not too many " ++ eTerms ++ " in solution?"
+      german $ "Nicht zu viele " ++ gTerms ++ " in eingereichter Lösung?"
+      english $ "Not too many " ++ eTerms ++ " in submitted solution?"
     )
 
     (paragraph $ do
@@ -200,8 +200,8 @@ completeMinMax :: (OutputCapable m, Formula f, Show f) => Bool -> f -> f -> Lang
 completeMinMax showSolution correct solution =
     preventWithHint (not $ null diff)
       (translate $ do
-         german "Lösung liefert korrekte Wahrheitstabelle?"
-         english "Solution gives correct truth table?"
+         german "Eingereichte Lösung liefert korrekte Wahrheitstabelle?"
+         english "Submitted solution gives correct truth table?"
       )
 
       (do

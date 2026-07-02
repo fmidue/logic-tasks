@@ -219,8 +219,8 @@ completeGrade' PrologInst{..} sol =
 
         Just solClause -> if solClause == transSol2
                             then instruct $ do
-                                      german "Ihre Lösung ist korrekt."
-                                      english "Your solution is correct."
+                                      german "Die eingereichte Lösung ist korrekt."
+                                      english "The submitted solution is correct."
                             else refuse $ indent $ do
                                     translate $ do
                                       german "Resolvente ist nicht korrekt."

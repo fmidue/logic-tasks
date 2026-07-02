@@ -5,6 +5,7 @@
 module Config where
 
 
+import Prelude hiding (Right)
 import Data.Data (Data)
 import GHC.Generics
 import Formula.Types
@@ -62,7 +63,7 @@ instance Show StepAnswer where
   show _ = ""
 
 data DecideChoice
-  = Correct
+  = Right
   | Wrong
   deriving (Show,Ord,Eq,Enum,Bounded,Generic)
 
@@ -71,14 +72,14 @@ newtype DecideAnswer
   deriving (Generic)
 
 showChoice :: Language -> DecideChoice -> String
-showChoice German Correct = "Richtig"
+showChoice German Right = "Richtig"
 showChoice German Wrong = "Fehlerhaft"
-showChoice English Correct = "Correct"
+showChoice English Right = "Right"
 showChoice English Wrong = "Wrong"
 
 showDecideAnswer :: Language -> DecideAnswer -> String
-showDecideAnswer German (DecideAnswer Nothing) = "Keine Antwort"
-showDecideAnswer English (DecideAnswer Nothing) = "No answer"
+showDecideAnswer German (DecideAnswer Nothing) = "Nichts"
+showDecideAnswer English (DecideAnswer Nothing) = "None"
 showDecideAnswer lang (DecideAnswer (Just choice)) = showChoice lang choice
 
 data PickInst = PickInst {

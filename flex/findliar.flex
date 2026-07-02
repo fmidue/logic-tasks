@@ -434,11 +434,6 @@ parseSubmission input =
       (displayInputAnd complainAboutMissingParenthesesIfNotFailingOn)
       (fully FP.formulaSymbolParser)
 
-
-{-# language QuasiQuotes #-}
-{-# language OverloadedStrings #-}
-
-
 =============================================
 
 {-# language QuasiQuotes #-}

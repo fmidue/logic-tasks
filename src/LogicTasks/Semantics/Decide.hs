@@ -30,6 +30,7 @@ import Data.List.Extra ((\\), intercalate)
 import Data.Map (Map, fromList)
 import Test.QuickCheck (Gen, suchThat)
 
+import Prelude hiding (Right)
 import Config (
   DecideConfig(..),
   DecideInst(..),
@@ -88,8 +89,8 @@ description withDropdowns DecideInst{..} = do
     pure ()
   paragraph $ do
     translate $ do
-      english "Decide for each row of the truth table whether the truth value in the last column is correct or incorrect."
-      german "Entscheiden Sie für jede Tabellenzeile, ob der Wahrheitswert in der letzten Spalte der Wahrheitstafel korrekt oder fehlerhaft ist."
+      english "Decide for each row of the truth table whether the truth value in the last column is right or wrong."
+      german "Entscheiden Sie für jede Tabellenzeile, ob der Wahrheitswert in der letzten Spalte der Wahrheitstafel richtig oder fehlerhaft ist."
     unless withDropdowns $ indent $ code $ show (flipAt (getTable formula) changed)
     pure ()
   if withDropdowns
@@ -138,8 +139,8 @@ description withDropdowns DecideInst{..} = do
   pure ()
   where
     printDecideAnswers lang = intercalate ", " . map (showDecideAnswer lang . DecideAnswer)
-    options = [Just Correct, Just Wrong, Nothing]
-    exampleInput = [Just Correct, Just Correct, Just Wrong, Nothing]
+    options = [Nothing, Just Right, Just Wrong]
+    exampleInput = [Just Right, Just Right, Just Wrong, Nothing]
 
 verifyStatic :: OutputCapable m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
@@ -222,14 +223,14 @@ completeGrade DecideInst{..} sol = reRefuse
           german "Die korrekte Lösung ist:"
         translatedCode $ flip localise $ translations $ do
           english $
-            "[" ++ intercalate ", " (map (\i -> showChoice English $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
+            "[" ++ intercalate ", " (map (\i -> showChoice English $ if i `elem` changed then Wrong else Right) [1..tableLen]) ++ "]"
           german $
-            "[" ++ intercalate ", " (map (\i -> showChoice German $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
+            "[" ++ intercalate ", " (map (\i -> showChoice German $ if i `elem` changed then Wrong else Right) [1..tableLen]) ++ "]"
         pure ()
 
       paragraph $ translate $ do
         english "Please compare with the correct table for the given formula:"
-        german "Vergleichen Sie mit der richtigen Tafel für die gegebene Formel:"
+        german "Vergleichen Sie mit der korrekten Tafel für die gegebene Formel:"
       code $ show table
       pure ()
     where
@@ -239,9 +240,9 @@ completeGrade DecideInst{..} sol = reRefuse
       tableLen = length $ readEntries table
       restOf = [1..tableLen] \\ changed
       answerListWrong = map ((,True) . (,Wrong)) changed ++ map ((,False) . (,Wrong)) restOf
-      answerListCorrect = map ((,False) . (,Correct)) changed ++ map ((,True) . (,Correct)) restOf
+      answerListCorrect = map ((,False) . (,Right)) changed ++ map ((,True) . (,Right)) restOf
       correctOption (i,c) = case c of
-        Correct -> i `elem` restOf
+        Right -> i `elem` restOf
         _   -> i `elem` changed
 
       what = Just $ translations $ do

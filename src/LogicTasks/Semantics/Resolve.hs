@@ -337,13 +337,13 @@ gradeSteps setNotation steps appliedIsNothing = do
             fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
       checkEmptyClause = null steps || not (isEmptyClause $ thd3 $ last steps)
 
-partialGrade :: OutputCapable m => ResolutionInst -> Delayed [ResStep] -> LangM m
-partialGrade inst = (partialGrade' inst `withDelayed` resStepsParser clauseParser) (const complainAboutWrongNotation)
+partialGrade :: OutputCapable m => Bool -> ResolutionInst -> Delayed [ResStep] -> LangM m
+partialGrade standardInput inst = (partialGrade' standardInput inst `withDelayed` resStepsParser clauseParser) (const complainAboutWrongNotation)
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 
-partialGrade' :: OutputCapable m => ResolutionInst -> [ResStep] -> LangM m
-partialGrade' ResolutionInst{..} sol = do
+partialGrade' :: OutputCapable m => Bool -> ResolutionInst -> [ResStep] -> LangM m
+partialGrade' standardInput ResolutionInst{..} sol = do
   checkMapping
 
   preventWithHint (not $ null wrongLitsSteps)
@@ -364,7 +364,7 @@ partialGrade' ResolutionInst{..} sol = do
 
   pure ()
   where
-    checkMapping = correctMapping (zip [1..] sol) $ baseMapping clauses
+    checkMapping = correctMapping standardInput (zip [1..] sol) $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
     availLits = unions (map (fromList . literals) clauses)
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
@@ -383,8 +383,8 @@ completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
       recoverFrom stepsGraded
 
     yesNo isCorrect $ translate $ do
-      german "Lösung ist korrekt und vollständig?"
-      english "Solution is correct and complete?"
+      german "Die eingereichte Lösung ist korrekt und vollständig?"
+      english "The submitted solution is correct and complete?"
 
     when (showSolution && not isCorrect) $
       example solutionDisplay $ do
@@ -407,30 +407,33 @@ baseMapping xs = zip [1..] $ sort xs
 
 
 
-correctMapping :: OutputCapable m => [(Int,ResStep)] -> [(Int,Clause)] -> LangM m
-correctMapping [] _ = pure()
-correctMapping ((j, Res (c1,c2,(c3,i))): rest) mapping = do
-  prevent checkIndices $
-    translate $ do
-      german $ show j ++ ". Schritt verwendet nur existierende Indizes?"
-      english $ "Step " ++ show j ++ " uses only existing indices?"
-
-  prevent (alreadyUsed i) $
-    translate $ do
-      german $ show j ++ ". Schritt vergibt keinen Index wiederholt?"
-      english $ "Step " ++ show j ++ " does not assign an index repeatedly?"
-
-  correctMapping rest newMapping
-  pure ()
+correctMapping :: OutputCapable m => Bool -> [(Int,ResStep)] -> [(Int,Clause)] -> LangM m
+correctMapping checkForDuplicates = check
   where
-    newMapping = case i of Nothing      -> mapping
-                           (Just index) -> (index,c3) : mapping
+    check [] _ = pure()
+    check ((j, Res (c1,c2,(c3,i))): rest) mapping = do
+      prevent checkIndices $
+        translate $ do
+          german $ show j ++ ". Schritt verwendet nur existierende Indizes?"
+          english $ "Step " ++ show j ++ " uses only existing indices?"
 
-    unknown (Left _) = False
-    unknown (Right n) = n `notElem` map fst mapping
-    checkIndices = unknown c1 || unknown c2
-    alreadyUsed Nothing = False
-    alreadyUsed (Just n) = n `elem` map fst mapping
+      when checkForDuplicates $ prevent (alreadyUsed i) $
+        translate $ do
+          german $ show j ++ ". Schritt vergibt keinen Index wiederholt?"
+          english $ "Step " ++ show j ++ " does not assign an index repeatedly?"
+
+      check rest newMapping
+      pure ()
+        where
+          newMapping = case i of
+            Nothing      -> mapping
+            (Just index) -> (index,c3) : mapping
+
+          unknown (Left _) = False
+          unknown (Right n) = n `notElem` map fst mapping
+          checkIndices = unknown c1 || unknown c2
+          alreadyUsed Nothing = False
+          alreadyUsed (Just n) = n `elem` map fst mapping
 
 
 

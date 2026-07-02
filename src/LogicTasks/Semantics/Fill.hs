@@ -73,7 +73,7 @@ genFillInst FillConfig{..} = do
 
 
 description :: OutputCapable m => Bool -> FillInst -> LangM m
-description inputHelp FillInst{..} = do
+description textVersion FillInst{..} = do
   paragraph $ do
     translate $ do
       german  "Betrachten Sie die folgende Formel:"
@@ -84,9 +84,9 @@ description inputHelp FillInst{..} = do
     translate $ do
       german "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
       english "Fill all blanks in the corresponding truth table with truth values (True or False)."
-    indent $ code $ show $ gapsAt (getTable formula) missing
+    when textVersion $ indent $ code $ show $ gapsAt (getTable formula) missing
     pure ()
-  when inputHelp $ paragraph $ translate $ do
+  when textVersion $ paragraph $ translate $ do
     german "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
     english "Provide the solution as a list of truth values. The first element of the list fills the first blank from the top, the second element fills the second blank, etc."
 
@@ -94,7 +94,7 @@ description inputHelp FillInst{..} = do
     german "Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (falsch, wahr) oder als Kurzform (f, w) erfolgen."
     english "Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word (false, true) or by giving a shorthand (f, t)."
 
-  when inputHelp $ paragraph $ indent $ do
+  when textVersion $ paragraph $ indent $ do
     translate $ do
       german "Ein Lösungsversuch im Fall von vier Lücken könnte so aussehen:"
       english "A solution attempt for four blanks could look like this:"
@@ -154,8 +154,8 @@ partialGrade :: OutputCapable m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
   preventWithHint (solLen /= missingLen)
     (translate $ do
-      german "Ihre Abgabe hat die korrekte Länge?"
-      english "Your submission has the correct length?"
+      german "Die eingereichte Lösung hat die korrekte Länge?"
+      english "The submitted solution has the correct length?"
     )
     (translate $ do
       german $ "Ihre Abgabe muss genau " ++ show missingLen ++ " Einträge enthalten."
@@ -179,8 +179,8 @@ completeGrade FillInst{..} sol = reRefuse
     solution
     submission)
   $ when (notNull diff && not showSolution) $ translate $ do
-    german $ "Ihre Abgabe enthält " ++ displayMistake ++ " Fehler."
-    english $ "Your submission contains " ++ displayMistake ++ " mistakes."
+    german $ "Die eingereichte Lösung enthält " ++ displayMistake ++ " Fehler."
+    english $ "The submitted solution contains " ++ displayMistake ++ " mistakes."
 
   where
     boolSol = map truth sol
