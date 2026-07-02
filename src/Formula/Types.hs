@@ -244,7 +244,7 @@ instance Show Cnf where
         withBraces cl = if amount cl == 1 then show cl else "(" ++ show cl ++ ")"
 
 instance Formula Cnf where
-    literals (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
+    literals (Cnf set) = concatMap literals set
 
     atomics (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
@@ -390,7 +390,7 @@ instance Show Dnf where
 
 
 instance Formula Dnf where
-    literals (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
+    literals (Dnf set) = concatMap literals set
 
     atomics (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
