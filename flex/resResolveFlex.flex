@@ -19,7 +19,7 @@ type TaskData = ResolutionInst
 module TaskSettings where
 
 import LogicTasks.Config                (dResConf, ResolutionConfig(..))
-import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import Control.OutputCapable.Blocks
 import LogicTasks.Semantics.Resolve     (verifyQuiz)
 
 
@@ -30,8 +30,14 @@ resConf :: ResolutionConfig
 resConf = dResConf
 
 validateSettings :: OutputCapable m => LangM m
-validateSettings = verifyQuiz resConf
-
+validateSettings
+  | isNotPrefilled prefillSelect =
+     refuse $ indent $ translate $ do
+       german "Es ist nichts vorausgefüllt!"
+       english "Nothing is prefilled!"
+  | otherwise = verifyQuiz resConf
+     where
+       isNotPrefilled (a,b,c) = not (a || b || c)
 
 =============================================
 
