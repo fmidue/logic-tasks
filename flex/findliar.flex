@@ -369,7 +369,6 @@ description _ TaskData{..} = do
     english "Notes on notation:"
     german "Notationshinweise:")
     (do
-      keyHeading
       basicOpKey True
       arrowsKey
       pure()

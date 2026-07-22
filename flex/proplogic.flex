@@ -399,7 +399,6 @@ description _ (legend,hints,_) = do
       english "Notes on notation:"
       german "Notationshinweise:")
       (do
-        keyHeading
         basicOpKey True
         arrowsKey
         pure()
