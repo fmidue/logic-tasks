@@ -72,7 +72,7 @@ description withListInput SubTreeInst{..} = do
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen oder leer starten.
+      german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen oder leer starten."
       english "You can copy the original formula into the submission several times and remove parts or start from scratch."
 
     collapsed True (translations $ do
