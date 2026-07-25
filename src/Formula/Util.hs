@@ -21,6 +21,9 @@ module Formula.Util
        -- , isSemanticEqualSat
        , cnfDependsOnAllAtomics
        , dnfDependsOnAllAtomics
+       , withPercentRange
+       , PercentRangeMode (TrueEntries, PosLiterals)
+       , percentRangeModeRange
        ) where
 
 
@@ -30,6 +33,7 @@ import qualified SAT.MiniSat as Sat
 import Data.Maybe(fromJust)
 
 import Formula.Types
+import Formula.Table (readEntries)
 
 
 ---------------------------------------------------------------------------------------------------
@@ -165,3 +169,41 @@ transformProlog :: PrologClause -> [(PrologLiteral,Literal)] -> Clause
 transformProlog pc mapping = mkClause $ map (fromJust . (`lookup` mapping)) lits
   where
     lits = Set.toList (pLiterals pc)
+
+----------------------------------------------------------------------------------------------------------
+
+data PercentRangeMode = TrueEntries (Int, Int) | PosLiterals (Int, Int) deriving (Show)
+
+withPercentRange :: Formula a => PercentRangeMode -> a -> Bool
+withPercentRange mode form = isFullRange mode || withPercentRange' range count total
+ where
+  -- isFullRange ensures that the trueEntries are not
+  -- calculated when not restricted
+  isFullRange (TrueEntries (0,100)) = True
+  isFullRange (PosLiterals (0,100)) = True
+  isFullRange _ = False
+  (range, count, total) = percentRangeStats mode form
+
+withPercentRange' :: (Int,Int) -> Int -> Int -> Bool
+withPercentRange' (lower, upper) count total =
+  count <= max (min 1 upper) (percentage upper)
+          && count >= max (min 1 lower) (percentage lower)
+  where
+    percentage :: Int -> Int
+    percentage n = total * n `div` 100
+
+percentRangeStats :: Formula a => PercentRangeMode -> a -> ((Int, Int), Int, Int)
+percentRangeStats (TrueEntries range) form =
+  let tableEntries = readEntries (getTable form)
+      trueEntries = length $ filter (== Just True) tableEntries
+      totalEntries = 2 ^ length (atomics form)
+  in (range, trueEntries, totalEntries)
+percentRangeStats (PosLiterals range) form =
+  let allLiterals = literals form
+      posLiterals = length $ filter isPositive allLiterals
+      totalLiterals = length allLiterals
+  in (range, posLiterals, totalLiterals)
+
+percentRangeModeRange :: PercentRangeMode -> (Int, Int)
+percentRangeModeRange (TrueEntries range) = range
+percentRangeModeRange (PosLiterals range) = range

@@ -14,6 +14,7 @@ import Trees.Types (BinOp(..))
 import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
+import Formula.Util (PercentRangeMode(TrueEntries))
 import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 listToFM :: Ord k => [(k, a)] -> Map k a
@@ -33,7 +34,7 @@ task11 = DecideConfig
                    , maxClauseAmount = 3
                    })
   , percentageOfChanged = 40
-  , percentTrueEntries = (30, 70)
+  , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
   , extraText = NoExtraText
   }
@@ -61,7 +62,7 @@ task13 = DecideConfig
                         , minUniqueBinOperators = 4
                         })
   , percentageOfChanged = 30
-  , percentTrueEntries = (30, 70)
+  , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
   , extraText = NoExtraText
   }
