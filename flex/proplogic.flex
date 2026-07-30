@@ -378,7 +378,7 @@ module Description (description) where
 
 
 import Control.OutputCapable.Blocks
-import LogicTasks.Keys                  (keyHeading, basicOpKey, arrowsKey)
+import LogicTasks.Keys                  (basicOpKey, arrowsKey)
 
 
 

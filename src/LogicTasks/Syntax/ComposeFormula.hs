@@ -25,7 +25,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (instruct, keyHeading, reject, example, basicOpKey, arrowsKey')
+import LogicTasks.Helpers (instruct, reject, example, basicOpKey, arrowsKey')
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)

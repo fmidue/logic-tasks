@@ -341,7 +341,7 @@ module Description (description) where
 import Data.Text (unpack)
 
 import Control.OutputCapable.Blocks
-import LogicTasks.Keys (keyHeading, basicOpKey, arrowsKey)
+import LogicTasks.Keys (basicOpKey, arrowsKey)
 
 import Global
 

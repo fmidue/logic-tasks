@@ -21,7 +21,7 @@ import Control.OutputCapable.Blocks (
   translations,
   )
 
-import LogicTasks.Helpers (example, instruct, keyHeading, basicOpKey, arrowsKey', reject)
+import LogicTasks.Helpers (example, instruct, basicOpKey, arrowsKey', reject)
 import Trees.Types (TreeFormulaAnswer(..))
 import Tasks.DecomposeFormula.Config (DecomposeFormulaInst(..), DecomposeFormulaConfig, checkDecomposeFormulaConfig)
 import Trees.Print (display, transferToPicture)
