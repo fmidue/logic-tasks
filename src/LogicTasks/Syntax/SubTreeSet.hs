@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   extra,
   ($=<<),
+  collapsed,
   english,
   german,
   translate,
@@ -79,7 +80,6 @@ description withListInput SubTreeInst{..} = do
       english "Notes on notation:"
       german "Notationshinweise:")
       (do
-        keyHeading
         basicOpKey unicodeAllowed
         arrowsKey' arrowOperatorsToShow
         pure()

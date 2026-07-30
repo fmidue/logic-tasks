@@ -58,7 +58,6 @@ description DecomposeFormulaInst{..} = do
       english "Notes on notation:"
       german "Notationshinweise:")
       (do
-        keyHeading
         basicOpKey unicodeAllowed
         arrowsKey' arrowOperatorsToShow
         pure()
