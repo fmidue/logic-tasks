@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   extra,
   ($=<<),
+  collapsed,
   english,
   german,
   localise,
@@ -20,7 +21,7 @@ import Control.OutputCapable.Blocks (
   translations,
   )
 
-import LogicTasks.Helpers (example, focus, instruct, keyHeading, basicOpKey, arrowsKey', reject)
+import LogicTasks.Helpers (example, focus, instruct, basicOpKey, arrowsKey', reject)
 import Trees.Types (TreeFormulaAnswer(..))
 import Tasks.DecomposeFormula.Config (DecomposeFormulaInst(..), DecomposeFormulaConfig, checkDecomposeFormulaConfig)
 import Trees.Print (display, transferToPicture)
@@ -55,9 +56,14 @@ description DecomposeFormulaInst{..} = do
       english "(You are allowed to add arbitrarily many additional pairs of brackets in the formula.)"
       german "(In der Formel dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    arrowsKey' arrowOperatorsToShow
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+        pure()
+      )
 
     paragraph $ indent $ do
       translate $ do

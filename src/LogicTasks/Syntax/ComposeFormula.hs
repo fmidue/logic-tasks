@@ -14,6 +14,7 @@ import Control.OutputCapable.Blocks (
   extra,
   ($=<<),
   english,
+  collapsed,
   german,
   translate,
   localise,
@@ -24,7 +25,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (instruct, keyHeading, reject, example, basicOpKey, arrowsKey')
+import LogicTasks.Helpers (instruct, reject, example, basicOpKey, arrowsKey')
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
@@ -76,9 +77,14 @@ description inputHelp path ComposeFormulaInst{..} = do
       english "(You are allowed to add arbitrarily many additional pairs of brackets in the formulas.)"
       german "(In den Formeln dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    arrowsKey' arrowOperatorsToShow
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+        pure()
+      )
 
     when inputHelp $ paragraph $ indent $ do
       translate $ do
