@@ -218,9 +218,9 @@ printAllocation =
 feedbackCompareHints :: OutputCapable m => Text -> [Namen] -> LangM m
 feedbackCompareHints unmatchedHint identifiedLiars = do
   indent $ text $
-    "Widerspruch gefunden: " ++
+    "Widerspruch gefunden. " ++
     selectionDisplay ++
-    " Das passt jedoch nicht zu dem Hinweis: " ++
+    " Das passt jedoch nicht zu dem folgenden Hinweis: " ++
     unpack unmatchedHint
   where
     selectionDisplay = if null identifiedLiars
@@ -234,9 +234,9 @@ feedbackCompareHints unmatchedHint identifiedLiars = do
 feedbackCompareChosenLiars :: OutputCapable m => [(Char, Bool)] -> SynTree BinOp Char -> LangM m
 feedbackCompareChosenLiars allocationFromLiars wrongLiar = do
   indent $ text $
-    "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl gehörende Belegung ist: " ++
+    "Widerspruch gefunden: Die zu der getroffenen Lügner-Auswahl gehörende Belegung ist " ++
     printAllocation allocationFromLiars ++ "." ++
-    " Jedoch wertet die angegebene Teilformel: " ++
+    " Jedoch wertet die angegebene Teilformel " ++
     simplestDisplay wrongLiar ++
     " unter dieser Belegung zu 0 (falsch) aus."
 
