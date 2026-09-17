@@ -44,7 +44,7 @@ import Config (
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable)
 import Formula.Util (withPercentRange)
-import Util (isOutside, remove, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
+import Util (isOutside, remove, checkPercentRangeModeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Helpers (reject)
 import Control.Monad (unless, when)
 import Trees.Generate (genSynTree)
@@ -182,7 +182,7 @@ verifyQuiz DecideConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf percentRangeMode formulaConfig
+    | otherwise = checkPercentRangeModeAndFormulaConf percentRangeMode formulaConfig
 
 
 

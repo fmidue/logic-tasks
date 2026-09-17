@@ -65,8 +65,8 @@ remove num xs = do
     remove (num-1) $ delete out xs
 
 
-checkTruthValueRange :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
-checkTruthValueRange rangeMode formulaConfig
+checkPercentRangeMode :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
+checkPercentRangeMode rangeMode formulaConfig
     | isOutside 0 100 low || isOutside 0 100 high =
         refuse $ indent $ translate $ do
           german $ "Die Beschränkung der " <> subjDe <> " liegt nicht zwischen 0 und 100 Prozent."
@@ -170,16 +170,16 @@ checkNormalFormConfig NormalFormConfig {..}
 
     | otherwise = checkBaseConf baseConf
 
-checkTruthValueRangeAndSynTreeConf :: OutputCapable m => PercentRangeMode -> SynTreeConfig -> LangM m
-checkTruthValueRangeAndSynTreeConf rangeMode synTreeConfig = do
-  checkTruthValueRange rangeMode (FormulaArbitrary synTreeConfig)
+checkPercentRangeModeAndSynTreeConf :: OutputCapable m => PercentRangeMode -> SynTreeConfig -> LangM m
+checkPercentRangeModeAndSynTreeConf rangeMode synTreeConfig = do
+  checkPercentRangeMode rangeMode (FormulaArbitrary synTreeConfig)
   checkSynTreeConfig synTreeConfig
   pure ()
 
-checkTruthValueRangeAndFormulaConf :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
-checkTruthValueRangeAndFormulaConf rangeMode formulaConf = do
+checkPercentRangeModeAndFormulaConf :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
+checkPercentRangeModeAndFormulaConf rangeMode formulaConf = do
   checkFullRangeForSynTrees rangeMode formulaConf
-  checkTruthValueRange rangeMode formulaConf
+  checkPercentRangeMode rangeMode formulaConf
   case formulaConf of
     (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
     (FormulaDnf dnfCfg) -> checkNormalFormConfig dnfCfg

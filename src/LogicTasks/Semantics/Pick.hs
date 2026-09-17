@@ -30,7 +30,7 @@ import Formula.Printing (showIndexedList)
 import Data.Maybe (fromJust)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
-import Util (vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
+import Util (vectorOfUniqueBy, checkPercentRangeModeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 
 
@@ -140,7 +140,7 @@ verifyQuiz PickConfig{..}
           german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
           english "The given restriction on True entries should not fall below a range of 30."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf percentRangeMode formulaConfig
+    | otherwise = checkPercentRangeModeAndFormulaConf percentRangeMode formulaConfig
   where
     hasMinUniqueAtoms x (FormulaArbitrary syntaxTreeConfig) = minAmountOfUniqueAtoms syntaxTreeConfig >= x
     hasMinUniqueAtoms _ _ = True

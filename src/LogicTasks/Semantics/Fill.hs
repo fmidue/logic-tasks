@@ -32,7 +32,7 @@ import Util (
   pairwiseCheck,
   preventWithHint,
   remove,
-  checkTruthValueRangeAndFormulaConf,
+  checkPercentRangeModeAndFormulaConf,
   formulaDependsOnAllAtoms
   )
 import Trees.Generate (genSynTree)
@@ -143,7 +143,7 @@ verifyQuiz FillConfig{..}
           german "Bei dieser Aufgabe müssen alle verfügbaren Atome verwendet werden."
           english "All available atoms must be used for this task."
 
-    | otherwise = checkTruthValueRangeAndFormulaConf percentRangeMode formulaConfig
+    | otherwise = checkPercentRangeModeAndFormulaConf percentRangeMode formulaConfig
 
 
 

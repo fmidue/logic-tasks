@@ -4,6 +4,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# OPTIONS_GHC -Wwarn=x-partial #-}
 module LogicTasks.Debug (
   testModule, analyseCnfGenerator, isTrivial,
   -- re-exports for (ghci) calls to testModule
@@ -19,7 +20,7 @@ import Formula.Types (Cnf(..), Clause(..), Literal(..), Formula(..))
 import Formula.Util (isPositive)
 import Data.Set (size, toList)
 import Data.List (partition)
-import Data.List.Extra (nubSort, nubOrd)
+import Data.List.Extra (nubSort, group)
 import Control.OutputCapable.Blocks.Debug (testTask, Display(..))
 import Formula.Parsing.Delayed (delayed)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
@@ -49,7 +50,7 @@ testModule prettyCfg lang gen desc partial complete p =
 
 analyseCnfGenerator :: Gen Cnf -> IO ()
 analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $ \cnf ->
-  let uniqueLiterals = nubOrd $ literals cnf in
+  let uniqueLiterals = map head . group $ literals cnf in
   tabulate "all literals" (map show uniqueLiterals) $
   tabulate "positive literals" (map show $ filter isPositive uniqueLiterals) $
   tabulate "negative literals" (map show $ filter (not . isPositive) uniqueLiterals) $

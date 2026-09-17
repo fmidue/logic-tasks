@@ -25,7 +25,7 @@ import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf, withPercentRan
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
 import LogicTasks.Helpers (formulaKey, example)
-import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, checkNormalFormConfig)
+import Util (checkPercentRangeMode, pairwiseCheck, prevent, preventWithHint, checkNormalFormConfig)
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
@@ -96,7 +96,7 @@ verifyStatic MaxInst{..}
 
 verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..} = do
-  checkTruthValueRange percentRangeMode (FormulaDnf normalFormConf)
+  checkPercentRangeMode percentRangeMode (FormulaDnf normalFormConf)
   checkNormalFormConfig normalFormConf
   pure ()
 
