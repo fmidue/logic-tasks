@@ -79,7 +79,7 @@ checkPercentRangeMode rangeMode formulaConfig
 
     | low == high =
         refuse $ indent $ translate $ do
-          german $ "Die Beschränkung der " <> subjDe <> " sollte ein gewissen Spielraum zulassen."
+          german $ "Die Beschränkung der " <> subjDe <> " sollte einen gewissen Spielraum zulassen."
           english $ "The given restriction on " <> subjEn <> " should allow for some flexibility."
 
     | checkRangeTooSmall =
