@@ -44,10 +44,10 @@ withDelayed ::
   -> (ParseError -> LangM m)
   -> Delayed a
   -> LangM m
-withDelayed whatToDo p displayError delayedAnswer =
-  case parseDelayed (fully p) delayedAnswer of
-    Left err -> refuse $ indent $ displayError err
-    Right x -> whatToDo x
+withDelayed whatToDo p displayError =
+  either (refuse . indent . displayError)
+         whatToDo
+  . parseDelayed (fully p)
 
 displayParseError :: OutputCapable m => ParseError -> LangM m
 displayParseError = text . show
@@ -72,10 +72,10 @@ withDelayedSucceeding ::
   -> Parser a
   -> Delayed a
   -> LangM' m b
-withDelayedSucceeding whatToDo p delayedAnswer =
-  case parseDelayed (fully p) delayedAnswer of
-    Left err -> error $ "It should be impossible here, and yet the following ParseError was encountered: " ++ show err
-    Right x -> whatToDo x
+withDelayedSucceeding whatToDo p =
+  either (error . ("It should be impossible here, and yet the following ParseError was encountered: " ++) . show)
+         whatToDo
+  . parseDelayed (fully p)
 
 complainAboutMissingParenthesesIfNotFailingOn :: OutputCapable m => Maybe a -> ParseError -> LangM m
 complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =

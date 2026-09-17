@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   extra,
   ($=<<),
+  collapsed,
   english,
   german,
   translate,
@@ -29,7 +30,7 @@ import Data.List (intercalate, nub, sort)
 import qualified Data.Set (map)
 import qualified Data.Map as Map (fromSet, insert, filter)
 import Data.Maybe (isNothing)
-import LogicTasks.Helpers (focus, instruct, keyHeading, reject, basicOpKey, arrowsKey')
+import LogicTasks.Helpers (focus, instruct, reject, basicOpKey, arrowsKey')
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
@@ -75,9 +76,14 @@ description withListInput SubTreeInst{..} = do
       german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen oder leer starten."
       english "You can copy the original formula into the submission several times and remove parts or start from scratch."
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    arrowsKey' arrowOperatorsToShow
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+        pure()
+      )
 
     extra addText
     pure ()

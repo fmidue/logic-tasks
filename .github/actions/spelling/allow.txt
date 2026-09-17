@@ -51,6 +51,7 @@ Minterme
 minterms
 mopt
 MReport
+Notationshinweise
 oneof
 parseable
 PLit
@@ -81,6 +82,7 @@ unwords
 usepackage
 UTF
 vcat
+vorausgefüllt
 whamlet
 Wno
 wohlaufgebaute
