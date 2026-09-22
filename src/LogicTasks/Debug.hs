@@ -4,7 +4,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-{-# OPTIONS_GHC -Wwarn=x-partial #-}
 module LogicTasks.Debug (
   testModule, analyseCnfGenerator, isTrivial,
   -- re-exports for (ghci) calls to testModule
@@ -20,12 +19,13 @@ import Formula.Types (Cnf(..), Clause(..), Literal(..), Formula(..))
 import Formula.Util (isPositive)
 import Data.Set (size, toList)
 import Data.List (partition)
-import Data.List.Extra (nubSort, group)
+import Data.List.Extra (nubSort)
 import Control.OutputCapable.Blocks.Debug (testTask, Display(..))
 import Formula.Parsing.Delayed (delayed)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
 import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully, lexeme)
+import qualified Data.List.NonEmpty as NonEmpty
 
 deriving instance Show (Delayed a)
 
@@ -50,7 +50,7 @@ testModule prettyCfg lang gen desc partial complete p =
 
 analyseCnfGenerator :: Gen Cnf -> IO ()
 analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $ \cnf ->
-  let uniqueLiterals = map head . group $ literals cnf in
+  let uniqueLiterals = map NonEmpty.head . NonEmpty.group $ literals cnf in
   tabulate "all literals" (map show uniqueLiterals) $
   tabulate "positive literals" (map show $ filter isPositive uniqueLiterals) $
   tabulate "negative literals" (map show $ filter (not . isPositive) uniqueLiterals) $

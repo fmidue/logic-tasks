@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wwarn=x-partial #-}
-
 module FormulaSpec where
 
 
@@ -13,7 +11,7 @@ import LogicTasks.Util
 import Formula.Types (lengthBound)
 import Control.OutputCapable.Blocks (Language(German))
 import Control.OutputCapable.Blocks.Debug (checkConfigWith)
-import Data.List (group)
+import qualified Data.List.NonEmpty as NonEmpty
 
 validBoundsClause :: Gen ((Int,Int),[Char])
 validBoundsClause = do
@@ -79,7 +77,7 @@ spec = do
       forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
         within (30 * 1000000) $ forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \cnf' ->
          let
-           sizes = map (length . map head . group . literals) (getClauses cnf')
+           sizes = map (length . map NonEmpty.head . NonEmpty.group . literals) (getClauses cnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random cnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
@@ -101,7 +99,7 @@ spec = do
       forAll validBoundsNormalFormParams $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->
         within (30 * 1000000) $ forAll (genDnf (lowerNum,upperNum) (lowerLen,upperLen) chars True) $ \dnf' ->
          let
-           sizes = map (length . map head . group . literals) (getConjunctions dnf')
+           sizes = map (length . map NonEmpty.head . NonEmpty.group . literals) (getConjunctions dnf')
          in
            maximum sizes <= upperLen && minimum sizes >= lowerLen
     it "should generate a random dnf formula containing all given atoms - or else an invariant assumed in LogicTasks.Util.usesAllAtoms becomes wrong" $ -- editorconfig-checker-disable-line
