@@ -1,6 +1,6 @@
 
 taskName: ResolutionFullPrefilled
-
+validation: Validate
 =============================================
 
 module Global where
@@ -49,9 +49,9 @@ module TaskData (getTask) where
 
 import Control.Monad.Random (MonadRandom)
 import Data.String.Interpolate (i)
-
+import Data.Text                        (Text, pack)
 import FlexTask.GenUtil (fromGen)
-import FlexTask.YesodConfig (Rendered, Widget)
+import FlexTask.Form                    (Rendered, Widget)
 import LogicTasks.Config                (ResolutionInst(..), ResolutionConfig(..))
 import LogicTasks.Forms (fullResolutionForm)
 import LogicTasks.Semantics.Resolve (genResInst)
@@ -74,24 +74,27 @@ form resInst = fullResolutionForm
     (showClause (usesSetNotation resInst))
     (prefill prefillSelect (usesSetNotation resInst) (solution resInst))
 
-prefill :: (Bool, Bool, Bool) -> Bool -> [ResStep] -> [(Maybe String, Maybe String, Maybe String)]
+prefill :: (Bool, Bool, Bool) -> Bool -> [ResStep] -> [(Maybe Text, Maybe Text, Maybe Text)]
 prefill (fill1, fill2, fill3) useSetNotation =
   map (\(Res (c1, c2, (c3, _))) ->
           ( if fill1 then
               case c1 of
-                Left clause -> Just (showClause useSetNotation clause)
-                Right j     -> Just (show j)
+                Left clause -> clauseText clause
+                Right j     -> indexText j
             else Nothing
           , if fill2 then
               case c2 of
-                Left clause -> Just (showClause useSetNotation clause)
-                Right j     -> Just (show j)
+                Left clause -> clauseText clause
+                Right j     -> indexText j
             else Nothing
           , if fill3 then
-              Just (showClause useSetNotation c3)
+              clauseText c3
             else Nothing
           )
       )
+  where
+    clauseText = Just . pack . showClause useSetNotation
+    indexText = Just . pack . show
 
 checkers :: String
 checkers = [i|
@@ -153,7 +156,7 @@ import Text.ParserCombinators.Parsec
 import LogicTasks.Config                (ResolutionConfig(..))
 import Control.OutputCapable.Blocks.Generic (($>>=))
 import Control.OutputCapable.Blocks
-import FlexTask.Generic.Parse
+import FlexTask.Parser
 import Formula.Parsing (clauseFormulaParser, clauseSetParser, resStepParser)
 import Formula.Parsing.Delayed
 import ParsingHelpers (fully)

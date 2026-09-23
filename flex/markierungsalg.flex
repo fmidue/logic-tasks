@@ -1,6 +1,6 @@
 
 taskName: Markierungsalgorithmus
-
+validation: Validate
 =============================================
 
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -12,7 +12,7 @@ import Data.List.Extra (replace)
 
 import LogicTasks.Formula (TruthValue)
 import Trees.Types (SynTree, BinOp)
-import FlexTask.Generic.Form (SingleChoiceSelection)
+import FlexTask.Form (SingleChoiceSelection)
 
 
 newtype CharAnswer = CharAnswer {unCharAnswer :: [Char]}
@@ -93,16 +93,15 @@ module TaskData (getTask) where
 
 import Control.Monad.Random (MonadRandom)
 import Data.String.Interpolate (i)
-import Data.Text (pack)
+import Data.Text (Text, pack)
 import Yesod
     ( RenderMessage(..)
     , SomeMessage(..)
     , fieldSettingsLabel
     )
 
-import FlexTask.Generic.Form
+import FlexTask.Form
 import FlexTask.GenUtil (fromGen)
-import FlexTask.YesodConfig (Rendered, Widget)
 import Horn (makeHornFormula, startAlgorithm)
 
 import Global
@@ -132,17 +131,17 @@ getTask = fromGen $ do
             , correctOutput = output
             , correctModel = model
             }
-    pure (TaskData {formula, solution}, checkers, form)
+    pure (TaskData {formula, solution}, checkers, formify Nothing form)
 
-form :: Rendered Widget
-form = formify (Nothing :: Maybe ([Maybe String], SingleChoiceSelection, Maybe String))
-    [ [ list Vertical (map (fieldSettingsLabel . Step) [1..stepFields])]
-    , [ dropdown (fieldSettingsLabel Output)
-        [ SomeMessage Satisfiable
-        , SomeMessage Unsatisfiable
-        ]
-    , single (fieldSettingsLabel Model)
-    ] ]
+form :: CompleteForm ([Maybe Text], SingleChoiceSelection, Maybe Text)
+form =
+  list Vertical basicField (map (fieldSettingsLabel . Step) [1..stepFields])
+  >-
+    singleChoice Dropdown (fieldSettingsLabel Output)
+      [ SomeMessage Satisfiable
+      , SomeMessage Unsatisfiable
+      ]
+    >| basic (fieldSettingsLabel Model)
 
 checkers :: String
 checkers = [i|
@@ -163,7 +162,7 @@ import Data.Tuple.Extra (second)
 import Control.Monad (unless, when)
 import Control.Monad.State (State)
 import Control.OutputCapable.Blocks
-import FlexTask.Generic.Form (getAnswer)
+import FlexTask.Form (getAnswer)
 import Horn
 import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (BinOp(..), SynTree(..))
@@ -362,7 +361,7 @@ import Control.OutputCapable.Blocks
   , OutputCapable
   )
 import Control.OutputCapable.Blocks.Generic (($>>=))
-import FlexTask.Generic.Parse
+import FlexTask.Parser
   ( Parse(..)
   , escaped
   , formParser
