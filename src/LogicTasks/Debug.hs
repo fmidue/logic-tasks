@@ -25,6 +25,7 @@ import Formula.Parsing.Delayed (delayed)
 import Formula.Parsing.Delayed.Internal (Delayed(..))
 import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully, lexeme)
+import qualified Data.List.NonEmpty as NonEmpty
 
 deriving instance Show (Delayed a)
 
@@ -49,13 +50,14 @@ testModule prettyCfg lang gen desc partial complete p =
 
 analyseCnfGenerator :: Gen Cnf -> IO ()
 analyseCnfGenerator gen = quickCheckWith stdArgs{maxSuccess=1000} $ forAll gen $ \cnf ->
-  tabulate "all literals" (map show $ literals cnf) $
-  tabulate "positive literals" (map show $ filter isPositive $ literals cnf) $
-  tabulate "negative literals" (map show $ filter (not . isPositive) $ literals cnf) $
+  let uniqueLiterals = map NonEmpty.head . NonEmpty.group $ literals cnf in
+  tabulate "all literals" (map show uniqueLiterals) $
+  tabulate "positive literals" (map show $ filter isPositive uniqueLiterals) $
+  tabulate "negative literals" (map show $ filter (not . isPositive) uniqueLiterals) $
   tabulate "clause lengths" (map (show . size . literalSet) . toList $ clauseSet cnf) $
   tabulate "number of clauses" (pure . show . size $ clauseSet cnf) $
   tabulate "trivial clauses (containing both X and not X)" (map (show . isTrivial) . toList $ clauseSet cnf) $
-  tabulate "usage of atomic formulas" (pure . nubSort . map (\case (Positive x) -> x ; (Negative x) -> x) $ literals cnf)
+  tabulate "usage of atomic formulas" (pure . nubSort . map (\case (Positive x) -> x ; (Negative x) -> x) $ uniqueLiterals)
     True
 
 isTrivial :: Clause -> Bool

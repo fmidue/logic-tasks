@@ -45,6 +45,7 @@ import qualified SAT.MiniSat as Sat
 
 import Data.Data (Data)
 import Data.List(intercalate, delete, nub, transpose, (\\))
+import Data.List.Extra (merge)
 import Data.Set (Set,empty)
 import GHC.Generics
 import Test.QuickCheck hiding (Positive,Negative)
@@ -244,7 +245,7 @@ instance Show Cnf where
         withBraces cl = if amount cl == 1 then show cl else "(" ++ show cl ++ ")"
 
 instance Formula Cnf where
-    literals (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
+    literals (Cnf set) = foldr (merge . literals) [] set
 
     atomics (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
@@ -390,7 +391,7 @@ instance Show Dnf where
 
 
 instance Formula Dnf where
-    literals (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
+    literals (Dnf set) = foldr (merge . literals) [] set
 
     atomics (Dnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
