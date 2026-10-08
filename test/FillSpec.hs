@@ -91,11 +91,11 @@ validBoundsPercentPosLiterals formulaConfig = do
     FormulaArbitrary _ -> pure (0, 100)
   where
     validRange entries = do
-      trueEntriesLow <- chooseInt (1,entries - 1)
-      trueEntriesHigh <- chooseInt (trueEntriesLow + 1, entries)
+      posLitsLow <- chooseInt (1,entries - 1)
+      posLitsHigh <- chooseInt (posLitsLow + 1, entries)
       pure (
-        floor (fromIntegral (trueEntriesLow * 100) / fromIntegral entries),
-        ceiling (fromIntegral (trueEntriesHigh * 100) / fromIntegral entries)
+        floor (fromIntegral (posLitsLow * 100) / fromIntegral entries),
+        ceiling (fromIntegral (posLitsHigh * 100) / fromIntegral entries)
         )
 
 validBoundsFillConfig :: Gen FillConfig
