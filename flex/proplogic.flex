@@ -1,6 +1,6 @@
 
 taskName: Concert
-
+validation: Validate
 ============================================
 
 {-# language DeriveDataTypeable #-}
@@ -9,6 +9,8 @@ module Global where
 
 
 import Data.Data (Data)
+import Data.Text (Text)
+import FlexTask.Form (MultipleChoice)
 import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree, BinOp)
 
@@ -17,7 +19,7 @@ newtype Table = Table [(Maybe (SynTree BinOp Char), [Maybe TruthValue])] derivin
 
 data Namen = A | B | C | D deriving (Data,Eq,Enum,Bounded,Show)
 
-type FormType = (String,[Namen])
+type FormType = (Text,MultipleChoice Namen)
 
 type TaskData = (String,[String],[Namen])
 type Submission = (Table,SynTree BinOp Char,[Namen])
@@ -76,23 +78,8 @@ import Data.List               (transpose)
 import Data.Maybe              (fromJust)
 import Data.Text               (Text)
 import Data.String.Interpolate (i)
-import FlexTask.FormUtil (
-  ($$>),
-  addCss,
-  addCssClass,
-  universalLabel,
-  )
-import FlexTask.Generic.Form (
-  Alignment(..),
-  FieldInfo,
-  Formify(..),
-  formify,
-  formifyInstanceMultiChoice,
-  single,
-  buttonsEnum
-  )
+import FlexTask.Form
 import FlexTask.GenUtil        (fromGen)
-import FlexTask.YesodConfig    (Rendered, Widget)
 import LogicTasks.Forms        (tableForm)
 import LogicTasks.Formula      (TruthValue(..))
 import Numeric                 (showBin)
@@ -133,7 +120,7 @@ getTask = fromGen $ do
     form :: (String,String,String,String) -> Rendered Widget
     form n = addCss formulaCss $
       tableForm emptyColumns rows ["A","B","C","D"] [] $$>
-      formify (Nothing :: Maybe FormType) (nonTableFields n)
+      formify Nothing (nonTableFields n)
 
     getNames :: Gen (String,String,String,String)
     getNames = do
@@ -211,19 +198,14 @@ formulaAndHints a b c d (aN,bN,cN,dN) = do
 
 
 
-nonTableFields :: (String,String,String,String) -> [[FieldInfo]]
-nonTableFields (a,b,c,d) = [
-      [single $ addCssClass formulaClass "Formel F ="]
-    , [buttonsEnum Vertical "Wer kommt mit?" getName]
-    ]
+nonTableFields :: (String,String,String,String) -> CompleteForm FormType
+nonTableFields (a,b,c,d) =
+    basic (addCssClass formulaClass "Formel F =")
+    >-
+    multipleChoiceEnum (Buttons Vertical) "Wer kommt mit?" getName
   where
     nameMatching = [(A, a), (B, b), (C, c), (D, d)]
     getName = universalLabel . fromJust . flip lookup nameMatching
-
-
-
-instance Formify [Namen] where
-  formifyImplementation = formifyInstanceMultiChoice
 
 
 
@@ -421,7 +403,8 @@ module Parse (parseSubmission) where
 import Control.OutputCapable.Blocks (LangM', OutputCapable, ReportT)
 import Control.OutputCapable.Blocks.Generic (($>>=))
 import Data.List.Extra        (chunksOf, transpose)
-import FlexTask.Generic.Parse (
+import FlexTask.Parser (
+  MultipleChoice(..),
   Parse(..),
   parseInstanceMultiChoice,
   displayInputAnd,
@@ -447,7 +430,7 @@ instance Parse TruthValue where
   formParser = escaped parser
 
 
-instance Parse [Namen] where
+instance Parse (MultipleChoice Namen) where
   formParser = parseInstanceMultiChoice
 
 
@@ -463,7 +446,7 @@ parseSubmission input =
     parseWithOrReport formParser reportWithFieldNumber input $>>= \(headerStrings,columns,formulaString,names) ->
       traverse (traverse parseIt) headerStrings $>>= \parsedHeaders ->
         parseIt formulaString $>>= \parsedFormula ->
-          pure (makeTable parsedHeaders columns, parsedFormula, names)
+          pure (makeTable parsedHeaders columns, parsedFormula, getChoices names)
   where
     parseIt =
       parseWithFallback

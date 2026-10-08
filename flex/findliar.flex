@@ -1,6 +1,6 @@
 
 taskName: FindLiar
-
+validation: Validate
 =============================================
 
 {-# LANGUAGE DeriveDataTypeable#-}
@@ -83,6 +83,7 @@ validateSettings
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeApplications #-}
 
 module TaskData (getTask) where
 
@@ -91,23 +92,13 @@ import Data.Char (digitToInt)
 import Data.List (sortOn, transpose)
 import Data.String (fromString)
 import Data.String.Interpolate (i)
+import Data.Text (Text)
 import Numeric (showBin)
 import Test.QuickCheck.Gen
 import Yesod
 
-import FlexTask.FormUtil
-  (($$>), addCss, addCssClass)
-import FlexTask.Generic.Form
-  ( Alignment(..)
-  , Formify(..)
-  , formify
-  , formifyInstanceMultiChoice
-  , list
-  , single
-  , buttonsEnum
-  )
+import FlexTask.Form
 import FlexTask.GenUtil (fromGen)
-import FlexTask.YesodConfig (Rendered, Widget)
 import LogicTasks.Formula (TruthValue(..))
 import LogicTasks.Forms (tableForm)
 import FindLiarTask
@@ -138,13 +129,14 @@ getTask = fromGen $ do
          )
   where
     form = addCss formulaCss $
-      formify (Nothing :: Maybe ([String], String))
-        [ [list Vertical [ "1) ", "2) ", "3) "]]
-        , [single $ addCssClass "formula-input" "Gesamtformel F = "]
-        ] $$>
+      formify @([Text], Text) Nothing
+        ( list Vertical basicField [ "1) ", "2) ", "3) "]
+          >-
+          basic (addCssClass "formula-input" "Gesamtformel F = ")
+        ) $$>
       tableForm emptyColumns rows ["A","B","C"] ["F"] $$>
-      formify (Nothing :: Maybe [Namen])
-        [[buttonsEnum Vertical "Wer lügt?" (fromString . show @Namen)]]
+      formify @(MultipleChoice Namen) Nothing
+        (multipleChoiceEnum (Buttons Vertical) "Wer lügt?" (fromString . show @Namen))
 
     formulaCss = [cassius|
       .flex-form-div .formula-input
@@ -166,9 +158,6 @@ getTask = fromGen $ do
         table tr th:last-child
           padding: 10px 0px
       |]
-
-instance Formify [Namen] where
-  formifyImplementation = formifyInstanceMultiChoice
 
 checkers :: String
 checkers = [i|
@@ -389,8 +378,9 @@ import Control.OutputCapable.Blocks
 import Control.OutputCapable.Blocks.Generic (($>>=))
 import Formula.Parsing.Delayed
   ( complainAboutMissingParenthesesIfNotFailingOn )
-import FlexTask.Generic.Parse
-  ( Parse(..)
+import FlexTask.Parser
+  ( MultipleChoice(..)
+  , Parse(..)
   , displayInputAnd
   , escaped
   , parseInstanceMultiChoice
@@ -412,7 +402,7 @@ import TaskSettings
 instance Parse TruthValue where
   formParser = escaped FP.parser
 
-instance Parse [Namen] where
+instance Parse (MultipleChoice Namen) where
   formParser = parseInstanceMultiChoice
 
 makeTable :: [Maybe (SynTree BinOp Char)] -> [Maybe TruthValue] -> Table
@@ -423,7 +413,7 @@ makeTable headers values = Table $ zip allHeaders formattedTruthValues
 
 parseSubmission :: (Monad m, OutputCapable (ReportT o m)) => String -> LangM' (ReportT o m) Submission
 parseSubmission input =
-  parseWithOrReport formParser reportWithFieldNumber input $>>= \(fs, f, headers, columns, identifiedLiars) ->
+  parseWithOrReport formParser reportWithFieldNumber input $>>= \(fs, f, headers, columns, liars) ->
     traverse parseIt fs $>>= \submittedParts ->
       parseIt f $>>= \submittedFormula ->
         traverse (traverse parseIt) headers $>>= \parsedHeaders ->
@@ -431,7 +421,7 @@ parseSubmission input =
             submittedParts,
             submittedFormula,
             submittedTable = makeTable parsedHeaders columns,
-            identifiedLiars
+            identifiedLiars = getChoices liars
             }
   where
     parseIt = parseWithFallback

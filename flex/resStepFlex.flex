@@ -1,6 +1,6 @@
 
 taskName: ResolutionStepReverse
-
+validation: Validate
 =============================================
 
 module Global where
@@ -42,16 +42,16 @@ validateSettings = verifyQuiz stepConf
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeApplications #-}
 
 module TaskData (getTask) where
 
 import Control.Monad.Random    (MonadRandom)
 import Data.List                        (isSubsequenceOf)
 import Data.String.Interpolate (i)
-
-import FlexTask.Generic.Form
+import Data.Text                        (Text)
+import FlexTask.Form
 import FlexTask.GenUtil        (fromGen)
-import FlexTask.YesodConfig    (Rendered, Widget)
 import LogicTasks.Config                (StepInst(..))
 import LogicTasks.Formula               (Formula(literals))
 import LogicTasks.Semantics.Step (genStepInst)
@@ -69,7 +69,7 @@ getTask = do
     pure (resInst, checkers, form)
 
 form :: Rendered Widget
-form = formify (Nothing :: Maybe String) [[single ""]]
+form = formify @Text Nothing $ basic ""
 
 checkers :: String
 checkers = [i|
@@ -202,7 +202,7 @@ module Parse (parseSubmission) where
 
 import LogicTasks.Config                (StepConfig(..))
 import Control.OutputCapable.Blocks
-import FlexTask.Generic.Parse
+import FlexTask.Parser
 import Formula.Parsing (clauseFormulaParser, clauseSetParser)
 import Formula.Types (Clause(..))
 

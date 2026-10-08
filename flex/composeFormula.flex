@@ -1,6 +1,6 @@
 
 taskName: ComposeFormula
-
+validation: Validate
 =============================================
 
 module Global where
@@ -77,10 +77,9 @@ module TaskData where
 
 import Control.Monad.Random             (MonadRandom)
 import Data.String.Interpolate          (i)
-import FlexTask.FormUtil                (addCss, addCssClass)
-import FlexTask.Generic.Form
+import Data.Text                        (Text)
+import FlexTask.Form
 import FlexTask.GenUtil                 (fromGen)
-import FlexTask.YesodConfig             (Rendered, Widget)
 import Tasks.ComposeFormula.Quiz        (generateComposeFormulaInst)
 import Yesod                            (RenderMessage(..), cassius, fieldSettingsLabel)
 
@@ -102,11 +101,11 @@ getTask = fromGen $ do
     inst <- generateComposeFormulaInst task03
     pure (inst, checkers, form)
 
-fields :: [[FieldInfo]]
-fields = [[list Horizontal $ map (addCssClass "formula-input" . fieldSettingsLabel) [First, Second]]]
+fields :: CompleteForm [Text]
+fields = list Horizontal basicField $ map (addCssClass "formula-input" . fieldSettingsLabel) [First, Second]
 
 form :: Rendered Widget
-form = addCss inputCss $ formify (Nothing :: Maybe [String]) fields
+form = addCss inputCss $ formify Nothing fields
   where
     inputCss = [cassius|
       .flex-form-span
@@ -206,7 +205,7 @@ import Control.OutputCapable.Blocks (
 import Control.OutputCapable.Blocks.Generic (
   ($>>=),
   )
-import FlexTask.Generic.Parse (
+import FlexTask.Parser (
   displayInputAnd,
   formParser,
   parseWithFallback,
