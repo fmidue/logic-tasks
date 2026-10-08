@@ -92,7 +92,7 @@ checkPercentRangeMode rangeMode formulaConfig
       checkRangeTooSmall = case rangeMode of
         TrueEntries _ -> checkRangeTooSmallTrueEntries
         PosLiterals _ -> False
-      
+
       checkRangeTooSmallTrueEntries = checkRangeTooSmallTrueEntries' $ case formulaConfig of
         FormulaCnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
         FormulaDnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
