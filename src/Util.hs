@@ -89,12 +89,16 @@ checkPercentRangeMode rangeMode formulaConfig
 
     | otherwise = pure ()
     where
-      checkRangeTooSmall = checkRangeTooSmall' $ case formulaConfig of
+      checkRangeTooSmall = case rangeMode of
+        TrueEntries _ -> checkRangeTooSmallTrueEntries
+        PosLiterals _ -> False
+      
+      checkRangeTooSmallTrueEntries = checkRangeTooSmallTrueEntries' $ case formulaConfig of
         FormulaCnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
         FormulaDnf normalFormConfig -> length (usedAtoms (baseConf normalFormConfig))
         FormulaArbitrary synTreeConf -> length (availableAtoms synTreeConf)
 
-      checkRangeTooSmall' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
+      checkRangeTooSmallTrueEntries' atomsAmount = (2 ^ atomsAmount * low `div` 100) + 1 > 2 ^ atomsAmount * high `div` 100
 
       (low, high) = percentRangeModeRange rangeMode
 
