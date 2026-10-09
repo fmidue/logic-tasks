@@ -191,7 +191,6 @@ checkPercentRangeModeAndFormulaConf rangeMode formulaConf = do
     (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
 
-
 checkFullRangeForSynTrees :: OutputCapable m => PercentRangeMode -> FormulaConfig -> LangM m
 checkFullRangeForSynTrees (TrueEntries (0, 100)) (FormulaArbitrary _) = pure ()
 checkFullRangeForSynTrees (TrueEntries _) (FormulaArbitrary _) = refuse $ indent $ translate $ do
