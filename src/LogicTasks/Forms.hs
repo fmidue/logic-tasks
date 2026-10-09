@@ -17,23 +17,20 @@ import Control.Monad.Reader             (reader)
 import Data.List                        (transpose, sort)
 import Data.Maybe                       (isNothing)
 import Data.Text                        (Text, pack)
-import FlexTask.Generic.Form (
-  formifyComponentsFlat,
-  single,
-  Hidden(..)
-  )
-import FlexTask.FormUtil (
+import FlexTask.Form (
+  FlexForm,
+  Hidden(..),
+  Rendered,
+  Widget,
+  pattern Singular,
+  (>|),
   addAttribute,
   addCss,
   addCssClass,
   addNameAndCssClass,
+  basic,
+  formifyComponentsFlat,
   readOnly,
-  )
-import FlexTask.YesodConfig (
-  FlexForm,
-  Rendered,
-  Widget,
-  pattern Singular,
   )
 import Yesod (
   RenderMessage(..),
@@ -154,17 +151,16 @@ fullResolutionForm
   :: Int -- ^ amount of input rows
   -> [Clause] -- ^ pool of clauses for resolution
   -> (Clause -> String) -- ^ how to display the clauses
-  -> [(Maybe String, Maybe String, Maybe String)] -- ^ list of values to prefill rows with
+  -> [(Maybe Text, Maybe Text, Maybe Text)] -- ^ list of values to prefill rows with
   -> Rendered Widget
 fullResolutionForm steps clauses howToShow prefilledFields = addCss css $ do
   forms <- traverse
             (\(x,(val1,val2,val3)) -> formifyComponentsFlat
               (Just (val1 ,val2, val3, Hidden x))
-              [ fSettings val1 First
-              , fSettings val2 Second
-              , fSettings val3 Resolvent
-              , single $ fieldSettingsLabel $ "= " <> pack (show x)
-              ]
+              $ fSettings val1 First >|
+                fSettings val2 Second >|
+                fSettings val3 Resolvent >|
+                basic (fieldSettingsLabel $ "= " <> pack (show x))
             )
             $ zip rowIndices rowDefaults
   reader $ \extra -> do
@@ -182,7 +178,7 @@ fullResolutionForm steps clauses howToShow prefilledFields = addCss css $ do
     containerClass  :: String
     containerClass = "full-resolution-form"
     inputClass = "clause-input"
-    fSettings x = single . addCssClass inputClass .
+    fSettings x = basic . addCssClass inputClass .
       (if isNothing x then id else readOnly) . fieldSettingsLabel
 
     html token widgets = [whamlet|

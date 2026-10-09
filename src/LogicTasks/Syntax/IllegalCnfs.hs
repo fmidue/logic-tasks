@@ -43,18 +43,18 @@ import Data.List.Extra (nubSort)
 
 
 descriptionTemplate :: OutputCapable m => Map Language String -> Bool -> LegalNormalFormInst -> LangM m
-descriptionTemplate what inputHelp LegalNormalFormInst{..} = do
+descriptionTemplate what textVersion LegalNormalFormInst{..} = do
     instruct $ do
-      english "Consider the following propositional logic formulas:"
-      german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
+      english "Consider the following propositional logic formulas."
+      german "Betrachten Sie die folgenden aussagenlogischen Formeln."
 
-    focus $ unlines $ indexed $ map thd3 formulaInfos
+    when textVersion $ focus $ unlines $ indexed $ map thd3 formulaInfos
 
     instruct $ do
       english $ "Which of these formulas are given in " ++ localise English what ++ "?"
       german $ "Welche dieser Formeln liegen in " ++ localise German what ++ " vor?"
 
-    when inputHelp $ do
+    when textVersion $ do
       instruct $ do
         english $  "Enter a list containing the indices of the formulas given in " ++ localise English what ++ " to submit your answer."
         german $ "Geben Sie eine Liste der Indizes aller in " ++ localise German what ++ " vorliegender Formeln als Ihre Lösung an."
@@ -148,8 +148,8 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
   where
     detailedSolution = fromMaybe False showSolution
     what = translations $ do
-      german "Indizes"
-      english "indices"
+      german "Formeln"
+      english "formulas"
     solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulaInfos
     hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
     simpleSolutionDisplay

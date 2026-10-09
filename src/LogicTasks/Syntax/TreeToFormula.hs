@@ -53,8 +53,8 @@ description path TreeToFormulaInst{..} = do
     image $=<< cacheTree latexImage path
 
     collapsed False (translations $ do
-      english "Additional hints:"
-      german "Weitere Hinweise:")
+      english "Hints:"
+      german "Hinweise:")
       (do
 
         instruct $ do
@@ -102,10 +102,10 @@ partialGrade' :: OutputCapable m => TreeToFormulaInst -> TreeFormulaAnswer -> La
 partialGrade' inst sol
         | isNothing $ maybeTree sol = reject $ do
           english "You did not submit a solution."
-          german "Die Abgabe ist leer."
+          german "Die eingereichte Lösung ist leer."
         | notNull atomicsDiff = reject $ do
-          english $ "Your submission contains unknown atomic formulas: " ++ diffDisplay
-          german $ "Die Abgabe enthält unbekannte atomare Formeln: " ++ diffDisplay
+          english $ "The submitted solution contains unknown atomic formulas: " ++ diffDisplay
+          german $ "Die eingereichte Lösung enthält unbekannte atomare Formeln: " ++ diffDisplay
         | otherwise = pure ()
   where treeAtomics = atomics $ tree inst
         solTreeAtomics = atomics $ fromJust $ maybeTree sol
@@ -129,8 +129,8 @@ completeGrade'
 completeGrade' path inst sol
     | treeAnswer /= correctTree = refuse $ do
         instruct $ do
-          english "Your submission is not correct. The syntax tree for your submitted formula looks like this:"
-          german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
+          english "The submitted solution is not correct. The syntax tree for your submitted formula looks like this:"
+          german "Die eingereichte Lösung ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
         image $=<< cacheTree (transferToPicture treeAnswer) path
 
@@ -148,8 +148,8 @@ completeGrade' path inst sol
 
     | otherwise =
         instruct $ do
-          english "Your solution is correct."
-          german "Ihre Lösung ist korrekt."
+          english "The submitted solution is correct."
+          german "Die eingereichte Lösung ist korrekt."
 
   where treeAnswer = fromJust (maybeTree sol)
         correctTree = tree inst

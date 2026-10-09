@@ -8,7 +8,7 @@ import Data.Maybe (isJust, fromJust, isNothing)
 import Formula.Types (Clause(Clause), Literal (..), Formula (literals))
 import qualified Data.Set
 import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution, clauses))
-import Test.QuickCheck (Gen, chooseInt, forAll)
+import Test.QuickCheck (Gen, arbitrary, chooseInt, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import FillSpec (validBoundsBaseConfig)
@@ -106,6 +106,7 @@ spec = do
     it "should generate the correct solution" $
       forAll validBoundsResolutionConfig $ \resConfig ->
         within (30 * 1000000) $ forAll (genResInst resConfig) $ \resInst ->
-          doesNotRefuse (partialGrade' resInst (solution resInst) :: LangM Maybe) &&
-          doesNotRefuse (completeGrade' resInst (solution resInst) :: LangM Maybe)
+          forAll arbitrary $ \taskVersion ->
+            doesNotRefuse (partialGrade' taskVersion resInst (solution resInst) :: LangM Maybe) &&
+            doesNotRefuse (completeGrade' resInst (solution resInst) :: LangM Maybe)
 

@@ -47,18 +47,18 @@ import Data.Tuple.Extra (thd3)
 
 
 description :: OutputCapable m => Bool -> LegalPropositionInst -> LangM m
-description inputHelp LegalPropositionInst{..} = do
+description textVersion LegalPropositionInst{..} = do
     instruct $ do
-      english "Consider the following propositional (pseudo) formulas:"
-      german "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
+      english "Consider the following propositional (pseudo) formulas."
+      german "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln."
 
-    focus $ unlines $ indexed $ map thd3 formulaInfos
+    when textVersion $ focus $ unlines $ indexed $ map thd3 formulaInfos
 
     instruct $ do
       english "Some of these are syntactically wrong. Which of these formulas are correctly formed?"
       german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln korrekt geformt sind."
 
-    when inputHelp $ do
+    when textVersion $ do
       instruct $ do
         english "Enter a list containing the indices of the syntactically correct formulas to submit your answer."
         german "Geben Sie eine Liste der Indizes aller syntaktisch korrekten Formeln als Ihre Lösung an."
@@ -157,8 +157,8 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
     where
       detailedSolution = fromMaybe False showSolution
       what = translations $ do
-        german "Indizes"
-        english "indices"
+        german "Formeln"
+        english "formulas"
       solution = map (\(i,info,_) -> (i, not (propFormulaIsErroneous info))) formulaInfos
       hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
       simpleSolutionDisplay

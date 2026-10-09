@@ -1,6 +1,6 @@
 
 taskName: Concert
-
+validation: Validate
 ============================================
 
 {-# language DeriveDataTypeable #-}
@@ -9,6 +9,8 @@ module Global where
 
 
 import Data.Data (Data)
+import Data.Text (Text)
+import FlexTask.Form (MultipleChoice)
 import LogicTasks.Formula (TruthValue(..))
 import Trees.Types (SynTree, BinOp)
 
@@ -17,7 +19,7 @@ newtype Table = Table [(Maybe (SynTree BinOp Char), [Maybe TruthValue])] derivin
 
 data Namen = A | B | C | D deriving (Data,Eq,Enum,Bounded,Show)
 
-type FormType = (String,[Namen])
+type FormType = (Text,MultipleChoice Namen)
 
 type TaskData = (String,[String],[Namen])
 type Submission = (Table,SynTree BinOp Char,[Namen])
@@ -76,23 +78,8 @@ import Data.List               (transpose)
 import Data.Maybe              (fromJust)
 import Data.Text               (Text)
 import Data.String.Interpolate (i)
-import FlexTask.FormUtil (
-  ($$>),
-  addCss,
-  addCssClass,
-  universalLabel,
-  )
-import FlexTask.Generic.Form (
-  Alignment(..),
-  FieldInfo,
-  Formify(..),
-  formify,
-  formifyInstanceMultiChoice,
-  single,
-  buttonsEnum
-  )
+import FlexTask.Form
 import FlexTask.GenUtil        (fromGen)
-import FlexTask.YesodConfig    (Rendered, Widget)
 import LogicTasks.Forms        (tableForm)
 import LogicTasks.Formula      (TruthValue(..))
 import Numeric                 (showBin)
@@ -133,7 +120,7 @@ getTask = fromGen $ do
     form :: (String,String,String,String) -> Rendered Widget
     form n = addCss formulaCss $
       tableForm emptyColumns rows ["A","B","C","D"] [] $$>
-      formify (Nothing :: Maybe FormType) (nonTableFields n)
+      formify Nothing (nonTableFields n)
 
     getNames :: Gen (String,String,String,String)
     getNames = do
@@ -171,25 +158,25 @@ formulaAndHints a b c d (aN,bN,cN,dN) = do
     let formula = foldr1 (Binary And) parts
     pure (formula, namesLegend, hints)
   where
-    namesLegend = [i|Sie fragt ihre Freunde #{aN} (A), #{bN} (B), #{cN} (C) und #{dN} (D), |]
+    namesLegend = [i|Sie fragt ihre Bekannten #{aN} (A), #{bN} (B), #{cN} (C) und #{dN} (D), |]
     hint1 = (if b == d
-              then [i|Falls #{bN} und #{dN}#{nicht b} kommen,|]
+              then [i|Falls #{bN} und #{dN}#{nicht b} mitkommen,|]
               else
                 if b
-                  then [i|Falls #{bN} nicht, aber #{dN} kommt,|]
-                  else [i|Falls #{bN}, aber nicht #{dN} kommt,|]
+                  then [i|Falls #{bN} nicht, aber #{dN} mitkommt,|]
+                  else [i|Falls #{bN}, aber nicht #{dN} mitkommt,|]
             )
-            ++ [i| kommt #{cN}#{nicht (not c)}.|]
+            ++ [i| kommt #{cN}#{nicht (not c)} mit.|]
     hint2 = [i|#{bN} kommt#{nicht b} mit, wenn #{aN}#{nicht a} mitkommt.|]
-    hint3 = [i|Wenn #{bN}#{nicht b} kommt, kommt #{if b == c then auch else ""} #{cN}#{nicht c}.|]
-    hint4 = [i|Wenn #{cN}#{nicht c} kommt, kommt #{if c == d then auch else ""} #{dN}#{nicht d}.|]
-    hint5 = [i|Wenn #{dN}#{nicht d} kommt, |]
+    hint3 = [i|Wenn #{bN}#{nicht b} mitkommt, kommt #{if b == c then auch else ""} #{cN}#{nicht c} mit.|]
+    hint4 = [i|Wenn #{cN}#{nicht c} mitkommt, kommt #{if c == d then auch else ""} #{dN}#{nicht d} mit.|]
+    hint5 = [i|Wenn #{dN}#{nicht d} mitkommt, |]
          ++ if a == b
-              then [i|kommen #{if d == a then auch else ""} #{aN} oder #{bN}#{nicht a}.|]
+              then [i|kommen #{if d == a then auch else ""} #{aN} oder #{bN}#{nicht a} mit.|]
               else
                 if a
-                  then [i|kommt #{if d then auch else ""} #{aN} nicht oder #{bN} kommt.|]
-                  else [i|kommt #{if d then "" else auch} #{aN} oder #{bN} kommt nicht.|]
+                  then [i|kommt #{if d then auch else ""} #{aN} nicht mit oder #{bN} kommt mit.|]
+                  else [i|kommt #{if d then "" else auch} #{aN} mit oder #{bN} kommt nicht mit.|]
 
     nicht :: Bool -> String
     nicht f = if f then " nicht" else ""
@@ -211,19 +198,14 @@ formulaAndHints a b c d (aN,bN,cN,dN) = do
 
 
 
-nonTableFields :: (String,String,String,String) -> [[FieldInfo]]
-nonTableFields (a,b,c,d) = [
-      [single $ addCssClass formulaClass "Formel F"]
-    , [buttonsEnum Vertical "Wer kommt?" getName]
-    ]
+nonTableFields :: (String,String,String,String) -> CompleteForm FormType
+nonTableFields (a,b,c,d) =
+    basic (addCssClass formulaClass "Formel F =")
+    >-
+    multipleChoiceEnum (Buttons Vertical) "Wer kommt mit?" getName
   where
     nameMatching = [(A, a), (B, b), (C, c), (D, d)]
     getName = universalLabel . fromJust . flip lookup nameMatching
-
-
-
-instance Formify [Namen] where
-  formifyImplementation = formifyInstanceMultiChoice
 
 
 
@@ -378,7 +360,7 @@ module Description (description) where
 
 
 import Control.OutputCapable.Blocks
-import LogicTasks.Keys                  (keyHeading, basicOpKey, arrowsKey)
+import LogicTasks.Keys                  (basicOpKey, arrowsKey)
 
 
 
@@ -395,9 +377,14 @@ description _ (legend,hints,_) = do
       "Geben Sie diese Formel in das entsprechend benannte Textfeld ein. " ++
       "Verwenden Sie dabei die atomaren Formeln A, B, C, D mit der Interpretation, " ++
       "dass eine Zuordnung von 'wahr' dafür steht, dass die entsprechende Person mitkommt."
-    keyHeading
-    basicOpKey True
-    arrowsKey
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        basicOpKey True
+        arrowsKey
+        pure()
+      )
     paragraph $ text $
       "Wer geht mit Eva zum Konzert? Leiten Sie Ihr Ergebnis mittels Wahrheitstafel her. " ++
       "Kreuzen Sie dann alle Begleitenden in der Namensliste an."
@@ -416,7 +403,8 @@ module Parse (parseSubmission) where
 import Control.OutputCapable.Blocks (LangM', OutputCapable, ReportT)
 import Control.OutputCapable.Blocks.Generic (($>>=))
 import Data.List.Extra        (chunksOf, transpose)
-import FlexTask.Generic.Parse (
+import FlexTask.Parser (
+  MultipleChoice(..),
   Parse(..),
   parseInstanceMultiChoice,
   displayInputAnd,
@@ -442,7 +430,7 @@ instance Parse TruthValue where
   formParser = escaped parser
 
 
-instance Parse [Namen] where
+instance Parse (MultipleChoice Namen) where
   formParser = parseInstanceMultiChoice
 
 
@@ -458,7 +446,7 @@ parseSubmission input =
     parseWithOrReport formParser reportWithFieldNumber input $>>= \(headerStrings,columns,formulaString,names) ->
       traverse (traverse parseIt) headerStrings $>>= \parsedHeaders ->
         parseIt formulaString $>>= \parsedFormula ->
-          pure (makeTable parsedHeaders columns, parsedFormula, names)
+          pure (makeTable parsedHeaders columns, parsedFormula, getChoices names)
   where
     parseIt =
       parseWithFallback

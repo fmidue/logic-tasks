@@ -14,7 +14,7 @@ extra-deps:
     subdirs:
       - output-blocks
   - git: https://github.com/fmidue/flex-tasks.git
-    commit: ffd69d0e00f9a5713cabb43511e067293a295b80
+    commit: d4b1b9c091e868f7fba9529088f0e4abecd0538d
     subdirs:
       - flex-tasks
       - flex-tasks-processing
