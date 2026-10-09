@@ -13,6 +13,7 @@ import Control.OutputCapable.Blocks (
   OutputCapable,
   extra,
   ($=<<),
+  collapsed,
   english,
   german,
   translate,
@@ -29,7 +30,7 @@ import Data.List (intercalate, nub, sort)
 import qualified Data.Set (map)
 import qualified Data.Map as Map (fromSet, insert, filter)
 import Data.Maybe (isNothing)
-import LogicTasks.Helpers (focus, instruct, keyHeading, reject, basicOpKey, arrowsKey')
+import LogicTasks.Helpers (focus, instruct, reject, basicOpKey, arrowsKey')
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display, transferToPicture)
@@ -72,12 +73,17 @@ description withListInput SubTreeInst{..} = do
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
-      english "You can copy the original formula into the submission several times and remove parts, or start from scratch and use the following syntax:"
+      german "Sie können dafür die ursprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen oder leer starten."
+      english "You can copy the original formula into the submission several times and remove parts or start from scratch."
 
-    keyHeading
-    basicOpKey unicodeAllowed
-    arrowsKey' arrowOperatorsToShow
+    collapsed True (translations $ do
+      english "Notes on notation:"
+      german "Notationshinweise:")
+      (do
+        basicOpKey unicodeAllowed
+        arrowsKey' arrowOperatorsToShow
+        pure()
+      )
 
     extra addText
     pure ()
@@ -125,25 +131,25 @@ partialGrade' SubTreeInst{..} fs
 
     | any (`notElem` correctAtoms) atoms =
       reject $ do
-        english "At least one formula in your submission contains unknown atomic formulas."
-        german "Ihre Abgabe beinhaltet mindestens eine Formel mit unbekannten atomaren Formeln."
+        english "At least one formula in your submitted solution contains unknown atomic formulas."
+        german "Die eingereichte Lösung beinhaltet mindestens eine Formel mit unbekannten atomaren Formeln."
 
     | any (> origOpsNum) opsNum =
       reject $ do
-        english "Your submission contains at least one formula with more logical operators than the original formula."
-        german "Ihre Abgabe beinhaltet mindestens eine Formel mit mehr logische Operatoren als die ursprüngliche Formel."
+        english "The submitted solution contains at least one formula with more logical operators than the original formula."
+        german "Die eingereichte Lösung beinhaltet mindestens eine Formel mit mehr logische Operatoren als die ursprüngliche Formel."
 
     | amount < inputTreeAmount =
       reject $ do
-        english "Your submission does not contain enough different subformulas. "
+        english "The submitted solution does not contain enough different subformulas. "
         english $ "Add " ++ show (inputTreeAmount - amount) ++ "."
-        german "Ihre Abgabe beinhaltet nicht genügend verschiedene Teilformeln. "
+        german "Die eingereichte Lösung beinhaltet nicht genügend verschiedene Teilformeln. "
         german $ "Fügen Sie " ++ show (inputTreeAmount - amount) ++ " hinzu."
 
     | amount > inputTreeAmount =
       reject $ do
-        english "Your submission contains too many formulas."
-        german "Ihre Abgabe enthält zu viele Formeln."
+        english "The submitted solution contains too many formulas."
+        german "Die eingereichte Lösung enthält zu viele Formeln."
 
     | otherwise = pure ()
   where

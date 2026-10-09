@@ -2,6 +2,8 @@
 {-# LANGUAGE RecordWildCards #-}
 module DecideSpec where
 
+import Prelude hiding (Right)
+
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
@@ -10,9 +12,9 @@ import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import SynTreeSpec (validBoundsSynTreeConfig')
 import Formula.Types (Table(getEntries), getTable)
+import Formula.Util (withPercentRange)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Util (withRatio)
-import FillSpec (validBoundsNormalFormConfig, validBoundsPercentTrueEntries)
+import FillSpec (validBoundsNormalFormConfig, validPercentRangeModes)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse)
 import Test.QuickCheck.Property (within)
@@ -29,12 +31,12 @@ validBoundsDecideConfig = do
             maxNodes < 30
 
   percentageOfChanged <- chooseInt (1, 100)
-  percentTrueEntries <- validBoundsPercentTrueEntries formulaConfig
+  percentRangeMode <- validPercentRangeModes formulaConfig
 
   pure $ DecideConfig {
       formulaConfig
     , percentageOfChanged
-    , percentTrueEntries
+    , percentRangeMode
     , printSolution = False
     , extraText = NoExtraText
     }
@@ -63,12 +65,12 @@ spec = do
           doesNotRefuse
             (partialGrade
               inst
-                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Right
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: LangM Maybe) &&
           doesNotRefuse
             (completeGrade
               inst
-                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Correct
+                [ DecideAnswer $ Just $ if i `elem` changed inst then Wrong else Right
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: Rated Maybe)
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
@@ -84,8 +86,8 @@ spec = do
       forAll validBoundsDecideConfig $ \decideConfig -> do
         within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \decideInst ->
           doesNotRefuse (verifyStatic decideInst :: LangM Maybe)
-    it "should respect percentTrueEntries" $
+    it "should respect percentRangeMode" $
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
         within (30 * 1000000) $ forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
-          withRatio percentTrueEntries formula
+          withPercentRange percentRangeMode formula
 

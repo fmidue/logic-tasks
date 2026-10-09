@@ -1,6 +1,6 @@
 
 taskName: ResolutionFullPrefilled
-
+validation: Validate
 =============================================
 
 module Global where
@@ -19,7 +19,7 @@ type TaskData = ResolutionInst
 module TaskSettings where
 
 import LogicTasks.Config                (dResConf, ResolutionConfig(..))
-import Control.OutputCapable.Blocks (LangM, OutputCapable)
+import Control.OutputCapable.Blocks
 import LogicTasks.Semantics.Resolve     (verifyQuiz)
 
 
@@ -30,8 +30,14 @@ resConf :: ResolutionConfig
 resConf = dResConf
 
 validateSettings :: OutputCapable m => LangM m
-validateSettings = verifyQuiz resConf
-
+validateSettings
+  | isNotPrefilled prefillSelect =
+     refuse $ indent $ translate $ do
+       german "Es ist nichts vorausgefüllt!"
+       english "Nothing is prefilled!"
+  | otherwise = verifyQuiz resConf
+     where
+       isNotPrefilled (a,b,c) = not (a || b || c)
 
 =============================================
 
@@ -43,9 +49,9 @@ module TaskData (getTask) where
 
 import Control.Monad.Random (MonadRandom)
 import Data.String.Interpolate (i)
-
+import Data.Text                        (Text, pack)
 import FlexTask.GenUtil (fromGen)
-import FlexTask.YesodConfig (Rendered, Widget)
+import FlexTask.Form                    (Rendered, Widget)
 import LogicTasks.Config                (ResolutionInst(..), ResolutionConfig(..))
 import LogicTasks.Forms (fullResolutionForm)
 import LogicTasks.Semantics.Resolve (genResInst)
@@ -68,24 +74,27 @@ form resInst = fullResolutionForm
     (showClause (usesSetNotation resInst))
     (prefill prefillSelect (usesSetNotation resInst) (solution resInst))
 
-prefill :: (Bool, Bool, Bool) -> Bool -> [ResStep] -> [(Maybe String, Maybe String, Maybe String)]
+prefill :: (Bool, Bool, Bool) -> Bool -> [ResStep] -> [(Maybe Text, Maybe Text, Maybe Text)]
 prefill (fill1, fill2, fill3) useSetNotation =
   map (\(Res (c1, c2, (c3, _))) ->
           ( if fill1 then
               case c1 of
-                Left clause -> Just (showClause useSetNotation clause)
-                Right j     -> Just (show j)
+                Left clause -> clauseText clause
+                Right j     -> indexText j
             else Nothing
           , if fill2 then
               case c2 of
-                Left clause -> Just (showClause useSetNotation clause)
-                Right j     -> Just (show j)
+                Left clause -> clauseText clause
+                Right j     -> indexText j
             else Nothing
           , if fill3 then
-              Just (showClause useSetNotation c3)
+              clauseText c3
             else Nothing
           )
       )
+  where
+    clauseText = Just . pack . showClause useSetNotation
+    indexText = Just . pack . show
 
 checkers :: String
 checkers = [i|
@@ -102,7 +111,7 @@ import Global
 
 
 checkSyntax :: OutputCapable m => TaskData -> Submission -> LangM m
-checkSyntax = partialGrade'
+checkSyntax = partialGrade' False
 
 checkSemantics :: (OutputCapable m, Alternative m) => FilePath -> TaskData -> Submission -> Rated m
 checkSemantics _ taskData submission = do
@@ -127,7 +136,9 @@ import Global
 description :: OutputCapable m => FilePath -> TaskData -> LangM m
 description _ =
     descriptionMultipleFields
-    (do german "Unvollständig ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
+    (do german "Bestimmte Felder sind schon ausgefüllt. Sie machen den Rest."
+        german "Unvollständig ausgefüllte Resolutionsschritte werden nicht berücksichtigt."
+        english "Certain fields are already filled in. You do the rest."
         english "Incomplete resolution steps will not be taken into account.")
 
 
@@ -145,7 +156,7 @@ import Text.ParserCombinators.Parsec
 import LogicTasks.Config                (ResolutionConfig(..))
 import Control.OutputCapable.Blocks.Generic (($>>=))
 import Control.OutputCapable.Blocks
-import FlexTask.Generic.Parse
+import FlexTask.Parser
 import Formula.Parsing (clauseFormulaParser, clauseSetParser, resStepParser)
 import Formula.Parsing.Delayed
 import ParsingHelpers (fully)
