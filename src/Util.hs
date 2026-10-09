@@ -91,6 +91,7 @@ checkPercentRangeMode rangeMode formulaConfig
     where
       checkRangeTooSmall = case rangeMode of
         TrueEntries _ -> checkRangeTooSmallTrueEntries
+        -- TODO: Implement range size check for PosLiterals
         PosLiterals _ -> False
 
       checkRangeTooSmallTrueEntries = checkRangeTooSmallTrueEntries' $ case formulaConfig of
