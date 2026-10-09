@@ -8,6 +8,7 @@ import LogicTasks.Config (
   )
 import Test.Hspec
 import Util.VerifyConfig
+import Formula.Util (PercentRangeMode(TrueEntries))
 import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 -- 2025: Weight 0.3
@@ -24,7 +25,7 @@ task07 = FillConfig
                   , maxClauseAmount = 3
                   })
   , percentageOfGaps = 60
-  , percentTrueEntries = (30, 70)
+  , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
   , extraText = NoExtraText
   }
@@ -43,7 +44,7 @@ task20 = FillConfig
                    , maxClauseAmount = 4
                    })
   , percentageOfGaps = 40
-  , percentTrueEntries = (35, 65)
+  , percentRangeMode = TrueEntries (35, 65)
   , extraText = NoExtraText
   , printSolution = True
   }
