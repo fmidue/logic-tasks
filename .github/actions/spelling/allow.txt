@@ -35,6 +35,7 @@ HUnit
 Implikationsschreibweise
 Impls
 Klauselanzahl
+Klauselform
 Klauselformen
 Klauselgröße
 Klausellänge
